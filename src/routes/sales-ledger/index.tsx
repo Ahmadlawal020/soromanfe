@@ -1,0 +1,1029 @@
+import { useState, useMemo, useCallback, useEffect } from 'react'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { SummaryCards, type SummaryCard } from '#/components/SummaryCards'
+import { PageHeader } from '#/components/PageHeader'
+import { Button } from '#/components/ui/button'
+import { Input } from '#/components/ui/input'
+import { Label } from '#/components/ui/label'
+import { Badge } from '#/components/ui/badge'
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from '#/components/ui/table'
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '#/components/ui/select'
+import {
+  Plus, Search, Download, Truck, Wallet, FileText,
+  TrendingUp, Banknote, Building2,
+  Calendar as CalendarIcon, X, Users, Tag,
+  ChevronDown, ChevronRight, ChevronLeft, SlidersHorizontal,
+  Loader2,
+} from 'lucide-react'
+import { useDeliverySalesList } from '#/lib/hooks/useDeliverySales'
+import { useDeliveryInventoryList } from '#/lib/hooks/useDeliveryInventory'
+import { useDeliveryCustomerList } from '#/lib/hooks/useDeliveryCustomers'
+import { usePfiList, type Pfi } from '#/lib/hooks/usePfis'
+import { useLedgerGroups } from '#/lib/hooks/useLedgerGroups'
+import { useSalesLedgerFilters } from '#/lib/hooks/useSalesLedgerFilters'
+import { useToast } from '#/lib/hooks/useToast'
+import type { DeliverySale, DeliveryInventory, DeliveryCustomer } from '#/lib/types'
+import {
+  RecordPaymentDialog, formatBankLabel,
+} from '#/components/sales-ledger/SalesLedgerDialogs'
+import {
+  toNum, fmt, fmtQty, normalizeCycleDate, getCycleKey, safeFormatDate,
+  getCodeTheme, type TimePreset,
+} from '#/lib/sales-ledger-utils'
+
+export const Route = createFileRoute('/sales-ledger/')({
+  component: SalesLedgerDashboard,
+})
+
+function SalesLedgerDashboard() {
+  const navigate = useNavigate()
+  const toast = useToast()
+
+  // ── Queries ───
+  const POLL_INTERVAL = 30_000
+  const { data: rawSales = [], isLoading: salesLoading } = useDeliverySalesList({ refetchInterval: POLL_INTERVAL })
+  const { data: rawInventory = [], isLoading: inventoryLoading } = useDeliveryInventoryList({ refetchInterval: POLL_INTERVAL })
+  const { data: rawCustomers, isLoading: customersLoading } = useDeliveryCustomerList()
+  const { data: rawPfis } = usePfiList()
+
+  const allSales: DeliverySale[] = useMemo(() =>
+    Array.isArray(rawSales) ? rawSales : [], [rawSales])
+  const allLoadings: DeliveryInventory[] = useMemo(() =>
+    Array.isArray(rawInventory) ? rawInventory : [], [rawInventory])
+  const customers: DeliveryCustomer[] = useMemo(() => {
+    if (!rawCustomers) return []
+    if (Array.isArray(rawCustomers)) return rawCustomers
+    return rawCustomers.customers || rawCustomers.data || []
+  }, [rawCustomers])
+  const pfis: Pfi[] = useMemo(() => {
+    if (!rawPfis) return []
+    if (Array.isArray(rawPfis)) return rawPfis
+    return rawPfis.pfis || rawPfis.data || []
+  }, [rawPfis])
+
+  // ── Lookup Maps ────────────────────────────────────────────────────
+  const customerMap = useMemo(() => {
+    const m = new Map<string, DeliveryCustomer>()
+    customers.forEach(c => m.set(c._id || c.id || '', c))
+    return m
+  }, [customers])
+
+  const pfiMap = useMemo(() => {
+    const m = new Map<string, Pfi>()
+    pfis.forEach(p => m.set(p._id, p))
+    return m
+  }, [pfis])
+
+  // ── Ledger Groups (shared computation) ────────────────────────────
+  const { ledgerGroups, cycleCustomerRateMap } = useLedgerGroups({
+    allSales, allLoadings, customerMap, pfiMap,
+  })
+
+  // ── Trip Codes (localStorage) ──────────────────────────────────────
+  const [tripCodes, setTripCodes] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem('dsl_trip_codes') || '[]') } catch { return [] }
+  })
+  const [saleTripMap, setSaleTripMap] = useState<Record<string, string>>(() => {
+    try { return JSON.parse(localStorage.getItem('dsl_sale_trip_map') || '{}') } catch { return {} }
+  })
+  const [newTripCodeInput, setNewTripCodeInput] = useState('')
+
+  useEffect(() => { localStorage.setItem('dsl_trip_codes', JSON.stringify(tripCodes)) }, [tripCodes])
+  useEffect(() => { localStorage.setItem('dsl_sale_trip_map', JSON.stringify(saleTripMap)) }, [saleTripMap])
+
+  useEffect(() => {
+    if (!allLoadings.length) return
+    const codes = allLoadings.map(l => (l.allocationCode || '').trim().toUpperCase()).filter(Boolean)
+    if (!codes.length) return
+    setTripCodes(prev => {
+      const merged = Array.from(new Set([...prev, ...codes])).sort()
+      return merged.join(',') === prev.join(',') ? prev : merged
+    })
+  }, [allLoadings])
+
+  // ── Filters ────────────────────────────────────────────────────────
+  const {
+    timePreset, customFrom, setCustomFrom, customTo, setCustomTo,
+    searchQuery, setSearchQuery, activeView, setActiveView,
+    truckFilter, setTruckFilter, customerFilter, setCustomerFilter,
+    customerTypeFilter, setCustomerTypeFilter, tripCodeFilter, setTripCodeFilter,
+    dateRange, handlePresetChange, clearAllFilters, hasActiveFilters,
+    filteredLedgerGroups, filteredSales,
+    uniqueTruckNumbers, uniqueCustomerOptions, periodLabel,
+  } = useSalesLedgerFilters({
+    ledgerGroups, allSales, allLoadings, customers, customerMap, tripCodes, saleTripMap,
+  })
+
+  // ── Pagination ─────────────────────────────────────────────────────
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(15)
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [
+    activeView, searchQuery, timePreset, customFrom, customTo,
+    truckFilter, customerFilter, customerTypeFilter, tripCodeFilter,
+  ])
+
+  const paginatedLedgerGroups = useMemo(() => {
+    const start = (currentPage - 1) * pageSize
+    return filteredLedgerGroups.slice(start, start + pageSize)
+  }, [filteredLedgerGroups, currentPage, pageSize])
+
+  const paginatedSales = useMemo(() => {
+    const start = (currentPage - 1) * pageSize
+    return filteredSales.slice(start, start + pageSize)
+  }, [filteredSales, currentPage, pageSize])
+
+  const renderPaginationFooter = (
+    totalCount: number,
+    totalPaidSum: number,
+    itemLabel: string
+  ) => {
+    const totalPages = Math.max(1, Math.ceil(totalCount / pageSize))
+    const startItem = totalCount > 0 ? (currentPage - 1) * pageSize + 1 : 0
+    const endItem = Math.min(currentPage * pageSize, totalCount)
+
+    return (
+      <div className="border-t border-slate-200 bg-slate-50/70 px-4 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center gap-4 text-xs text-slate-600">
+          <div className="flex items-center gap-2">
+            <span className="text-slate-500 font-medium">Rows per page:</span>
+            <Select
+              value={pageSize.toString()}
+              onValueChange={(val) => {
+                setPageSize(Number(val))
+                setCurrentPage(1)
+              }}
+            >
+              <SelectTrigger className="h-8 w-[72px] bg-white text-xs">
+                <SelectValue placeholder={pageSize.toString()} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="15">15</SelectItem>
+                <SelectItem value="25">25</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+                <SelectItem value="100">100</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <span>
+            Showing <strong className="text-slate-800">{startItem}</strong>–<strong className="text-slate-800">{endItem}</strong> of <strong className="text-slate-800">{totalCount}</strong> {itemLabel} · <span className="font-medium text-slate-500">{periodLabel}</span>
+          </span>
+          <span className="hidden sm:inline text-slate-300">|</span>
+          <span className="font-medium">
+            Total Paid: <strong className="text-emerald-700">{fmt(totalPaidSum)}</strong>
+          </span>
+        </div>
+
+        {totalPages > 1 && (
+          <div className="flex items-center gap-1">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 px-2.5 text-xs gap-1 text-slate-600 border-slate-200 bg-white hover:bg-slate-100"
+              disabled={currentPage <= 1}
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+            >
+              <ChevronLeft size={14} /> Previous
+            </Button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter((p) => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1)
+              .map((p, idx, arr) => {
+                const showEllipsis = idx > 0 && p - arr[idx - 1] > 1
+                return (
+                  <div key={p} className="flex items-center">
+                    {showEllipsis && <span className="px-1 text-xs text-slate-400">...</span>}
+                    <Button
+                      variant={currentPage === p ? 'default' : 'outline'}
+                      size="sm"
+                      className={`h-8 w-8 p-0 text-xs font-semibold ${
+                        currentPage === p
+                          ? 'bg-slate-900 text-white hover:bg-slate-800 border-slate-900 shadow-sm'
+                          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
+                      }`}
+                      onClick={() => setCurrentPage(p)}
+                    >
+                      {p}
+                    </Button>
+                  </div>
+                )
+              })}
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 px-2.5 text-xs gap-1 text-slate-600 border-slate-200 bg-white hover:bg-slate-100"
+              disabled={currentPage >= totalPages}
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+            >
+              Next <ChevronRight size={14} />
+            </Button>
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
+
+  // ── Totals ─────────────────────────────────────────────────────────
+  const totals = useMemo(() => {
+    let totalExpected = 0, totalPaid = 0, totalQty = 0, totalOutstanding = 0, totalOverpaid = 0
+    let fullyPaidCount = 0, pendingPaymentCount = 0, soldCount = 0, withBalanceCount = 0, notSoldCount = 0
+    const uniqueTrucks = new Set<string>()
+    const codeSummaries: Record<string, { code: string; qty: number; expected: number; paid: number; balance: number; trucksCount: number; fullyPaidCount: number; pendingCount: number; soldCount: number; withBalanceCount: number; notSoldCount: number; truckSet: Set<string> }> = {}
+
+    tripCodes.forEach(code => {
+      codeSummaries[code] = { code, qty: 0, expected: 0, paid: 0, balance: 0, trucksCount: 0, fullyPaidCount: 0, pendingCount: 0, soldCount: 0, withBalanceCount: 0, notSoldCount: 0, truckSet: new Set() }
+    })
+
+    filteredLedgerGroups.forEach(group => {
+      if (group.truckNumber) uniqueTrucks.add(group.truckNumber)
+      totalExpected += Math.max(0, toNum(group.expected))
+      totalPaid += toNum(group.totalPaid)
+      const bal = toNum(group.balance)
+      const isExpectedPositive = toNum(group.expected) > 0
+      const isLoadedTruck = !!group.truckNumber
+      const isFullyPaid = isExpectedPositive && bal <= 0
+      const hasPaymentEntered = toNum(group.totalPaid) > 0
+      const hasNoPayout = group.payments.length === 0 || !hasPaymentEntered
+      const hasBalanceWithPayment = hasPaymentEntered && bal > 0
+
+      if (isLoadedTruck) {
+        if (isFullyPaid) { fullyPaidCount += 1; soldCount += 1 } else { pendingPaymentCount += 1 }
+        if (hasNoPayout) notSoldCount += 1
+        else if (hasBalanceWithPayment) withBalanceCount += 1
+      }
+      if (bal > 0) totalOutstanding += bal
+      else if (bal < 0) totalOverpaid += Math.abs(bal)
+
+      const code = (group.code || '').trim().toUpperCase()
+      if (codeSummaries[code]) {
+        const s = codeSummaries[code]
+        s.expected += Math.max(0, toNum(group.expected))
+        s.paid += toNum(group.totalPaid)
+        s.balance += bal
+        if (group.truckNumber) s.truckSet.add(group.truckNumber)
+        if (isLoadedTruck) {
+          if (isFullyPaid) { s.fullyPaidCount += 1; s.soldCount += 1 } else s.pendingCount += 1
+          if (hasNoPayout) s.notSoldCount += 1
+          else if (hasBalanceWithPayment) s.withBalanceCount += 1
+        }
+      }
+    })
+
+    const qtyCountedCycles = new Set<string>()
+    ledgerGroups.forEach(group => {
+      const matchesDate = !dateRange.from && !dateRange.to ? true : true // already filtered
+      if (!matchesDate) return
+      const cycleKey = `${(group.truckNumber || '').trim().toUpperCase()}||${(group.dateLoaded || '').split('T')[0]}`
+      const isOrphan = group.key.startsWith('sale:')
+      const alreadyCounted = isOrphan && qtyCountedCycles.has(cycleKey)
+      const qty = (!isOrphan || !alreadyCounted) ? Math.max(0, toNum(group.quantity)) : 0
+      if (cycleKey && (!isOrphan || !alreadyCounted)) qtyCountedCycles.add(cycleKey)
+      totalQty += qty
+      const code = (group.code || '').trim().toUpperCase()
+      if (codeSummaries[code]) codeSummaries[code].qty += isOrphan ? 0 : Math.max(0, toNum(group.quantity))
+    })
+
+    const codeSummariesList = Object.values(codeSummaries).map(s => ({ ...s, trucksCount: s.truckSet.size }))
+
+    return {
+      totalExpected, totalPaid, totalQty,
+      totalOutstanding, totalOverpaid,
+      truckCount: uniqueTrucks.size,
+      fullyPaidCount, pendingPaymentCount, soldCount, withBalanceCount, notSoldCount,
+      codeSummaries: codeSummariesList,
+    }
+  }, [filteredLedgerGroups, ledgerGroups, tripCodes, dateRange])
+
+  const summaryCards = useMemo((): SummaryCard[] => {
+    const netBalance = totals.totalOutstanding - totals.totalOverpaid
+    return [
+      { title: 'Qty Sold (Ltrs)', value: totals.totalQty > 0 ? totals.totalQty.toLocaleString() : '0', icon: <Truck size={20} />, tone: 'neutral' },
+      { title: 'Expected Revenue', value: fmt(totals.totalExpected), icon: <TrendingUp size={20} />, tone: 'neutral' },
+      { title: 'Total Paid', value: fmt(totals.totalPaid), icon: <Banknote size={20} />, tone: 'green' },
+      { title: 'Outstanding', value: totals.totalOutstanding > 0 ? fmt(totals.totalOutstanding) : '₦0', icon: <Wallet size={20} />, tone: totals.totalOutstanding > 0 ? 'red' : 'green' },
+      { title: 'Overpaid', value: totals.totalOverpaid > 0 ? fmt(totals.totalOverpaid) : '₦0', icon: <Banknote size={20} />, tone: totals.totalOverpaid > 0 ? 'blue' : 'neutral' },
+      { title: 'Net Balance', value: netBalance <= 0 ? (netBalance < 0 ? `+${fmt(Math.abs(netBalance))}` : '₦0') : fmt(netBalance), icon: <TrendingUp size={20} />, tone: netBalance <= 0 ? 'blue' : 'red' },
+    ]
+  }, [totals])
+
+  // ── Loaded trucks for dialog ───────────────────────────────────────
+  const cyclePaymentSummary = useMemo(() => {
+    const map = new Map<string, { totalExpected: number; totalPaid: number }>()
+    allSales.forEach(s => {
+      const key = getCycleKey(s.truckNumber, s.dateLoaded)
+      const existing = map.get(key) || { totalExpected: 0, totalPaid: 0 }
+      existing.totalPaid += toNum(s.paymentAmount)
+      map.set(key, existing)
+    })
+    return map
+  }, [allSales])
+
+  const loadedTrucks = useMemo(() => {
+    return allLoadings.filter(t => {
+      if (!(t.truckNumber || (t as any).truckId || (t as any).truck)) return false
+      if (t.loadingStatus === 'offloaded') {
+        const cycleKey = getCycleKey(t.truckNumber || '', t.dateAllocated || '')
+        const cycle = cyclePaymentSummary.get(cycleKey)
+        if (cycle) {
+          const outstanding = cycle.totalExpected - cycle.totalPaid
+          if (outstanding <= 0 && cycle.totalExpected > 0) return false
+        }
+      }
+      return true
+    }).sort((a, b) => {
+      const truckA = (a.truckNumber || '').toUpperCase()
+      const truckB = (b.truckNumber || '').toUpperCase()
+      if (truckA !== truckB) return truckA.localeCompare(truckB)
+      return normalizeCycleDate(b.dateAllocated || '').localeCompare(normalizeCycleDate(a.dateAllocated || ''))
+    })
+  }, [allLoadings, cyclePaymentSummary])
+
+  // ── Trip Code Management ───────────────────────────────────────────
+  const addTripCode = () => {
+    const code = newTripCodeInput.trim().toUpperCase().replace(/\s+/g, '-')
+    if (!code) { toast.error('Enter a code first'); return }
+    if (tripCodes.includes(code)) { toast.error(`Code "${code}" already exists`); return }
+    setTripCodes(prev => [...prev, code].sort())
+    setNewTripCodeInput('')
+    toast.success(`Trip code "${code}" created`)
+  }
+
+  const deleteTripCode = (code: string) => {
+    const isInventoryCode = allLoadings.some(l => (l.allocationCode || '').trim().toUpperCase() === code)
+    if (isInventoryCode) { toast.error(`Cannot delete "${code}" — assigned to inventory records`); return }
+    setTripCodes(prev => prev.filter(c => c !== code))
+    setSaleTripMap(prev => {
+      const next = { ...prev }
+      Object.keys(next).forEach(k => { if (next[k] === code) delete next[k] })
+      return next
+    })
+    if (tripCodeFilter === code) setTripCodeFilter('all')
+    toast.success(`Trip code "${code}" deleted`)
+  }
+
+  // ── Dialog State ───────────────────────────────────────────────────
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [assignMode, setAssignMode] = useState(false)
+
+  const openPaymentDialog = (_loadingId?: string, inAssignMode = false) => {
+    setAssignMode(inAssignMode)
+    setDialogOpen(true)
+  }
+
+  // ── CSV Export ──────────────────────────────────────────────────────
+  const exportExcel = useCallback(() => {
+    if (!filteredLedgerGroups.length) return
+    const u = (s: string) => (s || '').toUpperCase()
+    const safeFmtDate = (d: string | null | undefined): string => safeFormatDate(d, 'dd/MM/yyyy')
+    const headers = ['S/N', 'PFI CODE', 'TRUCK NO.', 'CUSTOMER', 'DESTINATION', 'QTY (LTRS)', 'RATE', 'EXPECTED', 'PAYMENT', 'BALANCE', 'PAYER', 'BANK', 'PAYMENT DATE']
+    const rows: string[][] = []
+    let sn = 0
+    filteredLedgerGroups.forEach(group => {
+      sn += 1
+      if (group.payments.length === 0) {
+        rows.push([String(sn), group.code || '', group.truckNumber || '', u(group.customerName || ''), u(group.location || ''), group.quantity > 0 ? String(group.quantity) : '', group.rate > 0 ? String(group.rate) : '', group.expected > 0 ? String(group.expected) : '', '', group.expected > 0 ? String(group.expected) : '', '', '', ''])
+      } else {
+        let cumulative = 0
+        group.payments.forEach((s, idx) => {
+          cumulative += toNum(s.paymentAmount)
+          const bal = group.expected - cumulative
+          rows.push([
+            idx === 0 ? String(sn) : '', idx === 0 ? (group.code || '') : '', idx === 0 ? group.truckNumber : '', idx === 0 ? u(group.customerName || '') : '', idx === 0 ? u(group.location || '') : '',
+            idx === 0 && group.quantity > 0 ? String(group.quantity) : '', idx === 0 && group.rate > 0 ? String(group.rate) : '', idx === 0 && group.expected > 0 ? String(group.expected) : '',
+            toNum(s.paymentAmount) > 0 ? String(toNum(s.paymentAmount)) : '', group.expected > 0 ? (bal === 0 ? 'FULLY PAID' : bal > 0 ? String(bal) : `+${String(Math.abs(bal))}`) : '',
+            u(s.payerName || ''), u(formatBankLabel(s.bank)), safeFmtDate(s.dateOfPayment),
+          ])
+        })
+      }
+    })
+    const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n')
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a'); a.href = url; a.download = 'DELIVERY-SALES-LEDGER.csv'
+    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url)
+  }, [filteredLedgerGroups])
+
+  const exportDailyPayments = useCallback(() => {
+    if (!filteredSales.length) return
+    const u = (s: string) => (s || '').toUpperCase()
+    const safeFmtDate = (d: string | null | undefined): string => safeFormatDate(d, 'dd/MM/yyyy')
+    const period = timePreset === 'custom' ? `${customFrom || '?'}_TO_${customTo || '?'}` : timePreset.toUpperCase()
+    const headers = ['S/N', 'DATE PAID', 'TRUCK NO.', 'CUSTOMER', 'DESTINATION', 'VOLUME (L)', 'RATE', 'EXPECTED', 'AMOUNT PAID', 'PAYER', 'BANK', 'PHONE', 'ENTERED BY']
+    const rows = filteredSales.map((s, idx) => [
+      String(idx + 1), safeFmtDate(s.dateOfPayment || s.dateLoaded), u(s.truckNumber),
+      u(s.customerName || customerMap.get(String(s.customerId))?.name || ''), u(s.location || ''),
+      toNum(s.quantity) > 0 ? String(toNum(s.quantity)) : '', toNum(s.rate) > 0 ? String(toNum(s.rate)) : '',
+      toNum(s.salesValue) > 0 ? String(toNum(s.salesValue)) : '', toNum(s.paymentAmount) > 0 ? String(toNum(s.paymentAmount)) : '',
+      u(s.payerName || ''), u(formatBankLabel(s.bank)), s.phoneNumber || '', u(s.enteredBy || ''),
+    ])
+    const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n')
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a'); a.href = url; a.download = `DAILY-PAYMENTS-${period}.csv`
+    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url)
+  }, [filteredSales, customerMap, timePreset, customFrom, customTo])
+
+  const isLoading = salesLoading || inventoryLoading || customersLoading
+
+  // ═══════════════════════════════════════════════════════════════════
+  // Render
+  // ═══════════════════════════════════════════════════════════════════
+
+  return (
+    <div className="space-y-6">
+      <PageHeader
+        title="Delivery Sales Ledger"
+        description="Manage loaded trucks and track incremental payments."
+        actions={
+          <>
+            <Button variant="outline" className="gap-2" onClick={activeView === 'ledger' ? exportExcel : exportDailyPayments} disabled={activeView === 'ledger' ? filteredLedgerGroups.length === 0 : filteredSales.length === 0}>
+              <Download size={16} />
+              <span className="hidden sm:inline">{activeView === 'ledger' ? 'Download Ledger' : 'Download Payments'}</span>
+              <span className="sm:hidden">Export</span>
+            </Button>
+            <Button className="gap-2 bg-emerald-600 hover:bg-emerald-700" onClick={() => openPaymentDialog()}>
+              <Plus size={16} /> Record Payment
+            </Button>
+          </>
+        }
+      />
+
+      {/* ═══ FILTER PANEL ═══ */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="p-4 space-y-4">
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+            <Input placeholder="Search truck, customer, PFI, payer…" className="pl-9 h-10 text-sm" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+            {searchQuery && (
+              <button title="Clear search" onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors">
+                <X size={14} />
+              </button>
+            )}
+          </div>
+
+          {/* Time Period */}
+          <div className="flex flex-wrap gap-1.5">
+            {(['today', 'yesterday', 'week', 'month', 'year', 'all', 'custom'] as TimePreset[]).map(tp => (
+              <button
+                key={tp}
+                type="button"
+                onClick={() => handlePresetChange(tp)}
+                className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all ${timePreset === tp
+                    ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
+                    : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400 hover:bg-slate-50'
+                  }`}
+              >
+                {tp === 'all' ? 'All Time' : tp === 'custom' ? 'Custom' : tp.charAt(0).toUpperCase() + tp.slice(1)}
+              </button>
+            ))}
+          </div>
+
+          {timePreset === 'custom' && (
+            <div className="flex flex-wrap gap-3 items-end">
+              <div className="space-y-1"><Label className="text-xs text-slate-500">From</Label><Input type="date" value={customFrom} onChange={e => setCustomFrom(e.target.value)} className="h-9 w-[160px]" /></div>
+              <div className="space-y-1"><Label className="text-xs text-slate-500">To</Label><Input type="date" value={customTo} onChange={e => setCustomTo(e.target.value)} className="h-9 w-[160px]" /></div>
+            </div>
+          )}
+
+          {/* Advanced Filters Toggle */}
+          <div className="border-t border-slate-100 pt-3">
+            <button
+              type="button"
+              onClick={() => setShowAdvancedFilters(prev => !prev)}
+              className="flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors"
+            >
+              <SlidersHorizontal size={13} />
+              Advanced Filters
+              {hasActiveFilters && (
+                <Badge className="ml-1 h-5 px-1.5 text-[10px] bg-slate-900 text-white">
+                  Active
+                </Badge>
+              )}
+              {showAdvancedFilters ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
+            </button>
+          </div>
+
+          {/* Collapsible Advanced Filters */}
+          {showAdvancedFilters && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="space-y-1.5">
+                <Label className="flex items-center gap-1.5 text-xs font-medium text-slate-600">
+                  <Truck size={12} className="text-slate-400" /> Truck
+                </Label>
+                <Select value={truckFilter} onValueChange={setTruckFilter}>
+                  <SelectTrigger className="h-9 text-sm">
+                    <SelectValue placeholder="All Trucks" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Trucks</SelectItem>
+                    {uniqueTruckNumbers.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="flex items-center gap-1.5 text-xs font-medium text-slate-600">
+                  <Users size={12} className="text-slate-400" /> Customer
+                </Label>
+                <Select value={customerFilter} onValueChange={setCustomerFilter}>
+                  <SelectTrigger className="h-9 text-sm">
+                    <SelectValue placeholder="All Customers" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Customers</SelectItem>
+                    {uniqueCustomerOptions.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="flex items-center gap-1.5 text-xs font-medium text-slate-600">
+                  <Building2 size={12} className="text-slate-400" /> Customer Type
+                </Label>
+                <Select value={customerTypeFilter} onValueChange={(v) => setCustomerTypeFilter(v as any)}>
+                  <SelectTrigger className="h-9 text-sm">
+                    <SelectValue placeholder="All Types" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Types</SelectItem>
+                    <SelectItem value="normal">Normal Customers</SelectItem>
+                    <SelectItem value="filling_station">Filling Stations</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {tripCodes.length > 0 && (
+                <div className="space-y-1.5">
+                  <Label className="flex items-center gap-1.5 text-xs font-medium text-slate-600">
+                    <Tag size={12} className="text-purple-400" /> PFI Code
+                  </Label>
+                  <Select value={tripCodeFilter} onValueChange={setTripCodeFilter}>
+                    <SelectTrigger className="h-9 text-sm">
+                      <SelectValue placeholder="All PFI Codes" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All PFI Codes</SelectItem>
+                      {tripCodes.map(code => <SelectItem key={code} value={code}>{code}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Active Filter Chips */}
+          {hasActiveFilters && (
+            <div className="flex flex-wrap items-center gap-2">
+              {truckFilter !== 'all' && (
+                <Badge variant="outline" className="gap-1 pr-1 text-xs font-medium">
+                  Truck: {truckFilter}
+                  <button onClick={() => setTruckFilter('all')} className="ml-0.5 hover:text-red-500 transition-colors"><X size={10} /></button>
+                </Badge>
+              )}
+              {customerFilter !== 'all' && (
+                <Badge variant="outline" className="gap-1 pr-1 text-xs font-medium">
+                  Customer: {uniqueCustomerOptions.find(c => c.id === customerFilter)?.name || customerFilter}
+                  <button onClick={() => setCustomerFilter('all')} className="ml-0.5 hover:text-red-500 transition-colors"><X size={10} /></button>
+                </Badge>
+              )}
+              {customerTypeFilter !== 'all' && (
+                <Badge variant="outline" className="gap-1 pr-1 text-xs font-medium">
+                  Type: {customerTypeFilter === 'filling_station' ? 'Filling Station' : 'Normal'}
+                  <button onClick={() => setCustomerTypeFilter('all')} className="ml-0.5 hover:text-red-500 transition-colors"><X size={10} /></button>
+                </Badge>
+              )}
+              {tripCodeFilter !== 'all' && (
+                <Badge variant="outline" className="gap-1 pr-1 text-xs font-medium">
+                  Code: {tripCodeFilter}
+                  <button onClick={() => setTripCodeFilter('all')} className="ml-0.5 hover:text-red-500 transition-colors"><X size={10} /></button>
+                </Badge>
+              )}
+              {searchQuery && (
+                <Badge variant="outline" className="gap-1 pr-1 text-xs font-medium">
+                  Search: "{searchQuery}"
+                  <button onClick={() => setSearchQuery('')} className="ml-0.5 hover:text-red-500 transition-colors"><X size={10} /></button>
+                </Badge>
+              )}
+              <button onClick={clearAllFilters} className="text-xs text-slate-500 hover:text-red-600 font-medium transition-colors underline underline-offset-2">
+                Clear all
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ═══ PFI CODE MANAGEMENT ═══ */}
+      {tripCodes.length > 0 && (
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <div className="p-4">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-2">
+              <span className="text-xs font-semibold text-slate-500 flex items-center gap-1.5 shrink-0">
+                <Tag size={12} className="text-purple-400" /> PFI Codes
+              </span>
+              {tripCodes.map(code => {
+                const count = filteredLedgerGroups.filter(g => g.code === code).length
+                return (
+                  <span key={code} className="inline-flex items-center gap-0.5">
+                    <button
+                      type="button"
+                      onClick={() => setTripCodeFilter(prev => prev === code ? 'all' : code)}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all ${tripCodeFilter === code
+                          ? 'bg-purple-700 text-white border-purple-700 shadow-sm'
+                          : 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100'
+                        }`}
+                    >
+                      {code}{count > 0 ? ` · ${count}` : ''}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => deleteTripCode(code)}
+                      title={`Delete ${code}`}
+                      className="text-slate-300 hover:text-red-500 transition-colors p-0.5 rounded"
+                    >
+                      <X size={10} />
+                    </button>
+                  </span>
+                )
+              })}
+              <span className="inline-flex items-center gap-1 ml-1">
+                <input
+                  placeholder="+ new code"
+                  className="h-7 px-2 text-xs rounded-lg border border-dashed border-slate-300 bg-transparent focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-200 w-24 uppercase transition-all"
+                  value={newTripCodeInput}
+                  onChange={e => setNewTripCodeInput(e.target.value.toUpperCase())}
+                  onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTripCode() } }}
+                />
+                <button type="button" onClick={addTripCode} className="text-xs text-purple-600 hover:text-purple-800 font-semibold transition-colors">
+                  Add
+                </button>
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═══ VIEW SWITCHER ═══ */}
+      <div className="flex items-center gap-1 bg-white rounded-lg border border-slate-200 shadow-sm p-1 w-fit">
+        <button
+          onClick={() => setActiveView('ledger')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-all ${activeView === 'ledger'
+              ? 'bg-slate-900 text-white shadow-sm'
+              : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
+            }`}
+        >
+          <Truck size={14} /> Sales Ledger
+        </button>
+        <button
+          onClick={() => setActiveView('daily')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-all ${activeView === 'daily'
+              ? 'bg-slate-900 text-white shadow-sm'
+              : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
+            }`}
+        >
+          <CalendarIcon size={14} /> Daily Payments
+          {filteredSales.length > 0 && (
+            <span className={`ml-0.5 px-1.5 py-0.5 rounded-full text-[11px] font-bold leading-none ${activeView === 'daily' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+              }`}>
+              {filteredSales.length}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {/* ═══ SUMMARY CARDS ═══ */}
+      <SummaryCards cards={summaryCards} />
+
+      {/* ═══ PFI SUMMARY TABLE ═══ */}
+      {activeView === 'ledger' && totals.codeSummaries.length > 0 && (
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <div className="p-4 border-b border-slate-100">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h3 className="text-sm font-bold text-slate-800 flex items-center gap-1.5 uppercase">
+                  <FileText size={15} className="text-indigo-500" /> PFI Summary
+                </h3>
+                <p className="text-xs text-slate-400 mt-0.5">Payment status breakdown by PFI allocation code.</p>
+              </div>
+              <div className="flex flex-wrap items-center gap-3 text-xs font-semibold">
+                <span className="inline-flex items-center rounded-md bg-emerald-50 px-2.5 py-1 text-emerald-700 ring-1 ring-inset ring-emerald-700/10 gap-1.5">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span> Sold: <strong>{totals.soldCount}</strong>
+                </span>
+                <span className="inline-flex items-center rounded-md bg-amber-50 px-2.5 py-1 text-amber-700 ring-1 ring-inset ring-amber-700/10 gap-1.5">
+                  <span className="h-1.5 w-1.5 rounded-full bg-amber-500"></span> With Balance: <strong>{totals.withBalanceCount}</strong>
+                </span>
+                <span className="inline-flex items-center rounded-md bg-slate-100 px-2.5 py-1 text-slate-700 ring-1 ring-inset ring-slate-700/10 gap-1.5">
+                  <span className="h-1.5 w-1.5 rounded-full bg-slate-500"></span> Not Sold: <strong>{totals.notSoldCount}</strong>
+                </span>
+              </div>
+            </div>
+          </div>
+          <div className="overflow-x-auto">
+            <Table className="text-xs">
+              <TableHeader>
+                <TableRow className="bg-slate-50/80 hover:bg-slate-50/80">
+                  <TableHead className="font-semibold text-slate-700 w-[160px]">PFI Code</TableHead>
+                  <TableHead className="font-semibold text-slate-700 w-[140px]">Qty Loaded</TableHead>
+                  <TableHead className="font-semibold text-slate-700 w-[100px] text-center">Fully Paid</TableHead>
+                  <TableHead className="font-semibold text-slate-700 w-[110px] text-center">With Balance</TableHead>
+                  <TableHead className="font-semibold text-slate-700 w-[100px] text-center">Not Sold</TableHead>
+                  <TableHead className="font-semibold text-slate-700 text-right w-[150px]">Expected Revenue</TableHead>
+                  <TableHead className="font-semibold text-emerald-700 text-right w-[140px]">Total Paid</TableHead>
+                  <TableHead className="font-semibold text-red-700 text-right w-[150px]">Balance</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {totals.codeSummaries.map(s => {
+                  const hasOutstanding = s.balance > 0; const isOverpaid = s.balance < 0
+                  return (
+                    <TableRow key={s.code || 'unassigned'} className="hover:bg-slate-50/50 bg-white">
+                      <TableCell className="font-semibold text-slate-700 uppercase whitespace-nowrap">{s.code || 'UNASSIGNED'}</TableCell>
+                      <TableCell className="font-semibold text-slate-800 whitespace-nowrap">{s.qty > 0 ? `${s.qty.toLocaleString()} Ltrs` : '—'}</TableCell>
+                      <TableCell className="text-center">
+                        <span className="inline-flex items-center justify-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-600/10">{s.soldCount}</span>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <span className="inline-flex items-center justify-center rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700 ring-1 ring-inset ring-amber-600/10">{s.withBalanceCount}</span>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <span className="inline-flex items-center justify-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600 ring-1 ring-inset ring-slate-400/30">{s.notSoldCount}</span>
+                      </TableCell>
+                      <TableCell className="text-right font-semibold text-slate-800 whitespace-nowrap">{s.expected > 0 ? fmt(s.expected) : '—'}</TableCell>
+                      <TableCell className="text-right font-bold text-emerald-700 whitespace-nowrap">{s.paid > 0 ? fmt(s.paid) : '—'}</TableCell>
+                      <TableCell className={`text-right font-bold whitespace-nowrap ${hasOutstanding ? 'text-red-600' : isOverpaid ? 'text-blue-600' : 'text-emerald-600'}`}>
+                        {s.balance === 0 ? '₦0' : isOverpaid ? `+${fmt(Math.abs(s.balance))}` : fmt(s.balance)}
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+      )}
+
+      {/* ═══ LEDGER TABLE ═══ */}
+      {activeView === 'ledger' && (
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-24">
+              <Loader2 size={24} className="animate-spin text-muted-foreground" />
+            </div>
+          ) : filteredLedgerGroups.length === 0 ? (
+            <div className="p-12 text-center">
+              <div className="mx-auto w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
+                <Truck className="text-slate-300" size={32} />
+              </div>
+              <p className="text-slate-600 font-semibold text-base">No sales ledger rows found</p>
+              <p className="text-sm text-slate-400 mt-1.5 max-w-sm mx-auto">
+                {ledgerGroups.length > 0
+                  ? 'Try adjusting your filters or date range.'
+                  : 'Allocate trucks in inventory or click "Record Payment" to create the first row.'}
+              </p>
+              {ledgerGroups.length > 0 && hasActiveFilters && (
+                <Button variant="outline" size="sm" className="mt-4 gap-1.5" onClick={clearAllFilters}>
+                  <X size={14} /> Clear Filters
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table className="text-sm">
+                <TableHeader>
+                  <TableRow className="bg-slate-50/80 hover:bg-slate-50/80">
+                    <TableHead className="font-semibold text-slate-700 w-12 text-center sticky top-0 bg-slate-50/80 backdrop-blur-sm">S/N</TableHead>
+                    <TableHead className="font-semibold text-slate-700 whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">PFI Code</TableHead>
+                    <TableHead className="font-semibold text-slate-700 whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">Truck No.</TableHead>
+                    <TableHead className="font-semibold text-slate-700 whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">Customer</TableHead>
+                    <TableHead className="font-semibold text-slate-700 whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">Destination</TableHead>
+                    <TableHead className="font-semibold text-slate-700 text-right whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">Quantity</TableHead>
+                    <TableHead className="font-semibold text-slate-700 text-right whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">Rate</TableHead>
+                    <TableHead className="font-semibold text-slate-700 text-right whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">Expected</TableHead>
+                    <TableHead className="font-semibold text-emerald-700 text-right whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">Payment</TableHead>
+                    <TableHead className="font-semibold text-red-700 text-right whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">Balance</TableHead>
+                    <TableHead className="font-semibold text-slate-700 text-center whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {(() => {
+                    let serial = (currentPage - 1) * pageSize
+                    const rows: React.ReactNode[] = []
+                    const multiCustCounts = new Map<number, number>()
+                    filteredLedgerGroups.forEach(g => {
+                      if (g.loadingId && g.key.split(':').length === 3) multiCustCounts.set(g.loadingId, (multiCustCounts.get(g.loadingId) ?? 0) + 1)
+                    })
+                    const multiCustLoadingIds = new Set(Array.from(multiCustCounts.entries()).filter(([, c]) => c > 1).map(([id]) => id))
+                    const renderedMultiLoadings = new Set<number>()
+
+                    paginatedLedgerGroups.forEach(group => {
+                      const theme = getCodeTheme(group.code)
+                      const isMultiCustGroup = group.loadingId != null && multiCustLoadingIds.has(group.loadingId)
+                      const isFirstInMultiGroup = isMultiCustGroup && !renderedMultiLoadings.has(group.loadingId!)
+                      if (isMultiCustGroup) renderedMultiLoadings.add(group.loadingId!)
+                      serial += 1
+                      const isFullyPaid = group.balance <= 0 && group.expected > 0
+
+                      rows.push(
+                        <TableRow
+                          key={`${group.key}-main`}
+                          className={`cursor-pointer hover:bg-slate-50/90 border-b border-slate-100 border-l-[3px] transition-colors group ${isMultiCustGroup ? 'border-l-blue-400 bg-blue-50/10' : (theme ? theme.row : 'border-l-transparent')
+                            }`}
+                          onClick={() => navigate({
+                            to: '/sales-ledger/details',
+                            search: {
+                              key: group.key,
+                              loadingId: group.loadingId ? String(group.loadingId) : '',
+                              truckNumber: group.truckNumber,
+                              dateLoaded: group.dateLoaded,
+                              customerId: group.customerId || '',
+                              code: group.code || '',
+                            },
+                          })}
+                        >
+                          <TableCell className="text-slate-400 text-center text-xs">{serial}</TableCell>
+                          <TableCell className="whitespace-nowrap">
+                            {group.allocationCode ? (
+                              <span className="text-sm font-semibold text-slate-700">{group.allocationCode}</span>
+                            ) : (
+                              <span className="text-slate-300">—</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="font-semibold text-slate-900 whitespace-nowrap">
+                            {isMultiCustGroup && !isFirstInMultiGroup ? (
+                              <div className="flex items-center gap-1 pl-2 text-slate-500">
+                                <span className="text-blue-400 font-bold text-base leading-none">↳</span>
+                                <span className="text-xs text-slate-400 italic">same truck</span>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-1.5">
+                                <Truck size={13} className="text-amber-700" />
+                                {group.truckNumber || '—'}
+                                {isFirstInMultiGroup && (
+                                  <span className="ml-0.5 text-[10px] font-bold text-blue-700 bg-blue-100 px-1.5 py-0.5 rounded-full border border-blue-200 whitespace-nowrap">
+                                    {multiCustCounts.get(group.loadingId!)} customers
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                          </TableCell>
+                          <TableCell className="font-semibold text-slate-900 uppercase whitespace-nowrap text-xs">{group.customerName || '—'}</TableCell>
+                          <TableCell className="text-slate-600 text-xs uppercase whitespace-nowrap">{group.location || '—'}</TableCell>
+                          <TableCell className="text-right text-slate-700 whitespace-nowrap tabular-nums text-xs">{group.quantity > 0 ? `${fmtQty(group.quantity)} L` : '—'}</TableCell>
+                          <TableCell className="text-right text-slate-700 whitespace-nowrap tabular-nums text-xs">{group.rate > 0 ? fmt(group.rate) : '—'}</TableCell>
+                          <TableCell className="text-right font-medium text-slate-800 whitespace-nowrap tabular-nums text-xs">{group.expected > 0 ? fmt(group.expected) : '—'}</TableCell>
+                          <TableCell className="text-right font-bold text-emerald-700 whitespace-nowrap tabular-nums text-xs">{fmt(toNum(group.totalPaid))}</TableCell>
+                          <TableCell className={`text-right font-bold whitespace-nowrap tabular-nums text-xs ${group.balance > 0 ? 'text-red-600' : group.balance < 0 ? 'text-blue-600' : group.expected > 0 ? 'text-emerald-600' : 'text-slate-400'}`}>
+                            {group.expected > 0 ? (group.balance === 0 ? '₦0' : group.balance > 0 ? fmt(group.balance) : `+${fmt(Math.abs(group.balance))}`) : '—'}
+                          </TableCell>
+                          <TableCell className="whitespace-nowrap text-center">
+                            {group.payments.length === 0 ? (
+                              <Badge variant="outline" className="text-[11px] font-semibold text-amber-700 bg-amber-50 border-amber-200">
+                                No payment
+                              </Badge>
+                            ) : isFullyPaid ? (
+                              <Badge className="text-[11px] font-semibold bg-emerald-50 text-emerald-700 border-emerald-200">
+                                Fully Paid
+                              </Badge>
+                            ) : (
+                              <Badge className="text-[11px] font-semibold bg-red-50 text-red-700 border-red-200">
+                                Pending
+                              </Badge>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      )
+                    })
+                    return rows
+                  })()}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+          {/* Footer & Pagination */}
+          {!isLoading && filteredLedgerGroups.length > 0 && renderPaginationFooter(
+            filteredLedgerGroups.length,
+            filteredLedgerGroups.reduce((s, g) => s + toNum(g.totalPaid), 0),
+            'entries'
+          )}
+        </div>
+      )}
+
+      {/* ═══ DAILY PAYMENTS VIEW ═══ */}
+      {activeView === 'daily' && (
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-24">
+              <Loader2 size={24} className="animate-spin text-muted-foreground" />
+            </div>
+          ) : filteredSales.length === 0 ? (
+            <div className="p-12 text-center">
+              <div className="mx-auto w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
+                <CalendarIcon className="text-slate-300" size={32} />
+              </div>
+              <p className="text-slate-600 font-semibold text-base">No payment entries found</p>
+              <p className="text-sm text-slate-400 mt-1.5">Try adjusting your filters or date range.</p>
+              {hasActiveFilters && (
+                <Button variant="outline" size="sm" className="mt-4 gap-1.5" onClick={clearAllFilters}>
+                  <X size={14} /> Clear Filters
+                </Button>
+              )}
+            </div>
+          ) : (
+            <>
+              <div className="overflow-x-auto">
+                <Table className="text-sm">
+                  <TableHeader>
+                    <TableRow className="bg-slate-50/80 hover:bg-slate-50/80">
+                      <TableHead className="font-semibold text-slate-700 w-[48px] text-center sticky top-0 bg-slate-50/80 backdrop-blur-sm">S/N</TableHead>
+                      <TableHead className="font-semibold text-slate-700 whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">Date Paid</TableHead>
+                      <TableHead className="font-semibold text-slate-700 whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">Truck No.</TableHead>
+                      <TableHead className="font-semibold text-slate-700 whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">Customer</TableHead>
+                      <TableHead className="font-semibold text-slate-700 whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">Destination</TableHead>
+                      <TableHead className="font-semibold text-slate-700 text-right whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">Volume (L)</TableHead>
+                      <TableHead className="font-semibold text-slate-700 text-right whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">Rate</TableHead>
+                      <TableHead className="font-semibold text-slate-700 text-right whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">Expected</TableHead>
+                      <TableHead className="font-semibold text-emerald-700 text-right whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">Amount Paid</TableHead>
+                      <TableHead className="font-semibold text-slate-700 whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">Payer</TableHead>
+                      <TableHead className="font-semibold text-slate-700 whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">Payment Method</TableHead>
+                      <TableHead className="font-semibold text-slate-700 whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">Entered By</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedSales.map((sale, idx) => {
+                      const customerName = sale.customerName || customerMap.get(String(sale.customerId))?.name || '—'
+                      const datePaid = sale.dateOfPayment || sale.dateLoaded
+                      const serial = (currentPage - 1) * pageSize + idx + 1
+                      return (
+                        <TableRow
+                          key={sale._id || sale.id}
+                          className="cursor-pointer hover:bg-slate-50/70 border-b border-slate-100 transition-colors"
+                          onClick={() => navigate({
+                            to: '/sales-ledger/details',
+                            search: {
+                              truckNumber: sale.truckNumber,
+                              dateLoaded: sale.dateLoaded || '',
+                              customerId: String(sale.customerId || ''),
+                              code: sale.allocationCode || '',
+                            },
+                          })}
+                        >
+                          <TableCell className="text-slate-400 text-center text-xs">{serial}</TableCell>
+                          <TableCell className="text-slate-600 whitespace-nowrap text-xs">{safeFormatDate(datePaid)}</TableCell>
+                          <TableCell className="font-semibold text-slate-900 whitespace-nowrap">
+                            <div className="flex items-center gap-1.5">
+                              <Truck size={12} className="text-amber-700" />
+                              {sale.truckNumber || '—'}
+                            </div>
+                          </TableCell>
+                          <TableCell className="font-medium text-slate-800 uppercase whitespace-nowrap text-xs">{customerName}</TableCell>
+                          <TableCell className="text-slate-600 uppercase whitespace-nowrap text-xs">{sale.location || '—'}</TableCell>
+                          <TableCell className="text-right text-slate-700 whitespace-nowrap tabular-nums text-xs">{toNum(sale.quantity) > 0 ? fmtQty(toNum(sale.quantity)) : '—'}</TableCell>
+                          <TableCell className="text-right text-slate-700 whitespace-nowrap tabular-nums text-xs">{toNum(sale.rate) > 0 ? fmt(toNum(sale.rate)) : '—'}</TableCell>
+                          <TableCell className="text-right text-slate-700 whitespace-nowrap tabular-nums text-xs">{toNum(sale.salesValue) > 0 ? fmt(toNum(sale.salesValue)) : '—'}</TableCell>
+                          <TableCell className="text-right font-bold text-emerald-700 whitespace-nowrap tabular-nums text-xs">{toNum(sale.paymentAmount) > 0 ? fmt(toNum(sale.paymentAmount)) : '—'}</TableCell>
+                          <TableCell className="text-slate-600 whitespace-nowrap text-xs">{sale.payerName || '—'}</TableCell>
+                          <TableCell className="text-slate-600 text-xs whitespace-nowrap">
+                            {formatBankLabel(sale.bank) || '—'}
+                          </TableCell>
+                          <TableCell className="text-slate-500 text-xs whitespace-nowrap">{sale.enteredBy || '—'}</TableCell>
+                        </TableRow>
+                      )
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+              {/* Footer & Pagination */}
+              {!isLoading && filteredSales.length > 0 && renderPaginationFooter(
+                filteredSales.length,
+                filteredSales.reduce((s, p) => s + toNum(p.paymentAmount), 0),
+                'payments'
+              )}
+            </>
+          )}
+        </div>
+      )}
+
+      {/* ═══ DIALOGS ═══ */}
+      <RecordPaymentDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        trucks={loadedTrucks}
+        customers={customers}
+        customerMap={customerMap}
+        tripCodes={tripCodes}
+        cycleCustomerRateMap={cycleCustomerRateMap}
+        getCycleKey={getCycleKey}
+        normalizeCycleDate={normalizeCycleDate}
+        assignMode={assignMode}
+      />
+    </div>
+  )
+}

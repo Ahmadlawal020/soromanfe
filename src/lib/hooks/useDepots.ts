@@ -1,0 +1,107 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import api from '#/lib/api/http'
+import { useToast } from '#/lib/hooks/useToast'
+import type { Depot, DepotItem } from '#/lib/types'
+
+export type { Depot, DepotItem }
+
+export function useDepots(params?: { search?: string, page?: number, limit?: number }) {
+  return useQuery({
+    queryKey: ['depots', params],
+    queryFn: async () => {
+      const res = await api.get('/depots', { params })
+      return (res.data.data.depots || []) as DepotItem[]
+    },
+  })
+}
+
+export function useDepotDetails(id: string) {
+  return useQuery({
+    queryKey: ['depots', id],
+    queryFn: async () => {
+      const res = await api.get(`/depots/${id}`)
+      return res.data.data.depot as Depot
+    },
+    enabled: !!id,
+  })
+}
+
+function getErrorMessage(err: any): string {
+  return err?.response?.data?.message || err?.message || 'An unexpected error occurred'
+}
+
+export function useCreateDepot() {
+  const queryClient = useQueryClient()
+  const toast = useToast()
+
+  return useMutation({
+    mutationFn: async (data: Record<string, any>) => {
+      const res = await api.post('/depots', data)
+      return res.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['depots'] })
+      toast.success('Depot created successfully')
+    },
+    onError: (err: any) => {
+      toast.error(getErrorMessage(err))
+    },
+  })
+}
+
+export function useUpdateDepot() {
+  const queryClient = useQueryClient()
+  const toast = useToast()
+
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Record<string, any> }) => {
+      const res = await api.patch(`/depots/${id}`, data)
+      return res.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['depots'] })
+      toast.success('Depot updated successfully')
+    },
+    onError: (err: any) => {
+      toast.error(getErrorMessage(err))
+    },
+  })
+}
+
+export function useDeleteDepot() {
+  const queryClient = useQueryClient()
+  const toast = useToast()
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const res = await api.delete(`/depots/${id}`)
+      return res.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['depots'] })
+      toast.success('Depot deleted successfully')
+    },
+    onError: (err: any) => {
+      toast.error(getErrorMessage(err))
+    },
+  })
+}
+
+export function useUpdateProductPrice() {
+  const queryClient = useQueryClient()
+  const toast = useToast()
+
+  return useMutation({
+    mutationFn: async ({ depotId, productId, price }: { depotId: string; productId: string; price: number }) => {
+      const res = await api.patch(`/depots/${depotId}/product-price`, { productId, price })
+      return res.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['depots'] })
+      toast.success('Product price updated successfully')
+    },
+    onError: (err: any) => {
+      toast.error(getErrorMessage(err))
+    },
+  })
+}

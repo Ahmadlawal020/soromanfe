@@ -1,0 +1,164 @@
+import { useState, useMemo, useCallback } from 'react'
+import { parseISO } from 'date-fns'
+import type { DeliverySale, DeliveryInventory, DeliveryCustomer } from '#/lib/types'
+import type { LedgerGroup } from '#/components/sales-ledger/SalesLedgerDialogs'
+import { matchesDateRange, getPresetRange, type TimePreset, isFillingStation } from '#/lib/sales-ledger-utils'
+
+interface UseSalesLedgerFiltersParams {
+  ledgerGroups: LedgerGroup[]
+  allSales: DeliverySale[]
+  allLoadings: DeliveryInventory[]
+  customers: DeliveryCustomer[]
+  customerMap: Map<string, DeliveryCustomer>
+  tripCodes: string[]
+  saleTripMap: Record<string, string>
+}
+
+export function useSalesLedgerFilters({
+  ledgerGroups, allSales, allLoadings, customers, customerMap, tripCodes, saleTripMap,
+}: UseSalesLedgerFiltersParams) {
+  const [timePreset, setTimePreset] = useState<TimePreset>('all')
+  const [customFrom, setCustomFrom] = useState('')
+  const [customTo, setCustomTo] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [activeView, setActiveView] = useState<'ledger' | 'daily'>('ledger')
+  const [truckFilter, setTruckFilter] = useState('all')
+  const [customerFilter, setCustomerFilter] = useState('all')
+  const [customerTypeFilter, setCustomerTypeFilter] = useState<'all' | 'filling_station' | 'normal'>('all')
+  const [tripCodeFilter, setTripCodeFilter] = useState('all')
+
+  const dateRange = useMemo(() => {
+    if (timePreset === 'custom') {
+      return { from: customFrom ? parseISO(customFrom) : null, to: customTo ? parseISO(customTo) : null }
+    }
+    return getPresetRange(timePreset)
+  }, [timePreset, customFrom, customTo])
+
+  const handlePresetChange = useCallback((preset: TimePreset) => {
+    setTimePreset(preset)
+    if (preset !== 'custom') { setCustomFrom(''); setCustomTo('') }
+  }, [])
+
+  const clearAllFilters = useCallback(() => {
+    setTruckFilter('all')
+    setCustomerFilter('all')
+    setCustomerTypeFilter('all')
+    setTripCodeFilter('all')
+    setSearchQuery('')
+    setTimePreset('all')
+    setCustomFrom('')
+    setCustomTo('')
+  }, [])
+
+  const hasActiveFilters = truckFilter !== 'all' || customerFilter !== 'all'
+    || customerTypeFilter !== 'all' || tripCodeFilter !== 'all' || searchQuery !== ''
+
+  const filteredLedgerGroups = useMemo(() => {
+    let result = [...ledgerGroups]
+    result = result.filter(g =>
+      matchesDateRange(g.dateLoaded, dateRange.from, dateRange.to)
+      || g.payments.some(p => matchesDateRange(p.dateOfPayment || p.createdAt || p.dateLoaded, dateRange.from, dateRange.to))
+    )
+    if (truckFilter !== 'all') result = result.filter(g => g.truckNumber === truckFilter)
+    if (customerFilter !== 'all') {
+      const selectedCustName = customerMap.get(customerFilter)?.name
+      result = result.filter(g => (g.customerId || '') === customerFilter || (selectedCustName && g.customerName === selectedCustName))
+    }
+    if (tripCodeFilter !== 'all') result = result.filter(g => g.code === tripCodeFilter)
+    if (customerTypeFilter !== 'all') {
+      result = result.filter(g => customerTypeFilter === 'filling_station' ? g.isFillingStation : !g.isFillingStation)
+    }
+    const q = searchQuery.trim().toLowerCase()
+    if (q) {
+      result = result.filter(g =>
+        (g.truckNumber || '').toLowerCase().includes(q)
+        || (g.depot || '').toLowerCase().includes(q)
+        || (g.location || '').toLowerCase().includes(q)
+        || (g.customerName || '').toLowerCase().includes(q)
+        || (g.allocationCode || '').toLowerCase().includes(q)
+        || (g.pfiNumber || '').toLowerCase().includes(q)
+        || g.payments.some(p => (p.payerName || '').toLowerCase().includes(q) || (p.bank || '').toLowerCase().includes(q) || (p.phoneNumber || '').toLowerCase().includes(q) || (p.enteredBy || '').toLowerCase().includes(q))
+      )
+    }
+    const codeOrder = new Map<string, number>()
+    tripCodes.forEach((code, idx) => codeOrder.set(code, idx))
+    return result.sort((a, b) => {
+      const aRank = a.code ? (codeOrder.get(a.code) ?? 10_000) : 99_999
+      const bRank = b.code ? (codeOrder.get(b.code) ?? 10_000) : 99_999
+      if (aRank !== bRank) return aRank - bRank
+      const codeDiff = (a.code || '').localeCompare(b.code || '')
+      if (codeDiff !== 0) return codeDiff
+      return (a.truckNumber || '').localeCompare(b.truckNumber || '')
+    })
+  }, [ledgerGroups, dateRange, truckFilter, customerFilter, tripCodeFilter, customerTypeFilter, searchQuery, tripCodes, customerMap])
+
+  const filteredSales = useMemo(() => {
+    let result = allSales.filter(s => {
+      const dateField = s.dateOfPayment || s.dateLoaded
+      return matchesDateRange(dateField, dateRange.from, dateRange.to)
+    })
+    if (truckFilter !== 'all') result = result.filter(s => s.truckNumber === truckFilter)
+    if (customerFilter !== 'all') result = result.filter(s => String(s.customerId) === customerFilter)
+    if (tripCodeFilter !== 'all') result = result.filter(s => (s.allocationCode || saleTripMap[s._id || s.id || ''] || '') === tripCodeFilter)
+    if (customerTypeFilter !== 'all') {
+      result = result.filter(s => {
+        const custObj = s.customerId ? customerMap.get(String(s.customerId)) : null
+        const isFS = isFillingStation(custObj)
+        return customerTypeFilter === 'filling_station' ? isFS : !isFS
+      })
+    }
+    const q = searchQuery.trim().toLowerCase()
+    if (q) {
+      result = result.filter(s =>
+        (s.truckNumber || '').toLowerCase().includes(q)
+        || (s.customerName || (s.customerId ? customerMap.get(String(s.customerId))?.name : '') || '').toLowerCase().includes(q)
+        || (s.payerName || '').toLowerCase().includes(q)
+        || (s.location || '').toLowerCase().includes(q)
+      )
+    }
+    return result.sort((a, b) => (b.dateOfPayment || b.dateLoaded || '').localeCompare(a.dateOfPayment || a.dateLoaded || ''))
+  }, [allSales, dateRange, truckFilter, customerFilter, tripCodeFilter, customerTypeFilter, searchQuery, customerMap, saleTripMap])
+
+  const uniqueTruckNumbers = useMemo(() => {
+    const set = new Set<string>()
+    ledgerGroups.forEach(g => { if (g.truckNumber) set.add(g.truckNumber) })
+    allSales.forEach(s => { if (s.truckNumber) set.add(s.truckNumber) })
+    allLoadings.forEach(l => { if (l.truckNumber) set.add(l.truckNumber) })
+    return Array.from(set).filter(Boolean).sort()
+  }, [ledgerGroups, allSales, allLoadings])
+
+  const uniqueCustomerOptions = useMemo(() => {
+    const map = new Map<string, string>()
+    ledgerGroups.forEach(g => {
+      if (g.customerId && g.customerName) map.set(g.customerId, g.customerName)
+    })
+    allSales.forEach(s => {
+      const name = s.customerName || (s.customerId ? customerMap.get(String(s.customerId))?.name : '') || ''
+      if (s.customerId && name) map.set(String(s.customerId), name)
+    })
+    allLoadings.forEach(l => {
+      const cid = l.customerId ? String(l.customerId) : ''
+      const name = l.customerName || (cid ? customerMap.get(cid)?.name : '') || ''
+      if (cid && name) map.set(cid, name)
+    })
+    customers.forEach(c => {
+      const id = c._id || c.id || ''
+      if (id && c.name && !map.has(id)) map.set(id, c.name)
+    })
+    return Array.from(map.entries()).map(([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name))
+  }, [ledgerGroups, allSales, allLoadings, customers, customerMap])
+
+  const periodLabel = timePreset === 'custom'
+    ? `${customFrom || '?'} – ${customTo || '?'}`
+    : timePreset === 'all' ? 'All Time' : timePreset.charAt(0).toUpperCase() + timePreset.slice(1)
+
+  return {
+    timePreset, setTimePreset, customFrom, setCustomFrom, customTo, setCustomTo,
+    searchQuery, setSearchQuery, activeView, setActiveView,
+    truckFilter, setTruckFilter, customerFilter, setCustomerFilter,
+    customerTypeFilter, setCustomerTypeFilter, tripCodeFilter, setTripCodeFilter,
+    dateRange, handlePresetChange, clearAllFilters, hasActiveFilters,
+    filteredLedgerGroups, filteredSales,
+    uniqueTruckNumbers, uniqueCustomerOptions, periodLabel,
+  }
+}

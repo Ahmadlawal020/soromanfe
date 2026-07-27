@@ -1,0 +1,903 @@
+import { useState, useMemo, useCallback, useEffect } from 'react'
+import { createFileRoute, Link } from '@tanstack/react-router'
+import { useQueryClient } from '@tanstack/react-query'
+import { PageHeader } from '#/components/PageHeader'
+import { SummaryCards, type SummaryCard } from '#/components/SummaryCards'
+import { Button } from '#/components/ui/button'
+import { Input } from '#/components/ui/input'
+import {
+  Plus, Search, Download,
+  Truck, Droplets, CheckCircle2,
+  X, Tag, Settings, Calendar,
+  Loader2,
+} from 'lucide-react'
+import { format, parseISO, isWithinInterval, startOfDay, endOfDay } from 'date-fns'
+import { useDeliveryInventoryList, useCreateDeliveryInventory, useUpdateDeliveryInventory } from '#/lib/hooks/useDeliveryInventory'
+import { usePfiList, useUpdatePfi } from '#/lib/hooks/usePfis'
+import { useTruckList } from '#/lib/hooks/useTrucks'
+import { useDeliveryCustomerList } from '#/lib/hooks/useDeliveryCustomers'
+import { useToast } from '#/lib/hooks/useToast'
+import { cn } from '#/lib/utils'
+import type { DeliveryInventory, DeliveryCustomer } from '#/lib/types'
+import type { Pfi } from '#/lib/hooks/usePfis'
+
+import { AllocateTrucksDialog } from '#/components/delivery-operations/AllocateTrucksDialog'
+import { ManageCodesDialog } from '#/components/delivery-operations/ManageCodesDialog'
+
+export const Route = createFileRoute('/delivery-operations/')({
+  component: DeliveryOperationsPage,
+})
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Helpers
+// ═══════════════════════════════════════════════════════════════════════════
+
+const toNum = (v: string | number | undefined | null): number => {
+  if (v === undefined || v === null || v === '') return 0
+  if (typeof v === 'number') return v
+  const cleaned = String(v).replace(/[^0-9.]/g, '')
+  const n = Number(cleaned)
+  return Number.isFinite(n) ? n : 0
+}
+
+const fmtQty = (n: number) => n.toLocaleString(undefined, { maximumFractionDigits: 0 })
+
+const CODE_PALETTE = [
+  { header: 'bg-sky-50', row: 'border-l-sky-300', badge: 'bg-sky-100 text-sky-800 border-sky-200' },
+  { header: 'bg-emerald-50', row: 'border-l-emerald-300', badge: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
+  { header: 'bg-orange-50', row: 'border-l-orange-300', badge: 'bg-orange-100 text-orange-800 border-orange-200' },
+  { header: 'bg-violet-50', row: 'border-l-violet-300', badge: 'bg-violet-100 text-violet-800 border-violet-200' },
+  { header: 'bg-pink-50', row: 'border-l-pink-300', badge: 'bg-pink-100 text-pink-800 border-pink-200' },
+  { header: 'bg-amber-50', row: 'border-l-amber-300', badge: 'bg-amber-100 text-amber-800 border-amber-200' },
+  { header: 'bg-teal-50', row: 'border-l-teal-300', badge: 'bg-teal-100 text-teal-800 border-teal-200' },
+  { header: 'bg-indigo-50', row: 'border-l-indigo-300', badge: 'bg-indigo-100 text-indigo-800 border-indigo-200' },
+]
+
+const getCodeTheme = (code: string) => {
+  if (!code) return null
+  let hash = 0
+  for (let i = 0; i < code.length; i++) hash = (hash * 31 + code.charCodeAt(i)) >>> 0
+  return CODE_PALETTE[hash % CODE_PALETTE.length]
+}
+
+const statusBadge: Record<string, { label: string; cls: string; icon: typeof CheckCircle2 }> = {
+  loaded: { label: 'In Transit', cls: 'bg-amber-50 text-amber-700 border-amber-200', icon: Truck },
+  offloaded: { label: 'Sold', cls: 'bg-emerald-50 text-emerald-700 border-emerald-200', icon: CheckCircle2 },
+}
+
+type StatusFilter = 'all' | 'active' | 'delivered'
+
+interface TruckRecord extends DeliveryInventory {
+  status: 'loaded' | 'offloaded'
+  truckPlate: string
+  driverName: string
+  destination: string
+  depotDisplay: string
+  custName: string
+  pfiLabel: string
+  product: string
+  unitLabel: string
+  qty: number
+  code: string
+  isFillingStation: boolean
+  notes: string
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Component
+// ═══════════════════════════════════════════════════════════════════════════
+
+function DeliveryOperationsPage() {
+  const qc = useQueryClient()
+  const toast = useToast()
+
+  // ── Queries ─────────────────────────────────────────────────────────────
+  const { data: rawInventory = [], isLoading: isLoadingInventory } = useDeliveryInventoryList()
+  const { data: pfisData } = usePfiList()
+  const { data: trucksData } = useTruckList()
+  const { data: customersData = [] } = useDeliveryCustomerList()
+
+  const allPfis: Pfi[] = useMemo(() => {
+    if (!pfisData) return []
+    return Array.isArray(pfisData) ? pfisData : (pfisData.pfis || pfisData.data || [])
+  }, [pfisData])
+
+  const allTrucks = useMemo(() => {
+    if (!trucksData) return []
+    return Array.isArray(trucksData) ? trucksData : (trucksData.trucks || trucksData.data || [])
+  }, [trucksData])
+
+  const allEntries = useMemo((): DeliveryInventory[] => {
+    if (!rawInventory) return []
+    return Array.isArray(rawInventory) ? rawInventory : []
+  }, [rawInventory])
+
+  const allCustomers: DeliveryCustomer[] = useMemo(() => {
+    if (!customersData) return []
+    return Array.isArray(customersData) ? customersData : (customersData.customers || customersData.data || [])
+  }, [customersData])
+
+  // ── Mutations ───────────────────────────────────────────────────────────
+  const createInventory = useCreateDeliveryInventory()
+  const updateInventory = useUpdateDeliveryInventory()
+  const updatePfi = useUpdatePfi()
+
+  // ── Filters & Search ────────────────────────────────────────────────────
+  const [searchQuery, setSearchQuery] = useState('')
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
+  const [pfiFilter, setPfiFilter] = useState('')
+  const [customerFilter, setCustomerFilter] = useState('')
+  const [truckFilter, setTruckFilter] = useState('')
+  const [codeFilter, setCodeFilter] = useState('')
+  const [customerTypeFilter, setCustomerTypeFilter] = useState<'all' | 'filling_station' | 'normal'>('all')
+
+  // ── Allocation Codes ────────────────────────────────────────────────────
+  const [deliveryCodes, setDeliveryCodes] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem('dsl_trip_codes') || '[]') } catch { return [] }
+  })
+  const [manageCodesOpen, setManageCodesOpen] = useState(false)
+
+
+
+  // ── Allocate Trucks Dialog state ────────────────────────────────────────
+  const [loadDialogOpen, setLoadDialogOpen] = useState(false)
+  const [loadPfi, setLoadPfi] = useState('')
+  const [loadCode, setLoadCode] = useState('')
+  const [loadDepot, setLoadDepot] = useState('')
+  const [dateAllocated, setDateAllocated] = useState(format(new Date(), 'yyyy-MM-dd'))
+  const [selectedTruckIds, setSelectedTruckIds] = useState<Set<string>>(new Set())
+  const [truckSearch, setTruckSearch] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [showNewCodeInput, setShowNewCodeInput] = useState(false)
+  const [newCodeInput, setNewCodeInput] = useState('')
+
+  // Persist codes
+  useEffect(() => {
+    localStorage.setItem('dsl_trip_codes', JSON.stringify(deliveryCodes))
+  }, [deliveryCodes])
+
+  // Sync codes from inventory
+  useEffect(() => {
+    if (!allEntries.length) return
+    const inventoryCodes = allEntries
+      .map(e => (e.allocationCode || '').trim().toUpperCase())
+      .filter(Boolean)
+    setDeliveryCodes(prev => {
+      const merged = Array.from(new Set([...prev, ...inventoryCodes])).sort()
+      if (merged.join(',') === prev.join(',')) return prev
+      return merged
+    })
+  }, [allEntries])
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Lookup Maps
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  const truckMap = useMemo(() => {
+    const m = new Map<string | number, any>()
+    allTrucks.forEach((t: any) => {
+      if (t.id != null) { m.set(t.id, t); m.set(Number(t.id), t); m.set(String(t.id), t) }
+      if (t._id != null) { m.set(t._id, t); m.set(String(t._id), t) }
+    })
+    return m
+  }, [allTrucks])
+
+  const customerMap = useMemo(() => {
+    const m = new Map<string | number, DeliveryCustomer>()
+    allCustomers.forEach(c => {
+      if (c.id != null) { m.set(c.id, c); m.set(Number(c.id), c); m.set(String(c.id), c) }
+      if (c._id != null) { m.set(c._id, c); m.set(String(c._id), c) }
+    })
+    return m
+  }, [allCustomers])
+
+  const pfiMap = useMemo(() => {
+    const m = new Map<string, Pfi>()
+    allPfis.forEach((p: any) => {
+      if (p.id != null) { m.set(String(p.id), p) }
+      if (p._id != null) { m.set(String(p._id), p) }
+    })
+    return m
+  }, [allPfis])
+
+  const isFillingStation = (c: DeliveryCustomer | null | undefined): boolean => {
+    if (!c) return false
+    return c.customerType === 'filling_station'
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Enrich entries into TruckRecord[]
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  const truckRecords = useMemo((): TruckRecord[] => {
+    return allEntries
+      .filter(e => !!(e.truckId || e.truckNumber || e.loadingStatus))
+      .map(entry => {
+        const truck = entry.truckId ? (truckMap.get(entry.truckId) || truckMap.get(Number(entry.truckId)) || truckMap.get(String(entry.truckId))) : null
+        const customer = entry.customerId ? (customerMap.get(entry.customerId) || customerMap.get(Number(entry.customerId)) || customerMap.get(String(entry.customerId))) : null
+        const pfi = entry.pfiId ? pfiMap.get(String(entry.pfiId)) : null
+        const loadingStatus = (entry.loadingStatus || 'loaded') as 'loaded' | 'offloaded'
+
+        return {
+          ...entry,
+          status: loadingStatus,
+          truckPlate: entry.truckNumber || truck?.plateNumber || '—',
+          driverName: truck?.driverName || truck?.driver || '',
+          destination: isFillingStation(customer)
+            ? (customer?.name || entry.customerName || '')
+            : (entry.location || ''),
+          depotDisplay: entry.depot || entry.pfiLocation || pfi?.locationName || '',
+          custName: entry.customerName || customer?.name || '',
+          pfiLabel: entry.pfiNumber || pfi?.pfiNumber || '',
+          product: entry.pfiProduct || pfi?.productName || '',
+          unitLabel: pfi?.productUnit || 'Litres',
+          qty: toNum(entry.quantityAllocated ?? (entry as any).quantity_allocated ?? (entry as any).quantity),
+          code: (entry.allocationCode || (entry as any).allocation_code || '').trim().toUpperCase(),
+          isFillingStation: isFillingStation(customer),
+          notes: entry.notes || '',
+        }
+      })
+  }, [allEntries, truckMap, customerMap, pfiMap])
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Filtering & Sorting
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  const hasDateFilter = !!(dateFrom || dateTo)
+  const hasAnyFilter = !!(searchQuery || hasDateFilter || statusFilter !== 'all' || pfiFilter || customerFilter || truckFilter || codeFilter || customerTypeFilter !== 'all')
+
+  const filtered = useMemo(() => {
+    let list = [...truckRecords]
+
+    if (statusFilter === 'active') list = list.filter(r => r.status === 'loaded')
+    if (statusFilter === 'delivered') list = list.filter(r => r.status === 'offloaded')
+    if (pfiFilter) list = list.filter(r => String(r.pfiId) === pfiFilter)
+    if (customerFilter) list = list.filter(r => String(r.customerId) === customerFilter)
+    if (codeFilter) list = list.filter(r => r.code === codeFilter)
+    if (truckFilter) list = list.filter(r => r.truckPlate === truckFilter)
+    if (customerTypeFilter !== 'all') {
+      list = list.filter(r => customerTypeFilter === 'filling_station' ? r.isFillingStation : !r.isFillingStation)
+    }
+
+    if (dateFrom || dateTo) {
+      list = list.filter(r => {
+        const dateStr = r.dateOffloaded || r.dateAllocated
+        if (!dateStr) return false
+        try {
+          const d = startOfDay(parseISO(dateStr))
+          if (dateFrom && dateTo) return isWithinInterval(d, { start: startOfDay(parseISO(dateFrom)), end: endOfDay(parseISO(dateTo)) })
+          if (dateFrom) return d >= startOfDay(parseISO(dateFrom))
+          if (dateTo) return d <= endOfDay(parseISO(dateTo))
+          return true
+        } catch { return true }
+      })
+    }
+
+    const q = searchQuery.trim().toLowerCase()
+    if (q) {
+      list = list.filter(e =>
+        (e.truckPlate || '').toLowerCase().includes(q) ||
+        (e.driverName || '').toLowerCase().includes(q) ||
+        (e.destination || '').toLowerCase().includes(q) ||
+        (e.depotDisplay || '').toLowerCase().includes(q) ||
+        (e.custName || '').toLowerCase().includes(q) ||
+        (e.code || '').toLowerCase().includes(q) ||
+        (e.pfiLabel || '').toLowerCase().includes(q) ||
+        (e.product || '').toLowerCase().includes(q) ||
+        (e.notes || '').toLowerCase().includes(q)
+      )
+    }
+
+    return list.sort((a, b) => {
+      const dateA = a.dateOffloaded || a.dateAllocated || ''
+      const dateB = b.dateOffloaded || b.dateAllocated || ''
+      return dateB.localeCompare(dateA)
+    })
+  }, [truckRecords, statusFilter, pfiFilter, customerFilter, truckFilter, codeFilter, dateFrom, dateTo, searchQuery, customerTypeFilter])
+
+  // Group filtered records by allocation code
+  const grouped = useMemo((): [string, TruckRecord[]][] => {
+    const map = new Map<string, TruckRecord[]>()
+    filtered.forEach(r => {
+      const key = r.code || ''
+      const arr = map.get(key) ?? []
+      arr.push(r)
+      map.set(key, arr)
+    })
+
+    map.forEach(records => {
+      records.sort((x, y) => {
+        const dateX = x.dateOffloaded || x.dateAllocated || ''
+        const dateY = y.dateOffloaded || y.dateAllocated || ''
+        return dateY.localeCompare(dateX)
+      })
+    })
+
+    return [...map.entries()].sort(([, recordsA], [, recordsB]) => {
+      const maxDateA = recordsA.reduce((max, r) => {
+        const d = r.dateOffloaded || r.dateAllocated || ''
+        return d > max ? d : max
+      }, '')
+      const maxDateB = recordsB.reduce((max, r) => {
+        const d = r.dateOffloaded || r.dateAllocated || ''
+        return d > max ? d : max
+      }, '')
+      return maxDateB.localeCompare(maxDateA)
+    })
+  }, [filtered])
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Derived / Summaries
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  const activeRecords = useMemo(() => truckRecords.filter(r => r.status === 'loaded'), [truckRecords])
+
+  const totals = useMemo(() => {
+    let activeCount = 0, totalInTransit = 0, totalDelivered = 0, deliveredTrips = 0
+    filtered.forEach(r => {
+      if (r.status === 'loaded') { activeCount++; totalInTransit += r.qty }
+      else if (r.status === 'offloaded') { totalDelivered += r.qty; deliveredTrips++ }
+    })
+    return { activeCount, totalInTransit, totalDelivered, deliveredTrips }
+  }, [filtered])
+
+  const loadedTruckPlates = useMemo(() => {
+    const set = new Set<string>()
+    activeRecords.forEach(r => set.add(r.truckPlate))
+    return set
+  }, [activeRecords])
+
+  const availableTrucks = useMemo(
+    () => allTrucks.filter((t: any) => !loadedTruckPlates.has(t.plateNumber)),
+    [allTrucks, loadedTruckPlates]
+  )
+
+  const summaryCards = useMemo((): SummaryCard[] => [
+    {
+      title: 'Trucks in Transit',
+      value: String(totals.activeCount),
+      icon: <Truck size={20} />,
+      tone: totals.activeCount > 0 ? 'amber' : 'neutral',
+    },
+    {
+      title: 'Volume in Transit',
+      value: `${fmtQty(totals.totalInTransit)} Ltrs`,
+      icon: <Droplets size={20} />,
+      tone: totals.totalInTransit > 0 ? 'amber' : 'neutral',
+    },
+    {
+      title: 'Quantity Sold',
+      value: `${fmtQty(totals.totalDelivered)} Ltrs`,
+      icon: <CheckCircle2 size={20} />,
+      tone: 'green',
+    },
+  ], [totals])
+
+  const activePfiOptions = useMemo(() =>
+    allPfis
+      .filter(p => p.status === 'active')
+      .sort((a, b) => a.pfiNumber.localeCompare(b.pfiNumber))
+      .map(p => ({
+        id: String((p as any).id ?? p._id),
+        label: `${p.pfiNumber} — ${p.productName || 'N/A'} · ${p.locationName || 'N/A'}`,
+      })),
+    [allPfis])
+
+  const selectedPfi = useMemo(() => (loadPfi ? pfiMap.get(loadPfi) || null : null), [loadPfi, pfiMap])
+
+  const autoSumCapacity = useMemo(() => {
+    let total = 0
+    selectedTruckIds.forEach(id => {
+      const t = allTrucks.find((t: any) => (t._id || t.id) === id)
+      if (t?.capacity_litres || t?.capacity) total += toNum(t.capacity_litres || t.capacity)
+    })
+    return total
+  }, [selectedTruckIds, allTrucks])
+
+  const trucksWithNoCapacity = useMemo(() => {
+    const result: string[] = []
+    selectedTruckIds.forEach(id => {
+      const t = allTrucks.find((t: any) => (t._id || t.id) === id)
+      if (t && !toNum(t.capacity_litres || t.capacity)) result.push(t.plateNumber)
+    })
+    return result
+  }, [selectedTruckIds, allTrucks])
+
+  const distinctTruckPlates = useMemo(() => {
+    const set = new Set<string>()
+    truckRecords.forEach(r => { if (r.truckPlate && r.truckPlate !== '—') set.add(r.truckPlate) })
+    return [...set].sort()
+  }, [truckRecords])
+
+  const distinctCustomers = useMemo(() => {
+    const map = new Map<string, string>()
+    truckRecords.forEach(r => { if (r.customerId) map.set(String(r.customerId), r.custName) })
+    return [...map.entries()].sort((a, b) => a[1].localeCompare(b[1]))
+  }, [truckRecords])
+
+  const distinctAllocationCodes = useMemo(() => {
+    const codes = new Set<string>()
+    truckRecords.forEach(r => { if (r.code) codes.add(r.code) })
+    const codeOrder = new Map<string, number>()
+    deliveryCodes.forEach((c, i) => codeOrder.set(c, i))
+    return [...codes].sort((a, b) => {
+      const aR = codeOrder.get(a) ?? 10_000
+      const bR = codeOrder.get(b) ?? 10_000
+      return aR !== bR ? aR - bR : a.localeCompare(b)
+    })
+  }, [truckRecords, deliveryCodes])
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Handlers
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  const invalidateAll = useCallback(() => {
+    qc.invalidateQueries({ queryKey: ['delivery-inventory'] })
+    qc.invalidateQueries({ queryKey: ['delivery-sales'] })
+    qc.invalidateQueries({ queryKey: ['pfis'] })
+    qc.invalidateQueries({ queryKey: ['trucks'] })
+  }, [qc])
+
+  const toggleTruck = (truckId: string) => {
+    setSelectedTruckIds(prev => {
+      const next = new Set(prev)
+      next.has(truckId) ? next.delete(truckId) : next.add(truckId)
+      return next
+    })
+  }
+
+  const addNewCode = () => {
+    const normalized = newCodeInput.trim().toUpperCase().replace(/\s+/g, '-')
+    if (!normalized) return
+    if (deliveryCodes.includes(normalized)) {
+      toast.error(`Code "${normalized}" already exists`)
+      return
+    }
+    setDeliveryCodes(prev => [...prev, normalized].sort())
+    setLoadCode(normalized)
+    setNewCodeInput('')
+    setShowNewCodeInput(false)
+    toast.success(`Code "${normalized}" created and selected`)
+  }
+
+  const handleLoadSave = useCallback(async () => {
+    if (selectedTruckIds.size === 0) { toast.error('Select at least one truck'); return }
+    if (!loadPfi) { toast.error('Select a PFI source'); return }
+
+    setSaving(true)
+    try {
+      const depot = loadDepot || selectedPfi?.locationName || ''
+      const normalizedCode = loadCode ? loadCode.trim().toUpperCase().replace(/\s+/g, '-') : null
+      const promises: Promise<any>[] = []
+
+      for (const truckId of selectedTruckIds) {
+        const truckObj = allTrucks.find((t: any) => String(t._id || t.id) === String(truckId))
+        const truckCapacity = toNum(truckObj?.capacity_litres || truckObj?.capacity)
+        promises.push(
+          createInventory.mutateAsync({
+            pfi: loadPfi,
+            pfiId: Number(loadPfi) || undefined,
+            allocation_code: normalizedCode || undefined,
+            allocationCode: normalizedCode || undefined,
+            truck: truckId,
+            truckId: Number(truckId) || undefined,
+            truck_number: truckObj?.plateNumber || '',
+            truckNumber: truckObj?.plateNumber || '',
+            depot: depot || selectedPfi?.locationName || undefined,
+            quantity_allocated: truckCapacity,
+            quantityAllocated: truckCapacity,
+            date_allocated: dateAllocated,
+            dateAllocated: dateAllocated,
+            loading_status: 'loaded',
+            loadingStatus: 'loaded',
+          } as any)
+        )
+      }
+
+      await Promise.all(promises)
+
+      // Update PFI soldQtyLitres
+      if (selectedPfi && autoSumCapacity > 0) {
+        const currentSold = toNum(selectedPfi.soldQtyLitres)
+        await updatePfi.mutateAsync({
+          id: loadPfi,
+          data: { soldQtyLitres: currentSold + autoSumCapacity },
+        })
+      }
+
+      toast.success(`${selectedTruckIds.size} truck${selectedTruckIds.size > 1 ? 's' : ''} allocated${normalizedCode ? ` under ${normalizedCode}` : ''}`)
+      setLoadDialogOpen(false)
+      invalidateAll()
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to save')
+    } finally {
+      setSaving(false)
+    }
+  }, [selectedTruckIds, loadCode, loadPfi, loadDepot, dateAllocated, selectedPfi, allTrucks, autoSumCapacity, invalidateAll])
+
+  const clearAllFilters = () => {
+    setSearchQuery('')
+    setDateFrom('')
+    setDateTo('')
+    setStatusFilter('all')
+    setPfiFilter('')
+    setCustomerFilter('')
+    setTruckFilter('')
+    setCodeFilter('')
+    setCustomerTypeFilter('all')
+  }
+
+  const exportCSV = useCallback(() => {
+    if (!filtered.length) return
+    const headers = ['S/N', 'Code', 'Truck', 'PFI', 'Product', 'Depot', 'Destination', 'Quantity', 'Status', 'Date Loaded', 'Date Sold']
+    const rows = filtered.map((r, idx) => [
+      idx + 1,
+      r.code || '—',
+      r.truckPlate,
+      r.pfiLabel || '—',
+      r.product || '—',
+      r.depotDisplay || '—',
+      r.destination || '—',
+      r.qty,
+      statusBadge[r.status]?.label || r.status,
+      r.dateAllocated ? (() => { try { return format(parseISO(r.dateAllocated), 'dd/MM/yyyy') } catch { return r.dateAllocated } })() : '',
+      r.dateOffloaded ? (() => { try { return format(parseISO(r.dateOffloaded), 'dd/MM/yyyy') } catch { return r.dateOffloaded } })() : '',
+    ])
+    const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n')
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `DELIVERY-OPERATIONS-${format(new Date(), 'dd-MM-yyyy')}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }, [filtered])
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Render
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  const isLoading = isLoadingInventory
+
+  return (
+    <div className="space-y-6 animate-fade-in">
+      {/* Header */}
+      <PageHeader
+        title="Delivery Operations"
+        description="Track truck loading cycles grouped by allocation code. Allocate trucks to PFIs and manage deliveries."
+        actions={
+          <div className="flex gap-2">
+            <Button variant="outline" className="gap-2 cursor-pointer" onClick={exportCSV} disabled={filtered.length === 0}>
+              <Download size={16} /> Export
+            </Button>
+            <Button variant="outline" className="gap-2 cursor-pointer" onClick={() => setManageCodesOpen(true)}>
+              <Settings size={16} /> Manage Codes
+            </Button>
+            <Link to="/delivery-operations/allocate-trucks">
+              <Button className="gap-2 bg-emerald-700 hover:bg-emerald-800 text-white cursor-pointer">
+                <Plus size={16} /> Allocate Trucks
+              </Button>
+            </Link>
+          </div>
+        }
+      />
+
+      {/* Summary Cards */}
+      <SummaryCards cards={summaryCards} />
+
+      {/* Search + Filters Bar */}
+      <div className="bg-white p-4 rounded-xl shadow-sm border border-border space-y-3">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
+            <Input
+              placeholder="Search truck, PFI, product, customer, depot, destination, code…"
+              className="pl-9 h-9 text-sm"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 pt-2 border-t border-border">
+          <div className="flex flex-col gap-1">
+            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Status</label>
+            <select aria-label="Filter by status" value={statusFilter}
+              onChange={e => setStatusFilter(e.target.value as StatusFilter)}
+              className="h-8 rounded-md border border-border bg-white px-2 text-xs">
+              <option value="all">All Statuses</option>
+              <option value="active">In Transit</option>
+              <option value="delivered">Sold</option>
+            </select>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Truck</label>
+            <select aria-label="Filter by truck" value={truckFilter}
+              onChange={e => setTruckFilter(e.target.value)}
+              className="h-8 rounded-md border border-border bg-white px-2 text-xs">
+              <option value="">All Trucks</option>
+              {distinctTruckPlates.map(plate => (
+                <option key={plate} value={plate}>{plate}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Customer</label>
+            <select aria-label="Filter by customer" value={customerFilter}
+              onChange={e => setCustomerFilter(e.target.value)}
+              className="h-8 rounded-md border border-border bg-white px-2 text-xs">
+              <option value="">All Customers</option>
+              {distinctCustomers.map(([id, name]) => (
+                <option key={id} value={id}>{name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Customer Type</label>
+            <select aria-label="Filter by Customer Type" value={customerTypeFilter}
+              onChange={e => setCustomerTypeFilter(e.target.value as any)}
+              className="h-8 rounded-md border border-border bg-white px-2 text-xs">
+              <option value="all">All Types</option>
+              <option value="normal">Normal Only</option>
+              <option value="filling_station">Filling Stations Only</option>
+            </select>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Allocation Code</label>
+            <select aria-label="Filter by allocation code" value={codeFilter}
+              onChange={e => setCodeFilter(e.target.value)}
+              className="h-8 rounded-md border border-border bg-white px-2 text-xs font-medium">
+              <option value="">All Codes</option>
+              {distinctAllocationCodes.map(code => (
+                <option key={code} value={code}>{code}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Active Filter Chips */}
+        {[
+          statusFilter !== 'all' && { label: `Status: ${statusFilter === 'active' ? 'In Transit' : 'Sold'}`, clear: () => setStatusFilter('all') },
+          truckFilter && { label: `Truck: ${truckFilter}`, clear: () => setTruckFilter('') },
+          customerFilter && { label: `Customer: ${distinctCustomers.find(([id]) => id === customerFilter)?.[1] || customerFilter}`, clear: () => setCustomerFilter('') },
+          customerTypeFilter !== 'all' && { label: `Type: ${customerTypeFilter === 'filling_station' ? 'Filling Station' : 'Normal'}`, clear: () => setCustomerTypeFilter('all') },
+          codeFilter && { label: `Code: ${codeFilter}`, clear: () => setCodeFilter('') },
+          searchQuery && { label: `Search: "${searchQuery}"`, clear: () => setSearchQuery('') },
+        ].filter((x): x is { label: string; clear: () => void } => !!x).length > 0 && (
+            <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-border">
+              <span className="text-xs text-muted-foreground shrink-0">Filtering:</span>
+              {[
+                statusFilter !== 'all' && { label: `Status: ${statusFilter === 'active' ? 'In Transit' : 'Sold'}`, clear: () => setStatusFilter('all') },
+                truckFilter && { label: `Truck: ${truckFilter}`, clear: () => setTruckFilter('') },
+                customerFilter && { label: `Customer: ${distinctCustomers.find(([id]) => id === customerFilter)?.[1] || customerFilter}`, clear: () => setCustomerFilter('') },
+                customerTypeFilter !== 'all' && { label: `Type: ${customerTypeFilter === 'filling_station' ? 'Filling Station' : 'Normal'}`, clear: () => setCustomerTypeFilter('all') },
+                codeFilter && { label: `Code: ${codeFilter}`, clear: () => setCodeFilter('') },
+                searchQuery && { label: `Search: "${searchQuery}"`, clear: () => setSearchQuery('') },
+              ].filter((x): x is { label: string; clear: () => void } => !!x).map(chip => (
+                <span key={chip.label} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-foreground text-background">
+                  {chip.label}
+                  <button title={`Remove: ${chip.label}`} onClick={chip.clear} className="hover:text-muted-foreground ml-0.5">
+                    <X size={10} />
+                  </button>
+                </span>
+              ))}
+              <button type="button" onClick={clearAllFilters} className="text-xs text-muted-foreground hover:text-foreground underline ml-1">
+                Clear all
+              </button>
+            </div>
+          )}
+      </div>
+
+      {/* Allocation Cards */}
+      {isLoading ? (
+        <div className="flex items-center justify-center py-24">
+          <Loader2 size={24} className="animate-spin text-muted-foreground" />
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="bg-white rounded-xl shadow-sm border border-border p-16 text-center">
+          <Truck className="mx-auto text-muted-foreground mb-3" size={40} />
+          <p className="text-muted-foreground font-medium">
+            {hasAnyFilter ? 'No records match your filters' : 'No truck records yet'}
+          </p>
+          <p className="text-sm text-muted-foreground/70 mt-1">
+            {hasAnyFilter
+              ? 'Try adjusting your search, filters, or date range.'
+              : 'Click "Allocate Trucks" to start tracking deliveries.'}
+          </p>
+          {hasAnyFilter && (
+            <Button variant="outline" size="sm" className="mt-3 gap-1.5 cursor-pointer" onClick={clearAllFilters}>
+              <X size={13} /> Clear all filters
+            </Button>
+          )}
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {grouped.map(([code, records]) => {
+              const theme = code ? getCodeTheme(code) : null
+              const totalQty = records.reduce((s, r) => s + r.qty, 0)
+              const loadedCount = records.filter(r => r.status === 'loaded').length
+              const soldCount = records.filter(r => r.status === 'offloaded').length
+              const loadedQty = records.filter(r => r.status === 'loaded').reduce((s, r) => s + r.qty, 0)
+              const soldQty = records.filter(r => r.status === 'offloaded').reduce((s, r) => s + r.qty, 0)
+              const unit = records[0]?.unitLabel || 'Litres'
+
+              const distinctPfis = [...new Set(records.map(r => r.pfiLabel).filter(Boolean))]
+              const distinctProducts = [...new Set(records.map(r => r.product).filter(Boolean))]
+              const distinctDepots = [...new Set(records.map(r => r.depotDisplay).filter(Boolean))]
+              const distinctDestinations = [...new Set(records.map(r => r.destination).filter(Boolean))]
+
+              const latestDate = records.reduce((max, r) => {
+                const d = r.dateOffloaded || r.dateAllocated || ''
+                return d > max ? d : max
+              }, '')
+
+              return (
+                <Link
+                  key={code || '__none__'}
+                  to="/delivery-operations/allocation-details"
+                  search={{ code }}
+                  className="block group"
+                >
+                  <div className={cn(
+                    'bg-white rounded-xl shadow-sm border border-border p-5 transition-all cursor-pointer space-y-3',
+                    'hover:shadow-md hover:border-emerald-300 hover:-translate-y-0.5',
+                    theme && `${theme.header}`
+                  )}>
+                    {/* Top: Code + Truck Count */}
+                    <div className="flex items-start justify-between">
+                      {code ? (
+                        <span className={cn('inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border', theme?.badge || 'bg-muted text-muted-foreground border-border')}>
+                          <Tag size={11} /> {code}
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border bg-muted text-muted-foreground border-border">
+                          <Tag size={11} /> No Code
+                        </span>
+                      )}
+                      <span className="flex items-center gap-1.5 text-xs font-bold text-foreground bg-white/90 px-2.5 py-1 rounded-lg border border-border/80 shadow-2xs">
+                        <Truck size={14} className="text-emerald-600" />
+                        {records.length} {records.length === 1 ? 'truck' : 'trucks'}
+                      </span>
+                    </div>
+
+                    {/* Product & Depot */}
+                    {(distinctProducts.length > 0 || distinctDepots.length > 0) && (
+                      <div className="flex items-center justify-between gap-2 text-xs pt-0.5">
+                        {distinctProducts.length > 0 && (
+                          <span className="font-bold text-emerald-800 bg-emerald-100/80 px-2 py-0.5 rounded text-[11px]">
+                            {distinctProducts.join(', ')}
+                          </span>
+                        )}
+                        {distinctDepots.length > 0 && (
+                          <span className="truncate text-muted-foreground font-medium text-[11px]">
+                            📍 {distinctDepots.join(', ')}
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    {/* PFI Reference */}
+                    <div>
+                      <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">PFI Reference</div>
+                      {distinctPfis.length > 0 ? (
+                        <div className="flex flex-wrap gap-1.5">
+                          {distinctPfis.slice(0, 3).map(pfi => (
+                            <span key={pfi} className="text-xs font-semibold text-foreground bg-muted/60 px-2 py-0.5 rounded-md border border-border">
+                              {pfi}
+                            </span>
+                          ))}
+                          {distinctPfis.length > 3 && (
+                            <span className="text-xs text-muted-foreground">+{distinctPfis.length - 3} more</span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
+                    </div>
+
+                    {/* Total Quantity / Volume */}
+                    <div className="flex items-center justify-between bg-slate-50/80 p-2.5 rounded-lg border border-slate-200/70">
+                      <span className="text-xs font-medium text-slate-600">Total Volume</span>
+                      <span className="flex items-center gap-1.5 text-sm font-extrabold text-slate-900">
+                        <Droplets size={14} className="text-violet-600" />
+                        {fmtQty(totalQty)} {unit}
+                      </span>
+                    </div>
+
+                    {/* Status Badges */}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {loadedCount > 0 && (
+                        <span className="text-[11px] font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                          {loadedCount} in transit ({fmtQty(loadedQty)} L)
+                        </span>
+                      )}
+                      {soldCount > 0 && (
+                        <span className="text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                          {soldCount} sold ({fmtQty(soldQty)} L)
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Latest Date & Destination Footer */}
+                    {latestDate && (
+                      <div className="pt-2.5 border-t border-border/60 flex items-center justify-between text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1.5">
+                          <Calendar size={12} />
+                          {(() => { try { return format(parseISO(latestDate), 'dd MMM yyyy') } catch { return latestDate } })()}
+                        </span>
+                        {distinctDestinations.length > 0 && (
+                          <span className="truncate max-w-[140px] text-[11px] text-muted-foreground/80 font-medium" title={distinctDestinations.join(', ')}>
+                            To: {distinctDestinations[0]} {distinctDestinations.length > 1 ? `+${distinctDestinations.length - 1}` : ''}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
+
+          <p className="text-xs text-muted-foreground text-right">
+            {filtered.length} record{filtered.length !== 1 ? 's' : ''} in {grouped.length} allocation{grouped.length !== 1 ? 's' : ''}
+          </p>
+        </>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════════════ */}
+      {/* Dialogs */}
+      <AllocateTrucksDialog
+        open={loadDialogOpen}
+        onOpenChange={setLoadDialogOpen}
+        activePfiOptions={activePfiOptions}
+        selectedPfi={selectedPfi}
+        deliveryCodes={deliveryCodes}
+        availableTrucks={availableTrucks}
+        selectedTruckIds={selectedTruckIds}
+        autoSumCapacity={autoSumCapacity}
+        trucksWithNoCapacity={trucksWithNoCapacity}
+        saving={saving}
+        loadPfi={loadPfi}
+        loadCode={loadCode}
+        dateAllocated={dateAllocated}
+        truckSearch={truckSearch}
+        showNewCodeInput={showNewCodeInput}
+        newCodeInput={newCodeInput}
+        setLoadPfi={setLoadPfi}
+        setLoadCode={setLoadCode}
+        setDateAllocated={setDateAllocated}
+        setTruckSearch={setTruckSearch}
+        setShowNewCodeInput={setShowNewCodeInput}
+        setNewCodeInput={setNewCodeInput}
+        setLoadDepot={setLoadDepot}
+        toggleTruck={toggleTruck}
+        addNewCode={addNewCode}
+        handleLoadSave={handleLoadSave}
+        pfiMap={pfiMap}
+      />
+
+      <ManageCodesDialog
+        open={manageCodesOpen}
+        onOpenChange={setManageCodesOpen}
+        deliveryCodes={deliveryCodes}
+        setDeliveryCodes={setDeliveryCodes}
+        truckRecords={truckRecords}
+        allEntries={allEntries}
+        onRename={async (oldCode, newCode) => {
+          const toUpdate = allEntries.filter(e => (e.allocationCode || '').trim().toUpperCase() === oldCode)
+          await Promise.all(toUpdate.map(e =>
+            updateInventory.mutateAsync({ id: e._id || e.id || '', data: { allocationCode: newCode } as any })
+          ))
+        }}
+        toast={toast}
+      />
+    </div>
+  )
+}

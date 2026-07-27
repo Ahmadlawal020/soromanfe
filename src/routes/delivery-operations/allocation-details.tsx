@@ -1,0 +1,1117 @@
+import { useState, useMemo, useCallback } from 'react'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useQueryClient } from '@tanstack/react-query'
+import { Card, CardHeader, CardTitle, CardContent } from '#/components/ui/card'
+import { Button } from '#/components/ui/button'
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from '#/components/ui/table'
+import {
+  ArrowLeft, Truck, CheckCircle2,
+  Trash2, Loader2, ShieldAlert, FileText,
+  Tag, Pencil, X, Download, Droplets,
+} from 'lucide-react'
+import { format, parseISO } from 'date-fns'
+import { useDeliveryInventoryList, useUpdateDeliveryInventory, useDeleteDeliveryInventory } from '#/lib/hooks/useDeliveryInventory'
+import { useDeliverySalesList, useDeleteDeliverySale } from '#/lib/hooks/useDeliverySales'
+import { usePfiList } from '#/lib/hooks/usePfis'
+import { useTruckList } from '#/lib/hooks/useTrucks'
+import { useDeliveryCustomerList } from '#/lib/hooks/useDeliveryCustomers'
+import { useToast } from '#/lib/hooks/useToast'
+import { cn } from '#/lib/utils'
+import type { DeliveryInventory, DeliverySale, DeliveryCustomer } from '#/lib/types'
+import type { Pfi } from '#/lib/hooks/usePfis'
+
+import { OffloadDialog } from '#/components/delivery-operations/OffloadDialog'
+import { EditRecordDialog } from '#/components/delivery-operations/EditRecordDialog'
+import { DeleteConfirmDialog } from '#/components/delivery-operations/DeleteConfirmDialog'
+import { BulkAssignDialog } from '#/components/delivery-operations/BulkAssignDialog'
+import { BulkDeleteDialog } from '#/components/delivery-operations/BulkDeleteDialog'
+
+export const Route = createFileRoute('/delivery-operations/allocation-details')({
+  validateSearch: (search: Record<string, unknown>) => ({
+    code: (search.code as string) || '',
+  }),
+  component: AllocationDetailsPage,
+})
+
+const toNum = (v: string | number | undefined | null): number => {
+  if (v === undefined || v === null || v === '') return 0
+  const n = Number(String(v).replace(/,/g, ''))
+  return Number.isFinite(n) ? n : 0
+}
+
+const fmtQty = (n: number) => n.toLocaleString(undefined, { maximumFractionDigits: 0 })
+const fmtMoney = (n: number) => `₦${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+
+const CODE_PALETTE = [
+  { header: 'bg-sky-50', row: 'border-l-sky-300', badge: 'bg-sky-100 text-sky-800 border-sky-200' },
+  { header: 'bg-emerald-50', row: 'border-l-emerald-300', badge: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
+  { header: 'bg-orange-50', row: 'border-l-orange-300', badge: 'bg-orange-100 text-orange-800 border-orange-200' },
+  { header: 'bg-violet-50', row: 'border-l-violet-300', badge: 'bg-violet-100 text-violet-800 border-violet-200' },
+  { header: 'bg-pink-50', row: 'border-l-pink-300', badge: 'bg-pink-100 text-pink-800 border-pink-200' },
+  { header: 'bg-amber-50', row: 'border-l-amber-300', badge: 'bg-amber-100 text-amber-800 border-amber-200' },
+  { header: 'bg-teal-50', row: 'border-l-teal-300', badge: 'bg-teal-100 text-teal-800 border-teal-200' },
+  { header: 'bg-indigo-50', row: 'border-l-indigo-300', badge: 'bg-indigo-100 text-indigo-800 border-indigo-200' },
+]
+
+const getCodeTheme = (code: string) => {
+  if (!code) return null
+  let hash = 0
+  for (let i = 0; i < code.length; i++) hash = (hash * 31 + code.charCodeAt(i)) >>> 0
+  return CODE_PALETTE[hash % CODE_PALETTE.length]
+}
+
+const statusBadge: Record<string, { label: string; cls: string; icon: typeof CheckCircle2 }> = {
+  loaded: { label: 'In Transit', cls: 'bg-amber-50 text-amber-700 border-amber-200', icon: Truck },
+  offloaded: { label: 'Sold', cls: 'bg-emerald-50 text-emerald-700 border-emerald-200', icon: CheckCircle2 },
+}
+
+interface TruckRecord extends DeliveryInventory {
+  status: 'loaded' | 'offloaded'
+  truckPlate: string
+  driverName: string
+  destination: string
+  depotDisplay: string
+  custName: string
+  pfiLabel: string
+  product: string
+  unitLabel: string
+  qty: number
+  code: string
+  isFillingStation: boolean
+  notes: string
+}
+
+interface EditTarget {
+  id: string
+  truckPlate: string
+  currentCode: string
+  currentPfi: string
+  currentDepot: string
+  currentDate: string
+  currentLocation: string
+  currentRate: number
+}
+
+interface EditForm {
+  code: string
+  pfi: string
+  depot: string
+  date: string
+  location: string
+  rate: string
+}
+
+function AllocationDetailsPage() {
+  const navigate = useNavigate()
+  const qc = useQueryClient()
+  const toast = useToast()
+  const { code } = Route.useSearch()
+
+  // ── Queries ─────────────────────────────────────────────────────────────
+  const { data: rawInventory = [], isLoading: isLoadingInventory } = useDeliveryInventoryList()
+  const { data: allSales = [] } = useDeliverySalesList()
+  const { data: pfisData } = usePfiList()
+  const { data: trucksData } = useTruckList()
+  const { data: customersData = [] } = useDeliveryCustomerList()
+
+  const allPfis: Pfi[] = useMemo(() => {
+    if (!pfisData) return []
+    return Array.isArray(pfisData) ? pfisData : (pfisData.pfis || pfisData.data || [])
+  }, [pfisData])
+
+  const allTrucks = useMemo(() => {
+    if (!trucksData) return []
+    return Array.isArray(trucksData) ? trucksData : (trucksData.trucks || trucksData.data || [])
+  }, [trucksData])
+
+  const allEntries = useMemo((): DeliveryInventory[] => {
+    if (!rawInventory) return []
+    return Array.isArray(rawInventory) ? rawInventory : []
+  }, [rawInventory])
+
+  const allCustomers: DeliveryCustomer[] = useMemo(() => {
+    if (!customersData) return []
+    return Array.isArray(customersData) ? customersData : (customersData.customers || customersData.data || [])
+  }, [customersData])
+
+  // ── Mutations ───────────────────────────────────────────────────────────
+  const updateInventory = useUpdateDeliveryInventory()
+  const deleteInventory = useDeleteDeliveryInventory()
+  const deleteSale = useDeleteDeliverySale()
+
+  // ── Lookup Maps ─────────────────────────────────────────────────────────
+  const truckMap = useMemo(() => {
+    const m = new Map<string | number, any>()
+    allTrucks.forEach((t: any) => {
+      if (t.id != null) { m.set(t.id, t); m.set(Number(t.id), t); m.set(String(t.id), t) }
+      if (t._id != null) { m.set(t._id, t); m.set(String(t._id), t) }
+    })
+    return m
+  }, [allTrucks])
+
+  const customerMap = useMemo(() => {
+    const m = new Map<string | number, DeliveryCustomer>()
+    allCustomers.forEach(c => {
+      if (c.id != null) { m.set(c.id, c); m.set(Number(c.id), c); m.set(String(c.id), c) }
+      if (c._id != null) { m.set(c._id, c); m.set(String(c._id), c) }
+    })
+    return m
+  }, [allCustomers])
+
+  const pfiMap = useMemo(() => {
+    const m = new Map<string, Pfi>()
+    allPfis.forEach((p: any) => {
+      if (p.id != null) { m.set(String(p.id), p) }
+      if (p._id != null) { m.set(String(p._id), p) }
+    })
+    return m
+  }, [allPfis])
+
+  const isFillingStation = (c: DeliveryCustomer | null | undefined): boolean => {
+    if (!c) return false
+    return c.customerType === 'filling_station'
+  }
+
+  // ── Enrich entries for this allocation code ─────────────────────────────
+  const normalizedCode = (code || '').trim().toUpperCase()
+
+  const truckRecords = useMemo((): TruckRecord[] => {
+    return allEntries
+      .filter(e => {
+        if (!(e.truckId || e.truckNumber || e.loadingStatus)) return false
+        const entryCode = (e.allocationCode || (e as any).allocation_code || '').trim().toUpperCase()
+        if (normalizedCode) return entryCode === normalizedCode
+        return !entryCode
+      })
+      .map(entry => {
+        const truck = entry.truckId ? (truckMap.get(entry.truckId) || truckMap.get(Number(entry.truckId)) || truckMap.get(String(entry.truckId))) : null
+        const customer = entry.customerId ? (customerMap.get(entry.customerId) || customerMap.get(Number(entry.customerId)) || customerMap.get(String(entry.customerId))) : null
+        const pfi = entry.pfiId ? pfiMap.get(String(entry.pfiId)) : null
+        const loadingStatus = (entry.loadingStatus || 'loaded') as 'loaded' | 'offloaded'
+
+        return {
+          ...entry,
+          status: loadingStatus,
+          truckPlate: entry.truckNumber || truck?.plateNumber || '—',
+          driverName: truck?.driverName || truck?.driver || '',
+          destination: isFillingStation(customer)
+            ? (customer?.name || entry.customerName || '')
+            : (entry.location || ''),
+          depotDisplay: entry.depot || entry.pfiLocation || pfi?.locationName || '',
+          custName: entry.customerName || customer?.name || '',
+          pfiLabel: entry.pfiNumber || pfi?.pfiNumber || '',
+          product: entry.pfiProduct || pfi?.productName || '',
+          unitLabel: pfi?.productUnit || 'Litres',
+          qty: toNum(entry.quantityAllocated ?? (entry as any).quantity_allocated ?? (entry as any).quantity),
+          code: (entry.allocationCode || (entry as any).allocation_code || '').trim().toUpperCase(),
+          isFillingStation: isFillingStation(customer),
+          notes: entry.notes || '',
+        }
+      })
+      .sort((a, b) => {
+        const dateA = a.dateOffloaded || a.dateAllocated || ''
+        const dateB = b.dateOffloaded || b.dateAllocated || ''
+        return dateB.localeCompare(dateA)
+      })
+  }, [allEntries, normalizedCode, truckMap, customerMap, pfiMap])
+
+  // ── Match sales to trucks ───────────────────────────────────────────────
+  const truckSalesMap = useMemo(() => {
+    const map = new Map<string, { customerId: string; customerName: string; qty: number; rates: Set<number>; location: string }[]>()
+
+    const salesByTruckDate = new Map<string, DeliverySale[]>()
+    allSales.forEach(sale => {
+      const key = `${(sale.truckNumber || '').toUpperCase()}||${(sale.dateLoaded || '').split('T')[0]}`
+      const arr = salesByTruckDate.get(key) ?? []
+      arr.push(sale)
+      salesByTruckDate.set(key, arr)
+    })
+
+    const matchedSaleIds = new Set<string>()
+
+    truckRecords.forEach(loading => {
+      const truckKey = `${(loading.truckNumber || '').toUpperCase()}||${(loading.dateAllocated || '').split('T')[0]}`
+      const cycleSales = salesByTruckDate.get(truckKey) || []
+      let payments = cycleSales.filter(sale => !matchedSaleIds.has(sale._id || sale.id || ''))
+
+      if (payments.length === 0 && loading.customerId) {
+        payments = cycleSales.filter(sale => !matchedSaleIds.has(sale._id || sale.id || '') && sale.customerId === loading.customerId)
+      }
+
+      payments.forEach(p => matchedSaleIds.add(p._id || p.id || ''))
+
+      const customerGroups: { customerId: string; customerName: string; qty: number; rates: Set<number>; location: string }[] = []
+      payments.forEach(s => {
+        const rate = toNum(s.rate)
+        const sQty = toNum(s.quantity)
+        const sCustId = s.customerId ? String(s.customerId) : ''
+        const custEntry = customerGroups.find(e => e.customerId === sCustId)
+        const customerObj = sCustId ? customerMap.get(sCustId as any) : null
+        const isFS = isFillingStation(customerObj)
+        const sLoc = isFS ? (customerObj?.name || s.customerName || '') : (s.location || '')
+
+        if (custEntry) {
+          if (rate > 0) custEntry.rates.add(rate)
+          if (sQty > custEntry.qty) custEntry.qty = sQty
+          if (sLoc && !custEntry.location) custEntry.location = sLoc
+        } else {
+          customerGroups.push({
+            customerId: sCustId,
+            customerName: s.customerName || '',
+            qty: sQty,
+            rates: rate > 0 ? new Set([rate]) : new Set(),
+            location: sLoc,
+          })
+        }
+      })
+
+      map.set(loading._id || loading.id || '', customerGroups)
+    })
+
+    return map
+  }, [allSales, truckRecords, customerMap])
+
+  // ── All matched sales for this allocation ───────────────────────────────
+  const allocationSales = useMemo((): DeliverySale[] => {
+    if (!normalizedCode) return []
+    return allSales.filter(s => {
+      if (s.allocationCode && s.allocationCode.toUpperCase() === normalizedCode) return true
+      return truckRecords.some(r => {
+        const sTruck = (s.truckNumber || '').toUpperCase()
+        const iTruck = (r.truckPlate || r.truckNumber || '').toUpperCase()
+        const sDate = (s.dateLoaded || '').split('T')[0]
+        const iDate = (r.dateAllocated || '').split('T')[0]
+        return sTruck && iTruck && sTruck === iTruck && sDate === iDate
+      })
+    }).sort((a, b) => (a.dateOfPayment || a.dateLoaded || '').localeCompare(b.dateOfPayment || b.dateLoaded || ''))
+  }, [allSales, normalizedCode, truckRecords])
+
+  // ── Summary Stats ───────────────────────────────────────────────────────
+  const stats = useMemo(() => {
+    let totalQty = 0, loadedCount = 0, loadedQty = 0, soldCount = 0, soldQty = 0
+    truckRecords.forEach(r => {
+      totalQty += r.qty
+      if (r.status === 'loaded') { loadedCount++; loadedQty += r.qty }
+      else { soldCount++; soldQty += r.qty }
+    })
+    return { totalQty, loadedCount, loadedQty, soldCount, soldQty, truckCount: truckRecords.length }
+  }, [truckRecords])
+
+  // ── PFI Breakdown ───────────────────────────────────────────────────────
+  const pfiBreakdown = useMemo(() => {
+    const map = new Map<string, { pfiId: string; pfiNumber: string; product: string; unit: string; qty: number; truckCount: number }>()
+    truckRecords.forEach(r => {
+      const pfiId = r.pfiId ? String(r.pfiId) : ''
+      if (!pfiId) return
+      const existing = map.get(pfiId)
+      if (existing) {
+        existing.qty += r.qty
+        existing.truckCount++
+      } else {
+        map.set(pfiId, {
+          pfiId,
+          pfiNumber: r.pfiLabel || '—',
+          product: r.product || 'N/A',
+          unit: r.unitLabel || 'Litres',
+          qty: r.qty,
+          truckCount: 1,
+        })
+      }
+    })
+    return [...map.values()].sort((a, b) => b.qty - a.qty)
+  }, [truckRecords])
+
+  // ── Sales Summary ───────────────────────────────────────────────────────
+  const salesSummary = useMemo(() => {
+    let totalQty = 0, totalValue = 0, totalPaid = 0, totalExpenses = 0
+    allocationSales.forEach(s => {
+      totalQty += toNum(s.quantity)
+      totalValue += toNum(s.salesValue)
+      totalPaid += toNum(s.paymentAmount)
+      totalExpenses += toNum(s.expensesAmount ?? 0)
+    })
+    if (totalValue === 0 && truckRecords.length > 0) {
+      totalValue = truckRecords.reduce((sum, r) => {
+        const rate = toNum(r.rate)
+        return sum + (rate > 0 ? rate * r.qty : 0)
+      }, 0)
+    }
+    return { totalQty, totalValue, totalPaid, totalExpenses, balance: totalValue - (totalPaid + totalExpenses) }
+  }, [allocationSales, truckRecords])
+
+  // ── Code theme ──────────────────────────────────────────────────────────
+  const theme = normalizedCode ? getCodeTheme(normalizedCode) : null
+
+  // ── Dialog States ───────────────────────────────────────────────────────
+  const [offloadTarget, setOffloadTarget] = useState<TruckRecord | null>(null)
+  const [offloadDate, setOffloadDate] = useState(format(new Date(), 'yyyy-MM-dd'))
+  const [offloading, setOffloading] = useState(false)
+
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; label: string } | null>(null)
+  const [deleting, setDeleting] = useState(false)
+
+  const [editTarget, setEditTarget] = useState<EditTarget | null>(null)
+  const [editForm, setEditForm] = useState<EditForm>({ code: '', pfi: '', depot: '', date: '', location: '', rate: '' })
+  const [editSaving, setEditSaving] = useState(false)
+
+  const [selectedRowIds, setSelectedRowIds] = useState<Set<string>>(new Set())
+  const [bulkAssignOpen, setBulkAssignOpen] = useState(false)
+  const [bulkAssignCode, setBulkAssignCode] = useState('')
+  const [bulkAssignPfi, setBulkAssignPfi] = useState('')
+  const [bulkAssigning, setBulkAssigning] = useState(false)
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false)
+  const [bulkDeleting, setBulkDeleting] = useState(false)
+
+  const [deliveryCodes] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem('dsl_trip_codes') || '[]') } catch { return [] }
+  })
+
+  const allPfiOptions = useMemo(() =>
+    allPfis
+      .sort((a, b) => {
+        if (a.status !== b.status) return a.status === 'active' ? -1 : 1
+        return a.pfiNumber.localeCompare(b.pfiNumber)
+      })
+      .map(p => ({
+        id: String((p as any).id ?? p._id),
+        label: `${p.pfiNumber} — ${p.productName || 'N/A'} · ${p.locationName || 'N/A'}${p.status === 'finished' ? '  (finished)' : ''}`,
+      })),
+    [allPfis])
+
+  // ── Handlers ────────────────────────────────────────────────────────────
+  const invalidateAll = useCallback(() => {
+    qc.invalidateQueries({ queryKey: ['delivery-inventory'] })
+    qc.invalidateQueries({ queryKey: ['delivery-sales'] })
+    qc.invalidateQueries({ queryKey: ['pfis'] })
+    qc.invalidateQueries({ queryKey: ['trucks'] })
+  }, [qc])
+
+  const handleOffload = useCallback(async () => {
+    if (!offloadTarget) return
+    setOffloading(true)
+    try {
+      await updateInventory.mutateAsync({
+        id: offloadTarget._id || offloadTarget.id || '',
+        data: { loadingStatus: 'offloaded', dateOffloaded: offloadDate },
+      })
+      toast.success(`${offloadTarget.truckPlate} confirmed as sold`)
+      setOffloadTarget(null)
+      invalidateAll()
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to update')
+    } finally {
+      setOffloading(false)
+    }
+  }, [offloadTarget, offloadDate, invalidateAll])
+
+  const handleDelete = useCallback(async () => {
+    if (!deleteTarget) return
+    setDeleting(true)
+    try {
+      const targetRecord = truckRecords.find(r => (r._id || r.id) === deleteTarget.id)
+      if (targetRecord) {
+        const matchedSales = allSales.filter(s => {
+          if (s.allocationCode && targetRecord.code && s.allocationCode.toUpperCase() === targetRecord.code) return true
+          const sTruck = s.truckNumber || ''
+          const iTruck = targetRecord.truckPlate || targetRecord.truckNumber || ''
+          const sDate = s.dateLoaded || ''
+          const iDate = targetRecord.dateAllocated || ''
+          return sTruck && iTruck && sTruck === iTruck && sDate === iDate
+        })
+        if (matchedSales.length > 0) {
+          await Promise.all(matchedSales.map(sale => deleteSale.mutateAsync(sale._id || sale.id || '')))
+        }
+      }
+      await deleteInventory.mutateAsync(deleteTarget.id)
+      toast.success('Record deleted')
+      setDeleteTarget(null)
+      invalidateAll()
+    } catch (err: any) {
+      toast.error(err?.message || 'Delete failed')
+    } finally {
+      setDeleting(false)
+    }
+  }, [deleteTarget, truckRecords, allSales, invalidateAll])
+
+  const openEditDialog = (r: TruckRecord) => {
+    setEditTarget({
+      id: r._id || r.id || '',
+      truckPlate: r.truckPlate,
+      currentCode: r.code,
+      currentPfi: r.pfiId ? String(r.pfiId) : '',
+      currentDepot: r.depotDisplay,
+      currentDate: r.dateAllocated || '',
+      currentLocation: r.destination,
+      currentRate: toNum(r.rate),
+    })
+    setEditForm({
+      code: r.code,
+      pfi: r.pfiId ? String(r.pfiId) : '',
+      depot: r.depotDisplay,
+      date: r.dateAllocated || '',
+      location: r.destination,
+      rate: toNum(r.rate) > 0 ? String(toNum(r.rate)) : '',
+    })
+  }
+
+  const handleEditSave = useCallback(async () => {
+    if (!editTarget) return
+    setEditSaving(true)
+    try {
+      const normalizedEditCode = editForm.code.trim().toUpperCase().replace(/\s+/g, '-')
+      await updateInventory.mutateAsync({
+        id: editTarget.id,
+        data: {
+          allocationCode: normalizedEditCode || null,
+          pfiId: editForm.pfi ? Number(editForm.pfi) : null,
+          depot: editForm.depot.trim() || undefined,
+          dateAllocated: editForm.date || undefined,
+          location: editForm.location.trim() || undefined,
+          rate: editForm.rate ? Number(editForm.rate) : undefined,
+        } as any,
+      })
+      toast.success('Record updated')
+      setEditTarget(null)
+      invalidateAll()
+    } catch (err: any) {
+      toast.error(err?.message || 'Update failed')
+    } finally {
+      setEditSaving(false)
+    }
+  }, [editTarget, editForm, invalidateAll])
+
+  const handleBulkAssign = useCallback(async () => {
+    if (selectedRowIds.size === 0) return
+    const isClearCode = bulkAssignCode === '__CLEAR__'
+    if (!bulkAssignCode && !bulkAssignPfi) { toast.error('Select a code and/or PFI to assign'); return }
+    setBulkAssigning(true)
+    try {
+      const patch: Record<string, unknown> = {}
+      if (isClearCode) patch.allocationCode = null
+      else if (bulkAssignCode) patch.allocationCode = bulkAssignCode
+      if (bulkAssignPfi) patch.pfiId = Number(bulkAssignPfi)
+      await Promise.all([...selectedRowIds].map(id =>
+        updateInventory.mutateAsync({ id, data: patch as any })
+      ))
+      toast.success(`Updated ${selectedRowIds.size} record${selectedRowIds.size !== 1 ? 's' : ''}`)
+      setSelectedRowIds(new Set())
+      setBulkAssignOpen(false)
+      invalidateAll()
+    } catch (err: any) {
+      toast.error(err?.message || 'Bulk update failed')
+    } finally {
+      setBulkAssigning(false)
+    }
+  }, [selectedRowIds, bulkAssignCode, bulkAssignPfi, invalidateAll])
+
+  const handleBulkDelete = useCallback(async () => {
+    if (selectedRowIds.size === 0) return
+    setBulkDeleting(true)
+    try {
+      const targetRecords = truckRecords.filter(r => selectedRowIds.has(r._id || r.id || ''))
+      const matchedSales = allSales.filter(s => {
+        return targetRecords.some(targetRecord => {
+          if (s.allocationCode && targetRecord.code && s.allocationCode.toUpperCase() === targetRecord.code) return true
+          const sTruck = s.truckNumber || ''
+          const iTruck = targetRecord.truckPlate || targetRecord.truckNumber || ''
+          const sDate = s.dateLoaded || ''
+          const iDate = targetRecord.dateAllocated || ''
+          return sTruck && iTruck && sTruck === iTruck && sDate === iDate
+        })
+      })
+      if (matchedSales.length > 0) {
+        await Promise.all(matchedSales.map(sale => deleteSale.mutateAsync(sale._id || sale.id || '')))
+      }
+      await Promise.all([...selectedRowIds].map(id => deleteInventory.mutateAsync(id)))
+      toast.success(`Deleted ${selectedRowIds.size} record${selectedRowIds.size !== 1 ? 's' : ''}`)
+      setSelectedRowIds(new Set())
+      setBulkDeleteOpen(false)
+      invalidateAll()
+    } catch (err: any) {
+      toast.error(err?.message || 'Bulk delete failed')
+    } finally {
+      setBulkDeleting(false)
+    }
+  }, [selectedRowIds, truckRecords, allSales, invalidateAll])
+
+  const exportCSV = useCallback(() => {
+    if (!truckRecords.length) return
+    const headers = ['S/N', 'Truck', 'PFI', 'Product', 'Depot', 'Destination', 'Quantity', 'Status', 'Date Loaded', 'Date Sold']
+    const rows = truckRecords.map((r, idx) => [
+      idx + 1,
+      r.truckPlate,
+      r.pfiLabel || '—',
+      r.product || '—',
+      r.depotDisplay || '—',
+      r.destination || '—',
+      r.qty,
+      statusBadge[r.status]?.label || r.status,
+      r.dateAllocated ? (() => { try { return format(parseISO(r.dateAllocated), 'dd/MM/yyyy') } catch { return r.dateAllocated } })() : '',
+      r.dateOffloaded ? (() => { try { return format(parseISO(r.dateOffloaded), 'dd/MM/yyyy') } catch { return r.dateOffloaded } })() : '',
+    ])
+    const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n')
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `ALLOCATION-${normalizedCode || 'UNCODED'}-${format(new Date(), 'dd-MM-yyyy')}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }, [truckRecords, normalizedCode])
+
+  // ── Loading / Not Found ─────────────────────────────────────────────────
+  const isLoading = isLoadingInventory
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-16">
+        <Loader2 size={28} className="animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
+  if (truckRecords.length === 0) {
+    return (
+      <div className="p-8 text-center max-w-md mx-auto my-12 bg-card rounded-2xl border border-border">
+        <ShieldAlert size={40} className="mx-auto text-muted-foreground mb-4" />
+        <h3 className="font-semibold text-lg">Allocation Not Found</h3>
+        <p className="text-sm text-muted-foreground mt-1">
+          No truck records found for allocation <strong>{normalizedCode || '(no code)'}</strong>.
+        </p>
+        <Button onClick={() => navigate({ to: '/delivery-operations' })} className="mt-4 cursor-pointer">
+          Back to Delivery Operations
+        </Button>
+      </div>
+    )
+  }
+
+  // ── Render ──────────────────────────────────────────────────────────────
+  const soldPercent = stats.totalQty > 0 ? Math.round((stats.soldQty / stats.totalQty) * 100) : 0
+  const loadedPercent = stats.totalQty > 0 ? Math.round((stats.loadedQty / stats.totalQty) * 100) : 0
+
+  return (
+    <div className="space-y-6 pb-12 animate-fade-in">
+      {/* Top Header & Breadcrumb */}
+      <div className="bg-white p-5 rounded-2xl border border-border/80 shadow-xs space-y-3">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 w-9 p-0 rounded-xl cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              onClick={() => navigate({ to: '/delivery-operations' })}
+              title="Back to Delivery Operations"
+            >
+              <ArrowLeft size={16} />
+            </Button>
+            <div>
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <h1 className="text-2xl font-extrabold tracking-tight text-foreground font-mono">
+                  {normalizedCode || 'Unassigned Allocation'}
+                </h1>
+                {normalizedCode && theme && (
+                  <span className={cn('inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border shadow-2xs', theme.badge)}>
+                    <Tag size={12} /> {normalizedCode}
+                  </span>
+                )}
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  {soldPercent}% Sold
+                </span>
+              </div>
+              <p className="text-muted-foreground text-xs mt-1 flex items-center gap-2">
+                <span>{stats.truckCount} {stats.truckCount === 1 ? 'truck' : 'trucks'} allocated</span>
+                <span>•</span>
+                <span>{pfiBreakdown.length} {pfiBreakdown.length === 1 ? 'PFI' : 'PFIs'} attached</span>
+                <span>•</span>
+                <span>{fmtQty(stats.totalQty)} Litres Total</span>
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              className="gap-2 cursor-pointer h-9 text-xs font-semibold hover:border-slate-300"
+              onClick={exportCSV}
+              disabled={truckRecords.length === 0}
+            >
+              <Download size={14} /> Export CSV
+            </Button>
+          </div>
+        </div>
+
+        {/* Global Progress Bar */}
+        <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden flex">
+          <div
+            className="bg-emerald-500 h-full transition-all duration-500"
+            style={{ width: `${soldPercent}%` }}
+            title={`${soldPercent}% Sold`}
+          />
+          <div
+            className="bg-amber-400 h-full transition-all duration-500"
+            style={{ width: `${loadedPercent}%` }}
+            title={`${loadedPercent}% In Transit`}
+          />
+        </div>
+      </div>
+
+      {/* Summary Stat Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Total Trucks */}
+        <div className="bg-white p-4 rounded-xl border border-border/80 shadow-xs flex items-center justify-between transition-all hover:shadow-md">
+          <div>
+            <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Allocated Fleet</span>
+            <div className="text-2xl font-extrabold text-slate-900 mt-0.5">{stats.truckCount}</div>
+            <span className="text-[11px] text-muted-foreground">Vehicles in dispatch</span>
+          </div>
+          <div className="p-3 rounded-2xl bg-blue-50 text-blue-600 border border-blue-100">
+            <Truck size={22} />
+          </div>
+        </div>
+
+        {/* Total Volume */}
+        <div className="bg-white p-4 rounded-xl border border-border/80 shadow-xs flex items-center justify-between transition-all hover:shadow-md">
+          <div>
+            <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Total Volume</span>
+            <div className="text-2xl font-extrabold text-slate-900 mt-0.5">
+              {fmtQty(stats.totalQty)} <span className="text-xs font-semibold text-slate-500">{truckRecords[0]?.unitLabel || 'Ltrs'}</span>
+            </div>
+            <span className="text-[11px] text-muted-foreground">Combined capacity</span>
+          </div>
+          <div className="p-3 rounded-2xl bg-violet-50 text-violet-600 border border-violet-100">
+            <Droplets size={22} />
+          </div>
+        </div>
+
+        {/* In Transit */}
+        <div className="bg-white p-4 rounded-xl border border-border/80 shadow-xs flex items-center justify-between transition-all hover:shadow-md">
+          <div>
+            <span className="text-[11px] font-semibold text-amber-700 uppercase tracking-wider">In Transit</span>
+            <div className="text-2xl font-extrabold text-amber-600 mt-0.5">
+              {stats.loadedCount} <span className="text-xs font-normal text-slate-500">({fmtQty(stats.loadedQty)} L)</span>
+            </div>
+            <span className="text-[11px] text-amber-600/80 font-medium">{loadedPercent}% of allocation</span>
+          </div>
+          <div className="p-3 rounded-2xl bg-amber-50 text-amber-600 border border-amber-100">
+            <Truck size={22} />
+          </div>
+        </div>
+
+        {/* Sold */}
+        <div className="bg-white p-4 rounded-xl border border-border/80 shadow-xs flex items-center justify-between transition-all hover:shadow-md">
+          <div>
+            <span className="text-[11px] font-semibold text-emerald-700 uppercase tracking-wider">Quantity Sold</span>
+            <div className="text-2xl font-extrabold text-emerald-600 mt-0.5">
+              {stats.soldCount} <span className="text-xs font-normal text-slate-500">({fmtQty(stats.soldQty)} L)</span>
+            </div>
+            <span className="text-[11px] text-emerald-600/80 font-medium">{soldPercent}% completed</span>
+          </div>
+          <div className="p-3 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100">
+            <CheckCircle2 size={22} />
+          </div>
+        </div>
+      </div>
+
+      {/* PFI Breakdown & Financial Summary Row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* PFI Breakdown */}
+        <Card className="border border-border/80 shadow-xs">
+          <CardHeader className="bg-slate-50/50 border-b border-border/70 py-3 px-4">
+            <CardTitle className="flex items-center gap-2 text-sm font-bold text-slate-900">
+              <FileText size={16} className="text-emerald-600" /> PFI Breakdown
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {pfiBreakdown.map(p => {
+                const pfiPercent = stats.totalQty > 0 ? Math.round((p.qty / stats.totalQty) * 100) : 0
+                return (
+                  <div key={p.pfiId} className="p-3 rounded-xl border border-border/70 bg-slate-50/40 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="font-extrabold text-xs text-slate-900 font-mono">{p.pfiNumber}</span>
+                      <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">
+                        {pfiPercent}% of allocation
+                      </span>
+                    </div>
+                    <div className="text-xs text-muted-foreground font-medium">{p.product}</div>
+
+                    <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                      <div className="bg-emerald-600 h-full rounded-full" style={{ width: `${pfiPercent}%` }} />
+                    </div>
+
+                    <div className="flex justify-between items-center text-xs pt-1">
+                      <span className="text-slate-500 font-medium">{p.truckCount} {p.truckCount === 1 ? 'truck' : 'trucks'}</span>
+                      <span className="font-bold text-slate-900">{fmtQty(p.qty)} {p.unit}</span>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Financial Summary */}
+        <Card className="border border-border/80 shadow-xs">
+          <CardHeader className="bg-slate-50/50 border-b border-border/70 py-3 px-4">
+            <CardTitle className="flex items-center justify-between text-sm font-bold text-slate-900">
+              <span className="flex items-center gap-2">
+                <FileText size={16} className="text-emerald-600" /> Financial Summary
+              </span>
+              {salesSummary.balance === 0 && (
+                <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full border border-emerald-200">
+                  ✓ Settled
+                </span>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 grid grid-cols-2 gap-x-6 gap-y-2 text-xs">
+            <div className="flex justify-between py-1.5 border-b border-border/60 col-span-1">
+              <span className="text-slate-600 font-medium">Volume Sold</span>
+              <span className="font-bold text-slate-900">{salesSummary.totalQty > 0 ? `${fmtQty(salesSummary.totalQty)} L` : '—'}</span>
+            </div>
+            <div className="flex justify-between py-1.5 border-b border-border/60 col-span-1">
+              <span className="text-slate-600 font-medium">Expected Revenue</span>
+              <span className="font-bold text-slate-900">{salesSummary.totalValue > 0 ? fmtMoney(salesSummary.totalValue) : '—'}</span>
+            </div>
+            <div className="flex justify-between py-1.5 border-b border-border/60 col-span-1">
+              <span className="text-slate-600 font-medium">Total Deposits</span>
+              <span className="font-bold text-emerald-700">{salesSummary.totalPaid > 0 ? fmtMoney(salesSummary.totalPaid) : '—'}</span>
+            </div>
+            <div className="flex justify-between py-1.5 border-b border-border/60 col-span-1">
+              <span className="text-slate-600 font-medium">Expenses</span>
+              <span className="font-bold text-amber-700">{salesSummary.totalExpenses > 0 ? fmtMoney(salesSummary.totalExpenses) : '—'}</span>
+            </div>
+            <div className="flex justify-between items-center py-2 pt-2 col-span-2 bg-slate-50 p-2.5 rounded-lg border border-slate-200/70">
+              <span className="text-slate-800 font-bold">Outstanding Balance</span>
+              <span className={cn(
+                'font-black text-sm',
+                salesSummary.balance === 0 ? 'text-emerald-600' : salesSummary.balance > 0 ? 'text-red-600' : 'text-blue-600'
+              )}>
+                {salesSummary.balance === 0 ? '✓ ₦0.00' : salesSummary.balance > 0 ? fmtMoney(salesSummary.balance) : `+${fmtMoney(Math.abs(salesSummary.balance))}`}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* FULL-WIDTH TRUCK RECORDS SECTION */}
+      <div className="w-full space-y-4">
+        {/* Bulk Selection Floating Toolbar */}
+        {selectedRowIds.size > 0 && (
+          <div className="flex items-center gap-3 px-4 py-3 bg-slate-900 text-white rounded-xl shadow-xl border border-slate-800 animate-in fade-in slide-in-from-top-2 duration-200">
+            <span className="text-xs font-extrabold bg-emerald-500 text-slate-950 px-2 py-0.5 rounded-md">
+              {selectedRowIds.size}
+            </span>
+            <span className="text-xs font-medium text-slate-300">
+              truck record{selectedRowIds.size !== 1 ? 's' : ''} selected
+            </span>
+            <div className="flex-1" />
+            <Button
+              size="sm"
+              className="h-8 text-xs gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold cursor-pointer"
+              onClick={() => { setBulkAssignCode(''); setBulkAssignPfi(''); setBulkAssignOpen(true) }}
+            >
+              <Tag size={13} /> Assign PFI
+            </Button>
+            <Button
+              size="sm"
+              className="h-8 text-xs gap-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 font-bold cursor-pointer"
+              onClick={() => setBulkDeleteOpen(true)}
+            >
+              <Trash2 size={13} /> Delete Selected
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-8 text-xs gap-1 text-slate-400 hover:text-white hover:bg-slate-800 cursor-pointer"
+              onClick={() => setSelectedRowIds(new Set())}
+            >
+              <X size={13} /> Clear
+            </Button>
+          </div>
+        )}
+
+        {/* Trucks Table Card (FULL WIDTH) */}
+        <Card className="w-full overflow-hidden border border-border/80 shadow-xs">
+          <CardHeader className="bg-slate-50/50 border-b border-border/70 py-3.5 px-5">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-base font-bold text-slate-900">
+                <Truck size={18} className="text-emerald-600" />
+                Truck Records ({truckRecords.length})
+              </CardTitle>
+              <span className="text-xs text-muted-foreground font-medium">
+                {stats.loadedCount} in transit · {stats.soldCount} sold
+              </span>
+            </div>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto w-full">
+              <Table className="w-full text-sm">
+                <TableHeader>
+                  <TableRow className="bg-slate-100/60 border-b border-border text-slate-600">
+                    <TableHead className="w-[40px] text-center">
+                      <input
+                        type="checkbox"
+                        aria-label="Select all visible rows"
+                        className="h-4 w-4 rounded border-slate-300 accent-emerald-600 cursor-pointer"
+                        checked={truckRecords.length > 0 && truckRecords.every(r => selectedRowIds.has(r._id || r.id || ''))}
+                        onChange={e => {
+                          if (e.target.checked) setSelectedRowIds(new Set(truckRecords.map(r => r._id || r.id || '')))
+                          else setSelectedRowIds(new Set())
+                        }}
+                      />
+                    </TableHead>
+                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-slate-500 w-[35px] text-center">#</TableHead>
+                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-slate-500 min-w-[110px]">Truck</TableHead>
+                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-slate-500 min-w-[100px]">Quantity</TableHead>
+                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-slate-500 min-w-[100px]">Depot</TableHead>
+                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-slate-500 min-w-[90px]">Product</TableHead>
+                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-slate-500 min-w-[130px]">Customer</TableHead>
+                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-slate-500 min-w-[90px]">Rate(s)</TableHead>
+                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-slate-500 min-w-[120px]">Destination</TableHead>
+                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-slate-500 min-w-[95px]">Status</TableHead>
+                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-slate-500 min-w-[90px]">Date Loaded</TableHead>
+                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-slate-500 min-w-[90px]">Date Sold</TableHead>
+                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-slate-500 min-w-[160px] text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {truckRecords.map((r, idx) => {
+                    const badge = statusBadge[r.status]
+                    const Icon = badge?.icon
+                    const salesEntries = truckSalesMap.get(r._id || r.id || '')
+                    const recordId = r._id || r.id || ''
+
+                    return (
+                      <TableRow
+                        key={recordId}
+                        className={cn(
+                          'hover:bg-slate-50/80 transition-colors border-l-[3px] text-xs',
+                          selectedRowIds.has(recordId) ? 'bg-emerald-50/50 border-l-emerald-500' : (theme ? theme.row : 'border-l-transparent')
+                        )}
+                      >
+                        <TableCell className="text-center">
+                          <input
+                            type="checkbox"
+                            checked={selectedRowIds.has(recordId)}
+                            onChange={e => {
+                              setSelectedRowIds(prev => {
+                                const next = new Set(prev)
+                                e.target.checked ? next.add(recordId) : next.delete(recordId)
+                                return next
+                              })
+                            }}
+                            className="h-4 w-4 rounded border-slate-300 accent-emerald-600 cursor-pointer"
+                          />
+                        </TableCell>
+                        <TableCell className="text-muted-foreground text-center font-medium">{idx + 1}</TableCell>
+
+                        {/* Truck Plate */}
+                        <TableCell>
+                          <div className="flex flex-col gap-0.5">
+                            <span className="font-bold text-xs text-slate-900 font-mono flex items-center gap-1">
+                              <Truck size={12} className="text-emerald-600 shrink-0" />
+                              {r.truckPlate}
+                            </span>
+                            {salesEntries && salesEntries.length > 1 && (
+                              <span className="inline-flex self-start items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                Split Load
+                              </span>
+                            )}
+                          </div>
+                        </TableCell>
+
+                        {/* Quantity */}
+                        <TableCell className="font-extrabold text-slate-900">
+                          {r.qty > 0 ? `${fmtQty(r.qty)} ${r.unitLabel}` : '—'}
+                        </TableCell>
+
+                        {/* Depot */}
+                        <TableCell className="text-slate-700 font-medium">{r.depotDisplay || '—'}</TableCell>
+
+                        {/* Product */}
+                        <TableCell>
+                          {r.product ? (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-800 border border-slate-200">
+                              {r.product}
+                            </span>
+                          ) : <span className="text-muted-foreground">—</span>}
+                        </TableCell>
+
+                        {/* Customer */}
+                        <TableCell>
+                          {salesEntries && salesEntries.length > 0 ? (
+                            <div className="flex flex-col gap-1 py-0.5">
+                              {salesEntries.map(e => (
+                                <div key={e.customerId || 'none'} className="flex items-center gap-1.5">
+                                  <span className="text-xs text-slate-900 font-medium capitalize truncate">
+                                    {e.customerName || `Cust #${e.customerId}`}
+                                  </span>
+                                  {e.qty > 0 && (
+                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">
+                                      {fmtQty(e.qty)}L
+                                    </span>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          ) : r.custName ? (
+                            <span className="text-xs text-slate-900 font-medium capitalize truncate">{r.custName}</span>
+                          ) : <span className="text-muted-foreground">—</span>}
+                        </TableCell>
+
+                        {/* Rates */}
+                        <TableCell>
+                          {salesEntries && salesEntries.length > 0 ? (
+                            <div className="flex flex-col gap-1 py-0.5">
+                              {salesEntries.map((e, i) => (
+                                <div key={e.customerId || i} className="flex items-center">
+                                  <span className="text-xs text-slate-900 font-medium font-mono">
+                                    {e.rates.size > 0
+                                      ? [...e.rates].map(rate => `₦${rate.toLocaleString()}`).join(', ')
+                                      : '—'}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          ) : toNum(r.rate) > 0 ? (
+                            <span className="text-xs text-slate-900 font-medium font-mono">
+                              ₦{toNum(r.rate).toLocaleString()}
+                            </span>
+                          ) : <span className="text-muted-foreground">—</span>}
+                        </TableCell>
+
+                        {/* Destination */}
+                        <TableCell>
+                          {salesEntries && salesEntries.length > 0 ? (
+                            <div className="flex flex-col gap-1 py-0.5">
+                              {salesEntries.map((e, i) => {
+                                const customerObj = e.customerId ? customerMap.get(Number(e.customerId)) : null
+                                const isFS = isFillingStation(customerObj)
+                                const destDisplay = isFS ? (customerObj?.name || e.customerName || '') : (e.location || r.destination || '—')
+                                return (
+                                  <span key={e.customerId || i} className="text-xs text-slate-700 capitalize truncate">
+                                    {destDisplay || '—'}
+                                  </span>
+                                )
+                              })}
+                            </div>
+                          ) : <span className="text-xs text-slate-700 capitalize truncate">{r.destination || '—'}</span>}
+                        </TableCell>
+
+                        {/* Status Badge */}
+                        <TableCell>
+                          {badge && Icon ? (
+                            <span className={cn('inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold border', badge.cls)}>
+                              <Icon size={11} /> {badge.label}
+                            </span>
+                          ) : '—'}
+                        </TableCell>
+
+                        {/* Date Loaded */}
+                        <TableCell className="whitespace-nowrap text-slate-700 text-xs font-medium">
+                          {r.dateAllocated ? (() => { try { return format(parseISO(r.dateAllocated), 'dd MMM yyyy') } catch { return r.dateAllocated } })() : '—'}
+                        </TableCell>
+
+                        {/* Date Sold */}
+                        <TableCell className="whitespace-nowrap text-slate-700 text-xs font-medium">
+                          {r.dateOffloaded ? (() => { try { return format(parseISO(r.dateOffloaded), 'dd MMM yyyy') } catch { return r.dateOffloaded } })() : '—'}
+                        </TableCell>
+
+                        {/* Actions */}
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            {r.status === 'loaded' && (
+                              <Button
+                                size="sm"
+                                className="h-7 text-[11px] gap-1 bg-emerald-700 hover:bg-emerald-800 text-white px-2.5 cursor-pointer font-semibold shadow-2xs"
+                                onClick={() => { setOffloadTarget(r); setOffloadDate(format(new Date(), 'yyyy-MM-dd')) }}
+                              >
+                                <CheckCircle2 size={11} /> Sold
+                              </Button>
+                            )}
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-7 text-[11px] gap-1 px-2 cursor-pointer hover:bg-slate-100"
+                              onClick={() => openEditDialog(r)}
+                            >
+                              <Pencil size={11} /> Edit
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-7 w-7 p-0 text-slate-400 hover:text-red-600 hover:bg-red-50 cursor-pointer"
+                              title="Delete record"
+                              onClick={() => setDeleteTarget({ id: recordId, label: `${r.truckPlate}${r.code ? ` (${r.code})` : ''}` })}
+                            >
+                              <Trash2 size={12} />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Dialogs */}
+      <OffloadDialog
+        target={offloadTarget}
+        date={offloadDate}
+        setDate={setOffloadDate}
+        onClose={() => setOffloadTarget(null)}
+        onConfirm={handleOffload}
+        loading={offloading}
+      />
+
+      <EditRecordDialog
+        target={editTarget}
+        form={editForm}
+        setForm={setEditForm}
+        deliveryCodes={deliveryCodes}
+        allPfiOptions={allPfiOptions}
+        pfiMap={pfiMap}
+        onClose={() => setEditTarget(null)}
+        onSave={handleEditSave}
+        loading={editSaving}
+      />
+
+      <DeleteConfirmDialog
+        target={deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDelete}
+        loading={deleting}
+      />
+
+      <BulkDeleteDialog
+        open={bulkDeleteOpen}
+        count={selectedRowIds.size}
+        onClose={() => setBulkDeleteOpen(false)}
+        onConfirm={handleBulkDelete}
+        loading={bulkDeleting}
+      />
+
+      <BulkAssignDialog
+        open={bulkAssignOpen}
+        count={selectedRowIds.size}
+        deliveryCodes={deliveryCodes}
+        allPfiOptions={allPfiOptions}
+        allPfis={allPfis}
+        bulkAssignCode={bulkAssignCode}
+        bulkAssignPfi={bulkAssignPfi}
+        setBulkAssignCode={setBulkAssignCode}
+        setBulkAssignPfi={setBulkAssignPfi}
+        onClose={() => setBulkAssignOpen(false)}
+        onConfirm={handleBulkAssign}
+        loading={bulkAssigning}
+      />
+    </div>
+  )
+}

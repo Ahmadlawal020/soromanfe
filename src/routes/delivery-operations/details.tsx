@@ -1,0 +1,488 @@
+import { useState, useMemo } from 'react'
+import { createFileRoute, useNavigate, useRouterState } from '@tanstack/react-router'
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '#/components/ui/card'
+import { Button } from '#/components/ui/button'
+import { Badge } from '#/components/ui/badge'
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from '#/components/ui/table'
+import {
+  ArrowLeft, Truck, Package, MapPin, Calendar, CheckCircle2,
+  Trash2, Loader2, ShieldAlert, FileText, Building2, DollarSign,
+} from 'lucide-react'
+import { format, parseISO } from 'date-fns'
+import { useDeliveryInventoryList, useDeleteDeliveryInventory } from '#/lib/hooks/useDeliveryInventory'
+import { useDeliverySalesList } from '#/lib/hooks/useDeliverySales'
+import { usePfiList } from '#/lib/hooks/usePfis'
+import { useTruckList } from '#/lib/hooks/useTrucks'
+import { useToast } from '#/lib/hooks/useToast'
+import type { DeliveryInventory, DeliverySale } from '#/lib/types'
+import type { Pfi } from '#/lib/hooks/usePfis'
+
+export const Route = createFileRoute('/delivery-operations/details')({
+  validateSearch: (search: Record<string, unknown>) => ({
+    inventoryId: (search.inventoryId as string) || '',
+  }),
+  component: DeliveryOperationDetailsView,
+})
+
+const toNum = (v: string | number | undefined | null): number => {
+  if (v === undefined || v === null || v === '') return 0
+  const n = Number(String(v).replace(/,/g, ''))
+  return Number.isFinite(n) ? n : 0
+}
+
+const fmtQty = (n: number) => n.toLocaleString(undefined, { maximumFractionDigits: 0 })
+const fmtMoney = (n: number) => `₦${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+
+const statusBadge: Record<string, { label: string; cls: string; icon: typeof CheckCircle2 }> = {
+  loaded: { label: 'In Transit', cls: 'bg-amber-50 text-amber-700 border-amber-200', icon: Truck },
+  offloaded: { label: 'Sold', cls: 'bg-emerald-50 text-emerald-700 border-emerald-200', icon: CheckCircle2 },
+}
+
+function DeliveryOperationDetailsView() {
+  const navigate = useNavigate()
+  const routerState = useRouterState()
+  const searchParams = Route.useSearch()
+  const state = (routerState.location.state || {}) as { inventoryItem?: DeliveryInventory }
+  const toast = useToast()
+
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const deleteMutation = useDeleteDeliveryInventory()
+
+  const { data: rawInventory = [], isLoading } = useDeliveryInventoryList()
+  const { data: allSales = [] } = useDeliverySalesList()
+  const { data: pfisData } = usePfiList()
+  const { data: trucksData } = useTruckList()
+
+  const allEntries = useMemo((): DeliveryInventory[] => {
+    if (!rawInventory) return []
+    return Array.isArray(rawInventory) ? rawInventory : []
+  }, [rawInventory])
+
+  const allPfis: Pfi[] = useMemo(() => {
+    if (!pfisData) return []
+    return Array.isArray(pfisData) ? pfisData : (pfisData.pfis || pfisData.data || [])
+  }, [pfisData])
+
+  const allTrucks = useMemo(() => {
+    if (!trucksData) return []
+    return Array.isArray(trucksData) ? trucksData : (trucksData.trucks || trucksData.data || [])
+  }, [trucksData])
+
+  const targetId = searchParams.inventoryId || state.inventoryItem?._id || state.inventoryItem?.id || ''
+  const inventoryItem = state.inventoryItem || allEntries.find(e => (e._id || e.id) === targetId)
+
+  const truckMap = useMemo(() => {
+    const m = new Map<string, any>()
+    allTrucks.forEach((t: any) => m.set(t._id || t.id, t))
+    return m
+  }, [allTrucks])
+
+  const pfiMap = useMemo(() => {
+    const m = new Map<string, Pfi>()
+    allPfis.forEach(p => m.set(p._id, p))
+    return m
+  }, [allPfis])
+
+  // Enriched record
+  const record = useMemo(() => {
+    if (!inventoryItem) return null
+    const truck = inventoryItem.truckId ? truckMap.get(String(inventoryItem.truckId)) : null
+    const pfi = inventoryItem.pfiId ? pfiMap.get(String(inventoryItem.pfiId)) : null
+    return {
+      ...inventoryItem,
+      truckPlate: inventoryItem.truckNumber || truck?.plateNumber || '—',
+      driverName: truck?.driverName || '',
+      pfiLabel: inventoryItem.pfiNumber || pfi?.pfiNumber || '',
+      product: inventoryItem.pfiProduct || pfi?.productName || '',
+      unitLabel: pfi?.productUnit || 'Litres',
+      depotDisplay: inventoryItem.depot || inventoryItem.pfiLocation || pfi?.locationName || '',
+      qty: toNum(inventoryItem.quantityAllocated),
+      status: (inventoryItem.loadingStatus || 'loaded') as 'loaded' | 'offloaded',
+      code: (inventoryItem.allocationCode || '').trim().toUpperCase(),
+      notes: inventoryItem.notes || '',
+    }
+  }, [inventoryItem, truckMap, pfiMap])
+
+  // Matched sales
+  const matchedSales = useMemo((): DeliverySale[] => {
+    if (!record) return []
+    return allSales.filter(s => {
+      if (s.allocationCode && record.code && s.allocationCode.toUpperCase() === record.code) return true
+      const sTruck = (s.truckNumber || '').toUpperCase()
+      const iTruck = (record.truckPlate || record.truckNumber || '').toUpperCase()
+      const sDate = (s.dateLoaded || '').split('T')[0]
+      const iDate = (record.dateAllocated || '').split('T')[0]
+      return sTruck && iTruck && sTruck === iTruck && sDate === iDate
+    }).sort((a, b) => (a.dateOfPayment || a.dateLoaded || '').localeCompare(b.dateOfPayment || b.dateLoaded || ''))
+  }, [allSales, record])
+
+  const salesSummary = useMemo(() => {
+    let totalQty = 0, totalValue = 0, totalPaid = 0, totalExpenses = 0
+    matchedSales.forEach(s => {
+      totalQty += toNum(s.quantity)
+      totalValue += toNum(s.salesValue)
+      totalPaid += toNum(s.paymentAmount)
+      totalExpenses += toNum(s.expensesAmount ?? 0)
+    })
+    if (totalValue === 0 && record) {
+      const rate = toNum(record.rate)
+      if (rate > 0) totalValue = rate * record.qty
+    }
+    return { totalQty, totalValue, totalPaid, totalExpenses, balance: totalValue - (totalPaid + totalExpenses) }
+  }, [matchedSales, record])
+
+  const handleDelete = async () => {
+    if (!inventoryItem) return
+    try {
+      await deleteMutation.mutateAsync(inventoryItem._id || inventoryItem.id || '')
+      toast.success('Record deleted')
+      navigate({ to: '/delivery-operations' })
+    } catch {
+      toast.error('Delete failed')
+    }
+  }
+
+  if (!inventoryItem && isLoading) {
+    return (
+      <div className="flex justify-center py-16">
+        <Loader2 size={28} className="animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
+  if (!record) {
+    return (
+      <div className="p-8 text-center max-w-md mx-auto my-12 bg-card rounded-2xl border border-border">
+        <ShieldAlert size={40} className="mx-auto text-muted-foreground mb-4" />
+        <h3 className="font-semibold text-lg">Record Not Found</h3>
+        <p className="text-sm text-muted-foreground mt-1">Please select a valid inventory record from the list.</p>
+        <Button onClick={() => navigate({ to: '/delivery-operations' })} className="mt-4 cursor-pointer">
+          Back to Delivery Operations
+        </Button>
+      </div>
+    )
+  }
+
+  const badge = statusBadge[record.status]
+  const Icon = badge?.icon
+
+  return (
+    <div className="space-y-6 pb-12 animate-fade-in">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border pb-4">
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            className="cursor-pointer"
+            onClick={() => navigate({ to: '/delivery-operations' })}
+          >
+            <ArrowLeft size={16} />
+          </Button>
+          <div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">{record.truckPlate}</h1>
+              {record.code && (
+                <Badge variant="outline" className="font-mono text-xs uppercase">
+                  {record.code}
+                </Badge>
+              )}
+              {badge && Icon && (
+                <Badge className={`text-xs border flex items-center gap-1 ${badge.cls}`}>
+                  <Icon size={12} /> {badge.label}
+                </Badge>
+              )}
+            </div>
+            <p className="text-muted-foreground text-sm mt-0.5">
+              {record.product || 'N/A'} · {record.depotDisplay || 'N/A'}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            variant="destructive"
+            className="cursor-pointer"
+            onClick={() => setShowDeleteConfirm(true)}
+          >
+            <Trash2 size={14} className="mr-1.5" /> Delete
+          </Button>
+        </div>
+      </div>
+
+      {/* Metric Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-4 flex items-center justify-between">
+            <div>
+              <div className="text-xs text-muted-foreground font-medium">Quantity Allocated</div>
+              <div className="text-xl font-bold text-foreground mt-0.5">
+                {record.qty > 0 ? `${fmtQty(record.qty)} ${record.unitLabel}` : '—'}
+              </div>
+            </div>
+            <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-500">
+              <Package size={20} />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4 flex items-center justify-between">
+            <div>
+              <div className="text-xs text-muted-foreground font-medium">PFI Number</div>
+              <div className="text-lg font-bold text-foreground mt-0.5 truncate max-w-[140px]">
+                {record.pfiLabel || '—'}
+              </div>
+            </div>
+            <div className="p-2.5 rounded-xl bg-violet-500/10 text-violet-500">
+              <FileText size={20} />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4 flex items-center justify-between">
+            <div>
+              <div className="text-xs text-muted-foreground font-medium">Rate (per litre)</div>
+              <div className="text-xl font-bold text-foreground mt-0.5">
+                {toNum(record.rate) > 0 ? `₦${toNum(record.rate).toLocaleString()}` : '—'}
+              </div>
+            </div>
+            <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-500">
+              <DollarSign size={20} />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4 flex items-center justify-between">
+            <div>
+              <div className="text-xs text-muted-foreground font-medium">Date Loaded</div>
+              <div className="text-sm font-bold text-foreground mt-0.5">
+                {record.dateAllocated ? (() => { try { return format(parseISO(record.dateAllocated), 'dd MMM yyyy') } catch { return record.dateAllocated } })() : '—'}
+              </div>
+            </div>
+            <div className="p-2.5 rounded-xl bg-muted text-muted-foreground">
+              <Calendar size={20} />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4 flex items-center justify-between">
+            <div>
+              <div className="text-xs text-muted-foreground font-medium">Status</div>
+              <div className="text-sm font-bold text-foreground mt-0.5">
+                {badge?.label || '—'}
+              </div>
+            </div>
+            <div className={`p-2.5 rounded-xl ${record.status === 'loaded' ? 'bg-amber-500/10 text-amber-500' : 'bg-emerald-500/10 text-emerald-500'}`}>
+              {Icon ? <Icon size={20} /> : <Truck size={20} />}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Main Details */}
+        <div className="lg:col-span-2 space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Truck & Allocation Details</CardTitle>
+              <CardDescription>Core information about this delivery allocation.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl">
+                  <Truck className="h-5 w-5 text-primary shrink-0" />
+                  <div>
+                    <div className="text-xs text-muted-foreground font-medium">Truck Plate</div>
+                    <div className="font-semibold">{record.truckPlate}</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl">
+                  <Package className="h-5 w-5 text-primary shrink-0" />
+                  <div>
+                    <div className="text-xs text-muted-foreground font-medium">Product</div>
+                    <div className="font-semibold">{record.product || 'N/A'}</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl">
+                  <Building2 className="h-5 w-5 text-amber-500 shrink-0" />
+                  <div>
+                    <div className="text-xs text-muted-foreground font-medium">Depot</div>
+                    <div className="font-semibold">{record.depotDisplay || 'N/A'}</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl">
+                  <MapPin className="h-5 w-5 text-muted-foreground shrink-0" />
+                  <div>
+                    <div className="text-xs text-muted-foreground font-medium">Destination</div>
+                    <div className="font-semibold">{record.location || 'N/A'}</div>
+                  </div>
+                </div>
+              </div>
+
+              {record.dateOffloaded && (
+                <div className="border-t border-border pt-4 mt-4">
+                  <div className="flex items-center gap-3 p-3 bg-emerald-50/60 rounded-xl">
+                    <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
+                    <div>
+                      <div className="text-xs text-muted-foreground font-medium">Date Sold / Offloaded</div>
+                      <div className="font-semibold">
+                        {(() => { try { return format(parseISO(record.dateOffloaded), 'dd MMM yyyy') } catch { return record.dateOffloaded } })()}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Sales Ledger */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Sales Ledger Entries ({matchedSales.length})</CardTitle>
+              <CardDescription>Payment records matched to this truck allocation.</CardDescription>
+            </CardHeader>
+            <CardContent className="p-0">
+              {matchedSales.length === 0 ? (
+                <p className="p-8 text-sm text-muted-foreground text-center">No sales entries recorded for this allocation yet.</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table className="text-xs">
+                    <TableHeader>
+                      <TableRow className="bg-muted/30">
+                        <TableHead className="font-semibold text-muted-foreground px-4">#</TableHead>
+                        <TableHead className="font-semibold text-muted-foreground">Date</TableHead>
+                        <TableHead className="font-semibold text-muted-foreground">Customer</TableHead>
+                        <TableHead className="font-semibold text-muted-foreground text-right">Volume</TableHead>
+                        <TableHead className="font-semibold text-muted-foreground text-right">Rate</TableHead>
+                        <TableHead className="font-semibold text-muted-foreground text-right">Sales Value</TableHead>
+                        <TableHead className="font-semibold text-muted-foreground text-right">Deposits</TableHead>
+                        <TableHead className="font-semibold text-muted-foreground">Payer</TableHead>
+                        <TableHead className="font-semibold text-muted-foreground">Bank</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {matchedSales.map((entry, idx) => {
+                        const entryDate = entry.dateOfPayment || entry.dateLoaded || ''
+                        return (
+                          <TableRow key={entry._id || entry.id || idx} className="hover:bg-muted/30">
+                            <TableCell className="px-4 text-muted-foreground">{idx + 1}</TableCell>
+                            <TableCell className="whitespace-nowrap font-medium text-muted-foreground">
+                              {entryDate ? (() => { try { return format(parseISO(entryDate), 'dd MMM yy') } catch { return entryDate } })() : '—'}
+                            </TableCell>
+                            <TableCell className="text-foreground font-medium">{entry.customerName || '—'}</TableCell>
+                            <TableCell className="text-right font-semibold text-foreground">
+                              {toNum(entry.quantity) > 0 ? `${fmtQty(toNum(entry.quantity))} L` : '—'}
+                            </TableCell>
+                            <TableCell className="text-right text-muted-foreground">
+                              {toNum(entry.rate) > 0 ? `₦${toNum(entry.rate).toLocaleString()}` : '—'}
+                            </TableCell>
+                            <TableCell className="text-right text-foreground font-medium">
+                              {toNum(entry.salesValue) > 0 ? fmtMoney(toNum(entry.salesValue)) : '—'}
+                            </TableCell>
+                            <TableCell className="text-right font-semibold text-emerald-600">
+                              {toNum(entry.paymentAmount) > 0 ? fmtMoney(toNum(entry.paymentAmount)) : '—'}
+                            </TableCell>
+                            <TableCell className="text-muted-foreground">{entry.payerName || '—'}</TableCell>
+                            <TableCell className="text-muted-foreground">{entry.bank || '—'}</TableCell>
+                          </TableRow>
+                        )
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Sidebar */}
+        <div className="space-y-6">
+          {/* Sales Summary */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <FileText size={16} className="text-muted-foreground" /> Sales Summary
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm">
+              <div className="flex justify-between py-1 border-b border-border">
+                <span className="text-muted-foreground">Volume Sold</span>
+                <span className="font-semibold">{salesSummary.totalQty > 0 ? `${fmtQty(salesSummary.totalQty)} L` : '—'}</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-border">
+                <span className="text-muted-foreground">Expected Revenue</span>
+                <span className="font-semibold">{salesSummary.totalValue > 0 ? fmtMoney(salesSummary.totalValue) : '—'}</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-border">
+                <span className="text-muted-foreground">Total Deposits</span>
+                <span className="font-semibold text-emerald-600">{salesSummary.totalPaid > 0 ? fmtMoney(salesSummary.totalPaid) : '—'}</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-border">
+                <span className="text-muted-foreground">Expenses</span>
+                <span className="font-semibold text-amber-600">{salesSummary.totalExpenses > 0 ? fmtMoney(salesSummary.totalExpenses) : '—'}</span>
+              </div>
+              <div className="flex justify-between py-1">
+                <span className="text-muted-foreground font-medium">Balance</span>
+                <span className={`font-bold ${salesSummary.balance === 0 ? 'text-emerald-600' : salesSummary.balance > 0 ? 'text-red-600' : 'text-blue-600'}`}>
+                  {salesSummary.balance === 0 ? '✓ Settled' : salesSummary.balance > 0 ? fmtMoney(salesSummary.balance) : `+${fmtMoney(Math.abs(salesSummary.balance))}`}
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Notes */}
+          {record.notes && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <FileText size={16} className="text-muted-foreground" /> Notes
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground bg-muted/30 p-3 rounded-xl">
+                  {record.notes}
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
+
+      {/* Delete Confirmation */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-card border border-border rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl">
+            <div className="flex items-center gap-3 text-red-500">
+              <ShieldAlert size={28} />
+              <h3 className="font-bold text-lg text-foreground">Delete Record</h3>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Are you sure you want to delete the record for <strong>{record.truckPlate}</strong>
+              {record.code ? ` (${record.code})` : ''}? This will also delete associated sales entries. This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3 pt-2">
+              <Button variant="outline" onClick={() => setShowDeleteConfirm(false)} className="cursor-pointer">
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleDelete}
+                disabled={deleteMutation.isPending}
+                className="cursor-pointer"
+              >
+                {deleteMutation.isPending ? 'Deleting...' : 'Delete Record'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}

@@ -1,0 +1,704 @@
+import { useState, useMemo } from 'react'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { Card, CardHeader, CardTitle, CardContent } from '#/components/ui/card'
+import { Button } from '#/components/ui/button'
+import { Input } from '#/components/ui/input'
+import { Badge } from '#/components/ui/badge'
+import {
+  Plus, Search, Download, Eye,
+  Users, Phone, Wallet, UserCheck, UserX, UserMinus,
+  MapPin, Mail, CreditCard, Clock, User, Fuel,
+  ShieldAlert, AlertTriangle
+} from 'lucide-react'
+import { useDeliveryCustomerList, useDeleteDeliveryCustomer } from '#/lib/hooks/useDeliveryCustomers'
+
+type DeliveryCustomer = {
+  _id: string
+  id?: string
+  customerType: 'customer' | 'filling_station'
+  customerCode?: string
+  name: string
+  phoneNumber: string
+  altPhoneNumber?: string
+  email?: string
+  homeAddress?: string
+  officeAddress?: string
+  passportPhoto?: string
+  contactPerson?: string
+  contactPersonPhone?: string
+  stationAddress?: string
+  tankCapacity?: number
+  pumpCount?: number
+  paystackCustomerId?: string
+  virtualAccountNumber?: string
+  virtualAccountBank?: string
+  creditLimit?: number
+  outstanding?: number
+  totalSalesValue?: number
+  totalPayments?: number
+  totalQty?: number
+  status: 'active' | 'dormant' | 'suspended'
+  notes?: string
+  lastTransactionDate?: string | null
+  createdAt?: string
+  updatedAt?: string
+  _autoDormant?: boolean
+}
+
+export const Route = createFileRoute('/delivery-customer/')({
+  component: DeliveryCustomerListRoute,
+})
+
+const AUTO_DORMANT_DAYS = 60
+const LEGACY_TYPE_PREFIX = '__type:filling_station__'
+
+const cleanNotes = (notes?: string): string =>
+  notes?.startsWith(LEGACY_TYPE_PREFIX)
+    ? notes.slice(LEGACY_TYPE_PREFIX.length)
+    : (notes || '')
+
+const toNum = (v: string | number | undefined | null): number => {
+  if (v === undefined || v === null || v === '') return 0
+  const n = Number(String(v).replace(/,/g, ''))
+  return Number.isFinite(n) ? n : 0
+}
+
+const fmtMoney = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
+/** Check if customer hasn't had transactions in 60+ days */
+function isAutoDormant(lastTxnDate?: string | Date | null): boolean {
+  if (!lastTxnDate) return false
+  try {
+    const diffTime = Math.abs(new Date().getTime() - new Date(lastTxnDate).getTime())
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    return diffDays >= AUTO_DORMANT_DAYS
+  } catch {
+    return false
+  }
+}
+
+function getDaysSinceTxn(lastTxnDate?: string | Date | null): number | null {
+  if (!lastTxnDate) return null
+  try {
+    const diffTime = Math.abs(new Date().getTime() - new Date(lastTxnDate).getTime())
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+  } catch {
+    return null
+  }
+}
+
+const PhoneLink = ({ phone }: { phone?: string }) => {
+  if (!phone) return <span className="text-muted-foreground">—</span>
+  return (
+    <a href={`tel:${phone}`} className="text-primary hover:underline font-semibold" onClick={(e) => e.stopPropagation()}>
+      {phone}
+    </a>
+  )
+}
+
+const statusConfig = {
+  active: { label: 'Active', cls: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20', icon: UserCheck },
+  dormant: { label: 'Dormant', cls: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20', icon: UserMinus },
+  suspended: { label: 'Suspended', cls: 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20', icon: UserX },
+}
+
+function DeliveryCustomerListRoute() {
+  const navigate = useNavigate()
+  const deleteMutation = useDeleteDeliveryCustomer()
+
+  const [search, setSearch] = useState('')
+  const [typeFilter, setTypeFilter] = useState<'all' | 'customer' | 'filling_station'>('all')
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'dormant' | 'suspended' | 'auto-dormant'>('all')
+
+  // Drill-down Modal State
+  const [selectedCustomer, setSelectedCustomer] = useState<DeliveryCustomer | null>(null)
+
+  // Delete Modal State
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null)
+
+  const { data: rawCustomers, isLoading } = useDeliveryCustomerList({
+    search: search.trim(),
+    type: typeFilter === 'all' ? undefined : typeFilter,
+  })
+
+  // Format and standardize backend fields (supporting snake_case & camelCase)
+  const customers = useMemo(() => {
+    if (!rawCustomers) return []
+    const list = Array.isArray(rawCustomers)
+      ? rawCustomers
+      : (rawCustomers.customers || rawCustomers.data || [])
+    if (!Array.isArray(list)) return []
+
+    return list.map((c) => {
+      const name = c.name || c.customer_name || 'Unnamed'
+      const phoneNumber = c.phoneNumber || c.phone_number || ''
+      const altPhoneNumber = c.altPhoneNumber || c.alt_phone_number || ''
+      const email = c.email || ''
+      const homeAddress = c.homeAddress || c.home_address || ''
+      const officeAddress = c.officeAddress || c.office_address || ''
+      const stationAddress = c.stationAddress || c.station_address || ''
+      const contactPerson = c.contactPerson || c.contact_person || ''
+      const contactPersonPhone = c.contactPersonPhone || c.contact_person_phone || ''
+      const passportPhoto = c.passportPhoto || c.passport_photo || ''
+      const creditLimit = toNum(c.creditLimit || c.outstanding_limit)
+      const outstanding = toNum(c.outstanding || c.current_balance)
+      const totalSalesValue = toNum(c.totalSalesValue || c.total_value_given)
+      const totalPayments = toNum(c.totalPayments || c.total_payments_received)
+      const totalQty = toNum(c.totalQty)
+      const lastTransactionDate = c.lastTransactionDate || c.last_transaction_date || null
+      const paystackCustomerId = c.paystackCustomerId || ''
+      const virtualAccountNumber = c.virtualAccountNumber || ''
+      const virtualAccountBank = c.virtualAccountBank || ''
+
+      const autoDormant = (c.status === 'active' || !c.status) && isAutoDormant(lastTransactionDate)
+
+      return {
+        ...c,
+        _id: c._id || c.id,
+        name,
+        phoneNumber,
+        altPhoneNumber,
+        email,
+        homeAddress,
+        officeAddress,
+        stationAddress,
+        contactPerson,
+        contactPersonPhone,
+        passportPhoto,
+        creditLimit,
+        outstanding,
+        totalSalesValue,
+        totalPayments,
+        totalQty,
+        paystackCustomerId,
+        virtualAccountNumber,
+        virtualAccountBank,
+        notes: cleanNotes(c.notes),
+        lastTransactionDate,
+        _autoDormant: autoDormant,
+      } as DeliveryCustomer & { _autoDormant: boolean }
+    })
+  }, [rawCustomers])
+
+  // Filter list
+  const filteredCustomers = useMemo(() => {
+    return customers.filter((c) => {
+      if (typeFilter !== 'all' && c.customerType !== typeFilter) return false
+
+      if (statusFilter === 'auto-dormant') {
+        if (!c._autoDormant) return false
+      } else if (statusFilter !== 'all') {
+        if (c.status !== statusFilter) return false
+      }
+
+      if (search.trim()) {
+        const q = search.trim().toLowerCase()
+        const textToSearch = `${c.name} ${c.phoneNumber} ${c.altPhoneNumber || ''} ${c.customerCode || ''} ${c.contactPerson || ''} ${c.email || ''}`.toLowerCase()
+        if (!textToSearch.includes(q)) return false
+      }
+
+      return true
+    })
+  }, [customers, typeFilter, statusFilter, search])
+
+  // Metrics
+  const stats = useMemo(() => {
+    const total = customers.length
+    const regular = customers.filter((c) => c.customerType === 'customer').length
+    const stations = customers.filter((c) => c.customerType === 'filling_station').length
+    const autoDormantCount = customers.filter((c) => c._autoDormant).length
+    const totalCreditLimit = customers.reduce((sum, c) => sum + (c.creditLimit || 0), 0)
+    const totalQtySold = customers.reduce((sum, c) => sum + (c.totalQty || 0), 0)
+
+    return { total, regular, stations, autoDormantCount, totalCreditLimit, totalQtySold }
+  }, [customers])
+
+  // Handle Delete
+  const confirmDelete = async () => {
+    if (!deleteTarget) return
+    try {
+      await deleteMutation.mutateAsync(deleteTarget.id)
+      setDeleteTarget(null)
+      if (selectedCustomer && selectedCustomer._id === deleteTarget.id) {
+        setSelectedCustomer(null)
+      }
+    } catch {
+      // Error handled by mutation toast
+    }
+  }
+
+  // Export to CSV
+  const handleExportCSV = () => {
+    if (filteredCustomers.length === 0) return
+    const headers = [
+      'S/N', 'Classification', 'Name', 'Phone', 'Alt Phone', 'Email',
+      'Address', 'Contact Person', 'Credit Limit (NGN)', 'Outstanding (NGN)',
+      'Status', 'Auto-Dormant', 'Days Inactive', 'Notes'
+    ]
+    const rows = filteredCustomers.map((c, idx) => {
+      const days = getDaysSinceTxn(c.lastTransactionDate)
+      return [
+        idx + 1,
+        c.customerType === 'filling_station' ? 'Filling Station' : 'Individual Customer',
+        `"${c.name}"`,
+        `"${c.phoneNumber}"`,
+        `"${c.altPhoneNumber || 'N/A'}"`,
+        c.email || 'N/A',
+        `"${c.stationAddress || c.homeAddress || c.officeAddress || 'N/A'}"`,
+        `"${c.contactPerson || 'N/A'}"`,
+        c.creditLimit || 0,
+        c.outstanding || 0,
+        c.status || 'active',
+        c._autoDormant ? 'Yes' : 'No',
+        days !== null ? days : 'N/A',
+        `"${(c.notes || '').replace(/"/g, '""')}"`,
+      ]
+    })
+
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n')
+    const encodedUri = encodeURI(csvContent)
+    const link = document.createElement('a')
+    link.setAttribute('href', encodedUri)
+    link.setAttribute('download', `delivery-customers-${new Date().toISOString().slice(0, 10)}.csv`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Delivery Customers Database</h1>
+          <p className="text-muted-foreground text-sm">
+            Comprehensive customer profiles, credit limit tracking, and auto-dormancy monitoring.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={handleExportCSV}
+            disabled={filteredCustomers.length === 0}
+            className="cursor-pointer"
+          >
+            <Download size={16} className="mr-2" /> Export CSV
+          </Button>
+          <Button
+            onClick={() => navigate({ to: '/delivery-customer/form' as any })}
+            className="gradient-primary text-white cursor-pointer shadow-md shadow-primary/20"
+          >
+            <Plus size={16} className="mr-2" /> Add Delivery Customer
+          </Button>
+        </div>
+      </div>
+
+      {/* Metric Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="bg-card/60 backdrop-blur-sm">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div>
+              <div className="text-xs text-muted-foreground font-medium">Total Directory</div>
+              <div className="text-2xl font-bold text-foreground mt-0.5">{stats.total}</div>
+            </div>
+            <div className="p-3 rounded-xl bg-primary/10 text-primary">
+              <Users size={22} />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card/60 backdrop-blur-sm">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div>
+              <div className="text-xs text-muted-foreground font-medium">Regular Customers</div>
+              <div className="text-2xl font-bold text-foreground mt-0.5">{stats.regular}</div>
+            </div>
+            <div className="p-3 rounded-xl bg-blue-500/10 text-blue-500">
+              <User size={22} />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card/60 backdrop-blur-sm">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div>
+              <div className="text-xs text-muted-foreground font-medium">Filling Stations</div>
+              <div className="text-2xl font-bold text-foreground mt-0.5">{stats.stations}</div>
+            </div>
+            <div className="p-3 rounded-xl bg-amber-500/10 text-amber-500">
+              <Fuel size={22} />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card/60 backdrop-blur-sm">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div>
+              <div className="text-xs text-muted-foreground font-medium">Total Credit Limit</div>
+              <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
+                ₦{stats.totalCreditLimit.toLocaleString()}
+              </div>
+            </div>
+            <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-500">
+              <Wallet size={22} />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filter and Search Bar */}
+      <Card className="bg-card/60 backdrop-blur-sm">
+        <CardContent className="p-4 flex flex-col md:flex-row gap-4 items-center justify-between">
+          <div className="relative w-full md:w-80">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
+            <Input
+              placeholder="Search by name, phone, code..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+            {/* Type selector */}
+            <select
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value as any)}
+              className="h-9 rounded-lg border border-border bg-card px-3 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="all">All Classifications</option>
+              <option value="customer">Regular Customers</option>
+              <option value="filling_station">Filling Stations</option>
+            </select>
+
+            {/* Status selector */}
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as any)}
+              className="h-9 rounded-lg border border-border bg-card px-3 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="all">All Statuses</option>
+              <option value="active">Active</option>
+              <option value="dormant">Dormant</option>
+              <option value="suspended">Suspended</option>
+              <option value="auto-dormant">⏰ Auto-Dormant (60d+)</option>
+            </select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Directory Table */}
+      <Card>
+        <CardHeader className="py-4">
+          <CardTitle className="text-base font-medium">
+            Directory Entries ({filteredCustomers.length})
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          {isLoading ? (
+            <div className="p-12 text-center text-muted-foreground">Loading delivery customers...</div>
+          ) : filteredCustomers.length === 0 ? (
+            <div className="p-12 text-center text-muted-foreground">
+              No delivery customers found matching your filters.
+            </div>
+          ) : (
+            <div className="divide-y divide-border">
+              {filteredCustomers.map((c, idx) => {
+                const isStation = c.customerType === 'filling_station'
+                const statusInfo = statusConfig[c.status] || statusConfig.active
+                const StatusIcon = statusInfo.icon
+                const daysInactive = getDaysSinceTxn(c.lastTransactionDate)
+                const creditLimit = toNum(c.creditLimit)
+                const outstanding = toNum(c.outstanding)
+                const hasLimit = creditLimit > 0
+                const isOverLimit = hasLimit && outstanding > creditLimit
+                const isNearLimit = hasLimit && !isOverLimit && outstanding >= creditLimit * 0.8
+
+                return (
+                  <div
+                    key={c._id}
+                    className="p-4 hover:bg-muted/30 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer"
+                    onClick={() => setSelectedCustomer(c)}
+                  >
+                    <div className="flex items-start gap-3 min-w-0">
+                      <span className="text-xs text-muted-foreground font-mono mt-2 w-6">{idx + 1}.</span>
+
+                      <div
+                        className={`p-2.5 rounded-xl shrink-0 mt-0.5 ${isStation
+                          ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
+                          : 'bg-primary/10 text-primary'
+                          }`}
+                      >
+                        {isStation ? <Fuel size={20} /> : <User size={20} />}
+                      </div>
+
+                      <div className="space-y-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-semibold text-base truncate">{c.name}</span>
+                          <Badge variant="outline" className="font-mono text-xs uppercase">
+                            {c.customerCode || (isStation ? 'STATION' : 'CUSTOMER')}
+                          </Badge>
+                          <Badge className={`text-xs border capitalize font-medium flex items-center gap-1 ${statusInfo.cls}`}>
+                            <StatusIcon size={12} /> {statusInfo.label}
+                          </Badge>
+                          {c._autoDormant && (
+                            <Badge className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 text-xs flex items-center gap-1">
+                              <Clock size={10} /> Auto-Dormant ({daysInactive ? `${daysInactive}d` : '60d+'})
+                            </Badge>
+                          )}
+                        </div>
+
+                        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground pt-0.5">
+                          {c.phoneNumber && (
+                            <span className="flex items-center gap-1">
+                              <Phone size={12} /> <PhoneLink phone={c.phoneNumber} />
+                              {c.altPhoneNumber && (
+                                <span className="ml-1 text-muted-foreground">/ <PhoneLink phone={c.altPhoneNumber} /></span>
+                              )}
+                            </span>
+                          )}
+                          {c.email && (
+                            <span className="flex items-center gap-1">
+                              <Mail size={12} /> {c.email}
+                            </span>
+                          )}
+                          <span className="flex items-center gap-1 truncate max-w-xs">
+                            <MapPin size={12} /> {c.stationAddress || c.homeAddress || c.officeAddress || 'No Address'}
+                          </span>
+                          {hasLimit && (
+                            <span className="flex items-center gap-1 font-semibold text-emerald-600 dark:text-emerald-400">
+                              <CreditCard size={12} /> Limit: ₦{fmtMoney(creditLimit)}
+                            </span>
+                          )}
+                          {outstanding > 0 && (
+                            <span className={`flex items-center gap-1 font-semibold ${isOverLimit ? 'text-red-500' : isNearLimit ? 'text-amber-500' : 'text-foreground'}`}>
+                              {isOverLimit && <ShieldAlert size={12} />}
+                              {isNearLimit && <AlertTriangle size={12} />}
+                              Outst: ₦{fmtMoney(outstanding)}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0 self-end md:self-center" onClick={(e) => e.stopPropagation()}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="cursor-pointer"
+                        onClick={() => setSelectedCustomer(c)}
+                        title="Quick Profile View"
+                      >
+                        <Eye size={14} className="mr-1" /> Quick View
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="cursor-pointer"
+                        onClick={() =>
+                          navigate({
+                            to: '/delivery-customer/details',
+                            search: { customerId: c._id },
+                            state: { customer: c } as any,
+                          })
+                        }
+                      >
+                        Details
+                      </Button>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Quick View Dialog Modal */}
+      {selectedCustomer && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-card border border-border rounded-2xl max-w-xl w-full p-6 space-y-4 shadow-xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                {selectedCustomer.customerType === 'filling_station' ? (
+                  <div className="p-3 rounded-xl bg-amber-500/10 text-amber-500">
+                    <Fuel size={24} />
+                  </div>
+                ) : selectedCustomer.passportPhoto ? (
+                  <img
+                    src={selectedCustomer.passportPhoto}
+                    alt={selectedCustomer.name}
+                    className="w-12 h-12 rounded-xl object-cover border border-border"
+                  />
+                ) : (
+                  <div className="p-3 rounded-xl bg-primary/10 text-primary">
+                    <User size={24} />
+                  </div>
+                )}
+                <div>
+                  <h3 className="font-bold text-lg">{selectedCustomer.name}</h3>
+                  <p className="text-xs text-muted-foreground font-mono">
+                    {selectedCustomer.customerCode || (selectedCustomer.customerType === 'filling_station' ? 'STATION' : 'CUSTOMER')}
+                  </p>
+                </div>
+              </div>
+              <Button variant="ghost" size="sm" onClick={() => setSelectedCustomer(null)}>
+                ✕
+              </Button>
+            </div>
+
+            {selectedCustomer._autoDormant && (
+              <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-600 dark:text-amber-400 text-xs flex items-center gap-2">
+                <Clock size={16} />
+                <span>
+                  <strong>Auto-Dormant Alert:</strong> Inactive for {getDaysSinceTxn(selectedCustomer.lastTransactionDate) ?? '60+'} days. Consider reaching out to re-engage.
+                </span>
+              </div>
+            )}
+
+            <div className="space-y-3 text-sm">
+              {/* Profile Details */}
+              <div className="bg-muted/30 p-3 rounded-xl space-y-2">
+                <div className="flex justify-between py-1 border-b border-border/50">
+                  <span className="text-muted-foreground">Classification</span>
+                  <span className="font-semibold capitalize flex items-center gap-1">
+                    {selectedCustomer.customerType === 'filling_station' ? (
+                      <><Fuel size={14} className="text-amber-500" /> Filling Station</>
+                    ) : (
+                      <><User size={14} className="text-primary" /> Regular Customer</>
+                    )}
+                  </span>
+                </div>
+
+                <div className="flex justify-between py-1 border-b border-border/50">
+                  <span className="text-muted-foreground">Primary Phone</span>
+                  <PhoneLink phone={selectedCustomer.phoneNumber} />
+                </div>
+
+                {selectedCustomer.altPhoneNumber && (
+                  <div className="flex justify-between py-1 border-b border-border/50">
+                    <span className="text-muted-foreground">Alt Phone</span>
+                    <PhoneLink phone={selectedCustomer.altPhoneNumber} />
+                  </div>
+                )}
+
+                {selectedCustomer.email && (
+                  <div className="flex justify-between py-1 border-b border-border/50">
+                    <span className="text-muted-foreground">Email</span>
+                    <span className="font-semibold">{selectedCustomer.email}</span>
+                  </div>
+                )}
+
+                {selectedCustomer.customerType === 'filling_station' && selectedCustomer.contactPerson && (
+                  <div className="flex justify-between py-1 border-b border-border/50">
+                    <span className="text-muted-foreground">Station Manager</span>
+                    <span className="font-semibold">
+                      {selectedCustomer.contactPerson}
+                      {selectedCustomer.contactPersonPhone && ` (${selectedCustomer.contactPersonPhone})`}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Financial Summary */}
+              <div className="bg-muted/30 p-3 rounded-xl space-y-2">
+                <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1 flex items-center gap-1">
+                  <Wallet size={12} /> Financial Summary
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <span className="text-muted-foreground block">Credit Limit</span>
+                    <span className="font-bold text-foreground">
+                      ₦{fmtMoney(toNum(selectedCustomer.creditLimit))}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground block">Outstanding</span>
+                    <span className={`font-bold ${toNum(selectedCustomer.outstanding) > toNum(selectedCustomer.creditLimit) && toNum(selectedCustomer.creditLimit) > 0 ? 'text-red-500' : 'text-foreground'}`}>
+                      ₦{fmtMoney(toNum(selectedCustomer.outstanding))}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground block">Total Sales Value</span>
+                    <span className="font-bold text-foreground">
+                      ₦{fmtMoney(toNum(selectedCustomer.totalSalesValue))}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground block">Total Payments</span>
+                    <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                      ₦{fmtMoney(toNum(selectedCustomer.totalPayments))}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Primary Address */}
+              <div className="bg-muted/30 p-3 rounded-xl space-y-1">
+                <span className="text-muted-foreground text-xs block font-medium">Primary Address</span>
+                <span className="text-xs font-semibold">
+                  {selectedCustomer.stationAddress || selectedCustomer.homeAddress || selectedCustomer.officeAddress || 'N/A'}
+                </span>
+              </div>
+
+              {/* Notes */}
+              {selectedCustomer.notes && (
+                <div className="bg-muted/30 p-3 rounded-xl space-y-1">
+                  <span className="text-muted-foreground text-xs block font-medium">Remarks / Notes</span>
+                  <span className="text-xs text-foreground font-normal">{selectedCustomer.notes}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-border">
+              <Button variant="outline" size="sm" onClick={() => setSelectedCustomer(null)}>
+                Close
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => {
+                  const target = selectedCustomer
+                  setSelectedCustomer(null)
+                  navigate({
+                    to: '/delivery-customer/details',
+                    search: { customerId: target._id },
+                    state: { customer: target } as any,
+                  })
+                }}
+              >
+                Full Profile Details
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-card border border-border rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl">
+            <div className="flex items-center gap-3 text-red-500">
+              <ShieldAlert size={28} />
+              <h3 className="font-bold text-lg text-foreground">Delete Customer Profile</h3>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Are you sure you want to delete <strong>{deleteTarget.name}</strong>? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3 pt-2">
+              <Button variant="outline" onClick={() => setDeleteTarget(null)}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={confirmDelete}
+                disabled={deleteMutation.isPending}
+              >
+                {deleteMutation.isPending ? 'Deleting...' : 'Delete Customer'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}

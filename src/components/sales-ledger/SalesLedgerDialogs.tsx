@@ -1,0 +1,1157 @@
+import { useState, useCallback, useEffect } from 'react'
+import { Button } from '#/components/ui/button'
+import { Input } from '#/components/ui/input'
+import { Label } from '#/components/ui/label'
+import {
+  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription,
+} from '#/components/ui/dialog'
+import {
+  Plus, Loader2, Trash2, Pencil, UserPlus, X,
+  Fuel, Banknote, Tag, Truck,
+  Calendar as CalendarIcon, FileText,
+} from 'lucide-react'
+import { format, parseISO } from 'date-fns'
+import { useCreateDeliverySale, useUpdateDeliverySale, useDeleteDeliverySale } from '#/lib/hooks/useDeliverySales'
+import { useUpdateDeliveryInventory } from '#/lib/hooks/useDeliveryInventory'
+import { useToast } from '#/lib/hooks/useToast'
+import type { DeliverySale, DeliveryInventory, DeliveryCustomer } from '#/lib/types'
+import { toNum, fmt, formatWithCommas, stripCommas, isFillingStation } from '#/lib/sales-ledger-utils'
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Hardcoded Bank Accounts
+// ═══════════════════════════════════════════════════════════════════════════
+
+export interface BankAccount {
+  id: number
+  account_name: string
+  account_number: string
+  bank_name: string
+  is_active: boolean
+}
+
+export const BANK_ACCOUNTS: BankAccount[] = [
+  { id: 1, account_name: 'Soroman Trucks', account_number: '1311924986', bank_name: 'Zenith Bank', is_active: true },
+  { id: 2, account_name: 'Action Energy', account_number: '1017185599', bank_name: 'Zenith Bank', is_active: true },
+  { id: 3, account_name: 'Soroman Nigeria Ltd', account_number: '1000102110', bank_name: 'Optimus Bank', is_active: true },
+]
+
+export const resolveBankAccount = (bankStr: string | null | undefined): BankAccount | null => {
+  if (!bankStr) return null
+  return BANK_ACCOUNTS.find(b => bankStr.startsWith(b.account_number) || bankStr.includes(b.account_number)) || null
+}
+
+export const formatBankLabel = (bankStr: string | null | undefined): string => {
+  if (!bankStr) return ''
+  const acct = resolveBankAccount(bankStr)
+  if (acct) return `${acct.account_name} — ${acct.bank_name} (${acct.account_number})`
+  return bankStr
+}
+
+export const bankStringToId = (bankStr: string): string => {
+  if (!bankStr) return ''
+  const match = BANK_ACCOUNTS.find(b =>
+    bankStr.startsWith(b.account_number) || bankStr.includes(b.account_number),
+  )
+  return match ? String(match.id) : ''
+}
+
+// Helpers (imported from lib/sales-ledger-utils)
+
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Types
+// ═══════════════════════════════════════════════════════════════════════════
+
+export interface SaleRow {
+  uid: string
+  customer: string
+  customer_name: string
+  location: string
+  quantity: string
+  rate: string
+  rateLocked: boolean
+  sales_value: string
+  payment_amount: string
+  payer_name: string
+  bank_account_id: string
+  date_of_payment: string
+  phone_number: string
+  remarks: string
+}
+
+export interface LedgerGroup {
+  key: string
+  loadingId?: number
+  truckNumber: string
+  dateLoaded: string
+  depot: string
+  location: string
+  customerId: string | null
+  customerName: string
+  quantity: number
+  rate: number
+  expected: number
+  totalPaid: number
+  balance: number
+  pfiNumber: string
+  allocationCode: string
+  code: string
+  payments: DeliverySale[]
+  isFillingStation: boolean
+}
+
+export const makeSaleRow = (): SaleRow => ({
+  uid: crypto.randomUUID(),
+  customer: '',
+  customer_name: '',
+  location: '',
+  quantity: '',
+  rate: '',
+  rateLocked: false,
+  sales_value: '',
+  payment_amount: '',
+  payer_name: '',
+  bank_account_id: '',
+  date_of_payment: format(new Date(), 'yyyy-MM-dd'),
+  phone_number: '',
+  remarks: '',
+})
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Record Payment Dialog
+// ═══════════════════════════════════════════════════════════════════════════
+
+interface RecordPaymentDialogProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  trucks: DeliveryInventory[]
+  customers: DeliveryCustomer[]
+  customerMap: Map<string, DeliveryCustomer>
+  tripCodes: string[]
+  cycleCustomerRateMap: Map<string, Map<string, string>>
+  getCycleKey: (truck: string, date: string | null | undefined) => string
+  normalizeCycleDate: (d: string | null | undefined) => string
+  assignMode?: boolean
+}
+
+export function RecordPaymentDialog({
+  open, onOpenChange, trucks, customers, customerMap, tripCodes,
+  cycleCustomerRateMap, getCycleKey, normalizeCycleDate,
+  assignMode = false,
+}: RecordPaymentDialogProps) {
+  const toast = useToast()
+  const createSale = useCreateDeliverySale()
+  const updateInventory = useUpdateDeliveryInventory()
+
+  const [truckLoadingId, setTruckLoadingId] = useState('')
+  const [truckNumber, setTruckNumber] = useState('')
+  const [dateLoaded, setDateLoaded] = useState('')
+  const [depot, setDepot] = useState('')
+  const [dialogTripCode, setDialogTripCode] = useState('')
+  const [saleRows, setSaleRows] = useState<SaleRow[]>([makeSaleRow()])
+  const [rowErrors, setRowErrors] = useState<Record<string, Partial<Record<keyof SaleRow, string>>>>({})
+  const [saving, setSaving] = useState(false)
+
+  const handleTruckSelect = useCallback((loadingId: string) => {
+    setTruckLoadingId(loadingId)
+    const loading = trucks.find(t => (t._id || t.id) === loadingId)
+    if (!loading) {
+      setTruckNumber(''); setDateLoaded(''); setDepot(''); setSaleRows([makeSaleRow()])
+      return
+    }
+    const dep = loading.depot || loading.pfiLocation || loading.location || ''
+    setTruckNumber(loading.truckNumber || '')
+    setDateLoaded(loading.dateAllocated || '')
+    setDepot(dep)
+
+    const custId = loading.customerId != null ? String(loading.customerId) : ''
+    const custObj = custId ? customerMap.get(custId) : null
+    const custName = loading.customerName || custObj?.name || ''
+    const destination = isFillingStation(custObj) ? custName : (loading.location || '')
+    const qty = toNum(loading.quantityAllocated)
+    const cycleKey = getCycleKey(loading.truckNumber || '', loading.dateAllocated || '')
+    const cycleRates = cycleCustomerRateMap.get(cycleKey)
+    const existingRate = (custId && cycleRates?.get(custId)) || ''
+    const rateLocked = !!existingRate && !isFillingStation(custObj)
+    const qtyStr = qty > 0 ? formatWithCommas(String(qty)) : ''
+    const sv = existingRate && qtyStr
+      ? formatWithCommas(String(Number(stripCommas(qtyStr)) * Number(stripCommas(existingRate))))
+      : ''
+    const autoPhone = (custObj && isFillingStation(custObj) && custObj.phoneNumber) ? custObj.phoneNumber : ''
+    const autoPayerName = (custObj && isFillingStation(custObj) && custObj.contactPerson) ? custObj.contactPerson : ''
+    const autoPayerPhone = (custObj && isFillingStation(custObj) && custObj.contactPersonPhone) ? custObj.contactPersonPhone : autoPhone
+
+    setSaleRows([{
+      ...makeSaleRow(),
+      customer: custId,
+      customer_name: custName,
+      location: destination,
+      quantity: qtyStr,
+      rate: existingRate,
+      rateLocked,
+      sales_value: sv,
+      phone_number: autoPayerPhone,
+      payer_name: autoPayerName,
+    }])
+  }, [trucks, customerMap, getCycleKey, cycleCustomerRateMap])
+
+  const updateSaleRow = useCallback((uid: string, field: keyof Omit<SaleRow, 'uid'>, value: string) => {
+    if (rowErrors[uid]?.[field]) {
+      setRowErrors(prev => {
+        const next = { ...prev }
+        if (next[uid]) { next[uid] = { ...next[uid] }; delete next[uid][field] }
+        return next
+      })
+    }
+    setSaleRows(prev => prev.map(row => {
+      if (row.uid !== uid) return row
+      if (field === 'rate' && row.rateLocked) return row
+      const updated = {
+        ...row, [field]: field === 'quantity' || field === 'rate' || field === 'payment_amount' || field === 'sales_value'
+          ? (field === 'sales_value' ? value : formatWithCommas(value))
+          : value
+      }
+      if (field === 'customer') {
+        const cycleKey = getCycleKey(truckNumber, dateLoaded)
+        const cycleRates = cycleCustomerRateMap.get(cycleKey)
+        const priorRate = value ? cycleRates?.get(value) : undefined
+        const selectedCustomer = value ? customerMap.get(value) : null
+        if (priorRate && !isFillingStation(selectedCustomer)) {
+          updated.rate = priorRate
+          updated.rateLocked = true
+          const q = Number(stripCommas(updated.quantity)) || 0
+          const r = Number(stripCommas(priorRate)) || 0
+          updated.sales_value = q * r > 0 ? formatWithCommas(String(q * r)) : ''
+        } else {
+          updated.rateLocked = false
+        }
+        if (selectedCustomer && isFillingStation(selectedCustomer)) {
+          if (selectedCustomer.contactPerson) updated.payer_name = selectedCustomer.contactPerson
+          if (selectedCustomer.contactPersonPhone) updated.phone_number = selectedCustomer.contactPersonPhone
+          else if (selectedCustomer.phoneNumber) updated.phone_number = selectedCustomer.phoneNumber
+          updated.location = selectedCustomer.name
+        }
+      }
+      if (field === 'quantity' || field === 'rate') {
+        const q = Number(stripCommas(field === 'quantity' ? value : row.quantity)) || 0
+        const r = Number(stripCommas(field === 'rate' ? value : row.rate)) || 0
+        updated.sales_value = q * r > 0 ? formatWithCommas(String(q * r)) : ''
+      }
+      return updated
+    }))
+  }, [rowErrors, truckNumber, dateLoaded, getCycleKey, cycleCustomerRateMap, customerMap])
+
+  const addSaleRow = () => setSaleRows(prev => [...prev, makeSaleRow()])
+  const removeSaleRow = (uid: string) => setSaleRows(prev => prev.length > 1 ? prev.filter(r => r.uid !== uid) : prev)
+
+  const handleSave = useCallback(async () => {
+    if (!truckNumber.trim()) { toast.error('Please select a truck'); return }
+    const filledRows = saleRows.filter(r => r.customer || r.payment_amount || r.rate || r.quantity)
+    if (filledRows.length === 0) { toast.error('Add at least one customer row'); return }
+
+    const errors: Record<string, Partial<Record<keyof SaleRow, string>>> = {}
+    const nameOnlyRegex = /^[A-Za-z\s'\-\.]+$/
+    filledRows.forEach(row => {
+      const e: Partial<Record<keyof SaleRow, string>> = {}
+      const custObj = row.customer ? customerMap.get(row.customer) : null
+      const isFS = isFillingStation(custObj)
+      if (!row.customer) e.customer = 'Customer is required'
+      if (!row.location.trim()) e.location = 'Destination is required'
+      if (!assignMode && !isFS) {
+        if (!row.rate || Number(stripCommas(row.rate)) <= 0) e.rate = 'Rate is required'
+        if (row.payer_name.trim() && !nameOnlyRegex.test(row.payer_name.trim())) e.payer_name = 'Letters only'
+      }
+      if (Object.keys(e).length) errors[row.uid] = e
+    })
+    if (Object.keys(errors).length) { setRowErrors(errors); toast.error('Please fix the highlighted fields'); return }
+    setRowErrors({}); setSaving(true)
+
+    try {
+      const currentUser = localStorage.getItem('fullname') || 'Unknown'
+      const selectedLoading = truckLoadingId ? trucks.find(l => (l._id || l.id) === truckLoadingId) : undefined
+      const dialogAllocationCode = selectedLoading?.allocationCode || undefined
+
+      const promises = filledRows.map(row => {
+        return createSale.mutateAsync({
+          truckNumber: truckNumber.trim(),
+          dateLoaded: dateLoaded || format(new Date(), 'yyyy-MM-dd'),
+          depotLoaded: depot.trim() || undefined,
+          customerId: row.customer || undefined,
+          customerName: row.customer_name || undefined,
+          allocationCode: dialogTripCode || dialogAllocationCode || undefined,
+          location: row.location.trim() || undefined,
+          quantity: Number(stripCommas(row.quantity)) || undefined,
+          rate: !assignMode ? (Number(stripCommas(row.rate)) || undefined) : undefined,
+          salesValue: !assignMode ? (Number(stripCommas(row.sales_value)) || undefined) : undefined,
+          paymentAmount: !assignMode ? (Number(stripCommas(row.payment_amount)) || undefined) : undefined,
+          payerName: !assignMode ? (row.payer_name.trim() || undefined) : undefined,
+          dateOfPayment: !assignMode ? (row.date_of_payment || undefined) : undefined,
+          phoneNumber: row.phone_number.trim() || undefined,
+          remarks: row.remarks.trim() || undefined,
+          enteredBy: currentUser,
+          paymentMethod: 'manual',
+        } as Partial<DeliverySale>)
+      })
+
+      await Promise.all(promises)
+
+      const loadingId = truckLoadingId
+      if (loadingId) {
+        try {
+          const firstRow = filledRows[0]
+          const custName = firstRow.customer ? (customerMap.get(firstRow.customer)?.name || firstRow.customer_name) : ''
+          await updateInventory.mutateAsync({
+            id: loadingId,
+            data: {
+              ...(firstRow.customer ? { customerId: firstRow.customer, customerName: custName } : {}),
+              ...(firstRow.location.trim() ? { location: firstRow.location.trim() } : {}),
+            },
+          })
+        } catch { /* non-critical */ }
+      }
+
+      toast.success(assignMode
+        ? `${filledRows.length} customer${filledRows.length > 1 ? 's' : ''} assigned`
+        : `${filledRows.length} entr${filledRows.length > 1 ? 'ies' : 'y'} recorded`)
+      onOpenChange(false)
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to save')
+    } finally {
+      setSaving(false)
+    }
+  }, [truckNumber, dateLoaded, depot, truckLoadingId, dialogTripCode, saleRows, customerMap, assignMode, trucks, createSale, updateInventory, toast, onOpenChange])
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-3">
+            <div className={`p-2 rounded-lg ${assignMode ? 'bg-amber-100' : 'bg-emerald-100'}`}>
+              {assignMode
+                ? <UserPlus className="w-5 h-5 text-amber-600" />
+                : <Banknote className="w-5 h-5 text-emerald-600" />}
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold">
+                {assignMode ? 'Assign Customer to Cycle' : 'Record Payment'}
+              </h2>
+              <p className="text-sm font-normal text-slate-500 mt-0.5">
+                {assignMode
+                  ? 'Link customers to this truck cycle now — add rate & payment later.'
+                  : 'Select a loaded truck, then add one row per customer.'}
+              </p>
+            </div>
+          </DialogTitle>
+          <DialogDescription className="sr-only">Record payments against a loaded truck</DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4 py-2">
+          <div className="space-y-2">
+            <Label className="text-sm font-medium text-slate-700 flex items-center gap-1.5">
+              <Truck size={15} className="text-slate-500" /> Select Loaded Truck <span className="text-red-500">*</span>
+            </Label>
+            <select
+              aria-label="Select loaded truck"
+              value={truckLoadingId}
+              onChange={e => handleTruckSelect(e.target.value)}
+              className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            >
+              <option value="">Select a truck…</option>
+              {trucks.map(t => {
+                const id = t._id || t.id || ''
+                const plate = t.truckNumber || `Truck #${t.truckId}`
+                const custName = t.customerName || ''
+                const qty = toNum(t.quantityAllocated)
+                const dateLabel = normalizeCycleDate(t.dateAllocated || '')
+                return (
+                  <option key={id} value={id}>
+                    {plate} | {dateLabel || '-'} | {qty.toLocaleString()} L{custName ? ` → ${custName}` : ''}
+                  </option>
+                )
+              })}
+            </select>
+          </div>
+
+          {truckNumber && (
+            <div className="bg-blue-50/60 border border-blue-100 rounded-lg p-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-1.5 text-sm">
+                <div>
+                  <span className="text-slate-500 text-xs">Truck:</span>{' '}
+                  <span className="font-bold text-slate-800">{truckNumber}</span>
+                </div>
+                <div>
+                  <span className="text-slate-500 text-xs">Depot:</span>{' '}
+                  <span className="font-medium text-slate-800">{depot || '—'}</span>
+                </div>
+                <div>
+                  <span className="text-slate-500 text-xs">Date Loaded:</span>{' '}
+                  <span className="font-medium text-slate-800">
+                    {dateLoaded ? (() => { try { return format(parseISO(dateLoaded), 'dd MMM yyyy') } catch { return dateLoaded } })() : '—'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {truckNumber && tripCodes.length > 0 && (
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium text-slate-700 flex items-center gap-1.5">
+                <Tag size={14} className="text-purple-500" /> Allocation Code
+              </Label>
+              <select
+                aria-label="Select allocation code"
+                value={dialogTripCode}
+                onChange={e => setDialogTripCode(e.target.value)}
+                className={`h-10 w-full rounded-md border bg-background px-3 py-2 text-sm ${dialogTripCode ? 'border-purple-500 bg-purple-50 text-purple-900 font-semibold' : 'border-input'}`}
+              >
+                <option value="">No allocation code</option>
+                {tripCodes.map(code => (
+                  <option key={code} value={code}>{code}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {truckNumber && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                  Customer ({saleRows.length})
+                </p>
+                <Button type="button" variant="outline" size="sm" className="gap-1.5 text-xs h-8" onClick={addSaleRow}>
+                  <UserPlus size={13} /> Add Customer
+                </Button>
+              </div>
+
+              {saleRows.map((row, idx) => {
+                const custObj = row.customer ? customerMap.get(row.customer) : null
+                const isFS = isFillingStation(custObj)
+                const hasError = rowErrors[row.uid] && Object.keys(rowErrors[row.uid]).length
+
+                return (
+                  <div key={row.uid} className={`border rounded-lg p-3 space-y-3 relative ${hasError ? 'border-red-300 bg-red-50/30' : isFS ? 'border-amber-200 bg-amber-50/30' : 'border-slate-200 bg-slate-50/50'}`}>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                        {isFS ? <Fuel size={12} className="text-amber-500" /> : null}
+                        Customer #{idx + 1}
+                        {isFS && <span className="ml-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-700 border border-amber-200 normal-case tracking-normal">Filling Station</span>}
+                      </span>
+                      {saleRows.length > 1 && (
+                        <button type="button" onClick={() => removeSaleRow(row.uid)} className="text-slate-400 hover:text-red-500 transition-colors p-0.5 rounded" title="Remove row">
+                          <X size={15} />
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="space-y-1">
+                        <Label className="text-xs text-slate-600">Customer <span className="text-red-500">*</span></Label>
+                        <select
+                          aria-label={`Customer for row ${idx + 1}`}
+                          value={row.customer}
+                          onChange={e => {
+                            const custId = e.target.value
+                            const cust = custId ? customerMap.get(custId) : null
+                            updateSaleRow(row.uid, 'customer', custId)
+                            if (cust) updateSaleRow(row.uid, 'customer_name', cust.name)
+                          }}
+                          className={`h-9 w-full rounded-md border bg-background px-3 py-2 text-sm ${rowErrors[row.uid]?.customer ? 'border-red-400 bg-red-50' : 'border-input'}`}
+                        >
+                          <option value="">Select customer…</option>
+                          {customers.map(c => (
+                            <option key={c._id || c.id} value={c._id || c.id || ''}>{c.name}</option>
+                          ))}
+                        </select>
+                        {rowErrors[row.uid]?.customer && <p className="text-[11px] text-red-500">{rowErrors[row.uid].customer}</p>}
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs text-slate-600">Destination <span className="text-red-500">*</span></Label>
+                        <Input placeholder="e.g. Kano, Abuja…" className={`h-9 text-sm ${rowErrors[row.uid]?.location ? 'border-red-400 bg-red-50' : ''}`} value={row.location} onChange={e => updateSaleRow(row.uid, 'location', e.target.value)} />
+                        {rowErrors[row.uid]?.location && <p className="text-[11px] text-red-500">{rowErrors[row.uid].location}</p>}
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs text-slate-600">Quantity (L)</Label>
+                        <Input type="text" inputMode="decimal" placeholder="e.g. 33,000" className="h-9 text-sm" value={row.quantity} onChange={e => updateSaleRow(row.uid, 'quantity', e.target.value)} />
+                      </div>
+                    </div>
+
+                    {assignMode && (
+                      <div className="flex items-start gap-2 p-2.5 bg-amber-50 border border-amber-200 rounded-lg">
+                        <UserPlus size={14} className="text-amber-500 mt-0.5 shrink-0" />
+                        <p className="text-xs text-amber-700">
+                          <span className="font-semibold">Assign Only</span> — customer linked to this cycle now. Edit later to add rate and payment.
+                        </p>
+                      </div>
+                    )}
+
+                    {!assignMode && !isFS && (
+                      <>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                          <div className="space-y-1">
+                            <Label className="text-xs text-slate-600 flex items-center gap-1">
+                              Rate (₦/L) <span className="text-red-500">*</span>
+                              {row.rateLocked && <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-700 border border-amber-200"><FileText size={9} /> Locked</span>}
+                            </Label>
+                            <Input type="text" inputMode="decimal" placeholder="e.g. 1,210" className={`h-9 text-sm ${row.rateLocked ? 'bg-amber-50 text-amber-800 font-semibold cursor-not-allowed' : rowErrors[row.uid]?.rate ? 'border-red-400 bg-red-50' : ''}`} value={row.rate} readOnly={row.rateLocked} onChange={e => updateSaleRow(row.uid, 'rate', e.target.value)} />
+                            {rowErrors[row.uid]?.rate && <p className="text-[11px] text-red-500">{rowErrors[row.uid].rate}</p>}
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-xs text-slate-600">Expected (₦)</Label>
+                            <Input readOnly className="h-9 text-sm bg-white font-semibold text-slate-700" value={row.sales_value ? `₦${row.sales_value}` : '—'} />
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-xs text-slate-600">Amount Paid (₦)</Label>
+                            <Input type="text" inputMode="decimal" className="h-9 text-sm" value={row.payment_amount} onChange={e => updateSaleRow(row.uid, 'payment_amount', e.target.value)} />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div className="space-y-1">
+                            <Label className="text-xs text-slate-600"><CalendarIcon size={11} className="inline mr-1" />Date of Payment</Label>
+                            <Input type="date" className="h-9 text-sm" value={row.date_of_payment} onChange={e => updateSaleRow(row.uid, 'date_of_payment', e.target.value)} />
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-xs text-slate-600">Payer's Name</Label>
+                            <Input className={`h-9 text-sm ${rowErrors[row.uid]?.payer_name ? 'border-red-400 bg-red-50' : ''}`} value={row.payer_name} onChange={e => updateSaleRow(row.uid, 'payer_name', e.target.value.replace(/[0-9]/g, ''))} />
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <Label className="text-xs text-slate-600">Phone Number</Label>
+                        <Input placeholder="e.g. 08012345678" className="h-9 text-sm" value={row.phone_number} onChange={e => updateSaleRow(row.uid, 'phone_number', e.target.value)} />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs text-slate-600">Remarks</Label>
+                        <Input placeholder={isFS ? 'e.g. Awaiting sale…' : 'e.g. Partial Payment…'} className="h-9 text-sm" value={row.remarks} onChange={e => updateSaleRow(row.uid, 'remarks', e.target.value)} />
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+
+        <DialogFooter className="gap-2 sm:gap-0">
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>Cancel</Button>
+          <Button onClick={handleSave} disabled={saving} className="gap-2">
+            {saving ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+            {saving ? 'Saving…' : `Record ${saleRows.filter(r => r.customer).length || ''} Payment${saleRows.filter(r => r.customer).length !== 1 ? 's' : ''}`}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Quick Payment Dialog
+// ═══════════════════════════════════════════════════════════════════════════
+
+interface QuickPaymentDialogProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  target: LedgerGroup | null
+  customerMap?: Map<string, DeliveryCustomer>
+}
+
+export function QuickPaymentDialog({ open, onOpenChange, target, customerMap: _customerMap }: QuickPaymentDialogProps) {
+  const toast = useToast()
+  const createSale = useCreateDeliverySale()
+  const [saving, setSaving] = useState(false)
+  const [form, setForm] = useState({
+    payment_amount: '',
+    payer_name: '',
+    phone_number: '',
+    date_of_payment: format(new Date(), 'yyyy-MM-dd'),
+  })
+
+  const handleSave = useCallback(async () => {
+    if (!target) return
+    const paymentAmount = Number(stripCommas(form.payment_amount))
+    if (!paymentAmount || paymentAmount <= 0) { toast.error('Enter a valid payment amount'); return }
+    const payerName = form.payer_name.trim()
+    if (payerName && !/^[A-Za-z\s'\-.]+$/.test(payerName)) { toast.error('Payer name should contain letters only'); return }
+
+    setSaving(true)
+    try {
+      const currentUser = localStorage.getItem('fullname') || 'Unknown'
+      await createSale.mutateAsync({
+        truckNumber: target.truckNumber,
+        dateLoaded: target.dateLoaded || format(new Date(), 'yyyy-MM-dd'),
+        depotLoaded: target.depot || undefined,
+        customerId: target.customerId || undefined,
+        customerName: target.customerName || undefined,
+        allocationCode: target.allocationCode || undefined,
+        location: target.location || undefined,
+        quantity: target.quantity || undefined,
+        rate: target.rate || undefined,
+        salesValue: target.expected || undefined,
+        paymentAmount: paymentAmount,
+        payerName: payerName || undefined,
+        dateOfPayment: form.date_of_payment || format(new Date(), 'yyyy-MM-dd'),
+        phoneNumber: form.phone_number.trim() || undefined,
+        enteredBy: currentUser,
+        paymentMethod: 'manual',
+      } as Partial<DeliverySale>)
+      toast.success(`${target.truckNumber} · ${fmt(paymentAmount)}`)
+      onOpenChange(false)
+      setForm({ payment_amount: '', payer_name: '', phone_number: '', date_of_payment: format(new Date(), 'yyyy-MM-dd') })
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to record payment')
+    } finally {
+      setSaving(false)
+    }
+  }, [target, form, createSale, toast, onOpenChange])
+
+  const amountTyped = Number(stripCommas(form.payment_amount)) || 0
+  const remainingBalance = target ? target.balance - amountTyped : 0
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[520px]">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-emerald-100">
+              <Banknote className="w-5 h-5 text-emerald-600" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold">Add Payment</h2>
+              <p className="text-sm font-normal text-slate-500 mt-0.5">
+                {target ? `${target.truckNumber} · ${target.customerName || 'Customer pending'}${target.code ? ` · ${target.code}` : ''}` : ''}
+              </p>
+            </div>
+          </DialogTitle>
+          <DialogDescription className="sr-only">Record a follow-up payment</DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4 py-2">
+          {target && (
+            <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm space-y-2">
+              <div className="grid grid-cols-2 gap-3 pb-2 border-b border-dashed border-slate-200">
+                <div>
+                  <p className="text-xs text-slate-400 font-medium">Expected</p>
+                  <p className="font-bold text-slate-800 mt-0.5">{target.expected > 0 ? fmt(target.expected) : '—'}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-slate-400 font-medium">Current Balance</p>
+                  <p className={`font-bold mt-0.5 ${target.balance > 0 ? 'text-red-600' : 'text-emerald-600'}`}>
+                    {target.expected > 0 ? (target.balance > 0 ? fmt(target.balance) : 'Fully Paid') : '—'}
+                  </p>
+                </div>
+              </div>
+              {amountTyped > 0 && (
+                <div className="grid grid-cols-2 gap-3 pt-1">
+                  <div>
+                    <p className="text-xs text-indigo-500 font-semibold">Payment Preview</p>
+                    <p className="font-extrabold text-indigo-600 mt-0.5">{fmt(amountTyped)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-400 font-medium">New Balance</p>
+                    <p className={`font-extrabold mt-0.5 ${remainingBalance === 0 ? 'text-emerald-600' : remainingBalance > 0 ? 'text-red-600' : 'text-blue-600'}`}>
+                      {remainingBalance === 0 ? 'Fully Settled' : remainingBalance > 0 ? fmt(remainingBalance) : `+${fmt(Math.abs(remainingBalance))} Overpaid`}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label>Amount Paid</Label>
+              <Input type="text" inputMode="decimal" value={form.payment_amount} onChange={e => setForm(prev => ({ ...prev, payment_amount: formatWithCommas(e.target.value) }))} placeholder="e.g. 5,000,000" />
+            </div>
+            <div className="space-y-1">
+              <Label>Date Paid</Label>
+              <Input type="date" value={form.date_of_payment} onChange={e => setForm(prev => ({ ...prev, date_of_payment: e.target.value }))} />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label>Payer's Name</Label>
+              <Input value={form.payer_name} onChange={e => setForm(prev => ({ ...prev, payer_name: e.target.value.replace(/[0-9]/g, '') }))} />
+            </div>
+            <div className="space-y-1">
+              <Label>Phone Number</Label>
+              <Input value={form.phone_number} onChange={e => setForm(prev => ({ ...prev, phone_number: e.target.value }))} />
+            </div>
+          </div>
+
+
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>Cancel</Button>
+          <Button onClick={handleSave} disabled={saving} className="gap-2">
+            {saving ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+            {saving ? 'Saving…' : 'Save Payment'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Row Setup Dialog
+// ═══════════════════════════════════════════════════════════════════════════
+
+interface RowSetupDialogProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  target: LedgerGroup | null
+  customers: DeliveryCustomer[]
+  customerMap: Map<string, DeliveryCustomer>
+  tripCodes: string[]
+}
+
+export function RowSetupDialog({ open, onOpenChange, target, customers, customerMap, tripCodes }: RowSetupDialogProps) {
+  const toast = useToast()
+  const updateSale = useUpdateDeliverySale()
+  const updateInventory = useUpdateDeliveryInventory()
+  const [saving, setSaving] = useState(false)
+  const [setupCustomer, setSetupCustomer] = useState('')
+  const [setupDestination, setSetupDestination] = useState('')
+  const [setupCode, setSetupCode] = useState('')
+  const [setupRate, setSetupRate] = useState('')
+  const [setupQuantity, setSetupQuantity] = useState('')
+
+  useEffect(() => {
+    if (target) {
+      setSetupCustomer(target.customerId || '')
+      setSetupDestination(target.location || '')
+      setSetupCode(target.code || target.allocationCode || '')
+      setSetupRate(target.rate > 0 ? formatWithCommas(String(target.rate)) : '')
+      setSetupQuantity(target.quantity > 0 ? formatWithCommas(String(target.quantity)) : '')
+    }
+  }, [target, open])
+
+  const handleSave = useCallback(async () => {
+    if (!target) return
+    const normalized = setupCode.trim().toUpperCase().replace(/\s+/g, '-')
+    if (normalized && !tripCodes.includes(normalized)) { toast.error('Create this code in Inventory first'); return }
+
+    setSaving(true)
+    try {
+      const customerId = setupCustomer || null
+      const customerName = customerId ? (customerMap.get(customerId)?.name || '') : ''
+      const numRate = Number(stripCommas(setupRate)) || 0
+      const numQty = Number(stripCommas(setupQuantity)) || 0
+      const calcSalesValue = numRate * numQty > 0 ? numRate * numQty : undefined
+
+      if (target.loadingId) {
+        const isMulti = target.key.split(':').length > 2
+        await updateInventory.mutateAsync({
+          id: String(target.loadingId),
+          data: {
+            ...(isMulti ? {} : { customerId: customerId || undefined, customerName: customerName || undefined, location: setupDestination.trim() || undefined }),
+            ...(numQty > 0 ? { quantityAllocated: numQty } : {}),
+            allocationCode: normalized || null,
+          },
+        })
+        if (target.payments.length > 0) {
+          await Promise.all(target.payments.map(p =>
+            updateSale.mutateAsync({
+              id: p._id || p.id || '',
+              data: {
+                customerId: customerId || undefined,
+                location: setupDestination.trim() || undefined,
+                allocationCode: normalized || null,
+                ...(numRate > 0 ? { rate: numRate } : {}),
+                ...(numQty > 0 ? { quantity: numQty } : {}),
+                ...(calcSalesValue ? { salesValue: calcSalesValue } : {}),
+              },
+            }),
+          ))
+        }
+      } else if (target.payments.length > 0) {
+        await Promise.all(target.payments.map(p =>
+          updateSale.mutateAsync({
+            id: p._id || p.id || '',
+            data: {
+              customerId: customerId || undefined,
+              location: setupDestination.trim() || undefined,
+              allocationCode: normalized || null,
+              ...(numRate > 0 ? { rate: numRate } : {}),
+              ...(numQty > 0 ? { quantity: numQty } : {}),
+              ...(calcSalesValue ? { salesValue: calcSalesValue } : {}),
+            },
+          }),
+        ))
+      }
+
+      toast.success('Row setup saved')
+      onOpenChange(false)
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to save setup')
+    } finally {
+      setSaving(false)
+    }
+  }, [target, setupCustomer, setupDestination, setupCode, setupRate, setupQuantity, tripCodes, customerMap, updateSale, updateInventory, toast, onOpenChange])
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[600px]">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-amber-100">
+              <UserPlus className="w-5 h-5 text-amber-600" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold">Row Setup</h2>
+              <p className="text-sm font-normal text-slate-500 mt-0.5">
+                {target ? `${target.truckNumber} · ${target.dateLoaded ? (() => { try { return format(parseISO(target.dateLoaded), 'dd MMM yyyy') } catch { return target.dateLoaded } })() : 'No date'}` : 'Assign customer and destination'}
+              </p>
+            </div>
+          </DialogTitle>
+          <DialogDescription className="sr-only">Setup customer, destination and code for selected row</DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4 py-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label>Customer</Label>
+              <select aria-label="Setup customer" value={setupCustomer} onChange={e => setSetupCustomer(e.target.value)} className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                <option value="">Select customer…</option>
+                {customers.map(c => (
+                  <option key={c._id || c.id} value={c._id || c.id || ''}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-1">
+              <Label>Destination</Label>
+              <Input value={setupDestination} onChange={e => setSetupDestination(e.target.value)} placeholder="e.g. Kano, Abuja" />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label>Quantity (L)</Label>
+              <Input
+                type="text"
+                inputMode="decimal"
+                value={setupQuantity}
+                onChange={e => setSetupQuantity(formatWithCommas(e.target.value))}
+                placeholder="e.g. 33,000"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label>Rate (₦/L)</Label>
+              <Input
+                type="text"
+                inputMode="decimal"
+                value={setupRate}
+                onChange={e => setSetupRate(formatWithCommas(e.target.value))}
+                placeholder="e.g. 1,200"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <Label>Allocation Code</Label>
+            <select aria-label="Setup allocation code" value={setupCode} onChange={e => setSetupCode(e.target.value)} className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+              <option value="">No allocation code</option>
+              {tripCodes.map(code => (
+                <option key={code} value={code}>{code}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>Cancel</Button>
+          <Button onClick={handleSave} disabled={saving} className="gap-2">
+            {saving ? <Loader2 size={14} className="animate-spin" /> : <UserPlus size={14} />}
+            {saving ? 'Saving…' : 'Save Setup'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Edit Entry Dialog
+// ═══════════════════════════════════════════════════════════════════════════
+
+interface EditEntryDialogProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  target: DeliverySale | null
+  tripCodes: string[]
+  allSales: DeliverySale[]
+  getCycleKey: (truck: string, date: string | null | undefined) => string
+  customerMap?: Map<string, DeliveryCustomer>
+}
+
+export function EditEntryDialog({ open, onOpenChange, target, tripCodes, customerMap }: EditEntryDialogProps) {
+  const toast = useToast()
+  const updateSale = useUpdateDeliverySale()
+  const [saving, setSaving] = useState(false)
+  const [editTripCode, setEditTripCode] = useState('')
+  const [form, setForm] = useState<{
+    rate: string; sales_value: string; payment_amount: string;
+    payer_name: string; date_of_payment: string; bank: string;
+    remarks: string; phone_number: string; location: string; quantity: string;
+  } | null>(null)
+
+  useEffect(() => {
+    if (target && open) {
+      setEditTripCode(target.allocationCode || '')
+      const rate = toNum(target.rate)
+      const sv = toNum(target.salesValue)
+      const pa = toNum(target.paymentAmount)
+      const qty = toNum(target.quantity)
+
+      let rawDate = target.dateOfPayment || ''
+      if (rawDate) {
+        try {
+          rawDate = format(parseISO(rawDate), 'yyyy-MM-dd')
+        } catch {
+          rawDate = String(rawDate).split('T')[0] || ''
+        }
+      }
+
+      setForm({
+        quantity: qty > 0 ? formatWithCommas(String(qty)) : '',
+        rate: rate > 0 ? formatWithCommas(String(rate)) : '',
+        sales_value: sv > 0 ? formatWithCommas(String(sv)) : '',
+        payment_amount: pa > 0 ? formatWithCommas(String(pa)) : '',
+        payer_name: target.payerName || '',
+        date_of_payment: rawDate,
+        bank: target.bank || '',
+        remarks: target.remarks || '',
+        phone_number: target.phoneNumber || '',
+        location: target.location || '',
+      })
+    }
+  }, [target, open])
+
+  const handleSave = useCallback(async () => {
+    if (!target || !form) return
+    setSaving(true)
+    try {
+      const qty = Number(stripCommas(form.quantity)) || undefined
+      const rate = Number(stripCommas(form.rate)) || undefined
+      const sv = Number(stripCommas(form.sales_value)) || undefined
+      const pa = Number(stripCommas(form.payment_amount)) || undefined
+      const computedSv = qty && rate && !sv ? qty * rate : sv
+
+      await updateSale.mutateAsync({
+        id: String(target._id ?? target.id ?? ''),
+        data: {
+          quantity: qty,
+          rate: rate,
+          salesValue: computedSv,
+          paymentAmount: pa,
+          payerName: form.payer_name.trim() || undefined,
+          bank: form.bank.trim() || undefined,
+          dateOfPayment: form.date_of_payment || undefined,
+          remarks: form.remarks.trim() || undefined,
+          phoneNumber: form.phone_number.trim() || undefined,
+          location: form.location.trim() || undefined,
+          allocationCode: editTripCode || undefined,
+          paymentMethod: target.paymentMethod || 'manual',
+        },
+      })
+
+      toast.success('Entry updated')
+      onOpenChange(false)
+    } catch (err: any) {
+      toast.error(err?.message || 'Update failed')
+    } finally {
+      setSaving(false)
+    }
+  }, [target, form, editTripCode, updateSale, toast, onOpenChange, customerMap])
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-blue-100">
+              <Pencil className="w-5 h-5 text-blue-600" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold">Edit Entry</h2>
+              <p className="text-sm font-normal text-slate-500 mt-0.5">
+                {target?.truckNumber} — {target?.customerName || `Customer #${target?.customerId}`}
+              </p>
+            </div>
+          </DialogTitle>
+          <DialogDescription className="sr-only">Edit a sales ledger entry</DialogDescription>
+        </DialogHeader>
+
+        {form && target && (
+          <div className="space-y-4 py-2">
+            {(!toNum(target.rate) || !toNum(target.salesValue)) && (
+              <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                <Fuel size={14} className="text-amber-500 mt-0.5 shrink-0" />
+                <p className="text-xs text-amber-700">This entry has no rate or revenue yet — fill them in below.</p>
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs text-slate-600">Destination</Label>
+                <Input value={form.location} onChange={e => setForm(f => f ? { ...f, location: e.target.value } : f)} className="h-9 text-sm" placeholder="e.g. Kano" />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs text-slate-600">Quantity (L)</Label>
+                <Input type="text" inputMode="decimal" value={form.quantity} onChange={e => {
+                  const qty = formatWithCommas(e.target.value)
+                  const r = Number(stripCommas(form.rate)) || 0
+                  const q = Number(stripCommas(qty)) || 0
+                  const sv = q && r ? formatWithCommas(String(q * r)) : form.sales_value
+                  setForm(f => f ? { ...f, quantity: qty, sales_value: sv } : f)
+                }} className="h-9 text-sm" placeholder="e.g. 33,000" />
+              </div>
+            </div>
+
+            {tripCodes.length > 0 && (
+              <div className="space-y-1">
+                <Label className="text-xs text-slate-600 flex items-center gap-1.5"><Tag size={11} className="text-purple-500" /> Code</Label>
+                <select aria-label="Code" value={editTripCode} onChange={e => setEditTripCode(e.target.value)} className={`h-9 w-full rounded-md border bg-background px-3 py-1 text-sm ${editTripCode ? 'border-purple-500 bg-purple-50 text-purple-900 font-semibold' : 'border-input'}`}>
+                  <option value="">No code</option>
+                  {tripCodes.map(code => (<option key={code} value={code}>{code}</option>))}
+                </select>
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs text-slate-600">Rate (₦/L)</Label>
+                <Input type="text" inputMode="decimal" value={form.rate} onChange={e => {
+                  const rate = formatWithCommas(e.target.value)
+                  const r = Number(stripCommas(rate)) || 0
+                  const q = Number(stripCommas(form.quantity)) || 0
+                  const sv = q && r ? formatWithCommas(String(q * r)) : form.sales_value
+                  setForm(f => f ? { ...f, rate, sales_value: sv } : f)
+                }} className="h-9 text-sm" placeholder="e.g. 1,210" />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs text-slate-600">Total Expected (₦)</Label>
+                <Input type="text" inputMode="decimal" value={form.sales_value} onChange={e => setForm(f => f ? { ...f, sales_value: formatWithCommas(e.target.value) } : f)} className="h-9 text-sm font-semibold" placeholder="Auto-computed or manual" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs text-slate-600">Amount Paid (₦)</Label>
+                <Input type="text" inputMode="decimal" value={form.payment_amount} onChange={e => setForm(f => f ? { ...f, payment_amount: formatWithCommas(e.target.value) } : f)} className="h-9 text-sm" placeholder="e.g. 5,000,000" />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs text-slate-600">Date of Payment</Label>
+                <Input type="date" value={form.date_of_payment} onChange={e => setForm(f => f ? { ...f, date_of_payment: e.target.value } : f)} className="h-9 text-sm" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs text-slate-600">Payer's Name</Label>
+                <Input value={form.payer_name} onChange={e => setForm(f => f ? { ...f, payer_name: e.target.value.replace(/[0-9]/g, '') } : f)} className="h-9 text-sm" placeholder="Name only" />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs text-slate-600">Phone Number</Label>
+                <Input value={form.phone_number} onChange={e => setForm(f => f ? { ...f, phone_number: e.target.value } : f)} className="h-9 text-sm" placeholder="e.g. 08012345678" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs text-slate-600">Payment Bank Account</Label>
+                <select
+                  aria-label="Payment Bank Account"
+                  value={form.bank}
+                  onChange={e => setForm(f => f ? { ...f, bank: e.target.value } : f)}
+                  className="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm"
+                >
+                  <option value="">No Bank Selected / Cash</option>
+                  {BANK_ACCOUNTS.map(acct => (
+                    <option key={acct.id} value={`${acct.account_number} (${acct.bank_name})`}>
+                      {acct.account_name} — {acct.bank_name} ({acct.account_number})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs text-slate-600">Remarks</Label>
+                <Input value={form.remarks} onChange={e => setForm(f => f ? { ...f, remarks: e.target.value } : f)} className="h-9 text-sm" placeholder="e.g. Full Payment" />
+              </div>
+            </div>
+          </div>
+        )}
+
+        <DialogFooter className="gap-2 sm:gap-0">
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>Cancel</Button>
+          <Button onClick={handleSave} disabled={saving} className="gap-2">
+            {saving ? <Loader2 size={16} className="animate-spin" /> : <Pencil size={16} />}
+            {saving ? 'Saving…' : 'Save Changes'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Delete Confirmation Dialog
+// ═══════════════════════════════════════════════════════════════════════════
+
+interface DeleteConfirmDialogProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  target: { ids: string[]; loadingId?: string; mode: 'entry' | 'truck'; label: string } | null
+}
+
+export function DeleteConfirmDialog({ open, onOpenChange, target }: DeleteConfirmDialogProps) {
+  const toast = useToast()
+  const deleteSale = useDeleteDeliverySale()
+  const [deleting, setDeleting] = useState(false)
+
+  const handleDelete = useCallback(async () => {
+    if (!target) return
+    setDeleting(true)
+    try {
+      if (target.ids.length > 0) {
+        await Promise.all(target.ids.map(id => deleteSale.mutateAsync(id)))
+      }
+      toast.success(target.mode === 'truck' ? 'Truck record deleted' : 'Entry deleted')
+      onOpenChange(false)
+    } catch (err: any) {
+      toast.error(err?.message || 'Delete failed')
+    } finally {
+      setDeleting(false)
+    }
+  }, [target, deleteSale, toast, onOpenChange])
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[400px]">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-3">
+            <div className="bg-red-100 p-2 rounded-lg">
+              <Trash2 className="w-5 h-5 text-red-600" />
+            </div>
+            <span>Confirm Delete</span>
+          </DialogTitle>
+          <DialogDescription className="pt-2 text-slate-600">
+            Are you sure you want to delete <strong>{target?.label}</strong>? This action cannot be undone.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter className="gap-2 sm:gap-0">
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={deleting}>Cancel</Button>
+          <Button variant="destructive" onClick={handleDelete} disabled={deleting} className="gap-2">
+            {deleting ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
+            {deleting ? 'Deleting…' : 'Delete'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}

@@ -1,0 +1,817 @@
+import { useState, useMemo, useCallback } from 'react'
+import { createFileRoute, useNavigate, useSearch } from '@tanstack/react-router'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '#/components/ui/card'
+import { Button } from '#/components/ui/button'
+import { Input } from '#/components/ui/input'
+import { Label } from '#/components/ui/label'
+import { Badge } from '#/components/ui/badge'
+import {
+  ArrowLeft, Truck, Calendar, Tag, Building2, UserPlus,
+  Loader2, Plus, X, Fuel, CheckCircle2, ChevronRight,
+  Users, MapPin, AlertTriangle,
+} from 'lucide-react'
+import { useDeliveryInventoryList, useUpdateDeliveryInventory } from '#/lib/hooks/useDeliveryInventory'
+import { useDeliveryCustomerList } from '#/lib/hooks/useDeliveryCustomers'
+import { useDeliverySalesList, useCreateDeliverySale } from '#/lib/hooks/useDeliverySales'
+import { usePfiList, type Pfi } from '#/lib/hooks/usePfis'
+import { useLedgerGroups } from '#/lib/hooks/useLedgerGroups'
+import { useToast } from '#/lib/hooks/useToast'
+import type { DeliveryInventory, DeliveryCustomer, DeliverySale } from '#/lib/types'
+import type { LedgerGroup } from '#/components/sales-ledger/SalesLedgerDialogs'
+import { toNum, formatWithCommas, stripCommas, isFillingStation, safeFormatDate, normalizeCycleDate } from '#/lib/sales-ledger-utils'
+
+export const Route = createFileRoute('/sales-ledger/assign-customer')({
+  validateSearch: (search: Record<string, unknown>): {
+    loadingId?: string
+    truckNumber?: string
+    dateLoaded?: string
+    depot?: string
+    code?: string
+  } => ({
+    loadingId: (search.loadingId as string) || undefined,
+    truckNumber: (search.truckNumber as string) || undefined,
+    dateLoaded: (search.dateLoaded as string) || undefined,
+    depot: (search.depot as string) || undefined,
+    code: (search.code as string) || undefined,
+  }),
+  component: AssignCustomerPage,
+})
+
+interface SaleRow {
+  uid: string
+  customer: string
+  customer_name: string
+  location: string
+  quantity: string
+  phone_number: string
+  remarks: string
+}
+
+const makeSaleRow = (): SaleRow => ({
+  uid: crypto.randomUUID(),
+  customer: '',
+  customer_name: '',
+  location: '',
+  quantity: '',
+  phone_number: '',
+  remarks: '',
+})
+
+interface ExistingAssignment {
+  customerId: string
+  customerName: string
+  location: string
+  quantity: number
+  isFillingStation: boolean
+  paymentCount: number
+  totalPaid: number
+}
+
+function AssignCustomerPage() {
+  const navigate = useNavigate()
+  const toast = useToast()
+  const searchParams = useSearch({ from: '/sales-ledger/assign-customer' })
+
+  const { data: rawInventory = [], isLoading: inventoryLoading } = useDeliveryInventoryList()
+  const { data: rawCustomers, isLoading: customersLoading } = useDeliveryCustomerList()
+  const { data: rawSales = [], isLoading: salesLoading } = useDeliverySalesList()
+  const { data: rawPfis } = usePfiList()
+
+  const createSale = useCreateDeliverySale()
+  const updateInventory = useUpdateDeliveryInventory()
+
+  const allLoadings: DeliveryInventory[] = useMemo(() =>
+    Array.isArray(rawInventory) ? rawInventory : [], [rawInventory])
+
+  const allSales: DeliverySale[] = useMemo(() =>
+    Array.isArray(rawSales) ? rawSales : [], [rawSales])
+
+  const customers: DeliveryCustomer[] = useMemo(() => {
+    if (!rawCustomers) return []
+    if (Array.isArray(rawCustomers)) return rawCustomers
+    return rawCustomers.customers || rawCustomers.data || []
+  }, [rawCustomers])
+
+  const pfis: Pfi[] = useMemo(() => {
+    if (!rawPfis) return []
+    if (Array.isArray(rawPfis)) return rawPfis
+    return rawPfis.pfis || rawPfis.data || []
+  }, [rawPfis])
+
+  const pfiMap = useMemo(() => {
+    const m = new Map<string, Pfi>()
+    pfis.forEach(p => m.set(p._id, p))
+    return m
+  }, [pfis])
+
+  const customerMap = useMemo(() => {
+    const m = new Map<string, DeliveryCustomer>()
+    customers.forEach(c => {
+      if (c._id != null) m.set(String(c._id), c)
+      if (c.id != null) m.set(String(c.id), c)
+    })
+    return m
+  }, [customers])
+
+  const customerByNameMap = useMemo(() => {
+    const m = new Map<string, DeliveryCustomer>()
+    customers.forEach(c => {
+      if (c.name) m.set(c.name.trim().toLowerCase(), c)
+    })
+    return m
+  }, [customers])
+
+  const { ledgerGroups } = useLedgerGroups({
+    allSales,
+    allLoadings,
+    customerMap,
+    pfiMap,
+  })
+
+  const selectedLoading = useMemo(() => {
+    if (searchParams.loadingId) {
+      const found = allLoadings.find(l => String(l._id || l.id) === String(searchParams.loadingId))
+      if (found) return found
+    }
+    if (searchParams.truckNumber) {
+      const normalizedTruck = searchParams.truckNumber.trim().toUpperCase()
+      const matches = allLoadings.filter(l => (l.truckNumber || '').trim().toUpperCase() === normalizedTruck)
+      if (searchParams.dateLoaded) {
+        const dateMatch = matches.find(l => (l.dateAllocated || '').split('T')[0] === searchParams.dateLoaded?.split('T')[0])
+        if (dateMatch) return dateMatch
+      }
+      if (matches.length > 0) return matches[0]
+    }
+    return null
+  }, [allLoadings, searchParams])
+
+  const truckNumber = searchParams.truckNumber || selectedLoading?.truckNumber || ''
+  const dateLoaded = searchParams.dateLoaded || selectedLoading?.dateAllocated || ''
+  const depot = searchParams.depot || selectedLoading?.depot || selectedLoading?.pfiLocation || selectedLoading?.location || ''
+  const code = searchParams.code || selectedLoading?.allocationCode || ''
+
+  // ── Compute existing assignments for this truck cycle ──────────────────
+  const targetCycleGroups = useMemo((): LedgerGroup[] => {
+    if (!ledgerGroups.length) return []
+    const { loadingId, truckNumber: paramTruck, dateLoaded: paramDate, code: paramCode } = searchParams
+
+    if (loadingId || selectedLoading) {
+      const targetId = String(loadingId || selectedLoading?._id || selectedLoading?.id || '')
+      if (targetId) {
+        const matches = ledgerGroups.filter(g => String(g.loadingId || '') === targetId)
+        if (matches.length > 0) return matches
+      }
+    }
+
+    const targetTruck = (paramTruck || selectedLoading?.truckNumber || '').trim().toUpperCase()
+    if (!targetTruck) return []
+
+    return ledgerGroups.filter(g => {
+      const gTruck = (g.truckNumber || '').trim().toUpperCase()
+      if (gTruck !== targetTruck) return false
+
+      const targetDate = paramDate || selectedLoading?.dateAllocated
+      if (targetDate) {
+        if (normalizeCycleDate(g.dateLoaded) !== normalizeCycleDate(targetDate)) return false
+      }
+
+      const targetCode = (paramCode || selectedLoading?.allocationCode || '').trim().toUpperCase()
+      if (targetCode && g.code) {
+        if (g.code.trim().toUpperCase() !== targetCode) return false
+      }
+
+      return true
+    })
+  }, [ledgerGroups, searchParams, selectedLoading])
+
+  const existingAssignments = useMemo((): ExistingAssignment[] => {
+    const list: ExistingAssignment[] = []
+    const seenCustomers = new Set<string>()
+
+    targetCycleGroups.forEach(g => {
+      const name = g.customerName || ''
+      const rawCid = g.customerId ? String(g.customerId) : ''
+      const customerObj = (rawCid ? customerMap.get(rawCid) : null) || (name ? customerByNameMap.get(name.trim().toLowerCase()) : null)
+      const resolvedCid = rawCid || (customerObj ? String(customerObj._id || customerObj.id || '') : '')
+
+      if (!name && !resolvedCid) return
+
+      const dedupKey = resolvedCid || name.trim().toLowerCase()
+      if (seenCustomers.has(dedupKey)) return
+      seenCustomers.add(dedupKey)
+
+      const isFS = g.isFillingStation || isFillingStation(customerObj)
+      const location = isFS ? (name || customerObj?.name || g.location || '') : (g.location || name || '')
+
+      list.push({
+        customerId: resolvedCid,
+        customerName: name || customerObj?.name || 'Assigned Customer',
+        location,
+        quantity: Math.max(0, toNum(g.quantity)),
+        isFillingStation: isFS,
+        paymentCount: g.payments?.length || 0,
+        totalPaid: toNum(g.totalPaid),
+      })
+    })
+
+    return list
+  }, [targetCycleGroups, customerMap, customerByNameMap])
+
+  // ── Capacity calculations ─────────────────────────────────────────────
+  const totalTruckCapacity = useMemo(() => {
+    const direct = toNum(selectedLoading?.quantityAllocated)
+    if (direct > 0) return direct
+    return targetCycleGroups.reduce((mx, g) => Math.max(mx, toNum(g.quantity)), 0)
+  }, [selectedLoading, targetCycleGroups])
+
+  const alreadyAllocatedQty = useMemo(() =>
+    existingAssignments.reduce((sum, a) => sum + a.quantity, 0),
+    [existingAssignments]
+  )
+
+  const remainingCapacity = Math.max(0, totalTruckCapacity - alreadyAllocatedQty)
+
+  // IDs of already-assigned customers (to exclude from dropdown)
+  const assignedCustomerIds = useMemo(() =>
+    new Set(existingAssignments.map(a => a.customerId)),
+    [existingAssignments]
+  )
+
+  // ── Form state ────────────────────────────────────────────────────────
+  const [saleRows, setSaleRows] = useState<SaleRow[]>(() => {
+    // Start with an empty row — don't pre-fill from inventory since that customer is already tracked
+    return [makeSaleRow()]
+  })
+
+  const [rowErrors, setRowErrors] = useState<Record<string, Partial<Record<keyof SaleRow, string>>>>({})
+  const [saving, setSaving] = useState(false)
+
+  const updateSaleRow = useCallback((uid: string, field: keyof Omit<SaleRow, 'uid'>, value: string) => {
+    if (rowErrors[uid]?.[field]) {
+      setRowErrors(prev => {
+        const next = { ...prev }
+        if (next[uid]) { next[uid] = { ...next[uid] }; delete next[uid][field] }
+        return next
+      })
+    }
+    setSaleRows(prev => prev.map(row => {
+      if (row.uid !== uid) return row
+      const updated = {
+        ...row,
+        [field]: field === 'quantity' ? formatWithCommas(value) : value,
+      }
+      if (field === 'customer') {
+        const selectedCustomer = value ? customerMap.get(value) : null
+        if (selectedCustomer) {
+          updated.customer_name = selectedCustomer.name
+          if (isFillingStation(selectedCustomer)) {
+            const phone = (selectedCustomer as any).contactPersonPhone || (selectedCustomer as any).phoneNumber || (selectedCustomer as any).phone
+            if (phone) updated.phone_number = phone
+            updated.location = selectedCustomer.name
+          }
+        }
+      }
+      return updated
+    }))
+  }, [rowErrors, customerMap])
+
+  const addSaleRow = () => setSaleRows(prev => [...prev, makeSaleRow()])
+  const removeSaleRow = (uid: string) => setSaleRows(prev => prev.length > 1 ? prev.filter(r => r.uid !== uid) : prev)
+
+  // ── Available customers (exclude already assigned) ─────────────────────
+  const availableCustomers = useMemo(() => {
+    // Also exclude customers already selected in other form rows
+    const selectedInForm = new Set(saleRows.filter(r => r.customer).map(r => r.customer))
+    return customers.filter(c => {
+      const id = c._id || c.id || ''
+      return !assignedCustomerIds.has(id) || selectedInForm.has(id)
+    })
+  }, [customers, assignedCustomerIds, saleRows])
+
+  // ── Save handler ──────────────────────────────────────────────────────
+  const handleSave = useCallback(async () => {
+    if (!truckNumber.trim()) {
+      toast.error('Truck information missing')
+      return
+    }
+
+    const filledRows = saleRows.filter(r => r.customer || r.location || r.quantity)
+    if (filledRows.length === 0) {
+      toast.error('Please select at least one customer')
+      return
+    }
+
+    const newAllocatedQty = filledRows.reduce((sum, row) => sum + (Number(stripCommas(row.quantity)) || 0), 0)
+
+    const errors: Record<string, Partial<Record<keyof SaleRow, string>>> = {}
+    filledRows.forEach(row => {
+      const e: Partial<Record<keyof SaleRow, string>> = {}
+      if (!row.customer) e.customer = 'Customer is required'
+      if (!row.location.trim()) e.location = 'Destination is required'
+      const rowQty = Number(stripCommas(row.quantity)) || 0
+      if (!rowQty || rowQty <= 0) e.quantity = 'Quantity is required'
+      if (Object.keys(e).length) errors[row.uid] = e
+    })
+
+    // Validate against REMAINING capacity, not total
+    if (remainingCapacity > 0 && newAllocatedQty > remainingCapacity) {
+      toast.error(
+        `New allocation (${newAllocatedQty.toLocaleString()} L) exceeds remaining capacity (${remainingCapacity.toLocaleString()} L). ` +
+        `Already assigned: ${alreadyAllocatedQty.toLocaleString()} L of ${totalTruckCapacity.toLocaleString()} L.`
+      )
+      return
+    }
+
+    if (Object.keys(errors).length) {
+      setRowErrors(errors)
+      toast.error('Please fix the highlighted fields')
+      return
+    }
+
+    setRowErrors({})
+    setSaving(true)
+
+    try {
+      const currentUser = localStorage.getItem('fullname') || 'Unknown'
+
+      const promises = filledRows.map(row => {
+        return createSale.mutateAsync({
+          truckNumber: truckNumber.trim(),
+          dateLoaded: dateLoaded || new Date().toISOString().split('T')[0],
+          depotLoaded: depot.trim() || undefined,
+          customerId: row.customer || undefined,
+          customerName: row.customer_name || undefined,
+          allocationCode: code || undefined,
+          location: row.location.trim() || undefined,
+          quantity: Number(stripCommas(row.quantity)) || undefined,
+          phoneNumber: row.phone_number.trim() || undefined,
+          remarks: row.remarks.trim() || undefined,
+          enteredBy: currentUser,
+        } as Partial<DeliverySale>)
+      })
+
+      await Promise.all(promises)
+
+      const loadingId = searchParams.loadingId || (selectedLoading ? String(selectedLoading._id || selectedLoading.id) : '')
+      if (loadingId) {
+        try {
+          const firstRow = filledRows[0]
+          const custName = firstRow.customer ? (customerMap.get(firstRow.customer)?.name || firstRow.customer_name) : ''
+          await updateInventory.mutateAsync({
+            id: loadingId,
+            data: {
+              ...(firstRow.customer ? { customerId: firstRow.customer, customerName: custName } : {}),
+              ...(firstRow.location.trim() ? { location: firstRow.location.trim() } : {}),
+            },
+          })
+        } catch {
+          /* non-critical */
+        }
+      }
+
+      toast.success(`${filledRows.length} customer${filledRows.length > 1 ? 's' : ''} assigned to truck ${truckNumber}`)
+
+      navigate({
+        to: '/sales-ledger/details',
+        search: {
+          loadingId: searchParams.loadingId,
+          truckNumber: searchParams.truckNumber,
+          dateLoaded: searchParams.dateLoaded,
+          code: searchParams.code,
+        },
+      })
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to assign customer')
+    } finally {
+      setSaving(false)
+    }
+  }, [truckNumber, dateLoaded, depot, code, saleRows, searchParams, selectedLoading, customerMap, createSale, updateInventory, toast, navigate, remainingCapacity, alreadyAllocatedQty, totalTruckCapacity])
+
+  const goBack = () => {
+    navigate({
+      to: '/sales-ledger/details',
+      search: {
+        loadingId: searchParams.loadingId,
+        truckNumber: searchParams.truckNumber,
+        dateLoaded: searchParams.dateLoaded,
+        code: searchParams.code,
+      },
+    })
+  }
+
+  // ── New entries quantity for capacity bar ──────────────────────────────
+  const newEntriesQty = saleRows.reduce((sum, row) => sum + (Number(stripCommas(row.quantity)) || 0), 0)
+  const combinedTotal = alreadyAllocatedQty + newEntriesQty
+  const combinedPct = totalTruckCapacity > 0 ? Math.round((combinedTotal / totalTruckCapacity) * 100) : 0
+  const isOverCapacity = combinedPct > 100
+
+  if (inventoryLoading || customersLoading || salesLoading) {
+    return (
+      <div className="p-8 text-center max-w-md mx-auto my-12">
+        <Loader2 className="mx-auto h-8 w-8 animate-spin text-amber-600 mb-3" />
+        <p className="text-sm text-slate-500 font-medium">Loading details...</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Breadcrumb */}
+      <nav className="flex items-center gap-1.5 text-sm">
+        <button onClick={() => navigate({ to: '/sales-ledger' })} className="text-slate-500 hover:text-slate-800 font-medium transition-colors">
+          Sales Ledger
+        </button>
+        <ChevronRight size={14} className="text-slate-300" />
+        <button onClick={goBack} className="text-slate-500 hover:text-slate-800 font-medium transition-colors">
+          {truckNumber || 'Details'}
+        </button>
+        <ChevronRight size={14} className="text-slate-300" />
+        <span className="text-slate-900 font-semibold">Assign Customer</span>
+      </nav>
+
+      {/* Header */}
+      <div className="flex items-center justify-between border-b border-slate-200 pb-4">
+        <div className="flex items-center gap-3">
+          <Button variant="outline" size="sm" className="gap-1.5 text-slate-700" onClick={goBack}>
+            <ArrowLeft size={16} /> Back
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+              <UserPlus size={22} className="text-amber-600" />
+              Assign New Customer
+            </h1>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Link customer(s) to this truck cycle. Rates and payments can be added later.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Truck Context Card */}
+      <Card className="bg-amber-50/60 border-amber-200 shadow-sm">
+        <CardHeader className="pb-3 border-b border-amber-100">
+          <CardTitle className="text-sm font-bold text-amber-900 flex items-center gap-2">
+            <Truck size={16} className="text-amber-700" />
+            Truck Context
+          </CardTitle>
+          <CardDescription className="text-xs text-amber-700">
+            This assignment is bound to the currently viewed truck cycle.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="pt-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-sm">
+            <div className="p-3 bg-white/80 rounded-xl border border-amber-100">
+              <div className="text-xs text-slate-400 font-medium flex items-center gap-1">
+                <Truck size={12} className="text-amber-600" /> Truck Number
+              </div>
+              <div className="font-extrabold text-base font-mono text-slate-900 mt-0.5">
+                {truckNumber || '—'}
+              </div>
+            </div>
+            <div className="p-3 bg-white/80 rounded-xl border border-amber-100">
+              <div className="text-xs text-slate-400 font-medium flex items-center gap-1">
+                <Calendar size={12} className="text-indigo-500" /> Date Loaded
+              </div>
+              <div className="font-bold text-slate-900 mt-0.5">
+                {safeFormatDate(dateLoaded)}
+              </div>
+            </div>
+            <div className="p-3 bg-white/80 rounded-xl border border-amber-100">
+              <div className="text-xs text-slate-400 font-medium flex items-center gap-1">
+                <Building2 size={12} className="text-amber-500" /> Depot
+              </div>
+              <div className="font-bold text-slate-900 mt-0.5">
+                {depot || '—'}
+              </div>
+            </div>
+            <div className="p-3 bg-white/80 rounded-xl border border-amber-100">
+              <div className="text-xs text-slate-400 font-medium flex items-center gap-1">
+                <Tag size={12} className="text-purple-500" /> PFI Code
+              </div>
+              <div className="font-bold text-slate-900 mt-0.5">
+                {code ? (
+                  <Badge variant="outline" className="font-mono text-xs uppercase bg-purple-50 text-purple-700 border-purple-200">
+                    {code}
+                  </Badge>
+                ) : 'None'}
+              </div>
+            </div>
+            <div className="p-3 bg-white/80 rounded-xl border border-amber-100">
+              <div className="text-xs text-slate-400 font-medium flex items-center gap-1">
+                <Fuel size={12} className="text-emerald-600" /> Capacity
+              </div>
+              <div className="font-extrabold text-slate-900 mt-0.5">
+                {totalTruckCapacity > 0 ? (
+                  <>
+                    {totalTruckCapacity.toLocaleString()} L
+                    {alreadyAllocatedQty > 0 && (
+                      <span className="block text-xs font-medium text-slate-500 mt-0.5">
+                        {remainingCapacity.toLocaleString()} L remaining
+                      </span>
+                    )}
+                  </>
+                ) : '—'}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Existing Assignments */}
+      {existingAssignments.length > 0 && (
+        <Card className="bg-white shadow-sm border-slate-200">
+          <CardHeader className="border-b border-slate-100 pb-3">
+            <CardTitle className="text-base font-bold text-slate-800 flex items-center gap-2">
+              <Users size={16} className="text-indigo-500" />
+              Already Assigned Customers ({existingAssignments.length})
+            </CardTitle>
+            <CardDescription className="text-xs">
+              These customers are already linked to truck {truckNumber} on this cycle. They are excluded from the dropdown below.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-4">
+            <div className="space-y-2">
+              {existingAssignments.map(a => (
+                <div
+                  key={a.customerId}
+                  className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    {a.isFillingStation ? (
+                      <div className="p-1.5 rounded-lg bg-amber-100">
+                        <Fuel size={14} className="text-amber-600" />
+                      </div>
+                    ) : (
+                      <div className="p-1.5 rounded-lg bg-indigo-100">
+                        <Users size={14} className="text-indigo-600" />
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <p className="font-semibold text-slate-900 text-sm truncate uppercase">{a.customerName}</p>
+                      <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5">
+                        {a.location && (
+                          <span className="flex items-center gap-0.5">
+                            <MapPin size={10} /> {a.location}
+                          </span>
+                        )}
+                        {a.isFillingStation && (
+                          <Badge className="text-[10px] bg-amber-100 text-amber-800 border-amber-200 px-1 py-0">
+                            FS
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0 ml-3">
+                    <p className="font-bold text-slate-900 text-sm">{a.quantity > 0 ? `${a.quantity.toLocaleString()} L` : '—'}</p>
+                    {a.paymentCount > 0 && (
+                      <p className="text-[11px] text-emerald-600 font-medium">
+                        {a.paymentCount} payment{a.paymentCount !== 1 ? 's' : ''} · {a.totalPaid.toLocaleString()} paid
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
+
+              {/* Summary bar */}
+              <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
+                <span className="text-slate-500 font-medium">
+                  Total already allocated: <strong className="text-slate-700">{alreadyAllocatedQty.toLocaleString()} L</strong>
+                </span>
+                {totalTruckCapacity > 0 && (
+                  <span className={`font-bold ${remainingCapacity > 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                    {remainingCapacity > 0
+                      ? `${remainingCapacity.toLocaleString()} L remaining`
+                      : 'Fully allocated'}
+                  </span>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* No existing assignments - info banner */}
+      {existingAssignments.length === 0 && (
+        <div className="flex items-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-700">
+          <Users size={14} className="shrink-0" />
+          <span>No customers are currently assigned to this truck cycle. Use the form below to assign the first customer.</span>
+        </div>
+      )}
+
+      {/* Capacity fully allocated warning */}
+      {remainingCapacity <= 0 && totalTruckCapacity > 0 && (
+        <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700">
+          <AlertTriangle size={14} className="shrink-0" />
+          <span>
+            <strong>Fully allocated.</strong> This truck's capacity ({totalTruckCapacity.toLocaleString()} L) is fully used by existing assignments.
+            Adding more customers will exceed capacity.
+          </span>
+        </div>
+      )}
+
+      {/* Customer Assignment Form */}
+      <Card className="bg-white shadow-sm border-slate-200">
+        <CardHeader className="border-b border-slate-100 pb-3 flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="text-base font-bold text-slate-800 flex items-center gap-2">
+              <UserPlus size={18} className="text-slate-600" />
+              New Customer Assignment ({saleRows.length})
+            </CardTitle>
+            <CardDescription className="text-xs">
+              {existingAssignments.length > 0
+                ? `Add more customers to truck ${truckNumber}. Already-assigned customers are excluded.`
+                : `Select one or multiple customers receiving fuel from truck ${truckNumber}.`}
+            </CardDescription>
+          </div>
+          <Button type="button" variant="outline" size="sm" className="gap-1.5 text-xs h-8" onClick={addSaleRow}>
+            <Plus size={13} /> Add Customer
+          </Button>
+        </CardHeader>
+        <CardContent className="pt-5 space-y-4">
+          {saleRows.map((row, idx) => {
+            const custObj = row.customer ? customerMap.get(row.customer) : null
+            const isFS = isFillingStation(custObj)
+            const hasError = rowErrors[row.uid] && Object.keys(rowErrors[row.uid]).length
+
+            return (
+              <div
+                key={row.uid}
+                className={`border rounded-xl p-4 space-y-4 relative transition-all ${hasError ? 'border-red-300 bg-red-50/30' : isFS ? 'border-amber-200 bg-amber-50/30' : 'border-slate-200 bg-slate-50/40'
+                  }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
+                    {isFS && <Fuel size={14} className="text-amber-600" />}
+                    Customer #{idx + 1}
+                    {isFS && (
+                      <Badge className="ml-1 text-[10px] font-semibold bg-amber-100 text-amber-800 border-amber-200 px-1.5 py-0 normal-case tracking-normal">
+                        Filling Station
+                      </Badge>
+                    )}
+                  </span>
+                  {saleRows.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeSaleRow(row.uid)}
+                      className="text-slate-400 hover:text-red-500 transition-colors p-1 rounded-md"
+                      title="Remove customer row"
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold text-slate-700">
+                      Select Customer <span className="text-red-500">*</span>
+                    </Label>
+                    <select
+                      aria-label={`Customer for row ${idx + 1}`}
+                      value={row.customer}
+                      onChange={e => updateSaleRow(row.uid, 'customer', e.target.value)}
+                      className={`h-10 w-full rounded-lg border bg-background px-3 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-slate-300 ${rowErrors[row.uid]?.customer ? 'border-red-400 bg-red-50' : 'border-input'
+                        }`}
+                    >
+                      <option value="">Select customer...</option>
+                      {availableCustomers.map(c => {
+                        const cid = c._id || c.id || ''
+                        const isAssigned = assignedCustomerIds.has(cid)
+                        return (
+                          <option key={cid} value={cid}>
+                            {c.name} {c.customerType === 'filling_station' ? '(FS)' : ''}{isAssigned ? ' (already assigned)' : ''}
+                          </option>
+                        )
+                      })}
+                    </select>
+                    {rowErrors[row.uid]?.customer && (
+                      <p className="text-[11px] text-red-500 font-medium">{rowErrors[row.uid].customer}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold text-slate-700">
+                      Destination <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      placeholder="e.g. Kano, Abuja, Station Name..."
+                      className={`h-10 text-sm ${rowErrors[row.uid]?.location ? 'border-red-400 bg-red-50' : ''}`}
+                      value={row.location}
+                      onChange={e => updateSaleRow(row.uid, 'location', e.target.value)}
+                    />
+                    {rowErrors[row.uid]?.location && (
+                      <p className="text-[11px] text-red-500 font-medium">{rowErrors[row.uid].location}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold text-slate-700">
+                      Quantity (Litres) <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      type="text"
+                      inputMode="decimal"
+                      placeholder={remainingCapacity > 0 ? `max ${remainingCapacity.toLocaleString()}` : 'e.g. 33,000'}
+                      className={`h-10 text-sm font-medium ${rowErrors[row.uid]?.quantity ? 'border-red-400 bg-red-50' : ''}`}
+                      value={row.quantity}
+                      onChange={e => updateSaleRow(row.uid, 'quantity', e.target.value)}
+                    />
+                    {rowErrors[row.uid]?.quantity && (
+                      <p className="text-[11px] text-red-500 font-medium">{rowErrors[row.uid].quantity}</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold text-slate-700">Contact Phone</Label>
+                    <Input
+                      placeholder="e.g. 08012345678"
+                      className="h-10 text-sm"
+                      value={row.phone_number}
+                      onChange={e => updateSaleRow(row.uid, 'phone_number', e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold text-slate-700">Remarks</Label>
+                    <Input
+                      placeholder="e.g. Assigned to cycle..."
+                      className="h-10 text-sm"
+                      value={row.remarks}
+                      onChange={e => updateSaleRow(row.uid, 'remarks', e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+
+          {/* Combined Capacity Bar (existing + new) */}
+          {totalTruckCapacity > 0 && (
+            <div className={`p-4 rounded-xl border ${isOverCapacity ? 'bg-red-50 border-red-200' : combinedPct > 80 ? 'bg-amber-50 border-amber-200' : 'bg-emerald-50 border-emerald-200'}`}>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-semibold text-slate-600">Total Truck Capacity Usage</span>
+                <span className={`text-xs font-bold ${isOverCapacity ? 'text-red-600' : combinedPct > 80 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                  {combinedTotal.toLocaleString()} / {totalTruckCapacity.toLocaleString()} L ({combinedPct}%)
+                </span>
+              </div>
+              <div className="h-3 bg-white/60 rounded-full overflow-hidden flex">
+                {/* Existing allocations segment */}
+                {alreadyAllocatedQty > 0 && (
+                  <div
+                    className="h-full bg-indigo-400 transition-all"
+                    style={{ width: `${Math.min(100, Math.round((alreadyAllocatedQty / totalTruckCapacity) * 100))}%` }}
+                    title={`Already assigned: ${alreadyAllocatedQty.toLocaleString()} L`}
+                  />
+                )}
+                {/* New allocations segment */}
+                {newEntriesQty > 0 && (
+                  <div
+                    className={`h-full transition-all ${isOverCapacity ? 'bg-red-500' : combinedPct > 80 ? 'bg-amber-500' : 'bg-emerald-500'}`}
+                    style={{ width: `${Math.min(100 - Math.round((alreadyAllocatedQty / totalTruckCapacity) * 100), Math.round((newEntriesQty / totalTruckCapacity) * 100))}%` }}
+                    title={`New entries: ${newEntriesQty.toLocaleString()} L`}
+                  />
+                )}
+              </div>
+              <div className="flex items-center gap-4 mt-2 text-[11px]">
+                {alreadyAllocatedQty > 0 && (
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-2 w-2 rounded-full bg-indigo-400" />
+                    <span className="text-slate-500">Already assigned: <strong className="text-slate-700">{alreadyAllocatedQty.toLocaleString()} L</strong></span>
+                  </span>
+                )}
+                {newEntriesQty > 0 && (
+                  <span className="flex items-center gap-1.5">
+                    <span className={`h-2 w-2 rounded-full ${isOverCapacity ? 'bg-red-500' : 'bg-emerald-500'}`} />
+                    <span className="text-slate-500">New entries: <strong className="text-slate-700">{newEntriesQty.toLocaleString()} L</strong></span>
+                  </span>
+                )}
+                {remainingCapacity > 0 && newEntriesQty === 0 && (
+                  <span className="text-slate-400">
+                    {remainingCapacity.toLocaleString()} L available for new assignments
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Footer */}
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+            <Button variant="outline" onClick={goBack} disabled={saving}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSave}
+              disabled={saving}
+              className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
+            >
+              {saving ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
+              {saving ? 'Assigning...' : `Confirm & Assign to ${truckNumber}`}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
