@@ -17,6 +17,7 @@ function getStatusBadge(status: string) {
   switch (status) {
     case 'Active': return <Badge className="bg-success text-success-foreground">{status}</Badge>
     case 'Inactive': return <Badge className="bg-warning text-warning-foreground">{status}</Badge>
+    case 'Pending': return <Badge variant="outline" className="border-warning text-warning">{status}</Badge>
     default: return <Badge variant="outline">{status}</Badge>
   }
 }
@@ -33,27 +34,30 @@ function CustomerDashboard() {
   const [pageSize, setPageSize] = useState(10)
 
   const POLL_INTERVAL = 30_000
-  const { data, isLoading } = useCustomerList({ search: searchTerm || undefined, status: selectedStatus !== 'all' ? selectedStatus : undefined, refetchInterval: POLL_INTERVAL })
+  const { data, isLoading } = useCustomerList({
+    page: currentPage,
+    limit: pageSize,
+    search: searchTerm || undefined,
+    status: selectedStatus !== 'all' ? selectedStatus : undefined,
+    refetchInterval: POLL_INTERVAL,
+  })
   const customers = data?.customers || []
 
   useEffect(() => {
     setCurrentPage(1)
   }, [searchTerm, selectedStatus])
 
-  const totalItems = customers.length
-  const totalPages = Math.ceil(totalItems / pageSize)
-  const paginatedCustomers = customers.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  )
+  const totalItems = data?.pagination?.total ?? customers.length
+  const totalPages = data?.pagination?.pages ?? Math.ceil(totalItems / pageSize)
+  const paginatedCustomers = customers
 
   const stats = {
-    total: data?.pagination?.total || 0,
-    active: customers.filter((c: any) => c.status === 'Active').length,
-    inactive: customers.filter((c: any) => c.status === 'Inactive').length,
-    totalBalance: customers.reduce((sum: number, c: any) => sum + (c.balance || 0), 0),
+    total: data?.summary?.total ?? data?.pagination?.total ?? 0,
+    active: data?.summary?.active ?? customers.filter((c: any) => c.status === 'Active').length,
+    inactive: data?.summary?.inactive ?? customers.filter((c: any) => c.status === 'Inactive').length,
+    totalBalance: data?.summary?.totalBalance ?? customers.reduce((sum: number, c: any) => sum + (Number(c.balance) || 0), 0),
   }
-  const getInitials = (name: string) => { const parts = name.split(' '); return `${parts[0]?.[0] || ''}${parts[1]?.[0] || ''}`.toUpperCase() }
+  const getInitials = (name: string) => { const parts = (name || '').split(' '); return `${parts[0]?.[0] || ''}${parts[1]?.[0] || ''}`.toUpperCase() }
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -90,6 +94,7 @@ function CustomerDashboard() {
                   <SelectItem value="all">All Statuses</SelectItem>
                   <SelectItem value="Active">Active</SelectItem>
                   <SelectItem value="Inactive">Inactive</SelectItem>
+                  <SelectItem value="Pending">Pending</SelectItem>
                 </SelectContent>
               </Select>
             </div>

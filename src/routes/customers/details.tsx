@@ -103,7 +103,7 @@ function CustomerDetailPage() {
   }
 
   const getInitials = (name: string) => {
-    const parts = name.split(' ')
+    const parts = (name || '').split(' ')
     return `${parts[0]?.[0] || ''}${parts[1]?.[0] || ''}`.toUpperCase()
   }
 

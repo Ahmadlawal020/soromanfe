@@ -53,7 +53,7 @@ function CustomerForm() {
 
   const validate = () => {
     const newErrors: Record<string, string> = {}
-    if (!formData.name.trim()) newErrors.name = 'Customer initials are required'
+    if (!formData.name.trim()) newErrors.name = 'Customer name is required'
     if (!formData.phone.trim()) newErrors.phone = 'Phone number is required'
     else {
       const cleaned = formData.phone.replace(/[\s\-\(\)]/g, "");
@@ -147,11 +147,11 @@ function CustomerForm() {
             </div>
             <div className="space-y-3">
               <div>
-                <Label>Customer Initials*</Label>
+                <Label>Customer Name*</Label>
                 <Input
                   value={formData.name}
                   onChange={(e) => handleInputChange('name', e.target.value)}
-                  placeholder="e.g. AY"
+                  placeholder="e.g. Ahmad Ibrahim"
                   className={errors.name ? 'border-destructive' : ''}
                 />
                 {errors.name && <p className="text-sm text-destructive mt-1">{errors.name}</p>}
