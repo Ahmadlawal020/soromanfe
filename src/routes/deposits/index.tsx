@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '#/components/ui/card'
 import { Input } from '#/components/ui/input'
@@ -154,7 +153,7 @@ function DepositsDashboard() {
                   <TableBody>
                     {paginatedDeposits.map((deposit: Deposit) => (
                       <TableRow
-                        key={deposit.id || deposit._id}
+                        key={deposit._id}
                         className="hover:bg-muted/50 transition cursor-pointer"
                         onClick={() => navigate({ to: '/deposits/details' as any, state: { deposit } } as any)}
                       >

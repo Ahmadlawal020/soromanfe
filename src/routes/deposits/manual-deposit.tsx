@@ -21,7 +21,7 @@ function formatCurrency(val: number) {
     return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 2 }).format(val)
 }
 
-export function ManualDepositPage() {
+function ManualDepositPage() {
     const navigate = useNavigate()
     const { data: customerData, isLoading: isLoadingCustomers } = useCustomerList({ limit: 5000 })
     const { data: bankAccounts, isLoading: isLoadingBanks } = useBankAccounts({ status: 'Active' })

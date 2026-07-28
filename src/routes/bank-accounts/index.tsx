@@ -21,9 +21,8 @@ import {
   Loader2,
   Building2,
   Star,
-  CheckCircle,
 } from 'lucide-react'
-import { useBankAccounts, useDeleteBankAccount, type BankAccount } from '#/lib/hooks/useBankAccounts'
+import { useBankAccounts, useDeleteBankAccount } from '#/lib/hooks/useBankAccounts'
 import { useDepots } from '#/lib/hooks/useDepots'
 import { useToast } from '#/lib/hooks/useToast'
 
