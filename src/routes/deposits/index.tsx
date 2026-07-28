@@ -148,7 +148,7 @@ function DepositsDashboard() {
                   <TableBody>
                     {paginatedDeposits.map((deposit: Deposit) => (
                       <TableRow
-                        key={deposit._id}
+                        key={deposit.id || deposit._id}
                         className="hover:bg-muted/50 transition cursor-pointer"
                         onClick={() => navigate({ to: '/deposits/details' as any, state: { deposit } } as any)}
                       >

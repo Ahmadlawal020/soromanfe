@@ -229,7 +229,7 @@ function DepositDetailPage() {
           <CardContent className="space-y-4 pt-6">
             <div>
               <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Deposit ID</p>
-              <p className="text-xs font-mono text-muted-foreground mt-0.5 truncate select-all">{deposit._id}</p>
+              <p className="text-xs font-mono text-muted-foreground mt-0.5 truncate select-all">{deposit.id || deposit._id}</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Last Updated</p>
