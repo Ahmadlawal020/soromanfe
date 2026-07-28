@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '#/lib/api/http'
 import { useToast } from '#/lib/hooks/useToast'
+import { getErrorMessage } from '#/lib/utils'
 import type { Depot, DepotItem } from '#/lib/types'
 
 export type { Depot, DepotItem }
@@ -26,15 +27,12 @@ export function useDepotDetails(id: string) {
   })
 }
 
-function getErrorMessage(err: any): string {
-  return err?.response?.data?.message || err?.message || 'An unexpected error occurred'
-}
-
 export function useCreateDepot() {
   const queryClient = useQueryClient()
   const toast = useToast()
 
   return useMutation({
+    retry: false,
     mutationFn: async (data: Record<string, any>) => {
       const res = await api.post('/depots', data)
       return res.data
@@ -54,6 +52,7 @@ export function useUpdateDepot() {
   const toast = useToast()
 
   return useMutation({
+    retry: false,
     mutationFn: async ({ id, data }: { id: string; data: Record<string, any> }) => {
       const res = await api.patch(`/depots/${id}`, data)
       return res.data
@@ -73,6 +72,7 @@ export function useDeleteDepot() {
   const toast = useToast()
 
   return useMutation({
+    retry: false,
     mutationFn: async (id: string) => {
       const res = await api.delete(`/depots/${id}`)
       return res.data
@@ -92,6 +92,7 @@ export function useUpdateProductPrice() {
   const toast = useToast()
 
   return useMutation({
+    retry: false,
     mutationFn: async ({ depotId, productId, price }: { depotId: string; productId: string; price: number }) => {
       const res = await api.patch(`/depots/${depotId}/product-price`, { productId, price })
       return res.data

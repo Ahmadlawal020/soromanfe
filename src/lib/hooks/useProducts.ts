@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '#/lib/api/http'
 import { useToast } from '#/lib/hooks/useToast'
+import { getErrorMessage } from '#/lib/utils'
 
 export function useProductList(params?: { search?: string; category?: string }) {
   return useQuery({
@@ -23,15 +24,12 @@ export function useProductDetails(id: string) {
   })
 }
 
-function getErrorMessage(err: any): string {
-  return err?.response?.data?.message || err?.message || 'An unexpected error occurred'
-}
-
 export function useCreateProduct() {
   const queryClient = useQueryClient()
   const toast = useToast()
 
   return useMutation({
+    retry: false,
     mutationFn: async (data: Record<string, any>) => {
       const res = await api.post('/products', data)
       return res.data
@@ -51,6 +49,7 @@ export function useUpdateProduct() {
   const toast = useToast()
 
   return useMutation({
+    retry: false,
     mutationFn: async ({ id, data }: { id: string; data: Record<string, any> }) => {
       const res = await api.patch(`/products/${id}`, data)
       return res.data
@@ -70,6 +69,7 @@ export function useDeleteProduct() {
   const toast = useToast()
 
   return useMutation({
+    retry: false,
     mutationFn: async (id: string) => {
       const res = await api.delete(`/products/${id}`)
       return res.data

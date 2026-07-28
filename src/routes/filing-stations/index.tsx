@@ -955,7 +955,7 @@ function FilingStationsDashboard() {
       <SummaryCards cards={summaryCards} />
 
       {/* Filter Panel */}
-      <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden">
+      <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
         <div className="px-4 py-3 flex flex-wrap items-center gap-3">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={14} />
@@ -982,7 +982,7 @@ function FilingStationsDashboard() {
                   'px-2.5 py-1 text-xs font-medium rounded-full border transition-colors cursor-pointer',
                   timePreset === tp
                     ? 'bg-foreground text-background border-foreground'
-                    : 'bg-white text-muted-foreground border-border hover:border-foreground/40'
+                    : 'bg-card text-muted-foreground border-border hover:border-foreground/40'
                 )}
               >
                 {tp === 'all' ? 'All' : tp.charAt(0).toUpperCase() + tp.slice(1)}
@@ -997,13 +997,13 @@ function FilingStationsDashboard() {
               'inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full border transition-colors cursor-pointer',
               showAdvancedFilters || [truckFilter, locationFilter, stationFilter, allocationCodeFilter, rateFilter, cycleFilter].some(f => f !== 'all')
                 ? 'bg-foreground text-background border-foreground'
-                : 'bg-white text-muted-foreground border-border hover:border-foreground/40'
+                : 'bg-card text-muted-foreground border-border hover:border-foreground/40'
             )}
           >
             <Filter size={11} />
             Filters
             {[truckFilter, locationFilter, stationFilter, allocationCodeFilter, rateFilter, cycleFilter].filter(f => f !== 'all').length > 0 && (
-              <span className="ml-0.5 bg-white text-foreground rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold">
+              <span className="ml-0.5 bg-background text-foreground rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold">
                 {[truckFilter, locationFilter, stationFilter, allocationCodeFilter, rateFilter, cycleFilter].filter(f => f !== 'all').length}
               </span>
             )}
@@ -1029,7 +1029,7 @@ function FilingStationsDashboard() {
             <div className="space-y-1">
               <label className="flex items-center gap-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider"><Truck size={10} /> Truck</label>
               <select aria-label="Truck" value={truckFilter} onChange={e => setTruckFilter(e.target.value)}
-                className={cn('h-8 w-full rounded-md border bg-white px-2 text-xs', truckFilter !== 'all' ? 'border-foreground font-semibold' : 'border-border text-muted-foreground')}>
+                className={cn('h-8 w-full rounded-md border bg-background text-foreground px-2 text-xs', truckFilter !== 'all' ? 'border-foreground font-semibold' : 'border-border text-muted-foreground')}>
                 <option value="all">All</option>
                 {uniqueTruckNumbers.map(t => <option key={t} value={t}>{t}</option>)}
               </select>
@@ -1037,7 +1037,7 @@ function FilingStationsDashboard() {
             <div className="space-y-1">
               <label className="flex items-center gap-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider"><MapPin size={10} /> Destination</label>
               <select aria-label="Destination" value={locationFilter} onChange={e => setLocationFilter(e.target.value)}
-                className={cn('h-8 w-full rounded-md border bg-white px-2 text-xs', locationFilter !== 'all' ? 'border-foreground font-semibold' : 'border-border text-muted-foreground')}>
+                className={cn('h-8 w-full rounded-md border bg-background text-foreground px-2 text-xs', locationFilter !== 'all' ? 'border-foreground font-semibold' : 'border-border text-muted-foreground')}>
                 <option value="all">All</option>
                 {uniqueLocations.map(l => <option key={l} value={l}>{l}</option>)}
               </select>
@@ -1045,7 +1045,7 @@ function FilingStationsDashboard() {
             <div className="space-y-1">
               <label className="flex items-center gap-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider"><Users size={10} /> Station</label>
               <select aria-label="Station" value={stationFilter} onChange={e => setStationFilter(e.target.value)}
-                className={cn('h-8 w-full rounded-md border bg-white px-2 text-xs', stationFilter !== 'all' ? 'border-foreground font-semibold' : 'border-border text-muted-foreground')}>
+                className={cn('h-8 w-full rounded-md border bg-background text-foreground px-2 text-xs', stationFilter !== 'all' ? 'border-foreground font-semibold' : 'border-border text-muted-foreground')}>
                 <option value="all">All</option>
                 {uniqueStationOptions.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
@@ -1054,7 +1054,7 @@ function FilingStationsDashboard() {
               <div className="space-y-1">
                 <label className="flex items-center gap-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider"><Tag size={10} /> Code</label>
                 <select aria-label="Code" value={allocationCodeFilter} onChange={e => setAllocationCodeFilter(e.target.value)}
-                  className={cn('h-8 w-full rounded-md border bg-white px-2 text-xs', allocationCodeFilter !== 'all' ? 'border-purple-600 font-semibold text-purple-900 bg-purple-50' : 'border-border text-muted-foreground')}>
+                  className={cn('h-8 w-full rounded-md border bg-background text-foreground px-2 text-xs', allocationCodeFilter !== 'all' ? 'border-purple-600 font-semibold text-purple-900 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40' : 'border-border text-muted-foreground')}>
                   <option value="all">All</option>
                   {uniqueAllocationCodes.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
@@ -1064,7 +1064,7 @@ function FilingStationsDashboard() {
               <div className="space-y-1">
                 <label className="flex items-center gap-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider"><TrendingUp size={10} /> Rate (₦/L)</label>
                 <select aria-label="Rate" value={rateFilter} onChange={e => setRateFilter(e.target.value)}
-                  className={cn('h-8 w-full rounded-md border bg-white px-2 text-xs', rateFilter !== 'all' ? 'border-foreground font-semibold' : 'border-border text-muted-foreground')}>
+                  className={cn('h-8 w-full rounded-md border bg-background text-foreground px-2 text-xs', rateFilter !== 'all' ? 'border-foreground font-semibold' : 'border-border text-muted-foreground')}>
                   <option value="all">All Rates</option>
                   {uniqueRates.map(r => <option key={r} value={r}>₦{r.toLocaleString()}/L</option>)}
                 </select>
@@ -1074,7 +1074,7 @@ function FilingStationsDashboard() {
               <div className="space-y-1">
                 <label className="flex items-center gap-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider"><Receipt size={10} /> Cycle</label>
                 <select aria-label="Cycle" value={cycleFilter} onChange={e => setCycleFilter(e.target.value)}
-                  className={cn('h-8 w-full rounded-md border bg-white px-2 text-xs', cycleFilter !== 'all' ? 'border-foreground font-semibold' : 'border-border text-muted-foreground')}>
+                  className={cn('h-8 w-full rounded-md border bg-background text-foreground px-2 text-xs', cycleFilter !== 'all' ? 'border-foreground font-semibold' : 'border-border text-muted-foreground')}>
                   <option value="all">All Cycles</option>
                   {uniqueCycleOptions.map(c => <option key={c} value={c}>Cycle {c}</option>)}
                 </select>
@@ -1118,8 +1118,8 @@ function FilingStationsDashboard() {
                 <div
                   key={group.key}
                   className={cn(
-                    'bg-white rounded-xl shadow-sm border overflow-hidden transition-all',
-                    isExpanded ? 'border-emerald-200 ring-1 ring-emerald-100' : 'border-border'
+                    'bg-card rounded-xl shadow-sm border overflow-hidden transition-all',
+                    isExpanded ? 'border-emerald-200 dark:border-emerald-800 ring-1 ring-emerald-100 dark:ring-emerald-900/30' : 'border-border'
                   )}
                 >
                   {/* Card Header */}
@@ -1139,7 +1139,7 @@ function FilingStationsDashboard() {
                               {group.stationName || 'Unnamed Station'}
                             </h3>
                             {group.cycleNum && (
-                              <span className="shrink-0 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                              <span className="shrink-0 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
                                 Cycle {group.cycleNum}
                               </span>
                             )}
@@ -1225,7 +1225,7 @@ function FilingStationsDashboard() {
                     {(group.collectionAccounts.length > 0 || group.remittanceAccounts.length > 0) && (
                       <div className="mt-3 pt-3 border-t border-border grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {group.collectionAccounts.length > 0 && (
-                          <div className="rounded-lg bg-indigo-50/60 border border-indigo-100 px-3 py-2 space-y-2">
+                          <div className="rounded-lg bg-indigo-50/60 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/50 px-3 py-2 space-y-2">
                             <p className="text-[10px] uppercase tracking-wider text-indigo-500 font-semibold flex items-center gap-1">
                               <Wallet size={10} /> Collection Account{group.collectionAccounts.length > 1 ? 's' : ''}
                             </p>
@@ -1238,7 +1238,7 @@ function FilingStationsDashboard() {
                           </div>
                         )}
                         {group.remittanceAccounts.length > 0 && (
-                          <div className="rounded-lg bg-violet-50/60 border border-violet-100 px-3 py-2 space-y-2">
+                          <div className="rounded-lg bg-violet-50/60 dark:bg-violet-950/40 border border-violet-100 dark:border-violet-900/50 px-3 py-2 space-y-2">
                             <p className="text-[10px] uppercase tracking-wider text-violet-500 font-semibold flex items-center gap-1">
                               <ArrowRightLeft size={10} /> Remittance Account{group.remittanceAccounts.length > 1 ? 's' : ''}
                             </p>
@@ -1498,7 +1498,7 @@ function FilingStationsDashboard() {
                     <select
                       value={quickPaymentForm.bank_account_id}
                       onChange={e => setQuickPaymentForm(f => ({ ...f, bank_account_id: e.target.value }))}
-                      className="h-9 w-full rounded-md border border-border bg-white px-2 text-xs"
+                      className="h-9 w-full rounded-md border border-border bg-background text-foreground px-2 text-xs"
                     >
                       {BANK_ACCOUNTS.map(b => (
                         <option key={b.id} value={b.id}>{b.bank_name} - {b.account_number} ({b.account_name})</option>

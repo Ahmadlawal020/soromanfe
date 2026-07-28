@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Menu, Search, Bell, Settings, LogOut, User, ChevronsLeft, ChevronsRight, Sun, Moon } from 'lucide-react'
+import { Menu, Search, Bell, LogOut, User, ChevronsLeft, ChevronsRight, Sun, Moon } from 'lucide-react'
 import { Button } from '#/components/ui/button'
 import { Badge } from '#/components/ui/badge'
 import { Separator } from '#/components/ui/separator'
@@ -99,7 +99,7 @@ export default function Navbar() {
               <span className="truncate">Search dashboard...</span>
             </div>
             <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-0.5 rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
-              <span className="text-xs">⌘</span>K
+              {navigator.platform?.includes('Mac') ? '⌘' : 'Ctrl+'}K
             </kbd>
           </button>
 
@@ -132,7 +132,7 @@ export default function Navbar() {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon" className="relative">
+              <Button variant="outline" size="icon" className="relative" aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}>
                 <Bell size={16} />
                 {unreadCount > 0 && (
                   <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-[10px]">
@@ -169,15 +169,15 @@ export default function Navbar() {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+              <Button variant="ghost" className="relative h-9 w-9 rounded-full" aria-label="User menu">
                 <div className="h-9 w-9 rounded-full bg-gradient-to-br from-lime-700 to-lime-500 flex items-center justify-center text-white font-bold text-sm">
                   {initials}
                 </div>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end" forceMount>
-              <DropdownMenuItem disabled className="cursor-default">
-                <User className="mr-2 h-4 w-4" />
+              <DropdownMenuItem disabled className="cursor-default focus:bg-transparent">
+                <User className="mr-2 h-4 w-4" aria-hidden="true" />
                 <div className="flex flex-col space-y-1">
                   <p className="text-sm font-medium">{displayName}</p>
                   <p className="text-xs text-muted-foreground">{displayEmail}</p>
@@ -187,10 +187,6 @@ export default function Navbar() {
               <DropdownMenuItem onClick={toggleTheme}>
                 {theme === 'dark' ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
                 {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Settings className="mr-2 h-4 w-4" />
-                Settings
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem

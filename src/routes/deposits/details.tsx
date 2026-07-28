@@ -2,9 +2,30 @@ import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '#/components/ui/card'
-import { ArrowLeft, AlertCircle, DollarSign, ArrowDownLeft, Calendar, User, Building2, Phone, Hash, FileText, Clock, Landmark, CreditCard, Globe, Send, ShieldCheck, Banknote, ArrowRightLeft, Info } from 'lucide-react'
+import {
+  ArrowLeft,
+  AlertCircle,
+  DollarSign,
+  ArrowDownLeft,
+  Calendar,
+  User,
+  Building2,
+  Phone,
+  Hash,
+  FileText,
+  Clock,
+  Landmark,
+  CreditCard,
+  Globe,
+  Send,
+  ShieldCheck,
+  Banknote,
+  ArrowRightLeft,
+  Info,
+} from 'lucide-react'
 import type { Deposit } from '#/lib/hooks/useDeposits'
 import { toNum } from '#/lib/utils'
+import { Breadcrumbs } from '#/components/Breadcrumbs'
 
 export const Route = createFileRoute('/deposits/details')({
   component: DepositDetailPage,
@@ -40,8 +61,18 @@ function DepositDetailPage() {
 
   const ps = deposit.paystackDetails as Record<string, any> | null | undefined
 
+  // Determine if this deposit was processed via Paystack or is a manual bank transfer
+  const isPaystack = Boolean(
+    ps?.transactionId ||
+    ps?.paystackCustomerCode ||
+    (ps?.gatewayResponse && String(ps.gatewayResponse).toLowerCase() !== 'manual') ||
+    (ps?.channel && ps.channel !== 'manual_bank_transfer' && ps.channel !== 'manual')
+  )
+
   return (
     <div className="space-y-6 animate-fade-in">
+      <Breadcrumbs items={[{ label: 'Deposits', href: '/deposits' }, { label: 'Deposit Details' }]} />
+
       <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center gap-4">
           <Button variant="outline" size="icon" onClick={handleBack}>
@@ -49,7 +80,11 @@ function DepositDetailPage() {
           </Button>
           <div>
             <h1 className="text-3xl font-bold text-foreground">Deposit Details</h1>
-            <p className="text-muted-foreground">Transaction details and customer information</p>
+            <p className="text-muted-foreground">
+              {isPaystack
+                ? 'Paystack automated transaction details and customer information'
+                : 'Manual bank deposit details and customer information'}
+            </p>
           </div>
         </div>
       </header>
@@ -68,8 +103,14 @@ function DepositDetailPage() {
                 {deposit.reference && (
                   <Badge variant="outline" className="font-mono text-xs">Ref: {deposit.reference}</Badge>
                 )}
-                {ps?.channel && (
-                  <Badge variant="outline" className="font-mono text-xs capitalize">{String(ps.channel).replace(/_/g, ' ')}</Badge>
+                {isPaystack ? (
+                  <Badge className="bg-sky-500/15 text-sky-700 dark:text-sky-300 border-sky-500/30 font-medium text-xs capitalize">
+                    Paystack {ps?.channel ? `(${String(ps.channel).replace(/_/g, ' ')})` : ''}
+                  </Badge>
+                ) : (
+                  <Badge className="bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30 font-medium text-xs">
+                    Manual Bank Transfer
+                  </Badge>
                 )}
               </div>
               <p className="text-3xl font-bold mt-2 text-success">
@@ -124,6 +165,13 @@ function DepositDetailPage() {
               </div>
             </div>
             <div>
+              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Payment Method</p>
+              <p className="text-sm text-foreground mt-0.5 flex items-center gap-1.5 font-medium">
+                <Landmark size={14} className="text-muted-foreground" />
+                {isPaystack ? 'Paystack Gateway' : 'Manual Bank Transfer'}
+              </p>
+            </div>
+            <div>
               <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Reference</p>
               <p className="text-sm text-foreground mt-0.5 font-mono flex items-center gap-1.5">
                 <Hash size={14} className="text-muted-foreground" />
@@ -136,7 +184,7 @@ function DepositDetailPage() {
                 <User size={14} className="text-muted-foreground" />
                 {deposit.recorderFirstName
                   ? `${deposit.recorderFirstName} ${deposit.recorderSurname || ''}`
-                  : 'System'}
+                  : isPaystack ? 'Paystack System' : 'System'}
               </p>
             </div>
           </CardContent>
@@ -250,7 +298,7 @@ function DepositDetailPage() {
                   <FileText size={16} />
                 </div>
                 <div>
-                  <CardTitle className="text-sm">Description</CardTitle>
+                  <CardTitle className="text-sm">Description / Notes</CardTitle>
                   <CardDescription className="text-xs">Transaction notes and details</CardDescription>
                 </div>
               </div>
@@ -261,8 +309,109 @@ function DepositDetailPage() {
           </Card>
         )}
 
-        {/* ── Paystack Payment Details ── */}
-        {ps && (
+        {/* ── Manual Deposit Details Section ── */}
+        {!isPaystack && (
+          <Card className="md:col-span-2 border-amber-500/20">
+            <CardHeader className="border-b border-border bg-gradient-to-r from-amber-500/5 to-amber-500/10">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-lg bg-amber-500/15 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                    <Landmark size={16} />
+                  </div>
+                  <div>
+                    <CardTitle className="text-sm">Manual Deposit Details</CardTitle>
+                    <CardDescription className="text-xs">Direct bank transfer record (Recorded manually, not via Paystack)</CardDescription>
+                  </div>
+                </div>
+                <Badge variant="outline" className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 text-xs">
+                  Manual Entry
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {/* Depositor / Payer Name */}
+                <div className="space-y-1">
+                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider flex items-center gap-1.5">
+                    <User size={12} /> Depositor / Payer Name
+                  </p>
+                  <p className="text-sm font-semibold text-foreground">
+                    {ps?.senderName || ps?.depositorName || deposit.customerName || '—'}
+                  </p>
+                </div>
+
+                {/* Receiving Bank Name */}
+                <div className="space-y-1">
+                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider flex items-center gap-1.5">
+                    <Landmark size={12} /> Receiving Bank
+                  </p>
+                  <p className="text-sm font-semibold text-foreground">
+                    {ps?.bankName || ps?.receiverBankName || '—'}
+                  </p>
+                </div>
+
+                {/* Receiving Account Name */}
+                <div className="space-y-1">
+                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider flex items-center gap-1.5">
+                    <User size={12} /> Receiving Account Name
+                  </p>
+                  <p className="text-sm font-semibold text-foreground">
+                    {ps?.accountName || ps?.receiverAccountName || '—'}
+                  </p>
+                </div>
+
+                {/* Receiving Account Number */}
+                <div className="space-y-1">
+                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider flex items-center gap-1.5">
+                    <CreditCard size={12} /> Receiving Account Number
+                  </p>
+                  <p className="text-sm font-mono font-semibold text-foreground">
+                    {ps?.accountNumber || ps?.receiverAccountNumber || '—'}
+                  </p>
+                </div>
+
+                {/* Payment Date / Paid At */}
+                <div className="space-y-1">
+                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider flex items-center gap-1.5">
+                    <Clock size={12} /> Payment Date
+                  </p>
+                  <p className="text-sm text-foreground">
+                    {ps?.paidAt || ps?.paymentDate
+                      ? new Date(String(ps.paidAt || ps.paymentDate)).toLocaleDateString('en-GB', {
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })
+                      : deposit.createdAt
+                      ? new Date(deposit.createdAt).toLocaleDateString('en-GB', {
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })
+                      : '—'}
+                  </p>
+                </div>
+
+                {/* Channel / Source */}
+                <div className="space-y-1">
+                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider flex items-center gap-1.5">
+                    <ArrowRightLeft size={12} /> Payment Type
+                  </p>
+                  <Badge variant="outline" className="font-mono text-xs capitalize mt-0.5">
+                    Manual Bank Transfer
+                  </Badge>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* ── Paystack Payment Details Section ── */}
+        {isPaystack && ps && (
           <Card className="md:col-span-2 border-primary/20">
             <CardHeader className="border-b border-border bg-gradient-to-r from-primary/5 to-primary/10">
               <div className="flex items-center gap-2">

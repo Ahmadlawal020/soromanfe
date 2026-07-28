@@ -23,6 +23,8 @@ import {
 } from 'lucide-react'
 import { useBankAccountDetails, useDeleteBankAccount, type BankAccount } from '#/lib/hooks/useBankAccounts'
 import { useToast } from '#/lib/hooks/useToast'
+import { Breadcrumbs } from '#/components/Breadcrumbs'
+import { ConfirmDialog } from '#/components/ConfirmDialog'
 
 export const Route = createFileRoute('/bank-accounts/details')({
   component: BankAccountDetails,
@@ -59,6 +61,7 @@ function BankAccountDetails() {
 
   const [copied, setCopied] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   const handleCopyAccount = (num: string) => {
     navigator.clipboard.writeText(num)
@@ -67,16 +70,19 @@ function BankAccountDetails() {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!account) return
-    if (window.confirm(`Are you sure you want to delete bank account "${account.bankName}"?`)) {
-      setIsDeleting(true)
-      try {
-        await deleteBankAccount.mutateAsync(account.id)
-        navigate({ to: '/bank-accounts' })
-      } finally {
-        setIsDeleting(false)
-      }
+    setShowDeleteDialog(true)
+  }
+
+  const confirmDelete = async () => {
+    if (!account) return
+    setIsDeleting(true)
+    try {
+      await deleteBankAccount.mutateAsync(account.id)
+      navigate({ to: '/bank-accounts' })
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -92,9 +98,11 @@ function BankAccountDetails() {
   if (!account) {
     return (
       <div className="space-y-6 animate-fade-in">
-        <Button variant="ghost" size="sm" onClick={() => navigate({ to: '/bank-accounts' })}>
-          <ArrowLeft className="w-4 h-4 mr-2" /> Back to Bank Accounts
-        </Button>
+        <div className="flex items-center gap-4">
+          <Button variant="outline" size="icon" onClick={() => navigate({ to: '/bank-accounts' })}>
+            <ArrowLeft size={16} />
+          </Button>
+        </div>
         <Card className="p-12 text-center border-dashed">
           <AlertCircle className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
           <h2 className="text-lg font-semibold">Bank Account Not Found</h2>
@@ -112,11 +120,18 @@ function BankAccountDetails() {
 
   return (
     <div className="space-y-6 animate-fade-in max-w-6xl mx-auto pb-12">
+      <Breadcrumbs items={[{ label: 'Bank Accounts', href: '/bank-accounts' }, { label: account?.accountName || 'Details' }]} />
       {/* Top Header Navigation */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <Button variant="ghost" size="sm" onClick={() => navigate({ to: '/bank-accounts' })} className="w-fit">
-          <ArrowLeft className="w-4 h-4 mr-2" /> Back to Bank Accounts
-        </Button>
+        <div className="flex items-center gap-4">
+          <Button variant="outline" size="icon" onClick={() => navigate({ to: '/bank-accounts' })}>
+            <ArrowLeft size={16} />
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Bank Account Details</h1>
+            <p className="text-muted-foreground">View account information and linked depots</p>
+          </div>
+        </div>
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
@@ -356,6 +371,17 @@ function BankAccountDetails() {
           </CardContent>
         </Card>
       </div>
+
+      <ConfirmDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title="Delete Bank Account"
+        description={`Are you sure you want to delete bank account "${account?.bankName}"? This action cannot be undone.`}
+        confirmLabel="Delete"
+        variant="destructive"
+        onConfirm={confirmDelete}
+        loading={isDeleting}
+      />
     </div>
   )
 }

@@ -1,10 +1,13 @@
 import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
+import { useState } from 'react'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '#/components/ui/card'
 import { Truck, User, Wrench, Fuel, ShieldAlert, ArrowLeft, Edit, Trash2, Calendar, AlertCircle, Gauge, Loader2 } from 'lucide-react'
 import { useTruckDetails, useDeleteTruck } from '#/lib/hooks/useTrucks'
 import { useToast } from '#/lib/hooks/useToast'
+import { Breadcrumbs } from '#/components/Breadcrumbs'
+import { ConfirmDialog } from '#/components/ConfirmDialog'
 
 export const Route = createFileRoute('/trucks/details')({
   validateSearch: (search: Record<string, unknown>): { id?: string; truckId?: string } => ({
@@ -63,6 +66,7 @@ function TruckDetailPage() {
   const searchParams = Route.useSearch()
   const deleteTruck = useDeleteTruck()
   const toast = useToast()
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   const truckState = (router.history.location.state as any)?.truck
   const truckId = searchParams.id || searchParams.truckId || truckState?._id || truckState?.id || (router.history.location.state as any)?.id
@@ -76,14 +80,18 @@ function TruckDetailPage() {
     window.history.length > 1 ? window.history.back() : navigate({ to: '/trucks/' as any })
   }
 
-  const handleDelete = async () => {
-    if (confirm('Are you sure you want to permanently decommission and remove this truck from the fleet?') && truck?._id) {
-      try {
-        await deleteTruck.mutateAsync(truck._id || truck.id)
-        navigate({ to: '/trucks/' as any })
-      } catch {
-        toast.error('Failed to delete truck')
-      }
+  const handleDelete = () => {
+    setShowDeleteDialog(true)
+  }
+
+  const confirmDelete = async () => {
+    if (!truck?._id) return
+    try {
+      await deleteTruck.mutateAsync(truck._id || truck.id)
+      setShowDeleteDialog(false)
+      navigate({ to: '/trucks/' as any })
+    } catch {
+      toast.error('Failed to delete truck')
     }
   }
 
@@ -115,6 +123,8 @@ function TruckDetailPage() {
 
   return (
     <div className="space-y-6 animate-fade-in">
+      <Breadcrumbs items={[{ label: 'Trucks', href: '/trucks' }, { label: truck?.plateNumber || 'Details' }]} />
+
       <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center gap-4">
           <Button variant="outline" size="icon" onClick={handleBack}>
@@ -360,6 +370,17 @@ function TruckDetailPage() {
         </Card>
 
       </div>
+
+      <ConfirmDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title="Decommission Truck"
+        description="Are you sure you want to permanently decommission and remove this truck from the fleet? This action cannot be undone."
+        confirmLabel="Decommission"
+        variant="destructive"
+        onConfirm={confirmDelete}
+        loading={deleteTruck.isPending}
+      />
     </div>
   )
 }

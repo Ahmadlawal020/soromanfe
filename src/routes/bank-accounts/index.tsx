@@ -16,12 +16,14 @@ import {
   Check,
   Warehouse,
   ShieldCheck,
-  SearchX,
   X,
   Loader2,
   Building2,
   Star,
 } from 'lucide-react'
+import { PageLoader } from '#/components/PageLoader'
+import { PageError } from '#/components/PageError'
+import { PageEmpty } from '#/components/PageEmpty'
 import { useBankAccounts, useDeleteBankAccount } from '#/lib/hooks/useBankAccounts'
 import { useDepots } from '#/lib/hooks/useDepots'
 import { useToast } from '#/lib/hooks/useToast'
@@ -51,7 +53,8 @@ function BankAccountsIndex() {
   const [copiedId, setCopiedId] = useState<string | number | null>(null)
   const [deletingId, setDeletingId] = useState<string | number | null>(null)
 
-  const { data: bankAccounts = [], isLoading } = useBankAccounts()
+  const { data: bankAccounts = [], isLoading, isError, error, refetch } = useBankAccounts()
+  const hasFilters = !!(searchTerm || statusFilter !== 'ALL')
   const { data: depots = [] } = useDepots()
   const deleteBankAccount = useDeleteBankAccount()
 
@@ -138,22 +141,24 @@ function BankAccountsIndex() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {statsCards.map((card, idx) => (
-          <Card key={idx} className="stats-card border-border/40 bg-card/60 backdrop-blur-sm">
-            <CardContent className="p-5 flex justify-between items-center">
-              <div>
-                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{card.title}</p>
-                <p className="text-2xl font-bold text-foreground mt-1">{card.value}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">{card.sub}</p>
-              </div>
-              <div className="p-3 rounded-xl bg-primary/10 border border-primary/20">
-                <card.icon className={`w-6 h-6 ${card.color}`} />
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {!isLoading && !isError && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {statsCards.map((card, idx) => (
+            <Card key={idx} className="stats-card border-border/40 bg-card/60 backdrop-blur-sm">
+              <CardContent className="p-5 flex justify-between items-center">
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{card.title}</p>
+                  <p className="text-2xl font-bold text-foreground mt-1">{card.value}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{card.sub}</p>
+                </div>
+                <div className="p-3 rounded-xl bg-primary/10 border border-primary/20">
+                  <card.icon className={`w-6 h-6 ${card.color}`} />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
       {/* Main Content Card */}
       <Card className="border-border/50 shadow-sm">
@@ -204,43 +209,19 @@ function BankAccountsIndex() {
 
           {/* Accounts Grid */}
           {isLoading ? (
-            <div className="flex items-center justify-center py-20">
-              <Loader2 size={28} className="animate-spin text-primary" />
-              <span className="ml-3 text-sm text-muted-foreground">Loading bank accounts...</span>
-            </div>
+            <PageLoader message="Loading bank accounts..." />
+          ) : isError ? (
+            <PageError message={(error as any)?.message || 'Failed to load'} onRetry={() => refetch()} />
           ) : filteredAccounts.length === 0 ? (
-            <div className="p-16 text-center rounded-xl border border-dashed border-border/60 bg-muted/20">
-              <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-muted border border-border/40 mb-4">
-                <SearchX size={26} className="text-muted-foreground" />
-              </div>
-              <p className="text-base font-semibold text-foreground">No bank accounts found</p>
-              <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto">
-                {searchTerm || statusFilter !== 'ALL'
-                  ? 'No bank accounts match your search or filter parameters.'
-                  : 'Get started by adding your first company bank account.'}
-              </p>
-              {(searchTerm || statusFilter !== 'ALL') ? (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setSearchTerm('')
-                    setStatusFilter('ALL')
-                  }}
-                  className="mt-4 text-primary"
-                >
-                  <X size={14} className="mr-1" /> Clear filters
-                </Button>
-              ) : (
-                <Button
-                  size="sm"
-                  className="gradient-primary text-white border-0 mt-4"
-                  onClick={() => navigate({ to: '/bank-accounts/form' })}
-                >
-                  <Plus className="w-4 h-4 mr-2" /> Add Bank Account
-                </Button>
-              )}
-            </div>
+            <PageEmpty
+              icon={<Landmark size={24} className="text-muted-foreground" />}
+              title={hasFilters ? 'No bank accounts match your filters' : 'No bank accounts yet'}
+              description={hasFilters ? 'No bank accounts match your search or filter parameters.' : 'Get started by adding your first company bank account.'}
+              actionLabel="Add Bank Account"
+              onAction={() => navigate({ to: '/bank-accounts/form' })}
+              hasFilters={hasFilters}
+              onClearFilters={() => { setSearchTerm(''); setStatusFilter('ALL') }}
+            />
           ) : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {filteredAccounts.map((account) => {

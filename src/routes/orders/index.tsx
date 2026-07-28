@@ -6,8 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '#/com
 import { Input } from '#/components/ui/input'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '#/components/ui/select'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '#/components/ui/table'
-import { SearchX, Loader2, Building2, MapPin, Warehouse, Package, CheckCircle2, Clock, DollarSign, Search, Plus, X } from 'lucide-react'
+import { Building2, MapPin, Warehouse, Package, CheckCircle2, Clock, DollarSign, Search, Plus, X } from 'lucide-react'
 import { useOrderList } from '#/lib/hooks/useOrders'
+import { PageLoader } from '#/components/PageLoader'
+import { PageError } from '#/components/PageError'
+import { PageEmpty } from '#/components/PageEmpty'
+import { Pagination } from '#/components/Pagination'
 
 
 export const Route = createFileRoute('/orders/')({
@@ -39,7 +43,7 @@ function OrdersDashboard() {
   const [pageSize, setPageSize] = useState(10)
 
   const POLL_INTERVAL = 30_000
-  const { data, isLoading } = useOrderList({ refetchInterval: POLL_INTERVAL })
+  const { data, isLoading, isError, error, refetch } = useOrderList({ refetchInterval: POLL_INTERVAL })
   const orders = data?.orders || []
 
   useEffect(() => {
@@ -65,6 +69,8 @@ function OrdersDashboard() {
     currentPage * pageSize
   )
 
+  const hasFilters = searchTerm || selectedStatus !== 'all'
+
   const totalOrders = filteredOrders.length
   const completedOrders = filteredOrders.filter((o: any) => o.status === 'Completed').length
   const pendingOrders = filteredOrders.filter((o: any) => o.status === 'Pending').length
@@ -82,12 +88,14 @@ function OrdersDashboard() {
         </Button>
       </div>
 
+      {!isLoading && !isError && (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="stats-card"><CardContent className="p-4 flex justify-between items-center"><div><p className="text-sm text-muted-foreground">Total Orders</p><p className="text-2xl font-bold">{totalOrders}</p></div><Package className="w-8 h-8 text-primary" /></CardContent></Card>
         <Card className="stats-card"><CardContent className="p-4 flex justify-between items-center"><div><p className="text-sm text-muted-foreground">Completed</p><p className="text-2xl font-bold text-success">{completedOrders}</p></div><CheckCircle2 className="w-8 h-8 text-success" /></CardContent></Card>
         <Card className="stats-card"><CardContent className="p-4 flex justify-between items-center"><div><p className="text-sm text-muted-foreground">Pending</p><p className="text-2xl font-bold text-warning">{pendingOrders}</p></div><Clock className="w-8 h-8 text-warning" /></CardContent></Card>
         <Card className="stats-card"><CardContent className="p-4 flex justify-between items-center"><div><p className="text-sm text-muted-foreground">Total Value</p><p className="text-2xl font-bold text-info">{formatCurrency(totalValue)}</p></div><DollarSign className="w-8 h-8 text-info" /></CardContent></Card>
       </div>
+      )}
 
       <Card>
         <CardHeader className="border-b border-border">
@@ -113,14 +121,19 @@ function OrdersDashboard() {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="flex items-center justify-center py-16"><Loader2 size={24} className="animate-spin text-muted-foreground" /></div>
+            <PageLoader message="Loading orders..." />
+          ) : isError ? (
+            <PageError message={(error as any)?.message || 'Failed to load orders'} onRetry={() => refetch()} />
           ) : filteredOrders.length === 0 ? (
-            <div className="p-16 text-center">
-              <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-muted border border-border mb-4"><SearchX size={24} className="text-muted-foreground" /></div>
-              <p className="text-sm font-medium text-foreground">No orders found</p>
-              <p className="text-xs text-muted-foreground mt-1">Orders placed via the Admin Order page will appear here.</p>
-              <Button variant="ghost" size="sm" onClick={() => { setSearchTerm(''); setSelectedStatus('all') }} className="mt-4 text-primary"><X size={14} /> Clear filters</Button>
-            </div>
+            <PageEmpty
+              icon={<Package size={24} className="text-muted-foreground" />}
+              title={hasFilters ? 'No orders match your filters' : 'No orders yet'}
+              description={hasFilters ? 'Try adjusting your search or filter criteria.' : 'Orders placed via the Admin Order page will appear here.'}
+              actionLabel={hasFilters ? undefined : 'Place Order'}
+              onAction={hasFilters ? undefined : () => navigate({ to: '/admin-order' as any })}
+              hasFilters={hasFilters}
+              onClearFilters={() => { setSearchTerm(''); setSelectedStatus('all') }}
+            />
           ) : (
             <>
               <div className="overflow-x-auto">
@@ -209,74 +222,14 @@ function OrdersDashboard() {
                 </Table>
               </div>
 
-              {/* Pagination Controls */}
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border mt-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">Rows per page:</span>
-                  <Select
-                    value={pageSize.toString()}
-                    onValueChange={(val) => {
-                      setPageSize(Number(val))
-                      setCurrentPage(1)
-                    }}
-                  >
-                    <SelectTrigger className="h-8 w-[70px]">
-                      <SelectValue placeholder={pageSize.toString()} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="5">5</SelectItem>
-                      <SelectItem value="10">10</SelectItem>
-                      <SelectItem value="20">20</SelectItem>
-                      <SelectItem value="50">50</SelectItem>
-                      <SelectItem value="100">100</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground ml-4">
-                    Showing {totalItems > 0 ? (currentPage - 1) * pageSize + 1 : 0} to{' '}
-                    {Math.min(currentPage * pageSize, totalItems)} of {totalItems} entries
-                  </p>
-                </div>
-                {totalPages > 1 && (
-                  <div className="flex items-center gap-1">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-8"
-                      disabled={currentPage <= 1}
-                      onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                    >
-                      Previous
-                    </Button>
-                    {Array.from({ length: totalPages }, (_, i) => i + 1)
-                      .filter((p) => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1)
-                      .map((p, idx, arr) => {
-                        const showEllipsis = idx > 0 && p - arr[idx - 1] > 1
-                        return (
-                          <div key={p} className="flex items-center">
-                            {showEllipsis && <span className="px-2 text-xs text-muted-foreground">...</span>}
-                            <Button
-                              variant={currentPage === p ? 'default' : 'outline'}
-                              size="sm"
-                              className={`h-8 w-8 p-0 ${currentPage === p ? 'gradient-primary text-white border-0' : ''}`}
-                              onClick={() => setCurrentPage(p)}
-                            >
-                              {p}
-                            </Button>
-                          </div>
-                        )
-                      })}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-8"
-                      disabled={currentPage >= totalPages}
-                      onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-                    >
-                      Next
-                    </Button>
-                  </div>
-                )}
-              </div>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                pageSize={pageSize}
+                totalItems={totalItems}
+                onPageChange={setCurrentPage}
+                onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1) }}
+              />
             </>
           )}
         </CardContent>

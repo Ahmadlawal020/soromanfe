@@ -6,7 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '#/com
 import { Input } from '#/components/ui/input'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '#/components/ui/select'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '#/components/ui/table'
-import { SearchX, Loader2, Search, X, QrCode, Camera, ShieldCheck, Ticket, CalendarDays, CheckCircle2, AlertCircle } from 'lucide-react'
+import { Search, X, QrCode, Camera, ShieldCheck, Ticket, CalendarDays, CheckCircle2, AlertCircle } from 'lucide-react'
+import { PageLoader } from '#/components/PageLoader'
+import { PageError } from '#/components/PageError'
+import { PageEmpty } from '#/components/PageEmpty'
+import { Pagination } from '#/components/Pagination'
 import { useTicketList } from '#/lib/hooks/useTickets'
 import { Html5QrcodeScanner } from 'html5-qrcode'
 
@@ -34,8 +38,9 @@ function TicketsDashboard() {
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
 
-  const { data, isLoading } = useTicketList()
+  const { data, isLoading, isError, error, refetch } = useTicketList()
   const tickets = data?.tickets || []
+  const hasFilters = !!(searchTerm || selectedStatus !== 'all')
 
   const totalTickets = tickets.length
   const activeTickets = tickets.filter((t: any) => t.status === 'Active').length
@@ -150,78 +155,80 @@ function TicketsDashboard() {
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="relative overflow-hidden transition-all duration-200 hover:shadow-md border-border/60 bg-gradient-to-br from-card to-card/50">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Total Tickets</p>
-                <p className="text-3xl font-bold tracking-tight text-foreground">{isLoading ? '...' : totalTickets}</p>
+      {!isLoading && !isError && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="relative overflow-hidden transition-all duration-200 hover:shadow-md border-border/60 bg-gradient-to-br from-card to-card/50">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-muted-foreground">Total Tickets</p>
+                  <p className="text-3xl font-bold tracking-tight text-foreground">{totalTickets}</p>
+                </div>
+                <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                  <Ticket className="w-6 h-6" />
+                </div>
               </div>
-              <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-                <Ticket className="w-6 h-6" />
+              <div className="mt-4 flex items-center text-xs text-muted-foreground">
+                <span>All generated tickets</span>
               </div>
-            </div>
-            <div className="mt-4 flex items-center text-xs text-muted-foreground">
-              <span>All generated tickets</span>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card className="relative overflow-hidden transition-all duration-200 hover:shadow-md border-border/60 bg-gradient-to-br from-card to-card/50">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Active Tickets</p>
-                <p className="text-3xl font-bold tracking-tight text-foreground">{isLoading ? '...' : activeTickets}</p>
+          <Card className="relative overflow-hidden transition-all duration-200 hover:shadow-md border-border/60 bg-gradient-to-br from-card to-card/50">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-muted-foreground">Active Tickets</p>
+                  <p className="text-3xl font-bold tracking-tight text-foreground">{activeTickets}</p>
+                </div>
+                <div className="h-12 w-12 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
+                  <AlertCircle className="w-6 h-6" />
+                </div>
               </div>
-              <div className="h-12 w-12 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
-                <AlertCircle className="w-6 h-6" />
+              <div className="mt-4 flex items-center text-xs text-muted-foreground">
+                <span>Pending pickup/redemption</span>
               </div>
-            </div>
-            <div className="mt-4 flex items-center text-xs text-muted-foreground">
-              <span>Pending pickup/redemption</span>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card className="relative overflow-hidden transition-all duration-200 hover:shadow-md border-border/60 bg-gradient-to-br from-card to-card/50">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Redeemed</p>
-                <p className="text-3xl font-bold tracking-tight text-foreground">{isLoading ? '...' : redeemedTickets}</p>
+          <Card className="relative overflow-hidden transition-all duration-200 hover:shadow-md border-border/60 bg-gradient-to-br from-card to-card/50">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-muted-foreground">Redeemed</p>
+                  <p className="text-3xl font-bold tracking-tight text-foreground">{redeemedTickets}</p>
+                </div>
+                <div className="h-12 w-12 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+                  <CheckCircle2 className="w-6 h-6" />
+                </div>
               </div>
-              <div className="h-12 w-12 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
-                <CheckCircle2 className="w-6 h-6" />
+              <div className="mt-4 flex items-center text-xs text-muted-foreground">
+                <span>Successfully claimed orders</span>
               </div>
-            </div>
-            <div className="mt-4 flex items-center text-xs text-muted-foreground">
-              <span>Successfully claimed orders</span>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card className="relative overflow-hidden transition-all duration-200 hover:shadow-md border-border/60 bg-gradient-to-br from-card to-card/50">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Redemption Rate</p>
-                <p className="text-3xl font-bold tracking-tight text-foreground">{isLoading ? '...' : `${redemptionRate}%`}</p>
+          <Card className="relative overflow-hidden transition-all duration-200 hover:shadow-md border-border/60 bg-gradient-to-br from-card to-card/50">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-muted-foreground">Redemption Rate</p>
+                  <p className="text-3xl font-bold tracking-tight text-foreground">{`${redemptionRate}%`}</p>
+                </div>
+                <div className="h-12 w-12 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center">
+                  <ShieldCheck className="w-6 h-6" />
+                </div>
               </div>
-              <div className="h-12 w-12 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center">
-                <ShieldCheck className="w-6 h-6" />
+              <div className="mt-4 w-full bg-muted rounded-full h-1.5 overflow-hidden">
+                <div
+                  className="bg-blue-500 h-1.5 rounded-full transition-all duration-500"
+                  style={{ width: `${redemptionRate}%` }}
+                />
               </div>
-            </div>
-            <div className="mt-4 w-full bg-muted rounded-full h-1.5 overflow-hidden">
-              <div
-                className="bg-blue-500 h-1.5 rounded-full transition-all duration-500"
-                style={{ width: `${isLoading ? 0 : redemptionRate}%` }}
-              />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* QR Code Scanner Interface */}
       {scanning && (
@@ -288,25 +295,17 @@ function TicketsDashboard() {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="flex items-center justify-center py-16">
-              <Loader2 size={24} className="animate-spin text-muted-foreground" />
-            </div>
+            <PageLoader message="Loading tickets..." />
+          ) : isError ? (
+            <PageError message={(error as any)?.message || 'Failed to load'} onRetry={() => refetch()} />
           ) : filteredTickets.length === 0 ? (
-            <div className="p-16 text-center">
-              <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-muted border border-border mb-4">
-                <SearchX size={24} className="text-muted-foreground" />
-              </div>
-              <p className="text-sm font-medium text-foreground">No tickets found</p>
-              <p className="text-xs text-muted-foreground mt-1">Paid or completed orders will automatically generate tickets here.</p>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => { setSearchTerm(''); setSelectedStatus('all') }}
-                className="mt-4 text-primary"
-              >
-                <X size={14} /> Clear filters
-              </Button>
-            </div>
+            <PageEmpty
+              icon={<Ticket size={24} className="text-muted-foreground" />}
+              title={hasFilters ? 'No tickets match your filters' : 'No tickets yet'}
+              description="Paid or completed orders will automatically generate tickets here."
+              hasFilters={hasFilters}
+              onClearFilters={() => { setSearchTerm(''); setSelectedStatus('all') }}
+            />
           ) : (
             <>
               <div className="overflow-x-auto">
@@ -363,74 +362,14 @@ function TicketsDashboard() {
                 </Table>
               </div>
 
-              {/* Pagination Controls */}
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border mt-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">Rows per page:</span>
-                  <Select
-                    value={pageSize.toString()}
-                    onValueChange={(val) => {
-                      setPageSize(Number(val))
-                      setCurrentPage(1)
-                    }}
-                  >
-                    <SelectTrigger className="h-8 w-[70px]">
-                      <SelectValue placeholder={pageSize.toString()} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="5">5</SelectItem>
-                      <SelectItem value="10">10</SelectItem>
-                      <SelectItem value="20">20</SelectItem>
-                      <SelectItem value="50">50</SelectItem>
-                      <SelectItem value="100">100</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground ml-4">
-                    Showing {totalItems > 0 ? (currentPage - 1) * pageSize + 1 : 0} to{' '}
-                    {Math.min(currentPage * pageSize, totalItems)} of {totalItems} entries
-                  </p>
-                </div>
-                {totalPages > 1 && (
-                  <div className="flex items-center gap-1">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-8"
-                      disabled={currentPage <= 1}
-                      onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                    >
-                      Previous
-                    </Button>
-                    {Array.from({ length: totalPages }, (_, i) => i + 1)
-                      .filter((p) => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1)
-                      .map((p, idx, arr) => {
-                        const showEllipsis = idx > 0 && p - arr[idx - 1] > 1
-                        return (
-                          <div key={p} className="flex items-center">
-                            {showEllipsis && <span className="px-2 text-xs text-muted-foreground">...</span>}
-                            <Button
-                              variant={currentPage === p ? 'default' : 'outline'}
-                              size="sm"
-                              className={`h-8 w-8 p-0 ${currentPage === p ? 'gradient-primary text-white border-0' : ''}`}
-                              onClick={() => setCurrentPage(p)}
-                            >
-                              {p}
-                            </Button>
-                          </div>
-                        )
-                      })}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-8"
-                      disabled={currentPage >= totalPages}
-                      onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-                    >
-                      Next
-                    </Button>
-                  </div>
-                )}
-              </div>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                pageSize={pageSize}
+                totalItems={totalItems}
+                onPageChange={setCurrentPage}
+                onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1) }}
+              />
             </>
           )}
         </CardContent>

@@ -6,8 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '#/com
 import { Input } from '#/components/ui/input'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '#/components/ui/table'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '#/components/ui/select'
-import { Users, Search, Plus, UserCheck, UserX, Phone, Mail, Building2, X, SearchX, Loader2, Wallet, Banknote } from 'lucide-react'
+import { Users, Search, Plus, UserCheck, UserX, Phone, Mail, Building2, X, Wallet, Banknote } from 'lucide-react'
 import { useCustomerList } from '#/lib/hooks/useCustomers'
+import { PageLoader } from '#/components/PageLoader'
+import { PageError } from '#/components/PageError'
+import { PageEmpty } from '#/components/PageEmpty'
+import { Pagination } from '#/components/Pagination'
 
 export const Route = createFileRoute('/customers/')({
   component: CustomerDashboard,
@@ -34,7 +38,7 @@ function CustomerDashboard() {
   const [pageSize, setPageSize] = useState(10)
 
   const POLL_INTERVAL = 30_000
-  const { data, isLoading } = useCustomerList({
+  const { data, isLoading, isError, error, refetch } = useCustomerList({
     page: currentPage,
     limit: pageSize,
     search: searchTerm || undefined,
@@ -49,7 +53,6 @@ function CustomerDashboard() {
 
   const totalItems = data?.pagination?.total ?? customers.length
   const totalPages = data?.pagination?.pages ?? Math.ceil(totalItems / pageSize)
-  const paginatedCustomers = customers
 
   const stats = {
     total: data?.summary?.total ?? data?.pagination?.total ?? 0,
@@ -58,6 +61,8 @@ function CustomerDashboard() {
     totalBalance: data?.summary?.totalBalance ?? customers.reduce((sum: number, c: any) => sum + (Number(c.balance) || 0), 0),
   }
   const getInitials = (name: string) => { const parts = (name || '').split(' '); return `${parts[0]?.[0] || ''}${parts[1]?.[0] || ''}`.toUpperCase() }
+
+  const hasFilters = searchTerm || selectedStatus !== 'all'
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -71,12 +76,14 @@ function CustomerDashboard() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="stats-card"><CardContent className="p-4 flex justify-between items-center"><div><p className="text-sm text-muted-foreground">Total Customers</p><p className="text-2xl font-bold">{stats.total}</p></div><Users className="w-8 h-8 text-primary" /></CardContent></Card>
-        <Card className="stats-card"><CardContent className="p-4 flex justify-between items-center"><div><p className="text-sm text-muted-foreground">Active</p><p className="text-2xl font-bold text-success">{stats.active}</p></div><UserCheck className="w-8 h-8 text-success" /></CardContent></Card>
-        <Card className="stats-card"><CardContent className="p-4 flex justify-between items-center"><div><p className="text-sm text-muted-foreground">Inactive</p><p className="text-2xl font-bold text-warning">{stats.inactive}</p></div><UserX className="w-8 h-8 text-warning" /></CardContent></Card>
-        <Card className="stats-card"><CardContent className="p-4 flex justify-between items-center"><div><p className="text-sm text-muted-foreground">Total Balance</p><p className="text-2xl font-bold text-info">{formatCurrency(stats.totalBalance)}</p></div><Wallet className="w-8 h-8 text-info" /></CardContent></Card>
-      </div>
+      {!isLoading && !isError && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="stats-card"><CardContent className="p-4 flex justify-between items-center"><div><p className="text-sm text-muted-foreground">Total Customers</p><p className="text-2xl font-bold">{stats.total}</p></div><Users className="w-8 h-8 text-primary" /></CardContent></Card>
+          <Card className="stats-card"><CardContent className="p-4 flex justify-between items-center"><div><p className="text-sm text-muted-foreground">Active</p><p className="text-2xl font-bold text-success">{stats.active}</p></div><UserCheck className="w-8 h-8 text-success" /></CardContent></Card>
+          <Card className="stats-card"><CardContent className="p-4 flex justify-between items-center"><div><p className="text-sm text-muted-foreground">Inactive</p><p className="text-2xl font-bold text-warning">{stats.inactive}</p></div><UserX className="w-8 h-8 text-warning" /></CardContent></Card>
+          <Card className="stats-card"><CardContent className="p-4 flex justify-between items-center"><div><p className="text-sm text-muted-foreground">Total Balance</p><p className="text-2xl font-bold text-info">{formatCurrency(stats.totalBalance)}</p></div><Wallet className="w-8 h-8 text-info" /></CardContent></Card>
+        </div>
+      )}
 
       <Card>
         <CardHeader className="border-b border-border">
@@ -102,14 +109,19 @@ function CustomerDashboard() {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="flex items-center justify-center py-16"><Loader2 size={24} className="animate-spin text-muted-foreground" /></div>
+            <PageLoader message="Loading customers..." />
+          ) : isError ? (
+            <PageError message={(error as any)?.message || 'Failed to load customers'} onRetry={() => refetch()} />
           ) : customers.length === 0 ? (
-            <div className="p-16 text-center">
-              <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-muted border border-border mb-4"><SearchX size={24} className="text-muted-foreground" /></div>
-              <p className="text-sm font-medium text-foreground">No customers found</p>
-              <p className="text-xs text-muted-foreground mt-1">Try adjusting your search or filter criteria.</p>
-              <Button variant="ghost" size="sm" onClick={() => { setSearchTerm(''); setSelectedStatus('all') }} className="mt-4 text-primary"><X size={14} /> Clear filters</Button>
-            </div>
+            <PageEmpty
+              icon={<Users size={24} className="text-muted-foreground" />}
+              title={hasFilters ? 'No customers match your filters' : 'No customers yet'}
+              description={hasFilters ? 'Try adjusting your search or filter criteria.' : 'Get started by adding your first customer.'}
+              actionLabel={hasFilters ? undefined : 'Add Customer'}
+              onAction={hasFilters ? undefined : () => navigate({ to: '/customers/form' })}
+              hasFilters={hasFilters}
+              onClearFilters={() => { setSearchTerm(''); setSelectedStatus('all') }}
+            />
           ) : (
             <>
               <div className="overflow-x-auto">
@@ -125,7 +137,7 @@ function CustomerDashboard() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {paginatedCustomers.map((customer: any) => (
+                    {customers.map((customer: any) => (
                       <TableRow key={customer._id || customer.id} className="cursor-pointer hover:bg-muted transition" onClick={() => navigate({ to: '/customers/details' as any, search: { id: customer._id || customer.id } as any, state: { customer } } as any)}>
                         <TableCell>
                           <div className="flex items-center gap-3">
@@ -159,74 +171,14 @@ function CustomerDashboard() {
                 </Table>
               </div>
 
-              {/* Pagination Controls */}
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border mt-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">Rows per page:</span>
-                  <Select
-                    value={pageSize.toString()}
-                    onValueChange={(val) => {
-                      setPageSize(Number(val))
-                      setCurrentPage(1)
-                    }}
-                  >
-                    <SelectTrigger className="h-8 w-[70px]">
-                      <SelectValue placeholder={pageSize.toString()} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="5">5</SelectItem>
-                      <SelectItem value="10">10</SelectItem>
-                      <SelectItem value="20">20</SelectItem>
-                      <SelectItem value="50">50</SelectItem>
-                      <SelectItem value="100">100</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground ml-4">
-                    Showing {totalItems > 0 ? (currentPage - 1) * pageSize + 1 : 0} to{' '}
-                    {Math.min(currentPage * pageSize, totalItems)} of {totalItems} entries
-                  </p>
-                </div>
-                {totalPages > 1 && (
-                  <div className="flex items-center gap-1">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-8"
-                      disabled={currentPage <= 1}
-                      onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                    >
-                      Previous
-                    </Button>
-                    {Array.from({ length: totalPages }, (_, i) => i + 1)
-                      .filter((p) => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1)
-                      .map((p, idx, arr) => {
-                        const showEllipsis = idx > 0 && p - arr[idx - 1] > 1
-                        return (
-                          <div key={p} className="flex items-center">
-                            {showEllipsis && <span className="px-2 text-xs text-muted-foreground">...</span>}
-                            <Button
-                              variant={currentPage === p ? 'default' : 'outline'}
-                              size="sm"
-                              className={`h-8 w-8 p-0 ${currentPage === p ? 'gradient-primary text-white border-0' : ''}`}
-                              onClick={() => setCurrentPage(p)}
-                            >
-                              {p}
-                            </Button>
-                          </div>
-                        )
-                      })}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-8"
-                      disabled={currentPage >= totalPages}
-                      onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-                    >
-                      Next
-                    </Button>
-                  </div>
-                )}
-              </div>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                pageSize={pageSize}
+                totalItems={totalItems}
+                onPageChange={setCurrentPage}
+                onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1) }}
+              />
             </>
           )}
         </CardContent>

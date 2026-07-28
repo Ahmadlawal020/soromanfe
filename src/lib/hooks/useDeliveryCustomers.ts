@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '#/lib/api/http'
 import { useToast } from '#/lib/hooks/useToast'
+import { getErrorMessage } from '#/lib/utils'
 import { useAuthStore } from '#/modules/auth/stores/store'
 
 export interface DeliveryCustomerPayload {
@@ -51,10 +52,6 @@ export interface DeliveryCustomerPayload {
   notes?: string
 }
 
-function getErrorMessage(err: any): string {
-  return err?.response?.data?.message || err?.message || 'An error occurred'
-}
-
 export function useDeliveryCustomerList(params?: { type?: string; search?: string; status?: string }) {
   const token = useAuthStore((s) => s.accessToken)
 
@@ -96,6 +93,7 @@ export function useCreateDeliveryCustomer() {
   const toast = useToast()
 
   return useMutation({
+    retry: false,
     mutationFn: async (data: DeliveryCustomerPayload) => {
       const res = await api.post('/delivery-customers', data)
       return res.data
@@ -119,6 +117,7 @@ export function useUpdateDeliveryCustomer() {
   const toast = useToast()
 
   return useMutation({
+    retry: false,
     mutationFn: async ({ id, data }: { id: string; data: Partial<DeliveryCustomerPayload> }) => {
       const res = await api.patch(`/delivery-customers/${id}`, data)
       return res.data
@@ -138,6 +137,7 @@ export function useDeleteDeliveryCustomer() {
   const toast = useToast()
 
   return useMutation({
+    retry: false,
     mutationFn: async (id: string) => {
       const res = await api.delete(`/delivery-customers/${id}`)
       return res.data

@@ -50,6 +50,7 @@ function PFIForm() {
     description: '',
     locationId: '',
     productId: '',
+    productUnit: '',
     startingQtyLitres: '',
     qtyVolumeMt: '',
     unitPrice: '',
@@ -72,8 +73,9 @@ function PFIForm() {
         pfiDate: formatDateToInput(editingPfi.pfiDate),
         pfiNumber: editingPfi.pfiNumber || '',
         description: editingPfi.description || '',
-        locationId: String(editingPfi.locationId || ''),
+        locationId: editingPfi.locationId ? String(editingPfi.locationId) : '',
         productId: String(editingPfi.productId || ''),
+        productUnit: editingPfi.productUnit || '',
         startingQtyLitres: String(editingPfi.startingQtyLitres || ''),
         qtyVolumeMt: String(editingPfi.qtyVolumeMt || ''),
         unitPrice: editingPfi.unitPrice !== undefined && editingPfi.unitPrice !== null ? String(editingPfi.unitPrice) : '',
@@ -99,8 +101,8 @@ function PFIForm() {
     e.preventDefault()
     setError('')
 
-    if (!form.pfiNumber || !form.locationId || !form.productId || !form.startingQtyLitres) {
-      setError('Please fill in all required fields (PFI No, Location, Product, Qty Volume).')
+    if (!form.pfiNumber || !form.productId || (!form.startingQtyLitres && !form.qtyVolumeMt)) {
+      setError('Please fill in all required fields (PFI No, Product, and Quantity).')
       return
     }
 
@@ -110,9 +112,10 @@ function PFIForm() {
         pfiDate: form.pfiDate || null,
         pfiNumber: form.pfiNumber,
         description: form.description,
-        locationId: form.locationId,
+        locationId: form.locationId && form.locationId !== 'none' ? form.locationId : null,
         productId: form.productId,
-        startingQtyLitres: Number(form.startingQtyLitres),
+        productUnit: form.productUnit || undefined,
+        startingQtyLitres: Number(form.startingQtyLitres) || 0,
         qtyVolumeMt: form.qtyVolumeMt ? Number(form.qtyVolumeMt) : null,
         unitPrice: form.unitPrice ? Number(form.unitPrice) : 0,
         auditOfficerId: form.auditOfficerId || null,
@@ -159,6 +162,7 @@ function PFIForm() {
                 description: '',
                 locationId: '',
                 productId: '',
+                productUnit: '',
                 startingQtyLitres: '',
                 qtyVolumeMt: '',
                 unitPrice: '',
@@ -220,19 +224,20 @@ function PFIForm() {
 
               <div>
                 <Label>PFI No *</Label>
-                <Input placeholder="e.g. PFI-50" value={form.pfiNumber} onChange={e => setForm({ ...form, pfiNumber: e.target.value })} required />
+                <Input placeholder="e.g. PFI-001" value={form.pfiNumber} onChange={e => setForm({ ...form, pfiNumber: e.target.value })} required />
               </div>
 
               <div>
                 <Label>Description</Label>
-                <Input placeholder="e.g. AGO supply from Dangote refinery" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
+                <Input placeholder="e.g. AGO bulk supply" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
               </div>
 
               <div>
-                <Label>Location *</Label>
-                <Select value={form.locationId} onValueChange={v => setForm({ ...form, locationId: v })}>
-                  <SelectTrigger><SelectValue placeholder="Select location" /></SelectTrigger>
+                <Label>Location (Optional)</Label>
+                <Select value={form.locationId || "none"} onValueChange={v => setForm({ ...form, locationId: v === 'none' ? '' : v })}>
+                  <SelectTrigger><SelectValue placeholder="Select location (optional)" /></SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="none">No Location Selected</SelectItem>
                     {locations.map((l: any) => (
                       <SelectItem key={l.id || l._id} value={String(l.id || l._id)}>{l.name || l.state_name || l.state || l.id}</SelectItem>
                     ))}
@@ -242,36 +247,133 @@ function PFIForm() {
 
               <div>
                 <Label>Product *</Label>
-                <Select value={form.productId} onValueChange={v => setForm({ ...form, productId: v })}>
+                <Select value={form.productId} onValueChange={v => {
+                  const selected = products.find((p: any) => String(p.id || p._id) === String(v))
+                  setForm(prev => ({
+                    ...prev,
+                    productId: v,
+                    productUnit: selected?.unit || 'Litres'
+                  }))
+                }}>
                   <SelectTrigger><SelectValue placeholder="Select product" /></SelectTrigger>
                   <SelectContent>
                     {products.map((p: any) => (
-                      <SelectItem key={p.id || p._id} value={String(p.id || p._id)}>{p.name}</SelectItem>
+                      <SelectItem key={p.id || p._id} value={String(p.id || p._id)}>
+                        {p.name} {p.unit ? `(${p.unit})` : ''}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label>Qty (Ltr) *</Label>
-                  <Input type="number" min="0" placeholder="e.g. 1000000" value={form.startingQtyLitres} onChange={e => setForm({ ...form, startingQtyLitres: e.target.value })} required />
-                </div>
-                <div>
-                  <Label>Qty (MT)</Label>
-                  <Input type="number" min="0" placeholder="e.g. 820" value={form.qtyVolumeMt} onChange={e => setForm({ ...form, qtyVolumeMt: e.target.value })} />
-                </div>
-              </div>
+              {(() => {
+                const selectedProd = products.find((p: any) => String(p.id || p._id) === String(form.productId))
+                const unitName = selectedProd?.unit || form.productUnit || 'Litres'
+                const uLower = unitName.toLowerCase()
+                const isWeightProd = uLower.includes('mt') || uLower.includes('ton') || uLower.includes('kg') || uLower.includes('weight')
 
-              <div>
-                <Label>Unit Price (₦ per Ltr)</Label>
-                <Input type="number" step="0.01" min="0" placeholder="e.g. 950.00" value={form.unitPrice} onChange={e => setForm({ ...form, unitPrice: e.target.value })} />
-                {Number(form.startingQtyLitres || 0) > 0 && Number(form.unitPrice || 0) > 0 && (
-                  <p className="text-xs text-muted-foreground mt-1 font-medium">
-                    Projected Total Value: <span className="font-semibold text-success">₦{(Number(form.startingQtyLitres) * Number(form.unitPrice)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                  </p>
-                )}
-              </div>
+                const activeQty = isWeightProd
+                  ? (Number(form.qtyVolumeMt) || Number(form.startingQtyLitres) || 0)
+                  : (Number(form.startingQtyLitres) || Number(form.qtyVolumeMt) || 0)
+
+                const unitPriceVal = Number(form.unitPrice) || 0
+                const projectedCost = activeQty * unitPriceVal
+
+                return (
+                  <div className="space-y-4 pt-1">
+                    {/* Primary Quantity Input matching product unit */}
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between items-center">
+                        <Label className="font-semibold text-foreground">
+                          Quantity ({unitName}) *
+                        </Label>
+                        <span className="text-[11px] font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-md">
+                          Unit: {unitName}
+                        </span>
+                      </div>
+                      <div className="relative">
+                        <Input
+                          type="number"
+                          step={isWeightProd ? "0.001" : "1"}
+                          min="0"
+                          placeholder={isWeightProd ? "e.g. 820" : "e.g. 1000000"}
+                          value={isWeightProd ? form.qtyVolumeMt : form.startingQtyLitres}
+                          onChange={e => {
+                            if (isWeightProd) {
+                              setForm({ ...form, qtyVolumeMt: e.target.value })
+                            } else {
+                              setForm({ ...form, startingQtyLitres: e.target.value })
+                            }
+                          }}
+                          required
+                          className="pr-16 font-medium"
+                        />
+                        <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-xs font-bold text-muted-foreground bg-muted px-2 py-1 rounded">
+                          {unitName}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Secondary Equivalent Input (Optional) */}
+                    <div className="space-y-1.5">
+                      <Label className="text-xs text-muted-foreground font-normal">
+                        {isWeightProd ? 'Equivalent Volume in Litres (Optional)' : 'Equivalent Weight in MT / kg (Optional)'}
+                      </Label>
+                      <div className="relative">
+                        <Input
+                          type="number"
+                          step={isWeightProd ? "1" : "0.001"}
+                          min="0"
+                          placeholder={isWeightProd ? "e.g. 1000000" : "e.g. 820"}
+                          value={isWeightProd ? form.startingQtyLitres : form.qtyVolumeMt}
+                          onChange={e => {
+                            if (isWeightProd) {
+                              setForm({ ...form, startingQtyLitres: e.target.value })
+                            } else {
+                              setForm({ ...form, qtyVolumeMt: e.target.value })
+                            }
+                          }}
+                          className="pr-16 text-xs text-muted-foreground"
+                        />
+                        <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-[11px] font-medium text-muted-foreground bg-muted/60 px-2 py-0.5 rounded">
+                          {isWeightProd ? 'Litres' : 'MT / kg'}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Unit Price Input */}
+                    <div className="space-y-1.5 pt-1">
+                      <Label className="font-semibold text-foreground">
+                        Unit Price (₦ per {unitName})
+                      </Label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-semibold text-muted-foreground">₦</span>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          placeholder="e.g. 950.00"
+                          value={form.unitPrice}
+                          onChange={e => setForm({ ...form, unitPrice: e.target.value })}
+                          className="pl-8 font-medium"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Dynamic Cost Projection Summary */}
+                    {activeQty > 0 && unitPriceVal > 0 && (
+                      <div className="p-3 rounded-lg bg-primary/5 border border-primary/20 text-xs flex justify-between items-center">
+                        <span className="text-muted-foreground">
+                          Projected Cumulative Cost ({activeQty.toLocaleString()} {unitName} × ₦{unitPriceVal.toLocaleString()}):
+                        </span>
+                        <span className="font-bold text-primary text-sm">
+                          ₦{projectedCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )
+              })()}
             </div>
           </div>
 

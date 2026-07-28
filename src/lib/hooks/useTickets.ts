@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '#/lib/api/http'
 import { useToast } from '#/lib/hooks/useToast'
+import { getErrorMessage } from '#/lib/utils'
 
 export function useTicketList(params?: { page?: number; limit?: number; search?: string; status?: string }) {
   return useQuery({
@@ -23,15 +24,12 @@ export function useTicketDetails(idOrCode: string) {
   })
 }
 
-function getErrorMessage(err: any): string {
-  return err?.response?.data?.message || err?.message || 'An unexpected error occurred'
-}
-
 export function useRedeemTicket() {
   const queryClient = useQueryClient()
   const toast = useToast()
 
   return useMutation({
+    retry: false,
     mutationFn: async (idOrCode: string) => {
       const res = await api.post(`/tickets/${idOrCode}/redeem`)
       return res.data

@@ -460,7 +460,6 @@ function ManualDepositPage() {
                                 type="submit"
                                 className="w-full gradient-primary text-white font-medium gap-2"
                                 disabled={createDepositMutation.isPending}
-                                onClick={handleSubmit}
                             >
                                 {createDepositMutation.isPending ? (
                                     <>

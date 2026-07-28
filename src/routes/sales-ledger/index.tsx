@@ -149,10 +149,10 @@ function SalesLedgerDashboard() {
     const endItem = Math.min(currentPage * pageSize, totalCount)
 
     return (
-      <div className="border-t border-slate-200 bg-slate-50/70 px-4 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="flex flex-wrap items-center gap-4 text-xs text-slate-600">
+      <div className="border-t border-border bg-muted/50 px-4 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
           <div className="flex items-center gap-2">
-            <span className="text-slate-500 font-medium">Rows per page:</span>
+            <span className="text-muted-foreground font-medium">Rows per page:</span>
             <Select
               value={pageSize.toString()}
               onValueChange={(val) => {
@@ -160,7 +160,7 @@ function SalesLedgerDashboard() {
                 setCurrentPage(1)
               }}
             >
-              <SelectTrigger className="h-8 w-[72px] bg-white text-xs">
+              <SelectTrigger className="h-8 w-[72px] bg-background text-xs">
                 <SelectValue placeholder={pageSize.toString()} />
               </SelectTrigger>
               <SelectContent>
@@ -173,11 +173,11 @@ function SalesLedgerDashboard() {
             </Select>
           </div>
           <span>
-            Showing <strong className="text-slate-800">{startItem}</strong>–<strong className="text-slate-800">{endItem}</strong> of <strong className="text-slate-800">{totalCount}</strong> {itemLabel} · <span className="font-medium text-slate-500">{periodLabel}</span>
+            Showing <strong className="text-foreground">{startItem}</strong>–<strong className="text-foreground">{endItem}</strong> of <strong className="text-foreground">{totalCount}</strong> {itemLabel} · <span className="font-medium text-muted-foreground">{periodLabel}</span>
           </span>
-          <span className="hidden sm:inline text-slate-300">|</span>
+          <span className="hidden sm:inline text-muted-foreground/40">|</span>
           <span className="font-medium">
-            Total Paid: <strong className="text-emerald-700">{fmt(totalPaidSum)}</strong>
+            Total Paid: <strong className="text-emerald-600 dark:text-emerald-400">{fmt(totalPaidSum)}</strong>
           </span>
         </div>
 
@@ -186,7 +186,7 @@ function SalesLedgerDashboard() {
             <Button
               variant="outline"
               size="sm"
-              className="h-8 px-2.5 text-xs gap-1 text-slate-600 border-slate-200 bg-white hover:bg-slate-100"
+              className="h-8 px-2.5 text-xs gap-1 text-muted-foreground border-border bg-card hover:bg-muted"
               disabled={currentPage <= 1}
               onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
             >
@@ -198,14 +198,14 @@ function SalesLedgerDashboard() {
                 const showEllipsis = idx > 0 && p - arr[idx - 1] > 1
                 return (
                   <div key={p} className="flex items-center">
-                    {showEllipsis && <span className="px-1 text-xs text-slate-400">...</span>}
+                    {showEllipsis && <span className="px-1 text-xs text-muted-foreground">...</span>}
                     <Button
                       variant={currentPage === p ? 'default' : 'outline'}
                       size="sm"
                       className={`h-8 w-8 p-0 text-xs font-semibold ${
                         currentPage === p
-                          ? 'bg-slate-900 text-white hover:bg-slate-800 border-slate-900 shadow-sm'
-                          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
+                          ? 'bg-primary text-primary-foreground hover:bg-primary/90 border-primary shadow-sm'
+                          : 'bg-card text-foreground border-border hover:bg-muted'
                       }`}
                       onClick={() => setCurrentPage(p)}
                     >
@@ -217,7 +217,7 @@ function SalesLedgerDashboard() {
             <Button
               variant="outline"
               size="sm"
-              className="h-8 px-2.5 text-xs gap-1 text-slate-600 border-slate-200 bg-white hover:bg-slate-100"
+              className="h-8 px-2.5 text-xs gap-1 text-muted-foreground border-border bg-card hover:bg-muted"
               disabled={currentPage >= totalPages}
               onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
             >
@@ -457,14 +457,14 @@ function SalesLedgerDashboard() {
       />
 
       {/* ═══ FILTER PANEL ═══ */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
         <div className="p-4 space-y-4">
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={15} />
             <Input placeholder="Search truck, customer, PFI, payer…" className="pl-9 h-10 text-sm" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
             {searchQuery && (
-              <button title="Clear search" onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors">
+              <button title="Clear search" onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
                 <X size={14} />
               </button>
             )}
@@ -478,8 +478,8 @@ function SalesLedgerDashboard() {
                 type="button"
                 onClick={() => handlePresetChange(tp)}
                 className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all ${timePreset === tp
-                    ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
-                    : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400 hover:bg-slate-50'
+                    ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                    : 'bg-card text-muted-foreground border-border hover:border-foreground/40 hover:bg-muted'
                   }`}
               >
                 {tp === 'all' ? 'All Time' : tp === 'custom' ? 'Custom' : tp.charAt(0).toUpperCase() + tp.slice(1)}
@@ -489,22 +489,22 @@ function SalesLedgerDashboard() {
 
           {timePreset === 'custom' && (
             <div className="flex flex-wrap gap-3 items-end">
-              <div className="space-y-1"><Label className="text-xs text-slate-500">From</Label><Input type="date" value={customFrom} onChange={e => setCustomFrom(e.target.value)} className="h-9 w-[160px]" /></div>
-              <div className="space-y-1"><Label className="text-xs text-slate-500">To</Label><Input type="date" value={customTo} onChange={e => setCustomTo(e.target.value)} className="h-9 w-[160px]" /></div>
+              <div className="space-y-1"><Label className="text-xs text-muted-foreground">From</Label><Input type="date" value={customFrom} onChange={e => setCustomFrom(e.target.value)} className="h-9 w-[160px]" /></div>
+              <div className="space-y-1"><Label className="text-xs text-muted-foreground">To</Label><Input type="date" value={customTo} onChange={e => setCustomTo(e.target.value)} className="h-9 w-[160px]" /></div>
             </div>
           )}
 
           {/* Advanced Filters Toggle */}
-          <div className="border-t border-slate-100 pt-3">
+          <div className="border-t border-border pt-3">
             <button
               type="button"
               onClick={() => setShowAdvancedFilters(prev => !prev)}
-              className="flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors"
+              className="flex items-center gap-2 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
             >
               <SlidersHorizontal size={13} />
               Advanced Filters
               {hasActiveFilters && (
-                <Badge className="ml-1 h-5 px-1.5 text-[10px] bg-slate-900 text-white">
+                <Badge className="ml-1 h-5 px-1.5 text-[10px] bg-primary text-primary-foreground">
                   Active
                 </Badge>
               )}
@@ -516,8 +516,8 @@ function SalesLedgerDashboard() {
           {showAdvancedFilters && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
               <div className="space-y-1.5">
-                <Label className="flex items-center gap-1.5 text-xs font-medium text-slate-600">
-                  <Truck size={12} className="text-slate-400" /> Truck
+                <Label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                  <Truck size={12} className="text-muted-foreground" /> Truck
                 </Label>
                 <Select value={truckFilter} onValueChange={setTruckFilter}>
                   <SelectTrigger className="h-9 text-sm">
@@ -531,8 +531,8 @@ function SalesLedgerDashboard() {
               </div>
 
               <div className="space-y-1.5">
-                <Label className="flex items-center gap-1.5 text-xs font-medium text-slate-600">
-                  <Users size={12} className="text-slate-400" /> Customer
+                <Label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                  <Users size={12} className="text-muted-foreground" /> Customer
                 </Label>
                 <Select value={customerFilter} onValueChange={setCustomerFilter}>
                   <SelectTrigger className="h-9 text-sm">
@@ -546,8 +546,8 @@ function SalesLedgerDashboard() {
               </div>
 
               <div className="space-y-1.5">
-                <Label className="flex items-center gap-1.5 text-xs font-medium text-slate-600">
-                  <Building2 size={12} className="text-slate-400" /> Customer Type
+                <Label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                  <Building2 size={12} className="text-muted-foreground" /> Customer Type
                 </Label>
                 <Select value={customerTypeFilter} onValueChange={(v) => setCustomerTypeFilter(v as any)}>
                   <SelectTrigger className="h-9 text-sm">
@@ -563,7 +563,7 @@ function SalesLedgerDashboard() {
 
               {tripCodes.length > 0 && (
                 <div className="space-y-1.5">
-                  <Label className="flex items-center gap-1.5 text-xs font-medium text-slate-600">
+                  <Label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
                     <Tag size={12} className="text-purple-400" /> PFI Code
                   </Label>
                   <Select value={tripCodeFilter} onValueChange={setTripCodeFilter}>
@@ -623,10 +623,10 @@ function SalesLedgerDashboard() {
 
       {/* ═══ PFI CODE MANAGEMENT ═══ */}
       {tripCodes.length > 0 && (
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
           <div className="p-4">
             <div className="flex flex-wrap items-center gap-x-2 gap-y-2">
-              <span className="text-xs font-semibold text-slate-500 flex items-center gap-1.5 shrink-0">
+              <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5 shrink-0">
                 <Tag size={12} className="text-purple-400" /> PFI Codes
               </span>
               {tripCodes.map(code => {
@@ -638,7 +638,7 @@ function SalesLedgerDashboard() {
                       onClick={() => setTripCodeFilter(prev => prev === code ? 'all' : code)}
                       className={`px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all ${tripCodeFilter === code
                           ? 'bg-purple-700 text-white border-purple-700 shadow-sm'
-                          : 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100'
+                          : 'bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/20 hover:bg-purple-500/20'
                         }`}
                     >
                       {code}{count > 0 ? ` · ${count}` : ''}
@@ -647,7 +647,7 @@ function SalesLedgerDashboard() {
                       type="button"
                       onClick={() => deleteTripCode(code)}
                       title={`Delete ${code}`}
-                      className="text-slate-300 hover:text-red-500 transition-colors p-0.5 rounded"
+                      className="text-muted-foreground/50 hover:text-red-500 transition-colors p-0.5 rounded"
                     >
                       <X size={10} />
                     </button>
@@ -657,12 +657,12 @@ function SalesLedgerDashboard() {
               <span className="inline-flex items-center gap-1 ml-1">
                 <input
                   placeholder="+ new code"
-                  className="h-7 px-2 text-xs rounded-lg border border-dashed border-slate-300 bg-transparent focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-200 w-24 uppercase transition-all"
+                  className="h-7 px-2 text-xs rounded-lg border border-dashed border-border bg-transparent text-foreground focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-200 w-24 uppercase transition-all"
                   value={newTripCodeInput}
                   onChange={e => setNewTripCodeInput(e.target.value.toUpperCase())}
                   onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTripCode() } }}
                 />
-                <button type="button" onClick={addTripCode} className="text-xs text-purple-600 hover:text-purple-800 font-semibold transition-colors">
+                <button type="button" onClick={addTripCode} className="text-xs text-purple-600 dark:text-purple-400 hover:text-purple-800 font-semibold transition-colors">
                   Add
                 </button>
               </span>
@@ -672,12 +672,12 @@ function SalesLedgerDashboard() {
       )}
 
       {/* ═══ VIEW SWITCHER ═══ */}
-      <div className="flex items-center gap-1 bg-white rounded-lg border border-slate-200 shadow-sm p-1 w-fit">
+      <div className="flex items-center gap-1 bg-card rounded-lg border border-border shadow-sm p-1 w-fit">
         <button
           onClick={() => setActiveView('ledger')}
           className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-all ${activeView === 'ledger'
-              ? 'bg-slate-900 text-white shadow-sm'
-              : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
+              ? 'bg-primary text-primary-foreground shadow-sm'
+              : 'text-muted-foreground hover:bg-muted hover:text-foreground'
             }`}
         >
           <Truck size={14} /> Sales Ledger
@@ -685,13 +685,13 @@ function SalesLedgerDashboard() {
         <button
           onClick={() => setActiveView('daily')}
           className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-all ${activeView === 'daily'
-              ? 'bg-slate-900 text-white shadow-sm'
-              : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
+              ? 'bg-primary text-primary-foreground shadow-sm'
+              : 'text-muted-foreground hover:bg-muted hover:text-foreground'
             }`}
         >
           <CalendarIcon size={14} /> Daily Payments
           {filteredSales.length > 0 && (
-            <span className={`ml-0.5 px-1.5 py-0.5 rounded-full text-[11px] font-bold leading-none ${activeView === 'daily' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+            <span className={`ml-0.5 px-1.5 py-0.5 rounded-full text-[11px] font-bold leading-none ${activeView === 'daily' ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-muted text-muted-foreground'
               }`}>
               {filteredSales.length}
             </span>
@@ -704,24 +704,24 @@ function SalesLedgerDashboard() {
 
       {/* ═══ PFI SUMMARY TABLE ═══ */}
       {activeView === 'ledger' && totals.codeSummaries.length > 0 && (
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-          <div className="p-4 border-b border-slate-100">
+        <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
+          <div className="p-4 border-b border-border">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h3 className="text-sm font-bold text-slate-800 flex items-center gap-1.5 uppercase">
+                <h3 className="text-sm font-bold text-foreground flex items-center gap-1.5 uppercase">
                   <FileText size={15} className="text-indigo-500" /> PFI Summary
                 </h3>
-                <p className="text-xs text-slate-400 mt-0.5">Payment status breakdown by PFI allocation code.</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Payment status breakdown by PFI allocation code.</p>
               </div>
               <div className="flex flex-wrap items-center gap-3 text-xs font-semibold">
-                <span className="inline-flex items-center rounded-md bg-emerald-50 px-2.5 py-1 text-emerald-700 ring-1 ring-inset ring-emerald-700/10 gap-1.5">
+                <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2.5 py-1 text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20 gap-1.5">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span> Sold: <strong>{totals.soldCount}</strong>
                 </span>
-                <span className="inline-flex items-center rounded-md bg-amber-50 px-2.5 py-1 text-amber-700 ring-1 ring-inset ring-amber-700/10 gap-1.5">
+                <span className="inline-flex items-center rounded-md bg-amber-500/10 px-2.5 py-1 text-amber-600 dark:text-amber-400 ring-1 ring-inset ring-amber-500/20 gap-1.5">
                   <span className="h-1.5 w-1.5 rounded-full bg-amber-500"></span> With Balance: <strong>{totals.withBalanceCount}</strong>
                 </span>
-                <span className="inline-flex items-center rounded-md bg-slate-100 px-2.5 py-1 text-slate-700 ring-1 ring-inset ring-slate-700/10 gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-slate-500"></span> Not Sold: <strong>{totals.notSoldCount}</strong>
+                <span className="inline-flex items-center rounded-md bg-muted px-2.5 py-1 text-muted-foreground ring-1 ring-inset ring-border gap-1.5">
+                  <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60"></span> Not Sold: <strong>{totals.notSoldCount}</strong>
                 </span>
               </div>
             </div>
@@ -729,36 +729,36 @@ function SalesLedgerDashboard() {
           <div className="overflow-x-auto">
             <Table className="text-xs">
               <TableHeader>
-                <TableRow className="bg-slate-50/80 hover:bg-slate-50/80">
-                  <TableHead className="font-semibold text-slate-700 w-[160px]">PFI Code</TableHead>
-                  <TableHead className="font-semibold text-slate-700 w-[140px]">Qty Loaded</TableHead>
-                  <TableHead className="font-semibold text-slate-700 w-[100px] text-center">Fully Paid</TableHead>
-                  <TableHead className="font-semibold text-slate-700 w-[110px] text-center">With Balance</TableHead>
-                  <TableHead className="font-semibold text-slate-700 w-[100px] text-center">Not Sold</TableHead>
-                  <TableHead className="font-semibold text-slate-700 text-right w-[150px]">Expected Revenue</TableHead>
-                  <TableHead className="font-semibold text-emerald-700 text-right w-[140px]">Total Paid</TableHead>
-                  <TableHead className="font-semibold text-red-700 text-right w-[150px]">Balance</TableHead>
+                <TableRow className="bg-muted/60 hover:bg-muted/60">
+                  <TableHead className="font-semibold text-muted-foreground w-[160px]">PFI Code</TableHead>
+                  <TableHead className="font-semibold text-muted-foreground w-[140px]">Qty Loaded</TableHead>
+                  <TableHead className="font-semibold text-muted-foreground w-[100px] text-center">Fully Paid</TableHead>
+                  <TableHead className="font-semibold text-muted-foreground w-[110px] text-center">With Balance</TableHead>
+                  <TableHead className="font-semibold text-muted-foreground w-[100px] text-center">Not Sold</TableHead>
+                  <TableHead className="font-semibold text-muted-foreground text-right w-[150px]">Expected Revenue</TableHead>
+                  <TableHead className="font-semibold text-emerald-600 dark:text-emerald-400 text-right w-[140px]">Total Paid</TableHead>
+                  <TableHead className="font-semibold text-red-600 dark:text-red-400 text-right w-[150px]">Balance</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {totals.codeSummaries.map(s => {
                   const hasOutstanding = s.balance > 0; const isOverpaid = s.balance < 0
                   return (
-                    <TableRow key={s.code || 'unassigned'} className="hover:bg-slate-50/50 bg-white">
-                      <TableCell className="font-semibold text-slate-700 uppercase whitespace-nowrap">{s.code || 'UNASSIGNED'}</TableCell>
-                      <TableCell className="font-semibold text-slate-800 whitespace-nowrap">{s.qty > 0 ? `${s.qty.toLocaleString()} Ltrs` : '—'}</TableCell>
+                    <TableRow key={s.code || 'unassigned'} className="hover:bg-muted/50 bg-card">
+                      <TableCell className="font-semibold text-foreground uppercase whitespace-nowrap">{s.code || 'UNASSIGNED'}</TableCell>
+                      <TableCell className="font-semibold text-foreground whitespace-nowrap">{s.qty > 0 ? `${s.qty.toLocaleString()} Ltrs` : '—'}</TableCell>
                       <TableCell className="text-center">
-                        <span className="inline-flex items-center justify-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-600/10">{s.soldCount}</span>
+                        <span className="inline-flex items-center justify-center rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20">{s.soldCount}</span>
                       </TableCell>
                       <TableCell className="text-center">
-                        <span className="inline-flex items-center justify-center rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700 ring-1 ring-inset ring-amber-600/10">{s.withBalanceCount}</span>
+                        <span className="inline-flex items-center justify-center rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs font-semibold text-amber-600 dark:text-amber-400 ring-1 ring-inset ring-amber-500/20">{s.withBalanceCount}</span>
                       </TableCell>
                       <TableCell className="text-center">
-                        <span className="inline-flex items-center justify-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600 ring-1 ring-inset ring-slate-400/30">{s.notSoldCount}</span>
+                        <span className="inline-flex items-center justify-center rounded-full bg-muted px-2.5 py-0.5 text-xs font-semibold text-muted-foreground ring-1 ring-inset ring-border">{s.notSoldCount}</span>
                       </TableCell>
-                      <TableCell className="text-right font-semibold text-slate-800 whitespace-nowrap">{s.expected > 0 ? fmt(s.expected) : '—'}</TableCell>
-                      <TableCell className="text-right font-bold text-emerald-700 whitespace-nowrap">{s.paid > 0 ? fmt(s.paid) : '—'}</TableCell>
-                      <TableCell className={`text-right font-bold whitespace-nowrap ${hasOutstanding ? 'text-red-600' : isOverpaid ? 'text-blue-600' : 'text-emerald-600'}`}>
+                      <TableCell className="text-right font-semibold text-foreground whitespace-nowrap">{s.expected > 0 ? fmt(s.expected) : '—'}</TableCell>
+                      <TableCell className="text-right font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">{s.paid > 0 ? fmt(s.paid) : '—'}</TableCell>
+                      <TableCell className={`text-right font-bold whitespace-nowrap ${hasOutstanding ? 'text-red-600 dark:text-red-400' : isOverpaid ? 'text-blue-600 dark:text-blue-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
                         {s.balance === 0 ? '₦0' : isOverpaid ? `+${fmt(Math.abs(s.balance))}` : fmt(s.balance)}
                       </TableCell>
                     </TableRow>
@@ -772,18 +772,18 @@ function SalesLedgerDashboard() {
 
       {/* ═══ LEDGER TABLE ═══ */}
       {activeView === 'ledger' && (
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
           {isLoading ? (
             <div className="flex items-center justify-center py-24">
               <Loader2 size={24} className="animate-spin text-muted-foreground" />
             </div>
           ) : filteredLedgerGroups.length === 0 ? (
             <div className="p-12 text-center">
-              <div className="mx-auto w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
-                <Truck className="text-slate-300" size={32} />
+              <div className="mx-auto w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mb-4">
+                <Truck className="text-muted-foreground/60" size={32} />
               </div>
-              <p className="text-slate-600 font-semibold text-base">No sales ledger rows found</p>
-              <p className="text-sm text-slate-400 mt-1.5 max-w-sm mx-auto">
+              <p className="text-foreground font-semibold text-base">No sales ledger rows found</p>
+              <p className="text-sm text-muted-foreground mt-1.5 max-w-sm mx-auto">
                 {ledgerGroups.length > 0
                   ? 'Try adjusting your filters or date range.'
                   : 'Allocate trucks in inventory or click "Record Payment" to create the first row.'}
@@ -798,18 +798,18 @@ function SalesLedgerDashboard() {
             <div className="overflow-x-auto">
               <Table className="text-sm">
                 <TableHeader>
-                  <TableRow className="bg-slate-50/80 hover:bg-slate-50/80">
-                    <TableHead className="font-semibold text-slate-700 w-12 text-center sticky top-0 bg-slate-50/80 backdrop-blur-sm">S/N</TableHead>
-                    <TableHead className="font-semibold text-slate-700 whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">PFI Code</TableHead>
-                    <TableHead className="font-semibold text-slate-700 whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">Truck No.</TableHead>
-                    <TableHead className="font-semibold text-slate-700 whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">Customer</TableHead>
-                    <TableHead className="font-semibold text-slate-700 whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">Destination</TableHead>
-                    <TableHead className="font-semibold text-slate-700 text-right whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">Quantity</TableHead>
-                    <TableHead className="font-semibold text-slate-700 text-right whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">Rate</TableHead>
-                    <TableHead className="font-semibold text-slate-700 text-right whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">Expected</TableHead>
-                    <TableHead className="font-semibold text-emerald-700 text-right whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">Payment</TableHead>
-                    <TableHead className="font-semibold text-red-700 text-right whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">Balance</TableHead>
-                    <TableHead className="font-semibold text-slate-700 text-center whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">Status</TableHead>
+                  <TableRow className="bg-muted/60 hover:bg-muted/60">
+                    <TableHead className="font-semibold text-muted-foreground w-12 text-center sticky top-0 bg-muted/90 backdrop-blur-sm">S/N</TableHead>
+                    <TableHead className="font-semibold text-muted-foreground whitespace-nowrap sticky top-0 bg-muted/90 backdrop-blur-sm">PFI Code</TableHead>
+                    <TableHead className="font-semibold text-muted-foreground whitespace-nowrap sticky top-0 bg-muted/90 backdrop-blur-sm">Truck No.</TableHead>
+                    <TableHead className="font-semibold text-muted-foreground whitespace-nowrap sticky top-0 bg-muted/90 backdrop-blur-sm">Customer</TableHead>
+                    <TableHead className="font-semibold text-muted-foreground whitespace-nowrap sticky top-0 bg-muted/90 backdrop-blur-sm">Destination</TableHead>
+                    <TableHead className="font-semibold text-muted-foreground text-right whitespace-nowrap sticky top-0 bg-muted/90 backdrop-blur-sm">Quantity</TableHead>
+                    <TableHead className="font-semibold text-muted-foreground text-right whitespace-nowrap sticky top-0 bg-muted/90 backdrop-blur-sm">Rate</TableHead>
+                    <TableHead className="font-semibold text-muted-foreground text-right whitespace-nowrap sticky top-0 bg-muted/90 backdrop-blur-sm">Expected</TableHead>
+                    <TableHead className="font-semibold text-emerald-600 dark:text-emerald-400 text-right whitespace-nowrap sticky top-0 bg-muted/90 backdrop-blur-sm">Payment</TableHead>
+                    <TableHead className="font-semibold text-red-600 dark:text-red-400 text-right whitespace-nowrap sticky top-0 bg-muted/90 backdrop-blur-sm">Balance</TableHead>
+                    <TableHead className="font-semibold text-muted-foreground text-center whitespace-nowrap sticky top-0 bg-muted/90 backdrop-blur-sm">Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -834,7 +834,7 @@ function SalesLedgerDashboard() {
                       rows.push(
                         <TableRow
                           key={`${group.key}-main`}
-                          className={`cursor-pointer hover:bg-slate-50/90 border-b border-slate-100 border-l-[3px] transition-colors group ${isMultiCustGroup ? 'border-l-blue-400 bg-blue-50/10' : (theme ? theme.row : 'border-l-transparent')
+                          className={`cursor-pointer hover:bg-muted/70 border-b border-border border-l-[3px] transition-colors group ${isMultiCustGroup ? 'border-l-blue-500 bg-blue-500/10' : (theme ? theme.row : 'border-l-transparent')
                             }`}
                           onClick={() => navigate({
                             to: '/sales-ledger/details',
@@ -848,52 +848,52 @@ function SalesLedgerDashboard() {
                             },
                           })}
                         >
-                          <TableCell className="text-slate-400 text-center text-xs">{serial}</TableCell>
+                          <TableCell className="text-muted-foreground text-center text-xs">{serial}</TableCell>
                           <TableCell className="whitespace-nowrap">
                             {group.allocationCode ? (
-                              <span className="text-sm font-semibold text-slate-700">{group.allocationCode}</span>
+                              <span className="text-sm font-semibold text-foreground">{group.allocationCode}</span>
                             ) : (
-                              <span className="text-slate-300">—</span>
+                              <span className="text-muted-foreground/40">—</span>
                             )}
                           </TableCell>
-                          <TableCell className="font-semibold text-slate-900 whitespace-nowrap">
+                          <TableCell className="font-semibold text-foreground whitespace-nowrap">
                             {isMultiCustGroup && !isFirstInMultiGroup ? (
-                              <div className="flex items-center gap-1 pl-2 text-slate-500">
-                                <span className="text-blue-400 font-bold text-base leading-none">↳</span>
-                                <span className="text-xs text-slate-400 italic">same truck</span>
+                              <div className="flex items-center gap-1 pl-2 text-muted-foreground">
+                                <span className="text-blue-500 font-bold text-base leading-none">↳</span>
+                                <span className="text-xs text-muted-foreground italic">same truck</span>
                               </div>
                             ) : (
                               <div className="flex items-center gap-1.5">
-                                <Truck size={13} className="text-amber-700" />
+                                <Truck size={13} className="text-amber-600 dark:text-amber-400" />
                                 {group.truckNumber || '—'}
                                 {isFirstInMultiGroup && (
-                                  <span className="ml-0.5 text-[10px] font-bold text-blue-700 bg-blue-100 px-1.5 py-0.5 rounded-full border border-blue-200 whitespace-nowrap">
+                                  <span className="ml-0.5 text-[10px] font-bold text-blue-600 dark:text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded-full border border-blue-500/20 whitespace-nowrap">
                                     {multiCustCounts.get(group.loadingId!)} customers
                                   </span>
                                 )}
                               </div>
                             )}
                           </TableCell>
-                          <TableCell className="font-semibold text-slate-900 uppercase whitespace-nowrap text-xs">{group.customerName || '—'}</TableCell>
-                          <TableCell className="text-slate-600 text-xs uppercase whitespace-nowrap">{group.location || '—'}</TableCell>
-                          <TableCell className="text-right text-slate-700 whitespace-nowrap tabular-nums text-xs">{group.quantity > 0 ? `${fmtQty(group.quantity)} L` : '—'}</TableCell>
-                          <TableCell className="text-right text-slate-700 whitespace-nowrap tabular-nums text-xs">{group.rate > 0 ? fmt(group.rate) : '—'}</TableCell>
-                          <TableCell className="text-right font-medium text-slate-800 whitespace-nowrap tabular-nums text-xs">{group.expected > 0 ? fmt(group.expected) : '—'}</TableCell>
-                          <TableCell className="text-right font-bold text-emerald-700 whitespace-nowrap tabular-nums text-xs">{fmt(toNum(group.totalPaid))}</TableCell>
-                          <TableCell className={`text-right font-bold whitespace-nowrap tabular-nums text-xs ${group.balance > 0 ? 'text-red-600' : group.balance < 0 ? 'text-blue-600' : group.expected > 0 ? 'text-emerald-600' : 'text-slate-400'}`}>
+                          <TableCell className="font-semibold text-foreground uppercase whitespace-nowrap text-xs">{group.customerName || '—'}</TableCell>
+                          <TableCell className="text-muted-foreground text-xs uppercase whitespace-nowrap">{group.location || '—'}</TableCell>
+                          <TableCell className="text-right text-muted-foreground whitespace-nowrap tabular-nums text-xs">{group.quantity > 0 ? `${fmtQty(group.quantity)} L` : '—'}</TableCell>
+                          <TableCell className="text-right text-muted-foreground whitespace-nowrap tabular-nums text-xs">{group.rate > 0 ? fmt(group.rate) : '—'}</TableCell>
+                          <TableCell className="text-right font-medium text-foreground whitespace-nowrap tabular-nums text-xs">{group.expected > 0 ? fmt(group.expected) : '—'}</TableCell>
+                          <TableCell className="text-right font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap tabular-nums text-xs">{fmt(toNum(group.totalPaid))}</TableCell>
+                          <TableCell className={`text-right font-bold whitespace-nowrap tabular-nums text-xs ${group.balance > 0 ? 'text-red-600 dark:text-red-400' : group.balance < 0 ? 'text-blue-600 dark:text-blue-400' : group.expected > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground'}`}>
                             {group.expected > 0 ? (group.balance === 0 ? '₦0' : group.balance > 0 ? fmt(group.balance) : `+${fmt(Math.abs(group.balance))}`) : '—'}
                           </TableCell>
                           <TableCell className="whitespace-nowrap text-center">
                             {group.payments.length === 0 ? (
-                              <Badge variant="outline" className="text-[11px] font-semibold text-amber-700 bg-amber-50 border-amber-200">
+                              <Badge variant="outline" className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/20">
                                 No payment
                               </Badge>
                             ) : isFullyPaid ? (
-                              <Badge className="text-[11px] font-semibold bg-emerald-50 text-emerald-700 border-emerald-200">
+                              <Badge className="text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20">
                                 Fully Paid
                               </Badge>
                             ) : (
-                              <Badge className="text-[11px] font-semibold bg-red-50 text-red-700 border-red-200">
+                              <Badge className="text-[11px] font-semibold bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20">
                                 Pending
                               </Badge>
                             )}
@@ -918,18 +918,18 @@ function SalesLedgerDashboard() {
 
       {/* ═══ DAILY PAYMENTS VIEW ═══ */}
       {activeView === 'daily' && (
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
           {isLoading ? (
             <div className="flex items-center justify-center py-24">
               <Loader2 size={24} className="animate-spin text-muted-foreground" />
             </div>
           ) : filteredSales.length === 0 ? (
             <div className="p-12 text-center">
-              <div className="mx-auto w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
-                <CalendarIcon className="text-slate-300" size={32} />
+              <div className="mx-auto w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mb-4">
+                <CalendarIcon className="text-muted-foreground/60" size={32} />
               </div>
-              <p className="text-slate-600 font-semibold text-base">No payment entries found</p>
-              <p className="text-sm text-slate-400 mt-1.5">Try adjusting your filters or date range.</p>
+              <p className="text-foreground font-semibold text-base">No payment entries found</p>
+              <p className="text-sm text-muted-foreground mt-1.5">Try adjusting your filters or date range.</p>
               {hasActiveFilters && (
                 <Button variant="outline" size="sm" className="mt-4 gap-1.5" onClick={clearAllFilters}>
                   <X size={14} /> Clear Filters
@@ -941,19 +941,19 @@ function SalesLedgerDashboard() {
               <div className="overflow-x-auto">
                 <Table className="text-sm">
                   <TableHeader>
-                    <TableRow className="bg-slate-50/80 hover:bg-slate-50/80">
-                      <TableHead className="font-semibold text-slate-700 w-[48px] text-center sticky top-0 bg-slate-50/80 backdrop-blur-sm">S/N</TableHead>
-                      <TableHead className="font-semibold text-slate-700 whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">Date Paid</TableHead>
-                      <TableHead className="font-semibold text-slate-700 whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">Truck No.</TableHead>
-                      <TableHead className="font-semibold text-slate-700 whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">Customer</TableHead>
-                      <TableHead className="font-semibold text-slate-700 whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">Destination</TableHead>
-                      <TableHead className="font-semibold text-slate-700 text-right whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">Volume (L)</TableHead>
-                      <TableHead className="font-semibold text-slate-700 text-right whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">Rate</TableHead>
-                      <TableHead className="font-semibold text-slate-700 text-right whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">Expected</TableHead>
-                      <TableHead className="font-semibold text-emerald-700 text-right whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">Amount Paid</TableHead>
-                      <TableHead className="font-semibold text-slate-700 whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">Payer</TableHead>
-                      <TableHead className="font-semibold text-slate-700 whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">Payment Method</TableHead>
-                      <TableHead className="font-semibold text-slate-700 whitespace-nowrap sticky top-0 bg-slate-50/80 backdrop-blur-sm">Entered By</TableHead>
+                    <TableRow className="bg-muted/60 hover:bg-muted/60">
+                      <TableHead className="font-semibold text-muted-foreground w-[48px] text-center sticky top-0 bg-muted/90 backdrop-blur-sm">S/N</TableHead>
+                      <TableHead className="font-semibold text-muted-foreground whitespace-nowrap sticky top-0 bg-muted/90 backdrop-blur-sm">Date Paid</TableHead>
+                      <TableHead className="font-semibold text-muted-foreground whitespace-nowrap sticky top-0 bg-muted/90 backdrop-blur-sm">Truck No.</TableHead>
+                      <TableHead className="font-semibold text-muted-foreground whitespace-nowrap sticky top-0 bg-muted/90 backdrop-blur-sm">Customer</TableHead>
+                      <TableHead className="font-semibold text-muted-foreground whitespace-nowrap sticky top-0 bg-muted/90 backdrop-blur-sm">Destination</TableHead>
+                      <TableHead className="font-semibold text-muted-foreground text-right whitespace-nowrap sticky top-0 bg-muted/90 backdrop-blur-sm">Volume (L)</TableHead>
+                      <TableHead className="font-semibold text-muted-foreground text-right whitespace-nowrap sticky top-0 bg-muted/90 backdrop-blur-sm">Rate</TableHead>
+                      <TableHead className="font-semibold text-muted-foreground text-right whitespace-nowrap sticky top-0 bg-muted/90 backdrop-blur-sm">Expected</TableHead>
+                      <TableHead className="font-semibold text-emerald-600 dark:text-emerald-400 text-right whitespace-nowrap sticky top-0 bg-muted/90 backdrop-blur-sm">Amount Paid</TableHead>
+                      <TableHead className="font-semibold text-muted-foreground whitespace-nowrap sticky top-0 bg-muted/90 backdrop-blur-sm">Payer</TableHead>
+                      <TableHead className="font-semibold text-muted-foreground whitespace-nowrap sticky top-0 bg-muted/90 backdrop-blur-sm">Payment Method</TableHead>
+                      <TableHead className="font-semibold text-muted-foreground whitespace-nowrap sticky top-0 bg-muted/90 backdrop-blur-sm">Entered By</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -964,7 +964,7 @@ function SalesLedgerDashboard() {
                       return (
                         <TableRow
                           key={sale._id || sale.id}
-                          className="cursor-pointer hover:bg-slate-50/70 border-b border-slate-100 transition-colors"
+                          className="cursor-pointer hover:bg-muted/70 border-b border-border transition-colors"
                           onClick={() => navigate({
                             to: '/sales-ledger/details',
                             search: {
@@ -975,25 +975,25 @@ function SalesLedgerDashboard() {
                             },
                           })}
                         >
-                          <TableCell className="text-slate-400 text-center text-xs">{serial}</TableCell>
-                          <TableCell className="text-slate-600 whitespace-nowrap text-xs">{safeFormatDate(datePaid)}</TableCell>
-                          <TableCell className="font-semibold text-slate-900 whitespace-nowrap">
+                          <TableCell className="text-muted-foreground text-center text-xs">{serial}</TableCell>
+                          <TableCell className="text-muted-foreground whitespace-nowrap text-xs">{safeFormatDate(datePaid)}</TableCell>
+                          <TableCell className="font-semibold text-foreground whitespace-nowrap">
                             <div className="flex items-center gap-1.5">
-                              <Truck size={12} className="text-amber-700" />
+                              <Truck size={12} className="text-amber-600 dark:text-amber-400" />
                               {sale.truckNumber || '—'}
                             </div>
                           </TableCell>
-                          <TableCell className="font-medium text-slate-800 uppercase whitespace-nowrap text-xs">{customerName}</TableCell>
-                          <TableCell className="text-slate-600 uppercase whitespace-nowrap text-xs">{sale.location || '—'}</TableCell>
-                          <TableCell className="text-right text-slate-700 whitespace-nowrap tabular-nums text-xs">{toNum(sale.quantity) > 0 ? fmtQty(toNum(sale.quantity)) : '—'}</TableCell>
-                          <TableCell className="text-right text-slate-700 whitespace-nowrap tabular-nums text-xs">{toNum(sale.rate) > 0 ? fmt(toNum(sale.rate)) : '—'}</TableCell>
-                          <TableCell className="text-right text-slate-700 whitespace-nowrap tabular-nums text-xs">{toNum(sale.salesValue) > 0 ? fmt(toNum(sale.salesValue)) : '—'}</TableCell>
-                          <TableCell className="text-right font-bold text-emerald-700 whitespace-nowrap tabular-nums text-xs">{toNum(sale.paymentAmount) > 0 ? fmt(toNum(sale.paymentAmount)) : '—'}</TableCell>
-                          <TableCell className="text-slate-600 whitespace-nowrap text-xs">{sale.payerName || '—'}</TableCell>
-                          <TableCell className="text-slate-600 text-xs whitespace-nowrap">
+                          <TableCell className="font-medium text-foreground uppercase whitespace-nowrap text-xs">{customerName}</TableCell>
+                          <TableCell className="text-muted-foreground uppercase whitespace-nowrap text-xs">{sale.location || '—'}</TableCell>
+                          <TableCell className="text-right text-muted-foreground whitespace-nowrap tabular-nums text-xs">{toNum(sale.quantity) > 0 ? fmtQty(toNum(sale.quantity)) : '—'}</TableCell>
+                          <TableCell className="text-right text-muted-foreground whitespace-nowrap tabular-nums text-xs">{toNum(sale.rate) > 0 ? fmt(toNum(sale.rate)) : '—'}</TableCell>
+                          <TableCell className="text-right text-muted-foreground whitespace-nowrap tabular-nums text-xs">{toNum(sale.salesValue) > 0 ? fmt(toNum(sale.salesValue)) : '—'}</TableCell>
+                          <TableCell className="text-right font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap tabular-nums text-xs">{toNum(sale.paymentAmount) > 0 ? fmt(toNum(sale.paymentAmount)) : '—'}</TableCell>
+                          <TableCell className="text-muted-foreground whitespace-nowrap text-xs">{sale.payerName || '—'}</TableCell>
+                          <TableCell className="text-muted-foreground text-xs whitespace-nowrap">
                             {formatBankLabel(sale.bank) || '—'}
                           </TableCell>
-                          <TableCell className="text-slate-500 text-xs whitespace-nowrap">{sale.enteredBy || '—'}</TableCell>
+                          <TableCell className="text-muted-foreground text-xs whitespace-nowrap">{sale.enteredBy || '—'}</TableCell>
                         </TableRow>
                       )
                     })}

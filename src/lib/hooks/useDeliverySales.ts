@@ -1,11 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '#/lib/api/http'
 import { useToast } from '#/lib/hooks/useToast'
+import { getErrorMessage } from '#/lib/utils'
 import type { DeliverySale } from '#/lib/types'
-
-function getErrorMessage(err: any): string {
-  return err?.response?.data?.message || err?.message || 'An unexpected error occurred'
-}
 
 export function useDeliverySalesList(params?: {
   search?: string
@@ -44,6 +41,7 @@ export function useCreateDeliverySale() {
   const toast = useToast()
 
   return useMutation({
+    retry: false,
     mutationFn: async (data: Partial<DeliverySale>) => {
       const res = await api.post('/delivery-sales', data)
       return res.data
@@ -64,6 +62,7 @@ export function useUpdateDeliverySale() {
   const toast = useToast()
 
   return useMutation({
+    retry: false,
     mutationFn: async ({ id, data }: { id: string; data: Partial<DeliverySale> }) => {
       const res = await api.patch(`/delivery-sales/${id}`, data)
       return res.data
@@ -84,6 +83,7 @@ export function useDeleteDeliverySale() {
   const toast = useToast()
 
   return useMutation({
+    retry: false,
     mutationFn: async (id: string) => {
       const res = await api.delete(`/delivery-sales/${id}`)
       return res.data

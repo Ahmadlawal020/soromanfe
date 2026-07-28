@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
@@ -5,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '#/components/ui/card'
 import { Fuel, Layers, ArrowLeft, Edit, Trash2, AlertOctagon, Scale, Thermometer, ShieldAlert, Archive, Truck, AlertCircle, Loader2, Warehouse } from 'lucide-react'
 import { useProductDetails, useDeleteProduct } from '#/lib/hooks/useProducts'
 import { useDepots } from '#/lib/hooks/useDepots'
+import { Breadcrumbs } from '#/components/Breadcrumbs'
+import { ConfirmDialog } from '#/components/ConfirmDialog'
 
 export const Route = createFileRoute('/products/details')({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -19,6 +22,7 @@ function ProductDetailPage() {
   const { data: product, isLoading: isLoadingProduct } = useProductDetails(id)
   const { data: depots = [], isLoading: isLoadingDepots } = useDepots()
   const deleteProduct = useDeleteProduct()
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   const isLoading = isLoadingProduct || isLoadingDepots
 
@@ -26,15 +30,18 @@ function ProductDetailPage() {
     window.history.length > 1 ? window.history.back() : navigate({ to: '/products/' as any })
   }
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!product?._id) return
-    if (confirm('Are you sure you want to delete this product?')) {
-      try {
-        await deleteProduct.mutateAsync(product._id)
-        navigate({ to: '/products/' as any })
-      } catch {
-        // Error handling is done via react-query
-      }
+    setShowDeleteDialog(true)
+  }
+
+  const confirmDelete = async () => {
+    if (!product?._id) return
+    try {
+      await deleteProduct.mutateAsync(product._id)
+      navigate({ to: '/products/' as any })
+    } catch {
+      // Error handling is done via react-query
     }
   }
 
@@ -93,6 +100,7 @@ function ProductDetailPage() {
 
   return (
     <div className="space-y-6 animate-fade-in">
+      <Breadcrumbs items={[{ label: 'Products', href: '/products' }, { label: product?.name || 'Details' }]} />
       <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center gap-4">
           <Button variant="outline" size="icon" onClick={handleBack}><ArrowLeft size={16} /></Button>
@@ -231,6 +239,17 @@ function ProductDetailPage() {
           </Card>
         );
       })()}
+
+      <ConfirmDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title="Delete Product"
+        description="Are you sure you want to delete this product? This action cannot be undone."
+        confirmLabel="Delete"
+        variant="destructive"
+        onConfirm={confirmDelete}
+        loading={deleteProduct.isPending}
+      />
     </div>
   )
 }

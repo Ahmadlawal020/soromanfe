@@ -6,8 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '#/com
 import { Input } from '#/components/ui/input'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '#/components/ui/table'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '#/components/ui/select'
-import { Truck, Search, Plus, Compass, Wrench, Fuel, User, X, SearchX, Loader2 } from 'lucide-react'
+import { Truck, Search, Plus, Compass, Wrench, Fuel, User, X } from 'lucide-react'
 import { useTruckList } from '#/lib/hooks/useTrucks'
+import { PageLoader } from '#/components/PageLoader'
+import { PageError } from '#/components/PageError'
+import { PageEmpty } from '#/components/PageEmpty'
+import { Pagination } from '#/components/Pagination'
 
 export const Route = createFileRoute('/trucks/')({
   component: TrucksDashboard,
@@ -35,7 +39,7 @@ function TrucksDashboard() {
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
 
-  const { data, isLoading } = useTruckList({ search: searchTerm || undefined, status: selectedStatus !== 'all' ? selectedStatus : undefined })
+  const { data, isLoading, isError, error, refetch } = useTruckList({ search: searchTerm || undefined, status: selectedStatus !== 'all' ? selectedStatus : undefined })
   const trucks = data?.trucks || []
 
   useEffect(() => {
@@ -55,6 +59,8 @@ function TrucksDashboard() {
     maintenance: trucks.filter((t: any) => t.status === 'Maintenance').length,
   }
 
+  const hasFilters = searchTerm || selectedStatus !== 'all'
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex justify-between items-center">
@@ -65,12 +71,14 @@ function TrucksDashboard() {
         <Button size="sm" className="gradient-primary text-white border-0" onClick={() => navigate({ to: '/trucks/form' })}><Plus className="w-4 h-4 mr-2" />Register New Truck</Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="stats-card"><CardContent className="p-4 flex justify-between items-center"><div><p className="text-sm text-muted-foreground">Total Trucks</p><p className="text-2xl font-bold">{stats.total}</p></div><Truck className="w-8 h-8 text-primary" /></CardContent></Card>
-        <Card className="stats-card"><CardContent className="p-4 flex justify-between items-center"><div><p className="text-sm text-muted-foreground">In Transit</p><p className="text-2xl font-bold text-success">{stats.inTransit}</p></div><Compass className="w-8 h-8 text-success" /></CardContent></Card>
-        <Card className="stats-card"><CardContent className="p-4 flex justify-between items-center"><div><p className="text-sm text-muted-foreground">Idle Fleet</p><p className="text-2xl font-bold text-warning">{stats.idle}</p></div><Fuel className="w-8 h-8 text-warning" /></CardContent></Card>
-        <Card className="stats-card"><CardContent className="p-4 flex justify-between items-center"><div><p className="text-sm text-muted-foreground">In Maintenance</p><p className="text-2xl font-bold text-destructive">{stats.maintenance}</p></div><Wrench className="w-8 h-8 text-destructive" /></CardContent></Card>
-      </div>
+      {!isLoading && !isError && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="stats-card"><CardContent className="p-4 flex justify-between items-center"><div><p className="text-sm text-muted-foreground">Total Trucks</p><p className="text-2xl font-bold">{stats.total}</p></div><Truck className="w-8 h-8 text-primary" /></CardContent></Card>
+          <Card className="stats-card"><CardContent className="p-4 flex justify-between items-center"><div><p className="text-sm text-muted-foreground">In Transit</p><p className="text-2xl font-bold text-success">{stats.inTransit}</p></div><Compass className="w-8 h-8 text-success" /></CardContent></Card>
+          <Card className="stats-card"><CardContent className="p-4 flex justify-between items-center"><div><p className="text-sm text-muted-foreground">Idle Fleet</p><p className="text-2xl font-bold text-warning">{stats.idle}</p></div><Fuel className="w-8 h-8 text-warning" /></CardContent></Card>
+          <Card className="stats-card"><CardContent className="p-4 flex justify-between items-center"><div><p className="text-sm text-muted-foreground">In Maintenance</p><p className="text-2xl font-bold text-destructive">{stats.maintenance}</p></div><Wrench className="w-8 h-8 text-destructive" /></CardContent></Card>
+        </div>
+      )}
 
       <Card>
         <CardHeader className="border-b border-border">
@@ -96,14 +104,19 @@ function TrucksDashboard() {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="flex items-center justify-center py-16"><Loader2 size={24} className="animate-spin text-muted-foreground" /></div>
+            <PageLoader message="Loading trucks..." />
+          ) : isError ? (
+            <PageError message={(error as any)?.message || 'Failed to load trucks'} onRetry={() => refetch()} />
           ) : trucks.length === 0 ? (
-            <div className="p-16 text-center">
-              <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-muted border border-border mb-4"><SearchX size={24} className="text-muted-foreground" /></div>
-              <p className="text-sm font-medium text-foreground">No trucks found</p>
-              <p className="text-xs text-muted-foreground mt-1">Try adjusting your search or filter criteria.</p>
-              <Button variant="ghost" size="sm" onClick={() => { setSearchTerm(''); setSelectedStatus('all') }} className="mt-4 text-primary"><X size={14} /> Clear filters</Button>
-            </div>
+            <PageEmpty
+              icon={<Truck size={24} className="text-muted-foreground" />}
+              title={hasFilters ? 'No trucks match your filters' : 'No trucks yet'}
+              description={hasFilters ? 'Try adjusting your search or filter criteria.' : 'Get started by registering your first truck.'}
+              actionLabel={hasFilters ? undefined : 'Register Truck'}
+              onAction={hasFilters ? undefined : () => navigate({ to: '/trucks/form' })}
+              hasFilters={hasFilters}
+              onClearFilters={() => { setSearchTerm(''); setSelectedStatus('all') }}
+            />
           ) : (
             <>
               <div className="overflow-x-auto">
@@ -133,74 +146,14 @@ function TrucksDashboard() {
                 </Table>
               </div>
 
-              {/* Pagination Controls */}
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border mt-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">Rows per page:</span>
-                  <Select
-                    value={pageSize.toString()}
-                    onValueChange={(val) => {
-                      setPageSize(Number(val))
-                      setCurrentPage(1)
-                    }}
-                  >
-                    <SelectTrigger className="h-8 w-[70px]">
-                      <SelectValue placeholder={pageSize.toString()} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="5">5</SelectItem>
-                      <SelectItem value="10">10</SelectItem>
-                      <SelectItem value="20">20</SelectItem>
-                      <SelectItem value="50">50</SelectItem>
-                      <SelectItem value="100">100</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground ml-4">
-                    Showing {totalItems > 0 ? (currentPage - 1) * pageSize + 1 : 0} to{' '}
-                    {Math.min(currentPage * pageSize, totalItems)} of {totalItems} entries
-                  </p>
-                </div>
-                {totalPages > 1 && (
-                  <div className="flex items-center gap-1">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-8"
-                      disabled={currentPage <= 1}
-                      onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                    >
-                      Previous
-                    </Button>
-                    {Array.from({ length: totalPages }, (_, i) => i + 1)
-                      .filter((p) => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1)
-                      .map((p, idx, arr) => {
-                        const showEllipsis = idx > 0 && p - arr[idx - 1] > 1
-                        return (
-                          <div key={p} className="flex items-center">
-                            {showEllipsis && <span className="px-2 text-xs text-muted-foreground">...</span>}
-                            <Button
-                              variant={currentPage === p ? 'default' : 'outline'}
-                              size="sm"
-                              className={`h-8 w-8 p-0 ${currentPage === p ? 'gradient-primary text-white border-0' : ''}`}
-                              onClick={() => setCurrentPage(p)}
-                            >
-                              {p}
-                            </Button>
-                          </div>
-                        )
-                      })}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-8"
-                      disabled={currentPage >= totalPages}
-                      onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-                    >
-                      Next
-                    </Button>
-                  </div>
-                )}
-              </div>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                pageSize={pageSize}
+                totalItems={totalItems}
+                onPageChange={setCurrentPage}
+                onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1) }}
+              />
             </>
           )}
         </CardContent>

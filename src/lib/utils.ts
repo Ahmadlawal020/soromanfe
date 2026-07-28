@@ -6,6 +6,10 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+export function getErrorMessage(err: any): string {
+  return err?.response?.data?.message || err?.message || 'An unexpected error occurred'
+}
+
 export function toNum(v: string | number | undefined | null): number {
   if (v === undefined || v === null || v === '') return 0
   if (typeof v === 'number') return v

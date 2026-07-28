@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '#/lib/api/http'
 import { useToast } from '#/lib/hooks/useToast'
+import { getErrorMessage } from '#/lib/utils'
 import type { StaffMember } from '#/routes/admin/-roles'
 
 const ROLE_MAP_REVERSE: Record<string, number> = {
@@ -73,15 +74,12 @@ export function useAdminDetails(id: string) {
   })
 }
 
-function getErrorMessage(err: any): string {
-  return err?.response?.data?.message || err?.message || 'An unexpected error occurred'
-}
-
 export function useCreateAdmin() {
   const queryClient = useQueryClient()
   const toast = useToast()
 
   return useMutation({
+    retry: false,
     mutationFn: async (data: Record<string, any>) => {
       const res = await api.post('/admin', data)
       return res.data
@@ -101,6 +99,7 @@ export function useUpdateAdmin() {
   const toast = useToast()
 
   return useMutation({
+    retry: false,
     mutationFn: async ({ id, data }: { id: string; data: Record<string, any> }) => {
       const res = await api.patch(`/admin/${id}`, data)
       return res.data
@@ -120,6 +119,7 @@ export function useDeleteAdmin() {
   const toast = useToast()
 
   return useMutation({
+    retry: false,
     mutationFn: async (id: string) => {
       const res = await api.delete(`/admin/${id}`)
       return res.data

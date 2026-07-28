@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '#/lib/api/http'
 import { useToast } from '#/lib/hooks/useToast'
+import { getErrorMessage } from '#/lib/utils'
 import type { BankAccount } from '#/lib/types'
 
 export type { BankAccount }
@@ -26,15 +27,12 @@ export function useBankAccountDetails(id: string | number) {
   })
 }
 
-function getErrorMessage(err: any): string {
-  return err?.response?.data?.message || err?.message || 'An unexpected error occurred'
-}
-
 export function useCreateBankAccount() {
   const queryClient = useQueryClient()
   const toast = useToast()
 
   return useMutation({
+    retry: false,
     mutationFn: async (data: Partial<BankAccount>) => {
       const res = await api.post('/bank-accounts', data)
       return res.data
@@ -54,6 +52,7 @@ export function useUpdateBankAccount() {
   const toast = useToast()
 
   return useMutation({
+    retry: false,
     mutationFn: async ({ id, data }: { id: string | number; data: Partial<BankAccount> }) => {
       const res = await api.patch(`/bank-accounts/${id}`, data)
       return res.data
@@ -73,6 +72,7 @@ export function useDeleteBankAccount() {
   const toast = useToast()
 
   return useMutation({
+    retry: false,
     mutationFn: async (id: string | number) => {
       const res = await api.delete(`/bank-accounts/${id}`)
       return res.data

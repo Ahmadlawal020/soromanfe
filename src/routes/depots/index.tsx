@@ -4,7 +4,10 @@ import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '#/components/ui/card'
 import { Input } from '#/components/ui/input'
-import { Warehouse, User, Plus, Search, MapPin, Edit, Eye, SearchX, X, Loader2 } from 'lucide-react'
+import { Warehouse, User, Plus, Search, MapPin, Edit, Eye, X } from 'lucide-react'
+import { PageLoader } from '#/components/PageLoader'
+import { PageError } from '#/components/PageError'
+import { PageEmpty } from '#/components/PageEmpty'
 
 export const Route = createFileRoute('/depots/')({
   component: DepotsDashboard,
@@ -28,7 +31,7 @@ function getStatusBadge(status: string) {
 function DepotsDashboard() {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
-  const { data: depots = [], isLoading } = useDepots()
+  const { data: depots = [], isLoading, isError, error, refetch } = useDepots()
 
   const filteredDepots = depots.filter((depot) =>
     depot.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -38,6 +41,8 @@ function DepotsDashboard() {
     (depot.country && depot.country.toLowerCase().includes(searchTerm.toLowerCase())) ||
     (depot.staff || []).some((s) => `${s.firstName} ${s.surname}`.toLowerCase().includes(searchTerm.toLowerCase()))
   )
+
+  const hasFilters = searchTerm.length > 0
 
   const statsCards = [
     { title: 'Total Depots', value: depots.length, sub: `${depots.filter((d) => d.status === 'Active').length} Active`, icon: Warehouse },
@@ -54,11 +59,13 @@ function DepotsDashboard() {
         <Button size="sm" className="gradient-primary text-white border-0" onClick={() => navigate({ to: '/depots/form' })}><Plus className="w-4 h-4 mr-2" />Create New Depot</Button>
       </div>
 
+      {!isLoading && !isError && (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {statsCards.map((card, idx) => (
           <Card key={idx} className="stats-card"><CardContent className="p-4 flex justify-between items-center"><div><p className="text-sm text-muted-foreground">{card.title}</p><p className="text-2xl font-bold">{card.value}</p><p className="text-xs text-muted-foreground">{card.sub}</p></div><card.icon className="w-8 h-8 text-primary" /></CardContent></Card>
         ))}
       </div>
+      )}
 
       <Card>
         <CardHeader className="border-b border-border">
@@ -75,15 +82,20 @@ function DepotsDashboard() {
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {isLoading ? (
-              <div className="col-span-full flex items-center justify-center py-16">
-                <Loader2 size={24} className="animate-spin text-muted-foreground" />
-              </div>
+              <div className="col-span-full"><PageLoader message="Loading depots..." /></div>
+            ) : isError ? (
+              <div className="col-span-full"><PageError message={(error as any)?.message || 'Failed to load depots'} onRetry={() => refetch()} /></div>
             ) : filteredDepots.length === 0 ? (
-              <div className="col-span-full p-16 text-center">
-                <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-muted border border-border mb-4"><SearchX size={24} className="text-muted-foreground" /></div>
-                <p className="text-sm font-medium text-foreground">No depots found</p>
-                <p className="text-xs text-muted-foreground mt-1">Try adjusting your search criteria.</p>
-                <Button variant="ghost" size="sm" onClick={() => setSearchTerm('')} className="mt-4 text-primary"><X size={14} /> Clear filters</Button>
+              <div className="col-span-full">
+                <PageEmpty
+                  icon={<Warehouse size={24} className="text-muted-foreground" />}
+                  title={hasFilters ? 'No depots match your search' : 'No depots yet'}
+                  description={hasFilters ? 'Try adjusting your search criteria.' : 'Get started by creating your first depot.'}
+                  actionLabel={hasFilters ? undefined : 'Create Depot'}
+                  onAction={hasFilters ? undefined : () => navigate({ to: '/depots/form' })}
+                  hasFilters={hasFilters}
+                  onClearFilters={() => setSearchTerm('')}
+                />
               </div>
             ) : (
               filteredDepots.map((depot) => {

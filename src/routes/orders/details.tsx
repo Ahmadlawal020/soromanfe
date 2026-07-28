@@ -9,6 +9,8 @@ import {
   Calendar, Info, Phone, Mail, Building2, Truck, FileCheck, Banknote, Copy, CheckCircle, Ticket as TicketIcon, Check
 } from 'lucide-react'
 import { useOrderDetails, useUpdateOrder } from '#/lib/hooks/useOrders'
+import { Breadcrumbs } from '#/components/Breadcrumbs'
+import { ConfirmDialog } from '#/components/ConfirmDialog'
 
 export const Route = createFileRoute('/orders/details')({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -57,29 +59,40 @@ function RouteComponent() {
   const { data: order, isLoading } = useOrderDetails(id)
   const [copied, setCopied] = useState(false)
   const updateMutation = useUpdateOrder()
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [confirmAction, setConfirmAction] = useState<{ type: 'status' | 'payment'; value: string } | null>(null)
 
   const handleBack = () => {
     window.history.length > 1 ? window.history.back() : navigate({ to: '/orders/' as any })
   }
 
-  const handleUpdateStatus = async (status: string) => {
+  const handleUpdateStatus = (status: string) => {
     if (!order) return
-    if (confirm(`Are you sure you want to mark this order as ${status}?`)) {
-      await updateMutation.mutateAsync({
-        id: order._id || order.id,
-        data: { status }
-      })
-    }
+    setConfirmAction({ type: 'status', value: status })
+    setShowConfirmDialog(true)
   }
 
-  const handleUpdatePayment = async (paymentStatus: string) => {
+  const handleUpdatePayment = (paymentStatus: string) => {
     if (!order) return
-    if (confirm(`Are you sure you want to mark this order payment as ${paymentStatus}?`)) {
+    setConfirmAction({ type: 'payment', value: paymentStatus })
+    setShowConfirmDialog(true)
+  }
+
+  const executeConfirmAction = async () => {
+    if (!order || !confirmAction) return
+    if (confirmAction.type === 'status') {
       await updateMutation.mutateAsync({
         id: order._id || order.id,
-        data: { paymentStatus }
+        data: { status: confirmAction.value }
+      })
+    } else {
+      await updateMutation.mutateAsync({
+        id: order._id || order.id,
+        data: { paymentStatus: confirmAction.value }
       })
     }
+    setShowConfirmDialog(false)
+    setConfirmAction(null)
   }
 
   if (isLoading) {
@@ -114,6 +127,7 @@ function RouteComponent() {
 
   return (
     <div className="space-y-6 animate-fade-in">
+      <Breadcrumbs items={[{ label: 'Orders', href: '/orders' }, { label: order?.orderNumber || 'Details' }]} />
       <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center gap-4">
           <Button variant="outline" size="icon" onClick={handleBack}><ArrowLeft size={16} /></Button>
@@ -457,6 +471,19 @@ function RouteComponent() {
           )}
         </CardContent>
       </Card>
+
+      <ConfirmDialog
+        open={showConfirmDialog}
+        onOpenChange={setShowConfirmDialog}
+        title={confirmAction?.type === 'status' ? 'Update Order Status' : 'Update Payment Status'}
+        description={confirmAction?.type === 'status'
+          ? `Are you sure you want to mark this order as ${confirmAction?.value}?`
+          : `Are you sure you want to mark this order payment as ${confirmAction?.value}?`
+        }
+        confirmLabel="Confirm"
+        onConfirm={executeConfirmAction}
+        loading={updateMutation.isPending}
+      />
     </div>
   )
 }

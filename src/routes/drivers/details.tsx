@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
@@ -5,6 +6,8 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '#/com
 import { User, Truck, ShieldAlert, ArrowLeft, Edit, Trash2, Calendar, AlertCircle, Star, Phone, Mail, FileText, Gauge } from 'lucide-react'
 import { useDriverDetails, useDeleteDriver } from '#/lib/hooks/useDrivers'
 import { useToast } from '#/lib/hooks/useToast'
+import { Breadcrumbs } from '#/components/Breadcrumbs'
+import { ConfirmDialog } from '#/components/ConfirmDialog'
 
 export const Route = createFileRoute('/drivers/details')({
   validateSearch: (search: Record<string, unknown>): { id?: string; driverId?: string } => ({
@@ -76,6 +79,7 @@ function DriverDetailPage() {
   const searchParams = Route.useSearch()
   const deleteDriver = useDeleteDriver()
   const toast = useToast()
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   const driverState = (router.history.location.state as any)?.driver
   const driverId = searchParams.id || searchParams.driverId || driverState?._id || driverState?.id || (router.history.location.state as any)?.id
@@ -88,14 +92,18 @@ function DriverDetailPage() {
     window.history.length > 1 ? window.history.back() : navigate({ to: '/drivers/' as any })
   }
 
-  const handleDelete = async () => {
-    if (confirm('Are you sure you want to permanently remove this driver from the system?') && driver?._id) {
-      try {
-        await deleteDriver.mutateAsync(driver._id || driver.id)
-        navigate({ to: '/drivers/' as any })
-      } catch {
-        toast.error('Failed to delete driver')
-      }
+  const handleDelete = () => {
+    setShowDeleteDialog(true)
+  }
+
+  const confirmDelete = async () => {
+    if (!driver?._id) return
+    try {
+      await deleteDriver.mutateAsync(driver._id || driver.id)
+      setShowDeleteDialog(false)
+      navigate({ to: '/drivers/' as any })
+    } catch {
+      toast.error('Failed to delete driver')
     }
   }
 
@@ -135,6 +143,8 @@ function DriverDetailPage() {
 
   return (
     <div className="space-y-6 animate-fade-in">
+      <Breadcrumbs items={[{ label: 'Drivers', href: '/drivers' }, { label: driver?.name || 'Details' }]} />
+
       <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center gap-4">
           <Button variant="outline" size="icon" onClick={handleBack}>
@@ -427,6 +437,17 @@ function DriverDetailPage() {
           )}
         </CardContent>
       </Card>
+
+      <ConfirmDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title="Remove Driver"
+        description="Are you sure you want to permanently remove this driver from the system? This action cannot be undone."
+        confirmLabel="Remove Driver"
+        variant="destructive"
+        onConfirm={confirmDelete}
+        loading={deleteDriver.isPending}
+      />
     </div>
   )
 }

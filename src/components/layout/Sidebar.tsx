@@ -18,6 +18,9 @@ import {
   Ticket,
   Fuel,
   Landmark,
+  BarChart3,
+  Receipt,
+  Building2,
 } from 'lucide-react'
 import { useAuthStore, useAdminLogout } from '#/modules/auth'
 import { useLayoutStore } from '#/stores/layoutStore'
@@ -45,7 +48,7 @@ const navCategories: NavCategory[] = [
     items: [
       { title: 'Orders', icon: ShoppingBag, path: '/orders' },
       { title: 'Create Order', icon: PlusCircle, path: '/admin-order' },
-      { title: 'Our Customers', icon: Users, path: '/customers' },
+      { title: 'Our Customers', icon: Building2, path: '/customers' },
     ],
   },
   {
@@ -59,7 +62,7 @@ const navCategories: NavCategory[] = [
   {
     category: 'Finance',
     items: [
-      { title: 'Deposits', icon: DollarSign, path: '/deposits' },
+      { title: 'Deposits', icon: Receipt, path: '/deposits' },
       { title: 'Bank Accounts', icon: Landmark, path: '/bank-accounts' },
     ],
   },
@@ -73,8 +76,8 @@ const navCategories: NavCategory[] = [
   {
     category: 'Truck Sales',
     items: [
-      { title: 'Delivery Operations', icon: Package, path: '/delivery-operations' },
-      { title: 'Sales Ledger', icon: DollarSign, path: '/sales-ledger' },
+      { title: 'Delivery Operations', icon: Truck, path: '/delivery-operations' },
+      { title: 'Sales Ledger', icon: BarChart3, path: '/sales-ledger' },
       { title: 'Filling Stations', icon: Fuel, path: '/filing-stations' },
       { title: 'Delivery Customers', icon: Users, path: '/delivery-customer' },
     ],
@@ -112,7 +115,7 @@ function NavGroup({
         <div className="mx-auto my-2 h-px w-6 border-t border-white/10" />
       )}
       {items.map((item) => {
-        const isActive = location.pathname === item.path
+        const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/')
 
         return (
           <Link
@@ -121,6 +124,7 @@ function NavGroup({
             onClick={onItemClick}
             className={cn(
               'group flex items-center rounded-lg text-sm h-10 transition-all duration-200 cursor-pointer relative mx-1',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-0',
               expanded ? 'gap-3 px-3' : 'justify-center px-0',
               isActive
                 ? 'bg-white/10 text-white font-semibold shadow-sm'
@@ -252,6 +256,7 @@ export default function Sidebar() {
             type="button"
             className={cn(
               'h-10 w-full rounded-lg flex items-center transition-all cursor-pointer font-medium text-sm',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30',
               expanded ? 'justify-start gap-2 px-3' : 'justify-center px-0',
               'text-red-300 hover:text-red-200 hover:bg-red-500/10'
             )}

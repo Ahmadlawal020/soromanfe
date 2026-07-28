@@ -6,11 +6,13 @@ import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
 import { Badge } from '#/components/ui/badge'
 import { Separator } from '#/components/ui/separator'
-import { Loader2, ArrowLeft, Save, CheckCircle, FileText, Edit, Trash2, User, Calendar, Banknote, MapPin, Package, ShieldAlert } from 'lucide-react'
+import { Loader2, ArrowLeft, Save, CheckCircle, FileText, Edit, Trash2, User, Calendar, Banknote, MapPin, Package, ShieldAlert, Scale, DropletIcon } from 'lucide-react'
 import { usePfiDetails, useUpdatePfi, useDeletePfi } from '#/lib/hooks/usePfis'
 import { useAdminList } from '#/lib/hooks/useAdmin'
 import { useToast } from '#/lib/hooks/useToast'
 import { toNum } from '#/lib/utils'
+import { Breadcrumbs } from '#/components/Breadcrumbs'
+import { ConfirmDialog } from '#/components/ConfirmDialog'
 
 export const Route = createFileRoute('/pfi/details')({
   validateSearch: (search: Record<string, unknown>): { id: string } => {
@@ -21,8 +23,8 @@ export const Route = createFileRoute('/pfi/details')({
   component: PFIDetails,
 })
 
-function fmtQty(n: number) {
-  return n.toLocaleString(undefined, { maximumFractionDigits: 0 })
+function fmtQty(n: number, decimals: number = 0) {
+  return n.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
 }
 
 function fmtCurrency(n: number) {
@@ -62,6 +64,7 @@ function PFIDetails() {
   })
 
   const [error, setError] = useState('')
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   if (isLoading) {
     return <div className="flex h-[50vh] items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
@@ -78,24 +81,67 @@ function PFIDetails() {
     )
   }
 
-  const starting = Number(pfi.startingQtyLitres || 0)
-  const sold = Number(pfi.soldQtyLitres || 0)
-  const remaining = Math.max(0, starting - sold)
+  const unit = pfi.productUnit || (Number(pfi.qtyVolumeMt || 0) > 0 && Number(pfi.startingQtyLitres || 0) === 0 ? 'MT' : 'Litres')
+  const uLower = (unit || '').toLowerCase()
+  const isKg = uLower.includes('kg') || uLower.includes('kilogram')
+  const isMt = uLower.includes('mt') || uLower.includes('ton')
+  const isWeight = isKg || isMt
+
+  const startingLitres = Number(pfi.startingQtyLitres || 0)
+  const soldLitres = Number(pfi.soldQtyLitres || 0)
+  const remainingLitres = Math.max(0, startingLitres - soldLitres)
+
+  let qtyMt = Number(pfi.qtyVolumeMt || 0)
+  if (qtyMt <= 0 && isKg && startingLitres > 0) {
+    qtyMt = startingLitres / 1000
+  } else if (qtyMt <= 0 && isMt && startingLitres > 0) {
+    qtyMt = startingLitres
+  }
+
+  const primaryStarting = startingLitres
+  const primarySold = soldLitres
+  const primaryRemaining = remainingLitres
+  const decimals = isKg || isMt ? 2 : 0
+
   const isActive = pfi.status === 'active'
+
+  const unitPrice = toNum(pfi.unitPrice)
+  const totalAmount = toNum(pfi.totalAmount)
+  const purchaseCost = toNum(pfi.purchaseCost)
+
+  let cumulativeCost = totalAmount
+  if (cumulativeCost <= 0 && unitPrice > 0 && primaryStarting > 0) {
+    cumulativeCost = primaryStarting * unitPrice
+  }
+  if (cumulativeCost <= 0 && purchaseCost > 0) {
+    cumulativeCost = purchaseCost
+  }
+
+  let soldCost = 0
+  let remainingCost = 0
+  if (unitPrice > 0) {
+    soldCost = primarySold * unitPrice
+    remainingCost = primaryRemaining * unitPrice
+  } else if (primaryStarting > 0 && cumulativeCost > 0) {
+    soldCost = (primarySold / primaryStarting) * cumulativeCost
+    remainingCost = (primaryRemaining / primaryStarting) * cumulativeCost
+  }
 
   const handleEdit = () => {
     navigate({ to: '/pfi/form', state: { pfi, isEdit: true } as any })
   }
 
-  const handleDelete = async () => {
+  const handleDelete = () => { setShowDeleteDialog(true) }
+  const confirmDelete = async () => {
     const targetId = pfi?._id || pfi?.id
-    if (confirm('Are you sure you want to permanently delete this PFI and all associated data?') && targetId) {
-      try {
-        await deletePfi(String(targetId))
-        navigate({ to: '/pfi' as any })
-      } catch (err: any) {
-        toast.error(err?.response?.data?.message || err.message || 'Failed to delete PFI')
-      }
+    if (!targetId) return
+    try {
+      await deletePfi(String(targetId))
+      navigate({ to: '/pfi' as any })
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || err.message || 'Failed to delete PFI')
+    } finally {
+      setShowDeleteDialog(false)
     }
   }
 
@@ -125,6 +171,7 @@ function PFIDetails() {
 
   return (
     <div className="space-y-6 animate-fade-in">
+      <Breadcrumbs items={[{ label: 'PFIs', href: '/pfi' }, { label: pfi?.pfiNumber || 'Details' }]} />
       <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center gap-4">
           <Button variant="outline" size="icon" onClick={() => navigate({ to: '/pfi' as any })}>
@@ -132,7 +179,7 @@ function PFIDetails() {
           </Button>
           <div>
             <h1 className="text-3xl font-bold text-foreground">PFI Profile Details</h1>
-            <p className="text-muted-foreground">Monitor PFI transaction logs, quantities, assigned officers, and closure state</p>
+            <p className="text-muted-foreground">Monitor PFI transaction logs, weight & volume metrics, assigned officers, and closure state</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -147,22 +194,26 @@ function PFIDetails() {
 
       {/* Hero Badge Panel */}
       <Card className="card-hover">
-        <CardContent className="p-6 md:p-8 bg-gradient-to-r from-primary/5 to-info/5">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center text-primary shadow-lg shrink-0">
-              <FileText size={36} />
+        <CardContent className="p-4 sm:p-5 bg-gradient-to-r from-primary/5 to-info/5">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary shadow-sm shrink-0">
+              <FileText size={24} />
             </div>
             <div className="flex-1">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant="outline" className="font-mono text-xs">PFI ID: {pfi._id}</Badge>
+                <Badge variant="outline" className="font-medium text-xs">
+                  {isWeight ? <Scale size={12} className="mr-1 text-info inline" /> : <DropletIcon size={12} className="mr-1 text-primary inline" />}
+                  Unit: {unit}
+                </Badge>
                 {isActive ? (
                   <Badge className="bg-success text-success-foreground">Active</Badge>
                 ) : (
                   <Badge variant="secondary">Finished</Badge>
                 )}
               </div>
-              <h2 className="text-3xl font-bold text-foreground mt-2">{pfi.pfiNumber}</h2>
-              <p className="text-muted-foreground mt-1.5 text-sm flex items-center gap-1.5">
+              <h2 className="text-2xl font-bold text-foreground mt-1">{pfi.pfiNumber}</h2>
+              <p className="text-muted-foreground mt-0.5 text-xs flex items-center gap-1.5">
                 {pfi.description || 'Pro Forma Invoice details and logistics status'}
               </p>
             </div>
@@ -200,13 +251,17 @@ function PFIDetails() {
                 <dd className="font-semibold text-foreground mt-0.5">{pfi.productName || '—'}</dd>
               </div>
               <div>
+                <dt className="text-muted-foreground font-medium">Measurement Unit</dt>
+                <dd className="font-semibold text-foreground mt-0.5">{unit}</dd>
+              </div>
+              <div>
                 <dt className="text-muted-foreground font-medium">Qty Volume (MT)</dt>
-                <dd className="font-semibold text-foreground mt-0.5">{pfi.qtyVolumeMt || '—'}</dd>
+                <dd className="font-semibold text-foreground mt-0.5">{qtyMt > 0 ? `${fmtQty(qtyMt, 2)} MT` : '—'}</dd>
               </div>
               <div>
                 <dt className="text-muted-foreground font-medium">Unit Price</dt>
                 <dd className="font-semibold text-foreground mt-0.5">
-                  {pfi.unitPrice ? `₦${Number(pfi.unitPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} / Ltr` : '—'}
+                  {unitPrice > 0 ? `₦${unitPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} / ${unit}` : '—'}
                 </dd>
               </div>
             </dl>
@@ -291,7 +346,7 @@ function PFIDetails() {
           </CardContent>
         </Card>
 
-        {/* Card 4: Quantities & Revenue */}
+        {/* Card 4: Quantities & Financial Cost Breakdown */}
         <Card>
           <CardHeader className="border-b border-border">
             <div className="flex items-center gap-2">
@@ -299,46 +354,52 @@ function PFIDetails() {
                 <Banknote size={16} />
               </div>
               <div>
-                <CardTitle className="text-sm">Quantities & Revenue</CardTitle>
-                <CardDescription className="text-xs">Inventory metrics and financial totals</CardDescription>
+                <CardTitle className="text-sm">Quantities & Financial Value Breakdown</CardTitle>
+                <CardDescription className="text-xs">Inventory metrics and cumulative PFI cost allocation</CardDescription>
               </div>
             </div>
           </CardHeader>
           <CardContent className="space-y-4 pt-4 text-sm">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Starting Qty (Ltr)</p>
-                <p className="text-lg font-bold text-foreground mt-1">{fmtQty(starting)}</p>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Starting Qty ({unit})</p>
+                <p className="text-lg font-bold text-foreground mt-1">{fmtQty(primaryStarting, decimals)} {unit}</p>
+                {startingLitres > 0 && isWeight && (
+                  <p className="text-xs text-muted-foreground">({fmtQty(startingLitres)} L)</p>
+                )}
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Total Revenue</p>
-                <p className="text-lg font-bold text-success mt-1">{fmtCurrency(toNum(pfi.totalAmount))}</p>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Total PFI Cost</p>
+                <p className="text-lg font-bold text-primary mt-1">{fmtCurrency(cumulativeCost)}</p>
               </div>
             </div>
             <Separator />
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Sold Qty (Ltr)</p>
-                <p className="text-lg font-bold text-emerald-600 mt-1">{fmtQty(sold)}</p>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Sold Qty ({unit})</p>
+                <p className="text-lg font-bold text-emerald-600 mt-1">{fmtQty(primarySold, decimals)} {unit}</p>
+                <p className="text-xs font-semibold text-emerald-600 mt-0.5">Sold Cost: {fmtCurrency(soldCost)}</p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Remaining Qty (Ltr)</p>
-                <p className="text-lg font-bold text-amber-600 mt-1">{fmtQty(remaining)}</p>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Remaining Qty ({unit})</p>
+                <p className="text-lg font-bold text-amber-600 mt-1">{fmtQty(primaryRemaining, decimals)} {unit}</p>
+                <p className="text-xs font-semibold text-amber-600 mt-0.5">Rem Cost: {fmtCurrency(remainingCost)}</p>
               </div>
             </div>
-            {starting > 0 && (
+            {primaryStarting > 0 && (
               <div className="space-y-1 mt-2">
                 <div className="h-2 bg-muted rounded-full overflow-hidden w-full">
-                  <div className="h-full bg-emerald-500 rounded-full transition-all duration-700" style={{ width: `${Math.min(100, (sold / starting) * 100)}%` }} />
+                  <div className="h-full bg-emerald-500 rounded-full transition-all duration-700" style={{ width: `${Math.min(100, (primarySold / primaryStarting) * 100)}%` }} />
                 </div>
                 <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>{((sold / starting) * 100).toFixed(1)}% sold</span>
-                  <span>{((remaining / starting) * 100).toFixed(1)}% left</span>
+                  <span>{((primarySold / primaryStarting) * 100).toFixed(1)}% sold ({fmtCurrency(soldCost)})</span>
+                  <span>{((primaryRemaining / primaryStarting) * 100).toFixed(1)}% left ({fmtCurrency(remainingCost)})</span>
                 </div>
               </div>
             )}
           </CardContent>
         </Card>
+
 
         {/* Card 5: Closure Card */}
         <div className="md:col-span-2">
@@ -451,6 +512,16 @@ function PFIDetails() {
           )}
         </div>
       </div>
+      <ConfirmDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title="Delete PFI"
+        description="Are you sure you want to permanently delete this PFI and all associated data? This action cannot be undone."
+        confirmLabel="Delete"
+        variant="destructive"
+        onConfirm={confirmDelete}
+        loading={isDeleting}
+      />
     </div>
   )
 }

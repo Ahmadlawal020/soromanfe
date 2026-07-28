@@ -588,7 +588,7 @@ function DeliveryOperationsPage() {
       <SummaryCards cards={summaryCards} />
 
       {/* Search + Filters Bar */}
-      <div className="bg-white p-4 rounded-xl shadow-sm border border-border space-y-3">
+      <div className="bg-card p-4 rounded-xl shadow-sm border border-border space-y-3">
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
@@ -606,7 +606,7 @@ function DeliveryOperationsPage() {
             <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Status</label>
             <select aria-label="Filter by status" value={statusFilter}
               onChange={e => setStatusFilter(e.target.value as StatusFilter)}
-              className="h-8 rounded-md border border-border bg-white px-2 text-xs">
+              className="h-8 rounded-md border border-border bg-background text-foreground px-2 text-xs">
               <option value="all">All Statuses</option>
               <option value="active">In Transit</option>
               <option value="delivered">Sold</option>
@@ -617,7 +617,7 @@ function DeliveryOperationsPage() {
             <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Truck</label>
             <select aria-label="Filter by truck" value={truckFilter}
               onChange={e => setTruckFilter(e.target.value)}
-              className="h-8 rounded-md border border-border bg-white px-2 text-xs">
+              className="h-8 rounded-md border border-border bg-background text-foreground px-2 text-xs">
               <option value="">All Trucks</option>
               {distinctTruckPlates.map(plate => (
                 <option key={plate} value={plate}>{plate}</option>
@@ -629,7 +629,7 @@ function DeliveryOperationsPage() {
             <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Customer</label>
             <select aria-label="Filter by customer" value={customerFilter}
               onChange={e => setCustomerFilter(e.target.value)}
-              className="h-8 rounded-md border border-border bg-white px-2 text-xs">
+              className="h-8 rounded-md border border-border bg-background text-foreground px-2 text-xs">
               <option value="">All Customers</option>
               {distinctCustomers.map(([id, name]) => (
                 <option key={id} value={id}>{name}</option>
@@ -641,7 +641,7 @@ function DeliveryOperationsPage() {
             <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Customer Type</label>
             <select aria-label="Filter by Customer Type" value={customerTypeFilter}
               onChange={e => setCustomerTypeFilter(e.target.value as any)}
-              className="h-8 rounded-md border border-border bg-white px-2 text-xs">
+              className="h-8 rounded-md border border-border bg-background text-foreground px-2 text-xs">
               <option value="all">All Types</option>
               <option value="normal">Normal Only</option>
               <option value="filling_station">Filling Stations Only</option>
@@ -652,7 +652,7 @@ function DeliveryOperationsPage() {
             <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Allocation Code</label>
             <select aria-label="Filter by allocation code" value={codeFilter}
               onChange={e => setCodeFilter(e.target.value)}
-              className="h-8 rounded-md border border-border bg-white px-2 text-xs font-medium">
+              className="h-8 rounded-md border border-border bg-background text-foreground px-2 text-xs font-medium">
               <option value="">All Codes</option>
               {distinctAllocationCodes.map(code => (
                 <option key={code} value={code}>{code}</option>
@@ -700,7 +700,7 @@ function DeliveryOperationsPage() {
           <Loader2 size={24} className="animate-spin text-muted-foreground" />
         </div>
       ) : filtered.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-sm border border-border p-16 text-center">
+        <div className="bg-card rounded-xl shadow-sm border border-border p-16 text-center">
           <Truck className="mx-auto text-muted-foreground mb-3" size={40} />
           <p className="text-muted-foreground font-medium">
             {hasAnyFilter ? 'No records match your filters' : 'No truck records yet'}
@@ -746,8 +746,8 @@ function DeliveryOperationsPage() {
                   className="block group"
                 >
                   <div className={cn(
-                    'bg-white rounded-xl shadow-sm border border-border p-5 transition-all cursor-pointer space-y-3',
-                    'hover:shadow-md hover:border-emerald-300 hover:-translate-y-0.5',
+                    'bg-card rounded-xl shadow-sm border border-border p-5 transition-all cursor-pointer space-y-3',
+                    'hover:shadow-md hover:border-emerald-300 dark:hover:border-emerald-700 hover:-translate-y-0.5',
                     theme && `${theme.header}`
                   )}>
                     {/* Top: Code + Truck Count */}
@@ -761,7 +761,7 @@ function DeliveryOperationsPage() {
                           <Tag size={11} /> No Code
                         </span>
                       )}
-                      <span className="flex items-center gap-1.5 text-xs font-bold text-foreground bg-white/90 px-2.5 py-1 rounded-lg border border-border/80 shadow-2xs">
+                      <span className="flex items-center gap-1.5 text-xs font-bold text-foreground bg-card/90 px-2.5 py-1 rounded-lg border border-border/80 shadow-2xs">
                         <Truck size={14} className="text-emerald-600" />
                         {records.length} {records.length === 1 ? 'truck' : 'trucks'}
                       </span>
@@ -771,7 +771,7 @@ function DeliveryOperationsPage() {
                     {(distinctProducts.length > 0 || distinctDepots.length > 0) && (
                       <div className="flex items-center justify-between gap-2 text-xs pt-0.5">
                         {distinctProducts.length > 0 && (
-                          <span className="font-bold text-emerald-800 bg-emerald-100/80 px-2 py-0.5 rounded text-[11px]">
+                          <span className="font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-100/80 dark:bg-emerald-950/60 px-2 py-0.5 rounded text-[11px]">
                             {distinctProducts.join(', ')}
                           </span>
                         )}
@@ -803,10 +803,10 @@ function DeliveryOperationsPage() {
                     </div>
 
                     {/* Total Quantity / Volume */}
-                    <div className="flex items-center justify-between bg-slate-50/80 p-2.5 rounded-lg border border-slate-200/70">
-                      <span className="text-xs font-medium text-slate-600">Total Volume</span>
-                      <span className="flex items-center gap-1.5 text-sm font-extrabold text-slate-900">
-                        <Droplets size={14} className="text-violet-600" />
+                    <div className="flex items-center justify-between bg-slate-50/80 dark:bg-slate-900/60 p-2.5 rounded-lg border border-slate-200/70 dark:border-slate-800">
+                      <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Total Volume</span>
+                      <span className="flex items-center gap-1.5 text-sm font-extrabold text-slate-900 dark:text-slate-100">
+                        <Droplets size={14} className="text-violet-600 dark:text-violet-400" />
                         {fmtQty(totalQty)} {unit}
                       </span>
                     </div>
@@ -814,12 +814,12 @@ function DeliveryOperationsPage() {
                     {/* Status Badges */}
                     <div className="flex items-center gap-2 flex-wrap">
                       {loadedCount > 0 && (
-                        <span className="text-[11px] font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                        <span className="text-[11px] font-medium text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-500/20">
                           {loadedCount} in transit ({fmtQty(loadedQty)} L)
                         </span>
                       )}
                       {soldCount > 0 && (
-                        <span className="text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                        <span className="text-[11px] font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-500/20">
                           {soldCount} sold ({fmtQty(soldQty)} L)
                         </span>
                       )}

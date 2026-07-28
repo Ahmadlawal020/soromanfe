@@ -10,6 +10,8 @@ import { useOrderList } from '#/lib/hooks/useOrders'
 import { useDepositList } from '#/lib/hooks/useDeposits'
 import { useToast } from '#/lib/hooks/useToast'
 import { toNum } from '#/lib/utils'
+import { Breadcrumbs } from '#/components/Breadcrumbs'
+import { ConfirmDialog } from '#/components/ConfirmDialog'
 
 export const Route = createFileRoute('/customers/details')({
   validateSearch: (search: Record<string, unknown>): { id?: string; customerId?: string } => {
@@ -40,6 +42,7 @@ function CustomerDetailPage() {
   const deleteCustomer = useDeleteCustomer()
   const toast = useToast()
   const [copiedField, setCopiedField] = useState<string | null>(null)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   const copyToClipboard = (text: string, field: string) => {
     navigator.clipboard.writeText(text)
@@ -66,14 +69,18 @@ function CustomerDetailPage() {
     window.history.length > 1 ? window.history.back() : navigate({ to: '/customers/' as any })
   }
 
-  const handleDelete = async () => {
-    if (confirm('Are you sure you want to permanently remove this customer from the system?') && customer?._id) {
-      try {
-        await deleteCustomer.mutateAsync(customer._id || customer.id)
-        navigate({ to: '/customers/' as any })
-      } catch {
-        toast.error('Failed to delete customer')
-      }
+  const handleDelete = () => {
+    setShowDeleteDialog(true)
+  }
+
+  const confirmDelete = async () => {
+    if (!customer?._id) return
+    try {
+      await deleteCustomer.mutateAsync(customer._id || customer.id)
+      setShowDeleteDialog(false)
+      navigate({ to: '/customers/' as any })
+    } catch {
+      toast.error('Failed to delete customer')
     }
   }
 
@@ -120,6 +127,8 @@ function CustomerDetailPage() {
 
   return (
     <div className="space-y-6 animate-fade-in">
+      <Breadcrumbs items={[{ label: 'Customers', href: '/customers' }, { label: customer?.name || 'Details' }]} />
+
       <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center gap-4">
           <Button variant="outline" size="icon" onClick={handleBack}>
@@ -603,6 +612,17 @@ function CustomerDetailPage() {
           )}
         </CardContent>
       </Card>
+
+      <ConfirmDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title="Remove Customer"
+        description="Are you sure you want to permanently remove this customer from the system? This action cannot be undone."
+        confirmLabel="Remove Customer"
+        variant="destructive"
+        onConfirm={confirmDelete}
+        loading={deleteCustomer.isPending}
+      />
     </div>
   )
 }

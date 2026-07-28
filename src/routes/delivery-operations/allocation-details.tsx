@@ -594,7 +594,7 @@ function AllocationDetailsPage() {
   return (
     <div className="space-y-6 pb-12 animate-fade-in">
       {/* Top Header & Breadcrumb */}
-      <div className="bg-white p-5 rounded-2xl border border-border/80 shadow-xs space-y-3">
+      <div className="bg-card p-5 rounded-2xl border border-border/80 shadow-xs space-y-3">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="flex items-center gap-3">
             <Button
@@ -643,7 +643,7 @@ function AllocationDetailsPage() {
         </div>
 
         {/* Global Progress Bar */}
-        <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden flex">
+        <div className="w-full bg-muted h-2 rounded-full overflow-hidden flex">
           <div
             className="bg-emerald-500 h-full transition-all duration-500"
             style={{ width: `${soldPercent}%` }}
@@ -660,55 +660,55 @@ function AllocationDetailsPage() {
       {/* Summary Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Trucks */}
-        <div className="bg-white p-4 rounded-xl border border-border/80 shadow-xs flex items-center justify-between transition-all hover:shadow-md">
+        <div className="bg-card p-4 rounded-xl border border-border/80 shadow-xs flex items-center justify-between transition-all hover:shadow-md">
           <div>
             <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Allocated Fleet</span>
-            <div className="text-2xl font-extrabold text-slate-900 mt-0.5">{stats.truckCount}</div>
+            <div className="text-2xl font-extrabold text-foreground mt-0.5">{stats.truckCount}</div>
             <span className="text-[11px] text-muted-foreground">Vehicles in dispatch</span>
           </div>
-          <div className="p-3 rounded-2xl bg-blue-50 text-blue-600 border border-blue-100">
+          <div className="p-3 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
             <Truck size={22} />
           </div>
         </div>
 
         {/* Total Volume */}
-        <div className="bg-white p-4 rounded-xl border border-border/80 shadow-xs flex items-center justify-between transition-all hover:shadow-md">
+        <div className="bg-card p-4 rounded-xl border border-border/80 shadow-xs flex items-center justify-between transition-all hover:shadow-md">
           <div>
             <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Total Volume</span>
-            <div className="text-2xl font-extrabold text-slate-900 mt-0.5">
-              {fmtQty(stats.totalQty)} <span className="text-xs font-semibold text-slate-500">{truckRecords[0]?.unitLabel || 'Ltrs'}</span>
+            <div className="text-2xl font-extrabold text-foreground mt-0.5">
+              {fmtQty(stats.totalQty)} <span className="text-xs font-semibold text-muted-foreground">{truckRecords[0]?.unitLabel || 'Ltrs'}</span>
             </div>
             <span className="text-[11px] text-muted-foreground">Combined capacity</span>
           </div>
-          <div className="p-3 rounded-2xl bg-violet-50 text-violet-600 border border-violet-100">
+          <div className="p-3 rounded-2xl bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20">
             <Droplets size={22} />
           </div>
         </div>
 
         {/* In Transit */}
-        <div className="bg-white p-4 rounded-xl border border-border/80 shadow-xs flex items-center justify-between transition-all hover:shadow-md">
+        <div className="bg-card p-4 rounded-xl border border-border/80 shadow-xs flex items-center justify-between transition-all hover:shadow-md">
           <div>
-            <span className="text-[11px] font-semibold text-amber-700 uppercase tracking-wider">In Transit</span>
-            <div className="text-2xl font-extrabold text-amber-600 mt-0.5">
-              {stats.loadedCount} <span className="text-xs font-normal text-slate-500">({fmtQty(stats.loadedQty)} L)</span>
+            <span className="text-[11px] font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wider">In Transit</span>
+            <div className="text-2xl font-extrabold text-amber-600 dark:text-amber-400 mt-0.5">
+              {stats.loadedCount} <span className="text-xs font-normal text-muted-foreground">({fmtQty(stats.loadedQty)} L)</span>
             </div>
-            <span className="text-[11px] text-amber-600/80 font-medium">{loadedPercent}% of allocation</span>
+            <span className="text-[11px] text-amber-600/80 dark:text-amber-400/80 font-medium">{loadedPercent}% of allocation</span>
           </div>
-          <div className="p-3 rounded-2xl bg-amber-50 text-amber-600 border border-amber-100">
+          <div className="p-3 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
             <Truck size={22} />
           </div>
         </div>
 
         {/* Sold */}
-        <div className="bg-white p-4 rounded-xl border border-border/80 shadow-xs flex items-center justify-between transition-all hover:shadow-md">
+        <div className="bg-card p-4 rounded-xl border border-border/80 shadow-xs flex items-center justify-between transition-all hover:shadow-md">
           <div>
-            <span className="text-[11px] font-semibold text-emerald-700 uppercase tracking-wider">Quantity Sold</span>
-            <div className="text-2xl font-extrabold text-emerald-600 mt-0.5">
-              {stats.soldCount} <span className="text-xs font-normal text-slate-500">({fmtQty(stats.soldQty)} L)</span>
+            <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">Quantity Sold</span>
+            <div className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-0.5">
+              {stats.soldCount} <span className="text-xs font-normal text-muted-foreground">({fmtQty(stats.soldQty)} L)</span>
             </div>
-            <span className="text-[11px] text-emerald-600/80 font-medium">{soldPercent}% completed</span>
+            <span className="text-[11px] text-emerald-600/80 dark:text-emerald-400/80 font-medium">{soldPercent}% completed</span>
           </div>
-          <div className="p-3 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100">
+          <div className="p-3 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
             <CheckCircle2 size={22} />
           </div>
         </div>
@@ -718,8 +718,8 @@ function AllocationDetailsPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* PFI Breakdown */}
         <Card className="border border-border/80 shadow-xs">
-          <CardHeader className="bg-slate-50/50 border-b border-border/70 py-3 px-4">
-            <CardTitle className="flex items-center gap-2 text-sm font-bold text-slate-900">
+          <CardHeader className="bg-muted/50 border-b border-border/70 py-3 px-4">
+            <CardTitle className="flex items-center gap-2 text-sm font-bold text-foreground">
               <FileText size={16} className="text-emerald-600" /> PFI Breakdown
             </CardTitle>
           </CardHeader>
@@ -728,22 +728,22 @@ function AllocationDetailsPage() {
               {pfiBreakdown.map(p => {
                 const pfiPercent = stats.totalQty > 0 ? Math.round((p.qty / stats.totalQty) * 100) : 0
                 return (
-                  <div key={p.pfiId} className="p-3 rounded-xl border border-border/70 bg-slate-50/40 space-y-2">
+                  <div key={p.pfiId} className="p-3 rounded-xl border border-border/70 bg-muted/40 space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="font-extrabold text-xs text-slate-900 font-mono">{p.pfiNumber}</span>
-                      <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">
+                      <span className="font-extrabold text-xs text-foreground font-mono">{p.pfiNumber}</span>
+                      <span className="text-[10px] font-bold bg-emerald-500/20 text-emerald-800 dark:text-emerald-200 px-2 py-0.5 rounded">
                         {pfiPercent}% of allocation
                       </span>
                     </div>
                     <div className="text-xs text-muted-foreground font-medium">{p.product}</div>
 
-                    <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                    <div className="w-full bg-muted h-1.5 rounded-full overflow-hidden">
                       <div className="bg-emerald-600 h-full rounded-full" style={{ width: `${pfiPercent}%` }} />
                     </div>
 
                     <div className="flex justify-between items-center text-xs pt-1">
-                      <span className="text-slate-500 font-medium">{p.truckCount} {p.truckCount === 1 ? 'truck' : 'trucks'}</span>
-                      <span className="font-bold text-slate-900">{fmtQty(p.qty)} {p.unit}</span>
+                      <span className="text-muted-foreground font-medium">{p.truckCount} {p.truckCount === 1 ? 'truck' : 'trucks'}</span>
+                      <span className="font-bold text-foreground">{fmtQty(p.qty)} {p.unit}</span>
                     </div>
                   </div>
                 )
@@ -754,13 +754,13 @@ function AllocationDetailsPage() {
 
         {/* Financial Summary */}
         <Card className="border border-border/80 shadow-xs">
-          <CardHeader className="bg-slate-50/50 border-b border-border/70 py-3 px-4">
-            <CardTitle className="flex items-center justify-between text-sm font-bold text-slate-900">
+          <CardHeader className="bg-muted/50 border-b border-border/70 py-3 px-4">
+            <CardTitle className="flex items-center justify-between text-sm font-bold text-foreground">
               <span className="flex items-center gap-2">
                 <FileText size={16} className="text-emerald-600" /> Financial Summary
               </span>
               {salesSummary.balance === 0 && (
-                <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full border border-emerald-200">
+                <span className="text-[10px] font-bold bg-emerald-500/20 text-emerald-800 dark:text-emerald-200 px-2 py-0.5 rounded-full border border-emerald-500/30">
                   ✓ Settled
                 </span>
               )}
@@ -768,23 +768,23 @@ function AllocationDetailsPage() {
           </CardHeader>
           <CardContent className="p-4 grid grid-cols-2 gap-x-6 gap-y-2 text-xs">
             <div className="flex justify-between py-1.5 border-b border-border/60 col-span-1">
-              <span className="text-slate-600 font-medium">Volume Sold</span>
-              <span className="font-bold text-slate-900">{salesSummary.totalQty > 0 ? `${fmtQty(salesSummary.totalQty)} L` : '—'}</span>
+              <span className="text-muted-foreground font-medium">Volume Sold</span>
+              <span className="font-bold text-foreground">{salesSummary.totalQty > 0 ? `${fmtQty(salesSummary.totalQty)} L` : '—'}</span>
             </div>
             <div className="flex justify-between py-1.5 border-b border-border/60 col-span-1">
-              <span className="text-slate-600 font-medium">Expected Revenue</span>
-              <span className="font-bold text-slate-900">{salesSummary.totalValue > 0 ? fmtMoney(salesSummary.totalValue) : '—'}</span>
+              <span className="text-muted-foreground font-medium">Expected Revenue</span>
+              <span className="font-bold text-foreground">{salesSummary.totalValue > 0 ? fmtMoney(salesSummary.totalValue) : '—'}</span>
             </div>
             <div className="flex justify-between py-1.5 border-b border-border/60 col-span-1">
-              <span className="text-slate-600 font-medium">Total Deposits</span>
-              <span className="font-bold text-emerald-700">{salesSummary.totalPaid > 0 ? fmtMoney(salesSummary.totalPaid) : '—'}</span>
+              <span className="text-muted-foreground font-medium">Total Deposits</span>
+              <span className="font-bold text-emerald-600 dark:text-emerald-400">{salesSummary.totalPaid > 0 ? fmtMoney(salesSummary.totalPaid) : '—'}</span>
             </div>
             <div className="flex justify-between py-1.5 border-b border-border/60 col-span-1">
-              <span className="text-slate-600 font-medium">Expenses</span>
-              <span className="font-bold text-amber-700">{salesSummary.totalExpenses > 0 ? fmtMoney(salesSummary.totalExpenses) : '—'}</span>
+              <span className="text-muted-foreground font-medium">Expenses</span>
+              <span className="font-bold text-amber-600 dark:text-amber-400">{salesSummary.totalExpenses > 0 ? fmtMoney(salesSummary.totalExpenses) : '—'}</span>
             </div>
-            <div className="flex justify-between items-center py-2 pt-2 col-span-2 bg-slate-50 p-2.5 rounded-lg border border-slate-200/70">
-              <span className="text-slate-800 font-bold">Outstanding Balance</span>
+            <div className="flex justify-between items-center py-2 pt-2 col-span-2 bg-muted/60 p-2.5 rounded-lg border border-border">
+              <span className="text-foreground font-bold">Outstanding Balance</span>
               <span className={cn(
                 'font-black text-sm',
                 salesSummary.balance === 0 ? 'text-emerald-600' : salesSummary.balance > 0 ? 'text-red-600' : 'text-blue-600'
@@ -835,9 +835,9 @@ function AllocationDetailsPage() {
 
         {/* Trucks Table Card (FULL WIDTH) */}
         <Card className="w-full overflow-hidden border border-border/80 shadow-xs">
-          <CardHeader className="bg-slate-50/50 border-b border-border/70 py-3.5 px-5">
+          <CardHeader className="bg-muted/50 border-b border-border/70 py-3.5 px-5">
             <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2 text-base font-bold text-slate-900">
+              <CardTitle className="flex items-center gap-2 text-base font-bold text-foreground">
                 <Truck size={18} className="text-emerald-600" />
                 Truck Records ({truckRecords.length})
               </CardTitle>
@@ -850,12 +850,12 @@ function AllocationDetailsPage() {
             <div className="overflow-x-auto w-full">
               <Table className="w-full text-sm">
                 <TableHeader>
-                  <TableRow className="bg-slate-100/60 border-b border-border text-slate-600">
+                  <TableRow className="bg-muted/60 border-b border-border text-muted-foreground">
                     <TableHead className="w-[40px] text-center">
                       <input
                         type="checkbox"
                         aria-label="Select all visible rows"
-                        className="h-4 w-4 rounded border-slate-300 accent-emerald-600 cursor-pointer"
+                        className="h-4 w-4 rounded border-border accent-emerald-600 cursor-pointer"
                         checked={truckRecords.length > 0 && truckRecords.every(r => selectedRowIds.has(r._id || r.id || ''))}
                         onChange={e => {
                           if (e.target.checked) setSelectedRowIds(new Set(truckRecords.map(r => r._id || r.id || '')))
@@ -863,18 +863,18 @@ function AllocationDetailsPage() {
                         }}
                       />
                     </TableHead>
-                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-slate-500 w-[35px] text-center">#</TableHead>
-                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-slate-500 min-w-[110px]">Truck</TableHead>
-                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-slate-500 min-w-[100px]">Quantity</TableHead>
-                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-slate-500 min-w-[100px]">Depot</TableHead>
-                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-slate-500 min-w-[90px]">Product</TableHead>
-                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-slate-500 min-w-[130px]">Customer</TableHead>
-                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-slate-500 min-w-[90px]">Rate(s)</TableHead>
-                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-slate-500 min-w-[120px]">Destination</TableHead>
-                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-slate-500 min-w-[95px]">Status</TableHead>
-                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-slate-500 min-w-[90px]">Date Loaded</TableHead>
-                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-slate-500 min-w-[90px]">Date Sold</TableHead>
-                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-slate-500 min-w-[160px] text-right">Actions</TableHead>
+                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground w-[35px] text-center">#</TableHead>
+                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground min-w-[110px]">Truck</TableHead>
+                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground min-w-[100px]">Quantity</TableHead>
+                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground min-w-[100px]">Depot</TableHead>
+                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground min-w-[90px]">Product</TableHead>
+                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground min-w-[130px]">Customer</TableHead>
+                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground min-w-[90px]">Rate(s)</TableHead>
+                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground min-w-[120px]">Destination</TableHead>
+                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground min-w-[95px]">Status</TableHead>
+                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground min-w-[90px]">Date Loaded</TableHead>
+                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground min-w-[90px]">Date Sold</TableHead>
+                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground min-w-[160px] text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -888,8 +888,8 @@ function AllocationDetailsPage() {
                       <TableRow
                         key={recordId}
                         className={cn(
-                          'hover:bg-slate-50/80 transition-colors border-l-[3px] text-xs',
-                          selectedRowIds.has(recordId) ? 'bg-emerald-50/50 border-l-emerald-500' : (theme ? theme.row : 'border-l-transparent')
+                          'hover:bg-muted/60 transition-colors border-l-[3px] text-xs',
+                          selectedRowIds.has(recordId) ? 'bg-emerald-500/10 border-l-emerald-500' : (theme ? theme.row : 'border-l-transparent')
                         )}
                       >
                         <TableCell className="text-center">
@@ -903,7 +903,7 @@ function AllocationDetailsPage() {
                                 return next
                               })
                             }}
-                            className="h-4 w-4 rounded border-slate-300 accent-emerald-600 cursor-pointer"
+                            className="h-4 w-4 rounded border-border accent-emerald-600 cursor-pointer"
                           />
                         </TableCell>
                         <TableCell className="text-muted-foreground text-center font-medium">{idx + 1}</TableCell>
@@ -911,12 +911,12 @@ function AllocationDetailsPage() {
                         {/* Truck Plate */}
                         <TableCell>
                           <div className="flex flex-col gap-0.5">
-                            <span className="font-bold text-xs text-slate-900 font-mono flex items-center gap-1">
+                            <span className="font-bold text-xs text-foreground font-mono flex items-center gap-1">
                               <Truck size={12} className="text-emerald-600 shrink-0" />
                               {r.truckPlate}
                             </span>
                             {salesEntries && salesEntries.length > 1 && (
-                              <span className="inline-flex self-start items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                              <span className="inline-flex self-start items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20">
                                 Split Load
                               </span>
                             )}
@@ -924,17 +924,17 @@ function AllocationDetailsPage() {
                         </TableCell>
 
                         {/* Quantity */}
-                        <TableCell className="font-extrabold text-slate-900">
+                        <TableCell className="font-extrabold text-foreground">
                           {r.qty > 0 ? `${fmtQty(r.qty)} ${r.unitLabel}` : '—'}
                         </TableCell>
 
                         {/* Depot */}
-                        <TableCell className="text-slate-700 font-medium">{r.depotDisplay || '—'}</TableCell>
+                        <TableCell className="text-muted-foreground font-medium">{r.depotDisplay || '—'}</TableCell>
 
                         {/* Product */}
                         <TableCell>
                           {r.product ? (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-800 border border-slate-200">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-muted text-foreground border border-border">
                               {r.product}
                             </span>
                           ) : <span className="text-muted-foreground">—</span>}
@@ -946,7 +946,7 @@ function AllocationDetailsPage() {
                             <div className="flex flex-col gap-1 py-0.5">
                               {salesEntries.map(e => (
                                 <div key={e.customerId || 'none'} className="flex items-center gap-1.5">
-                                  <span className="text-xs text-slate-900 font-medium capitalize truncate">
+                                  <span className="text-xs text-foreground font-medium capitalize truncate">
                                     {e.customerName || `Cust #${e.customerId}`}
                                   </span>
                                   {e.qty > 0 && (

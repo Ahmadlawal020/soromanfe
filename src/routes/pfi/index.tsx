@@ -6,7 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '#/com
 import { Input } from '#/components/ui/input'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '#/components/ui/table'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '#/components/ui/select'
-import { FileSearch2, Search, Plus, CheckCircle2, DropletIcon, Package, Banknote, X, Loader2, SearchX, FileText, MapPin } from 'lucide-react'
+import { FileSearch2, Search, Plus, DropletIcon, Scale, Package, Banknote, X, FileText, MapPin } from 'lucide-react'
+import { PageLoader } from '#/components/PageLoader'
+import { PageError } from '#/components/PageError'
+import { PageEmpty } from '#/components/PageEmpty'
+import { Pagination } from '#/components/Pagination'
 import { usePfiList, type Pfi } from '#/lib/hooks/usePfis'
 import { toNum } from '#/lib/utils'
 
@@ -22,12 +26,95 @@ function getStatusBadge(status: string) {
   }
 }
 
-function fmtQty(n: number) {
-  return n.toLocaleString(undefined, { maximumFractionDigits: 0 })
+function fmtQty(n: number, decimals: number = 0) {
+  return n.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
 }
 
 function fmtCurrency(n: number) {
   return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)
+}
+
+function isWeightBased(pfi: Pfi): boolean {
+  const u = (pfi.productUnit || '').toLowerCase()
+  if (u.includes('mt') || u.includes('ton') || u.includes('kg') || u.includes('weight')) return true
+  if (Number(pfi.qtyVolumeMt || 0) > 0 && Number(pfi.startingQtyLitres || 0) === 0) return true
+  return false
+}
+
+function getPfiUnit(pfi: Pfi): string {
+  if (pfi.productUnit) return pfi.productUnit
+  if (isWeightBased(pfi)) return 'MT'
+  return 'Litres'
+}
+
+function getPfiQuantities(pfi: Pfi) {
+  const isWeight = isWeightBased(pfi)
+  const unit = getPfiUnit(pfi)
+  const uLower = (unit || '').toLowerCase()
+
+  let starting = Number(pfi.startingQtyLitres || 0)
+  let sold = Number(pfi.soldQtyLitres || 0)
+
+  if (isWeight && Number(pfi.qtyVolumeMt || 0) > 0 && starting === 0) {
+    starting = Number(pfi.qtyVolumeMt)
+    sold = Number(pfi.soldQtyLitres || 0)
+  }
+
+  const remaining = Math.max(0, starting - sold)
+
+  // Compute MT equivalent for weight stat calculations (1 MT = 1000 kg)
+  let startingMt = 0
+  let soldMt = 0
+  let remainingMt = 0
+
+  if (Number(pfi.qtyVolumeMt || 0) > 0) {
+    startingMt = Number(pfi.qtyVolumeMt)
+    soldMt = starting > 0 ? (sold / starting) * startingMt : 0
+    remainingMt = Math.max(0, startingMt - soldMt)
+  } else if (uLower.includes('kg') || uLower.includes('kilogram')) {
+    startingMt = starting / 1000
+    soldMt = sold / 1000
+    remainingMt = Math.max(0, startingMt - soldMt)
+  } else if (uLower.includes('mt') || uLower.includes('ton')) {
+    startingMt = starting
+    soldMt = sold
+    remainingMt = Math.max(0, startingMt - soldMt)
+  }
+
+  return { starting, sold, remaining, startingMt, soldMt, remainingMt, unit, isWeight }
+}
+
+function getPfiCosts(pfi: Pfi) {
+  const q = getPfiQuantities(pfi)
+  const unitPrice = toNum(pfi.unitPrice)
+  const totalAmount = toNum(pfi.totalAmount)
+  const purchaseCost = toNum(pfi.purchaseCost)
+
+  let totalCost = totalAmount
+  if (totalCost <= 0 && unitPrice > 0 && q.starting > 0) {
+    totalCost = q.starting * unitPrice
+  }
+  if (totalCost <= 0 && purchaseCost > 0) {
+    totalCost = purchaseCost
+  }
+
+  let soldCost = 0
+  let remainingCost = 0
+
+  if (unitPrice > 0) {
+    soldCost = q.sold * unitPrice
+    remainingCost = q.remaining * unitPrice
+  } else if (q.starting > 0 && totalCost > 0) {
+    soldCost = (q.sold / q.starting) * totalCost
+    remainingCost = (q.remaining / q.starting) * totalCost
+  }
+
+  return {
+    totalCost,
+    soldCost,
+    remainingCost,
+    unitPrice,
+  }
 }
 
 function PFIDashboard() {
@@ -37,9 +124,10 @@ function PFIDashboard() {
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
 
-  const { data, isLoading } = usePfiList({ search: searchTerm || undefined, status: selectedStatus !== 'all' ? selectedStatus : undefined })
+  const { data, isLoading, isError, error, refetch } = usePfiList({ search: searchTerm || undefined, status: selectedStatus !== 'all' ? selectedStatus : undefined })
 
   const pfis: Pfi[] = Array.isArray(data) ? data : (data?.pfis || data?.results || [])
+  const hasFilters = !!(searchTerm || selectedStatus !== 'all')
 
   useEffect(() => {
     setCurrentPage(1)
@@ -53,20 +141,49 @@ function PFIDashboard() {
   )
 
   const stats = useMemo(() => {
-    let totalStarting = 0, totalSold = 0, totalRemaining = 0, totalAmount = 0
     let activeCount = 0, finishedCount = 0
+    let totalStartingLitres = 0, totalSoldLitres = 0, totalRemainingLitres = 0
+    let totalStartingMt = 0, totalSoldMt = 0, totalRemainingMt = 0
+    let cumulativeCost = 0, cumulativeSoldCost = 0, cumulativeRemainingCost = 0
+
     pfis.forEach(p => {
-      const starting = Number(p.startingQtyLitres || 0)
-      const sold = Number(p.soldQtyLitres || 0)
-      const amount = toNum(p.totalAmount)
-      totalStarting += starting
-      totalSold += sold
-      totalRemaining += Math.max(0, starting - sold)
-      totalAmount += amount
       if (p.status === 'active') activeCount++
       else finishedCount++
+
+      const q = getPfiQuantities(p)
+
+      // Add to volume inventory if product is litres/volume based
+      if (!q.isWeight) {
+        totalStartingLitres += q.starting
+        totalSoldLitres += q.sold
+        totalRemainingLitres += q.remaining
+      }
+
+      // Add to MT weight inventory (accounts for MT directly or kg / 1000)
+      totalStartingMt += q.startingMt
+      totalSoldMt += q.soldMt
+      totalRemainingMt += q.remainingMt
+
+      const c = getPfiCosts(p)
+      cumulativeCost += c.totalCost
+      cumulativeSoldCost += c.soldCost
+      cumulativeRemainingCost += c.remainingCost
     })
-    return { totalStarting, totalSold, totalRemaining, totalAmount, activeCount, finishedCount, total: pfis.length }
+
+    return {
+      activeCount,
+      finishedCount,
+      total: pfis.length,
+      totalStartingLitres,
+      totalSoldLitres,
+      totalRemainingLitres,
+      totalStartingMt,
+      totalSoldMt,
+      totalRemainingMt,
+      cumulativeCost,
+      cumulativeSoldCost,
+      cumulativeRemainingCost,
+    }
   }, [pfis])
 
   return (
@@ -74,46 +191,100 @@ function PFIDashboard() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-foreground">PFI Tracking</h1>
-          <p className="text-muted-foreground">Monitor PFIs by location and product, track sold and remaining quantities.</p>
+          <p className="text-muted-foreground">Monitor PFIs by location and product, track weight & volume inventory, and review cumulative PFI costs.</p>
         </div>
         <Button size="sm" className="gradient-primary text-white border-0" onClick={() => navigate({ to: '/pfi/form' })}>
           <Plus className="w-4 h-4 mr-2" />Add PFI
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="stats-card">
-          <CardContent className="p-4 flex justify-between items-center">
-            <div><p className="text-sm text-muted-foreground">Active PFIs</p><p className="text-2xl font-bold text-success">{stats.activeCount}</p></div>
-            <FileSearch2 className="w-8 h-8 text-success" />
-          </CardContent>
-        </Card>
-        <Card className="stats-card">
-          <CardContent className="p-4 flex justify-between items-center">
-            <div><p className="text-sm text-muted-foreground">Finished PFIs</p><p className="text-2xl font-bold text-muted-foreground">{stats.finishedCount}</p></div>
-            <CheckCircle2 className="w-8 h-8 text-muted-foreground" />
-          </CardContent>
-        </Card>
-        <Card className="stats-card">
-          <CardContent className="p-4 flex justify-between items-center">
-            <div><p className="text-sm text-muted-foreground">Total Qty (L)</p><p className="text-2xl font-bold">{fmtQty(stats.totalStarting)}</p></div>
-            <DropletIcon className="w-8 h-8 text-primary" />
-          </CardContent>
-        </Card>
-        <Card className="stats-card">
-          <CardContent className="p-4 flex justify-between items-center">
-            <div><p className="text-sm text-muted-foreground">Total Revenue</p><p className="text-xl font-bold text-success">{fmtCurrency(stats.totalAmount)}</p></div>
-            <Banknote className="w-8 h-8 text-success" />
-          </CardContent>
-        </Card>
-      </div>
+      {/* Compact Stat Cards Grid */}
+      {!isLoading && !isError && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+          {/* Card 1: Status Overview */}
+          <Card className="stats-card hover:border-primary/40 transition-all border-border/80">
+            <CardContent className="p-3.5 flex justify-between items-center">
+              <div>
+                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Status Overview</p>
+                <div className="flex items-baseline gap-2 mt-1">
+                  <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400">{stats.activeCount} <span className="text-[11px] font-normal text-muted-foreground">Active</span></span>
+                  <span className="text-sm font-semibold text-muted-foreground">• {stats.finishedCount} <span className="text-[11px] font-normal text-muted-foreground">Finished</span></span>
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-0.5">{stats.total} total PFIs</p>
+              </div>
+              <div className="h-9 w-9 rounded-xl bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                <FileSearch2 className="w-4 h-4" />
+              </div>
+            </CardContent>
+          </Card>
 
+          {/* Card 2: Volume Inventory (L) */}
+          <Card className="stats-card hover:border-blue-500/40 transition-all border-border/80">
+            <CardContent className="p-3.5 flex justify-between items-center">
+              <div className="min-w-0 flex-1">
+                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Volume (L)</p>
+                <p className="text-xl font-bold text-foreground mt-0.5 truncate">
+                  {fmtQty(stats.totalStartingLitres)} <span className="text-[11px] font-medium text-muted-foreground">L</span>
+                </p>
+                <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
+                  <span className="text-emerald-600 dark:text-emerald-400 font-medium">Sold: {fmtQty(stats.totalSoldLitres)} L</span>
+                  <span className="mx-1">•</span>
+                  <span className="text-amber-600 dark:text-amber-400 font-medium">Rem: {fmtQty(stats.totalRemainingLitres)} L</span>
+                </p>
+              </div>
+              <div className="h-9 w-9 rounded-xl bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 flex items-center justify-center shrink-0 ml-2">
+                <DropletIcon className="w-4 h-4" />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Card 3: Weight Inventory (MT) */}
+          <Card className="stats-card hover:border-purple-500/40 transition-all border-border/80">
+            <CardContent className="p-3.5 flex justify-between items-center">
+              <div className="min-w-0 flex-1">
+                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Weight (MT)</p>
+                <p className="text-xl font-bold text-foreground mt-0.5 truncate">
+                  {fmtQty(stats.totalStartingMt, 2)} <span className="text-[11px] font-medium text-muted-foreground">MT</span>
+                </p>
+                <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
+                  <span className="text-emerald-600 dark:text-emerald-400 font-medium">Sold: {fmtQty(stats.totalSoldMt, 2)} MT</span>
+                  <span className="mx-1">•</span>
+                  <span className="text-amber-600 dark:text-amber-400 font-medium">Rem: {fmtQty(stats.totalRemainingMt, 2)} MT</span>
+                </p>
+              </div>
+              <div className="h-9 w-9 rounded-xl bg-purple-500/10 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400 flex items-center justify-center shrink-0 ml-2">
+                <Scale className="w-4 h-4" />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Card 4: Cumulative PFI Cost */}
+          <Card className="stats-card hover:border-primary/40 transition-all border-primary/20 bg-gradient-to-br from-card via-card to-primary/5">
+            <CardContent className="p-3.5 flex justify-between items-center">
+              <div className="min-w-0 flex-1">
+                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Cumulative PFI Cost</p>
+                <p className="text-lg font-extrabold text-primary mt-0.5 truncate">{fmtCurrency(stats.cumulativeCost)}</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
+                  <span className="text-emerald-600 dark:text-emerald-400 font-medium">Sold: {fmtCurrency(stats.cumulativeSoldCost)}</span>
+                  <span className="mx-1">•</span>
+                  <span className="text-amber-600 dark:text-amber-400 font-medium">Rem: {fmtCurrency(stats.cumulativeRemainingCost)}</span>
+                </p>
+              </div>
+              <div className="h-9 w-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 ml-2">
+                <Banknote className="w-4 h-4" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Directory Table Card */}
       <Card>
         <CardHeader className="border-b border-border">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <CardTitle>PFI Directory</CardTitle>
-              <CardDescription>Browse active and finished pro forma invoices</CardDescription>
+              <CardDescription>Browse active and finished pro forma invoices by location, product, and measurement unit</CardDescription>
             </div>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               <div className="relative flex-1 sm:w-64">
@@ -134,14 +305,19 @@ function PFIDashboard() {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="flex items-center justify-center py-16"><Loader2 size={24} className="animate-spin text-muted-foreground" /></div>
+            <PageLoader message="Loading PFIs..." />
+          ) : isError ? (
+            <PageError message={(error as any)?.message || 'Failed to load'} onRetry={() => refetch()} />
           ) : pfis.length === 0 ? (
-            <div className="p-16 text-center">
-              <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-muted border border-border mb-4"><SearchX size={24} className="text-muted-foreground" /></div>
-              <p className="text-sm font-medium text-foreground">No PFIs found</p>
-              <p className="text-xs text-muted-foreground mt-1">Try adjusting your search or filter criteria.</p>
-              <Button variant="ghost" size="sm" onClick={() => { setSearchTerm(''); setSelectedStatus('all') }} className="mt-4 text-primary"><X size={14} /> Clear filters</Button>
-            </div>
+            <PageEmpty
+              icon={<FileText size={24} className="text-muted-foreground" />}
+              title={hasFilters ? 'No PFIs match your filters' : 'No PFIs yet'}
+              description={hasFilters ? 'Try adjusting your search or filter criteria.' : 'Create your first PFI to get started.'}
+              actionLabel="Create PFI"
+              onAction={() => navigate({ to: '/pfi/form' })}
+              hasFilters={hasFilters}
+              onClearFilters={() => { setSearchTerm(''); setSelectedStatus('all') }}
+            />
           ) : (
             <>
               <div className="overflow-x-auto">
@@ -151,19 +327,20 @@ function PFIDashboard() {
                       <TableHead>PFI No</TableHead>
                       <TableHead>Location</TableHead>
                       <TableHead>Product</TableHead>
-                      <TableHead>Qty (Ltr)</TableHead>
-                      <TableHead className="text-success">Sold (Ltr)</TableHead>
-                      <TableHead className="text-warning">Remaining (Ltr)</TableHead>
-                      <TableHead>Amount (₦)</TableHead>
+                      <TableHead>Unit</TableHead>
+                      <TableHead>Starting Qty</TableHead>
+                      <TableHead className="text-success">Sold Qty</TableHead>
+                      <TableHead className="text-warning">Remaining Qty</TableHead>
+                      <TableHead>Total Cost (₦)</TableHead>
                       <TableHead>Status</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {paginatedPfis.map((pfi: Pfi) => {
-                      const starting = Number(pfi.startingQtyLitres || 0)
-                      const sold = Number(pfi.soldQtyLitres || 0)
-                      const remaining = Math.max(0, starting - sold)
-                      const amount = toNum(pfi.totalAmount)
+                      const q = getPfiQuantities(pfi)
+                      const c = getPfiCosts(pfi)
+                      const decimals = q.isWeight ? 2 : 0
+
                       return (
                         <TableRow key={pfi._id || pfi.id} className="cursor-pointer hover:bg-muted transition" onClick={() => navigate({ to: '/pfi/details' as any, search: { id: String(pfi._id || pfi.id) } as any })}>
                           <TableCell>
@@ -191,19 +368,25 @@ function PFIDashboard() {
                               <span>{pfi.productName || '—'}</span>
                             </div>
                           </TableCell>
-                          <TableCell className="font-medium">{fmtQty(starting)}</TableCell>
-                          <TableCell className="text-success font-medium">{fmtQty(sold)}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="font-medium text-xs">
+                              {q.isWeight ? <Scale size={12} className="mr-1 text-info inline" /> : <DropletIcon size={12} className="mr-1 text-primary inline" />}
+                              {q.unit}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="font-medium">{fmtQty(q.starting, decimals)} {q.unit}</TableCell>
+                          <TableCell className="text-success font-medium">{fmtQty(q.sold, decimals)} {q.unit}</TableCell>
                           <TableCell className="text-warning font-medium">
-                            <div className="flex flex-col gap-1 w-full max-w-[100px]">
-                              <span>{fmtQty(remaining)}</span>
-                              {starting > 0 && (
+                            <div className="flex flex-col gap-1 w-full max-w-[120px]">
+                              <span>{fmtQty(q.remaining, decimals)} {q.unit}</span>
+                              {q.starting > 0 && (
                                 <div className="h-1.5 bg-muted rounded-full overflow-hidden w-full">
-                                  <div className="h-full bg-warning rounded-full" style={{ width: `${Math.min(100, (remaining / starting) * 100)}%` }} />
+                                  <div className="h-full bg-warning rounded-full" style={{ width: `${Math.min(100, (q.remaining / q.starting) * 100)}%` }} />
                                 </div>
                               )}
                             </div>
                           </TableCell>
-                          <TableCell className="font-semibold text-success">{fmtCurrency(amount)}</TableCell>
+                          <TableCell className="font-semibold text-primary">{fmtCurrency(c.totalCost)}</TableCell>
                           <TableCell>{getStatusBadge(pfi.status)}</TableCell>
                         </TableRow>
                       )
@@ -212,74 +395,14 @@ function PFIDashboard() {
                 </Table>
               </div>
 
-              {/* Pagination Controls */}
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border mt-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">Rows per page:</span>
-                  <Select
-                    value={pageSize.toString()}
-                    onValueChange={(val) => {
-                      setPageSize(Number(val))
-                      setCurrentPage(1)
-                    }}
-                  >
-                    <SelectTrigger className="h-8 w-[70px]">
-                      <SelectValue placeholder={pageSize.toString()} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="5">5</SelectItem>
-                      <SelectItem value="10">10</SelectItem>
-                      <SelectItem value="20">20</SelectItem>
-                      <SelectItem value="50">50</SelectItem>
-                      <SelectItem value="100">100</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground ml-4">
-                    Showing {totalItems > 0 ? (currentPage - 1) * pageSize + 1 : 0} to{' '}
-                    {Math.min(currentPage * pageSize, totalItems)} of {totalItems} entries
-                  </p>
-                </div>
-                {totalPages > 1 && (
-                  <div className="flex items-center gap-1">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-8"
-                      disabled={currentPage <= 1}
-                      onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                    >
-                      Previous
-                    </Button>
-                    {Array.from({ length: totalPages }, (_, i) => i + 1)
-                      .filter((p) => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1)
-                      .map((p, idx, arr) => {
-                        const showEllipsis = idx > 0 && p - arr[idx - 1] > 1
-                        return (
-                          <div key={p} className="flex items-center">
-                            {showEllipsis && <span className="px-2 text-xs text-muted-foreground">...</span>}
-                            <Button
-                              variant={currentPage === p ? 'default' : 'outline'}
-                              size="sm"
-                              className={`h-8 w-8 p-0 ${currentPage === p ? 'gradient-primary text-white border-0' : ''}`}
-                              onClick={() => setCurrentPage(p)}
-                            >
-                              {p}
-                            </Button>
-                          </div>
-                        )
-                      })}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-8"
-                      disabled={currentPage >= totalPages}
-                      onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-                    >
-                      Next
-                    </Button>
-                  </div>
-                )}
-              </div>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                pageSize={pageSize}
+                totalItems={totalItems}
+                onPageChange={setCurrentPage}
+                onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1) }}
+              />
             </>
           )}
         </CardContent>
@@ -287,3 +410,4 @@ function PFIDashboard() {
     </div>
   )
 }
+

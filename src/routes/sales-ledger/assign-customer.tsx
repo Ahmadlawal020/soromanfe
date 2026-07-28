@@ -430,17 +430,17 @@ function AssignCustomerPage() {
       </nav>
 
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-slate-200 pb-4">
+      <div className="flex items-center justify-between border-b border-border pb-4">
         <div className="flex items-center gap-3">
-          <Button variant="outline" size="sm" className="gap-1.5 text-slate-700" onClick={goBack}>
+          <Button variant="outline" size="sm" className="gap-1.5 text-foreground" onClick={goBack}>
             <ArrowLeft size={16} /> Back
           </Button>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
-              <UserPlus size={22} className="text-amber-600" />
+            <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+              <UserPlus size={22} className="text-amber-600 dark:text-amber-400" />
               Assign New Customer
             </h1>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-muted-foreground mt-0.5">
               Link customer(s) to this truck cycle. Rates and payments can be added later.
             </p>
           </div>
@@ -448,64 +448,64 @@ function AssignCustomerPage() {
       </div>
 
       {/* Truck Context Card */}
-      <Card className="bg-amber-50/60 border-amber-200 shadow-sm">
-        <CardHeader className="pb-3 border-b border-amber-100">
-          <CardTitle className="text-sm font-bold text-amber-900 flex items-center gap-2">
-            <Truck size={16} className="text-amber-700" />
+      <Card className="bg-amber-500/10 border-amber-500/20 shadow-sm">
+        <CardHeader className="pb-3 border-b border-amber-500/20">
+          <CardTitle className="text-sm font-bold text-amber-900 dark:text-amber-200 flex items-center gap-2">
+            <Truck size={16} className="text-amber-600 dark:text-amber-400" />
             Truck Context
           </CardTitle>
-          <CardDescription className="text-xs text-amber-700">
+          <CardDescription className="text-xs text-amber-700 dark:text-amber-300">
             This assignment is bound to the currently viewed truck cycle.
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-4">
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-sm">
-            <div className="p-3 bg-white/80 rounded-xl border border-amber-100">
-              <div className="text-xs text-slate-400 font-medium flex items-center gap-1">
-                <Truck size={12} className="text-amber-600" /> Truck Number
+            <div className="p-3 bg-card rounded-xl border border-amber-500/20">
+              <div className="text-xs text-muted-foreground font-medium flex items-center gap-1">
+                <Truck size={12} className="text-amber-600 dark:text-amber-400" /> Truck Number
               </div>
-              <div className="font-extrabold text-base font-mono text-slate-900 mt-0.5">
+              <div className="font-extrabold text-base font-mono text-foreground mt-0.5">
                 {truckNumber || '—'}
               </div>
             </div>
-            <div className="p-3 bg-white/80 rounded-xl border border-amber-100">
-              <div className="text-xs text-slate-400 font-medium flex items-center gap-1">
+            <div className="p-3 bg-card rounded-xl border border-amber-500/20">
+              <div className="text-xs text-muted-foreground font-medium flex items-center gap-1">
                 <Calendar size={12} className="text-indigo-500" /> Date Loaded
               </div>
-              <div className="font-bold text-slate-900 mt-0.5">
+              <div className="font-bold text-foreground mt-0.5">
                 {safeFormatDate(dateLoaded)}
               </div>
             </div>
-            <div className="p-3 bg-white/80 rounded-xl border border-amber-100">
-              <div className="text-xs text-slate-400 font-medium flex items-center gap-1">
+            <div className="p-3 bg-card rounded-xl border border-amber-500/20">
+              <div className="text-xs text-muted-foreground font-medium flex items-center gap-1">
                 <Building2 size={12} className="text-amber-500" /> Depot
               </div>
-              <div className="font-bold text-slate-900 mt-0.5">
+              <div className="font-bold text-foreground mt-0.5">
                 {depot || '—'}
               </div>
             </div>
-            <div className="p-3 bg-white/80 rounded-xl border border-amber-100">
-              <div className="text-xs text-slate-400 font-medium flex items-center gap-1">
+            <div className="p-3 bg-card rounded-xl border border-amber-500/20">
+              <div className="text-xs text-muted-foreground font-medium flex items-center gap-1">
                 <Tag size={12} className="text-purple-500" /> PFI Code
               </div>
-              <div className="font-bold text-slate-900 mt-0.5">
+              <div className="font-bold text-foreground mt-0.5">
                 {code ? (
-                  <Badge variant="outline" className="font-mono text-xs uppercase bg-purple-50 text-purple-700 border-purple-200">
+                  <Badge variant="outline" className="font-mono text-xs uppercase bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/20">
                     {code}
                   </Badge>
                 ) : 'None'}
               </div>
             </div>
-            <div className="p-3 bg-white/80 rounded-xl border border-amber-100">
-              <div className="text-xs text-slate-400 font-medium flex items-center gap-1">
-                <Fuel size={12} className="text-emerald-600" /> Capacity
+            <div className="p-3 bg-card rounded-xl border border-amber-500/20">
+              <div className="text-xs text-muted-foreground font-medium flex items-center gap-1">
+                <Fuel size={12} className="text-emerald-600 dark:text-emerald-400" /> Capacity
               </div>
-              <div className="font-extrabold text-slate-900 mt-0.5">
+              <div className="font-extrabold text-foreground mt-0.5">
                 {totalTruckCapacity > 0 ? (
                   <>
                     {totalTruckCapacity.toLocaleString()} L
                     {alreadyAllocatedQty > 0 && (
-                      <span className="block text-xs font-medium text-slate-500 mt-0.5">
+                      <span className="block text-xs font-medium text-muted-foreground mt-0.5">
                         {remainingCapacity.toLocaleString()} L remaining
                       </span>
                     )}
@@ -519,9 +519,9 @@ function AssignCustomerPage() {
 
       {/* Existing Assignments */}
       {existingAssignments.length > 0 && (
-        <Card className="bg-white shadow-sm border-slate-200">
-          <CardHeader className="border-b border-slate-100 pb-3">
-            <CardTitle className="text-base font-bold text-slate-800 flex items-center gap-2">
+        <Card className="bg-card shadow-sm border-border">
+          <CardHeader className="border-b border-border pb-3">
+            <CardTitle className="text-base font-bold text-foreground flex items-center gap-2">
               <Users size={16} className="text-indigo-500" />
               Already Assigned Customers ({existingAssignments.length})
             </CardTitle>
@@ -534,28 +534,28 @@ function AssignCustomerPage() {
               {existingAssignments.map(a => (
                 <div
                   key={a.customerId}
-                  className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100"
+                  className="flex items-center justify-between p-3 bg-muted/60 rounded-xl border border-border"
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     {a.isFillingStation ? (
-                      <div className="p-1.5 rounded-lg bg-amber-100">
-                        <Fuel size={14} className="text-amber-600" />
+                      <div className="p-1.5 rounded-lg bg-amber-500/20">
+                        <Fuel size={14} className="text-amber-600 dark:text-amber-400" />
                       </div>
                     ) : (
-                      <div className="p-1.5 rounded-lg bg-indigo-100">
-                        <Users size={14} className="text-indigo-600" />
+                      <div className="p-1.5 rounded-lg bg-indigo-500/20">
+                        <Users size={14} className="text-indigo-600 dark:text-indigo-400" />
                       </div>
                     )}
                     <div className="min-w-0">
-                      <p className="font-semibold text-slate-900 text-sm truncate uppercase">{a.customerName}</p>
-                      <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5">
+                      <p className="font-semibold text-foreground text-sm truncate uppercase">{a.customerName}</p>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
                         {a.location && (
                           <span className="flex items-center gap-0.5">
                             <MapPin size={10} /> {a.location}
                           </span>
                         )}
                         {a.isFillingStation && (
-                          <Badge className="text-[10px] bg-amber-100 text-amber-800 border-amber-200 px-1 py-0">
+                          <Badge className="text-[10px] bg-amber-500/20 text-amber-800 dark:text-amber-200 border-amber-500/30 px-1 py-0">
                             FS
                           </Badge>
                         )}
@@ -563,9 +563,9 @@ function AssignCustomerPage() {
                     </div>
                   </div>
                   <div className="text-right shrink-0 ml-3">
-                    <p className="font-bold text-slate-900 text-sm">{a.quantity > 0 ? `${a.quantity.toLocaleString()} L` : '—'}</p>
+                    <p className="font-bold text-foreground text-sm">{a.quantity > 0 ? `${a.quantity.toLocaleString()} L` : '—'}</p>
                     {a.paymentCount > 0 && (
-                      <p className="text-[11px] text-emerald-600 font-medium">
+                      <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
                         {a.paymentCount} payment{a.paymentCount !== 1 ? 's' : ''} · {a.totalPaid.toLocaleString()} paid
                       </p>
                     )}
@@ -574,9 +574,9 @@ function AssignCustomerPage() {
               ))}
 
               {/* Summary bar */}
-              <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
-                <span className="text-slate-500 font-medium">
-                  Total already allocated: <strong className="text-slate-700">{alreadyAllocatedQty.toLocaleString()} L</strong>
+              <div className="flex items-center justify-between pt-2 border-t border-border text-xs">
+                <span className="text-muted-foreground font-medium">
+                  Total already allocated: <strong className="text-foreground">{alreadyAllocatedQty.toLocaleString()} L</strong>
                 </span>
                 {totalTruckCapacity > 0 && (
                   <span className={`font-bold ${remainingCapacity > 0 ? 'text-emerald-600' : 'text-red-600'}`}>
@@ -611,11 +611,11 @@ function AssignCustomerPage() {
       )}
 
       {/* Customer Assignment Form */}
-      <Card className="bg-white shadow-sm border-slate-200">
-        <CardHeader className="border-b border-slate-100 pb-3 flex flex-row items-center justify-between">
+      <Card className="bg-card shadow-sm border-border">
+        <CardHeader className="border-b border-border pb-3 flex flex-row items-center justify-between">
           <div>
-            <CardTitle className="text-base font-bold text-slate-800 flex items-center gap-2">
-              <UserPlus size={18} className="text-slate-600" />
+            <CardTitle className="text-base font-bold text-foreground flex items-center gap-2">
+              <UserPlus size={18} className="text-muted-foreground" />
               New Customer Assignment ({saleRows.length})
             </CardTitle>
             <CardDescription className="text-xs">
@@ -637,15 +637,15 @@ function AssignCustomerPage() {
             return (
               <div
                 key={row.uid}
-                className={`border rounded-xl p-4 space-y-4 relative transition-all ${hasError ? 'border-red-300 bg-red-50/30' : isFS ? 'border-amber-200 bg-amber-50/30' : 'border-slate-200 bg-slate-50/40'
+                className={`border rounded-xl p-4 space-y-4 relative transition-all ${hasError ? 'border-red-400 bg-red-500/10' : isFS ? 'border-amber-500/30 bg-amber-500/10' : 'border-border bg-muted/40'
                   }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
-                    {isFS && <Fuel size={14} className="text-amber-600" />}
+                  <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                    {isFS && <Fuel size={14} className="text-amber-600 dark:text-amber-400" />}
                     Customer #{idx + 1}
                     {isFS && (
-                      <Badge className="ml-1 text-[10px] font-semibold bg-amber-100 text-amber-800 border-amber-200 px-1.5 py-0 normal-case tracking-normal">
+                      <Badge className="ml-1 text-[10px] font-semibold bg-amber-500/20 text-amber-800 dark:text-amber-200 border-amber-500/30 px-1.5 py-0 normal-case tracking-normal">
                         Filling Station
                       </Badge>
                     )}
@@ -654,7 +654,7 @@ function AssignCustomerPage() {
                     <button
                       type="button"
                       onClick={() => removeSaleRow(row.uid)}
-                      className="text-slate-400 hover:text-red-500 transition-colors p-1 rounded-md"
+                      className="text-muted-foreground hover:text-red-500 transition-colors p-1 rounded-md"
                       title="Remove customer row"
                     >
                       <X size={16} />
@@ -664,14 +664,14 @@ function AssignCustomerPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-slate-700">
+                    <Label className="text-xs font-semibold text-foreground">
                       Select Customer <span className="text-red-500">*</span>
                     </Label>
                     <select
                       aria-label={`Customer for row ${idx + 1}`}
                       value={row.customer}
                       onChange={e => updateSaleRow(row.uid, 'customer', e.target.value)}
-                      className={`h-10 w-full rounded-lg border bg-background px-3 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-slate-300 ${rowErrors[row.uid]?.customer ? 'border-red-400 bg-red-50' : 'border-input'
+                      className={`h-10 w-full rounded-lg border bg-background text-foreground px-3 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring ${rowErrors[row.uid]?.customer ? 'border-red-500' : 'border-input'
                         }`}
                     >
                       <option value="">Select customer...</option>
@@ -691,12 +691,12 @@ function AssignCustomerPage() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-slate-700">
+                    <Label className="text-xs font-semibold text-foreground">
                       Destination <span className="text-red-500">*</span>
                     </Label>
                     <Input
                       placeholder="e.g. Kano, Abuja, Station Name..."
-                      className={`h-10 text-sm ${rowErrors[row.uid]?.location ? 'border-red-400 bg-red-50' : ''}`}
+                      className={`h-10 text-sm ${rowErrors[row.uid]?.location ? 'border-red-500' : ''}`}
                       value={row.location}
                       onChange={e => updateSaleRow(row.uid, 'location', e.target.value)}
                     />
@@ -706,14 +706,14 @@ function AssignCustomerPage() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-slate-700">
+                    <Label className="text-xs font-semibold text-foreground">
                       Quantity (Litres) <span className="text-red-500">*</span>
                     </Label>
                     <Input
                       type="text"
                       inputMode="decimal"
                       placeholder={remainingCapacity > 0 ? `max ${remainingCapacity.toLocaleString()}` : 'e.g. 33,000'}
-                      className={`h-10 text-sm font-medium ${rowErrors[row.uid]?.quantity ? 'border-red-400 bg-red-50' : ''}`}
+                      className={`h-10 text-sm font-medium ${rowErrors[row.uid]?.quantity ? 'border-red-500' : ''}`}
                       value={row.quantity}
                       onChange={e => updateSaleRow(row.uid, 'quantity', e.target.value)}
                     />
@@ -725,7 +725,7 @@ function AssignCustomerPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-slate-700">Contact Phone</Label>
+                    <Label className="text-xs font-semibold text-foreground">Contact Phone</Label>
                     <Input
                       placeholder="e.g. 08012345678"
                       className="h-10 text-sm"
@@ -734,7 +734,7 @@ function AssignCustomerPage() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-slate-700">Remarks</Label>
+                    <Label className="text-xs font-semibold text-foreground">Remarks</Label>
                     <Input
                       placeholder="e.g. Assigned to cycle..."
                       className="h-10 text-sm"
@@ -749,9 +749,9 @@ function AssignCustomerPage() {
 
           {/* Combined Capacity Bar (existing + new) */}
           {totalTruckCapacity > 0 && (
-            <div className={`p-4 rounded-xl border ${isOverCapacity ? 'bg-red-50 border-red-200' : combinedPct > 80 ? 'bg-amber-50 border-amber-200' : 'bg-emerald-50 border-emerald-200'}`}>
+            <div className={`p-4 rounded-xl border ${isOverCapacity ? 'bg-red-500/10 border-red-500/30' : combinedPct > 80 ? 'bg-amber-500/10 border-amber-500/30' : 'bg-emerald-500/10 border-emerald-500/30'}`}>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-semibold text-slate-600">Total Truck Capacity Usage</span>
+                <span className="text-xs font-semibold text-muted-foreground">Total Truck Capacity Usage</span>
                 <span className={`text-xs font-bold ${isOverCapacity ? 'text-red-600' : combinedPct > 80 ? 'text-amber-600' : 'text-emerald-600'}`}>
                   {combinedTotal.toLocaleString()} / {totalTruckCapacity.toLocaleString()} L ({combinedPct}%)
                 </span>

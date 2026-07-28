@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
+import { useState } from 'react'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '#/components/ui/card'
@@ -11,6 +12,8 @@ import type { StaffMember } from './-roles'
 import { ROLE_LABELS, ROLES, statesList } from './-roles'
 import { useAdminDetails, useDeleteAdmin } from '#/lib/hooks/useAdmin'
 import { useToast } from '#/lib/hooks/useToast'
+import { Breadcrumbs } from '#/components/Breadcrumbs'
+import { ConfirmDialog } from '#/components/ConfirmDialog'
 
 export const Route = createFileRoute('/admin/details')({
   component: UserDetailPage,
@@ -31,6 +34,7 @@ function UserDetailPage() {
   const router = useRouter()
   const deleteAdmin = useDeleteAdmin()
   const toast = useToast()
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   const staffState = (router.history.location.state as any)?.staff as StaffMember | undefined
   const staffId = staffState?.id || (router.history.location.state as any)?.id
@@ -40,15 +44,16 @@ function UserDetailPage() {
   const staff = staffDetails || staffState
 
   const handleBack = () => { window.history.length > 1 ? window.history.back() : navigate({ to: '/admin/' as any }) }
-  const handleDelete = async () => {
+  const handleDelete = () => { setShowDeleteDialog(true) }
+  const confirmDelete = async () => {
     if (!staff?.id) return
-    if (confirm('Are you sure you want to delete this user account?')) {
-      try {
-        await deleteAdmin.mutateAsync(String(staff.id))
-        navigate({ to: '/admin/' as any })
-      } catch {
-        toast.error('Failed to delete user. Please try again.')
-      }
+    try {
+      await deleteAdmin.mutateAsync(String(staff.id))
+      navigate({ to: '/admin/' as any })
+    } catch {
+      toast.error('Failed to delete user. Please try again.')
+    } finally {
+      setShowDeleteDialog(false)
     }
   }
 
@@ -79,6 +84,7 @@ function UserDetailPage() {
 
   return (
     <div className="space-y-6 animate-fade-in">
+      <Breadcrumbs items={[{ label: 'Staff', href: '/admin' }, { label: staff?.full_name || 'Details' }]} />
       <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center gap-4">
           <Button variant="outline" size="icon" onClick={handleBack} aria-label="Go back"><ArrowLeft size={16} /></Button>
@@ -186,6 +192,16 @@ function UserDetailPage() {
           </div>
         </CardContent>
       </Card>
+      <ConfirmDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title="Delete User Account"
+        description="Are you sure you want to delete this user account? This action cannot be undone."
+        confirmLabel="Delete"
+        variant="destructive"
+        onConfirm={confirmDelete}
+        loading={deleteAdmin.isPending}
+      />
     </div>
   )
 }

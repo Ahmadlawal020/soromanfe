@@ -1,5 +1,6 @@
 import React from 'react'
 import { Button } from '#/components/ui/button'
+import { ArrowLeft } from 'lucide-react'
 
 interface PageHeaderProps {
   title: string
@@ -13,8 +14,8 @@ export function PageHeader({ title, description, actions, backAction }: PageHead
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
       <div className="flex items-center gap-3">
         {backAction && (
-          <Button variant="outline" size="sm" className="cursor-pointer" onClick={backAction}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></svg>
+          <Button variant="outline" size="icon" className="cursor-pointer" onClick={backAction} aria-label="Go back">
+            <ArrowLeft size={16} />
           </Button>
         )}
         <div>

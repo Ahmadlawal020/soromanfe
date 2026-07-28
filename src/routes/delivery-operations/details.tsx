@@ -36,8 +36,8 @@ const fmtQty = (n: number) => n.toLocaleString(undefined, { maximumFractionDigit
 const fmtMoney = (n: number) => `₦${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 
 const statusBadge: Record<string, { label: string; cls: string; icon: typeof CheckCircle2 }> = {
-  loaded: { label: 'In Transit', cls: 'bg-amber-50 text-amber-700 border-amber-200', icon: Truck },
-  offloaded: { label: 'Sold', cls: 'bg-emerald-50 text-emerald-700 border-emerald-200', icon: CheckCircle2 },
+  loaded: { label: 'In Transit', cls: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20', icon: Truck },
+  offloaded: { label: 'Sold', cls: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20', icon: CheckCircle2 },
 }
 
 function DeliveryOperationDetailsView() {

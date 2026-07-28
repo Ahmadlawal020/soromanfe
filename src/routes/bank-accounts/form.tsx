@@ -481,11 +481,10 @@ function BankAccountForm() {
                     <div
                       key={depot.id}
                       onClick={() => toggleDepotSelection(numericId)}
-                      className={`p-3 rounded-lg border cursor-pointer transition-all flex items-center justify-between select-none ${
-                        isChecked
+                      className={`p-3 rounded-lg border cursor-pointer transition-all flex items-center justify-between select-none ${isChecked
                           ? 'border-primary/50 bg-primary/10 text-foreground shadow-sm'
                           : 'border-border/40 hover:bg-muted/30 text-muted-foreground'
-                      }`}
+                        }`}
                     >
                       <div className="min-w-0 flex-1 pr-2">
                         <div className="flex items-center gap-2">
@@ -500,9 +499,8 @@ function BankAccountForm() {
                       </div>
 
                       <div
-                        className={`h-5 w-5 rounded-md border flex items-center justify-center transition-colors shrink-0 ${
-                          isChecked ? 'bg-primary border-primary text-white' : 'border-border bg-background'
-                        }`}
+                        className={`h-5 w-5 rounded-md border flex items-center justify-center transition-colors shrink-0 ${isChecked ? 'bg-primary border-primary text-white' : 'border-border bg-background'
+                          }`}
                       >
                         {isChecked && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                       </div>

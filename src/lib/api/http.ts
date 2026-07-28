@@ -68,6 +68,7 @@ api.interceptors.response.use(
             useAuthStore.getState();
           if (!refreshToken) {
             clearSession();
+            try { sessionStorage.setItem('soroman-session-expired', '1') } catch {}
             window.location.href = "/login";
             return Promise.reject(error);
           }
@@ -91,6 +92,7 @@ api.interceptors.response.use(
           }
         } catch (refreshError) {
           useAuthStore.getState().clearSession();
+          try { sessionStorage.setItem('soroman-session-expired', '1') } catch {}
           window.location.href = "/login";
           return Promise.reject(refreshError);
         }

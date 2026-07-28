@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '#/lib/api/http'
 import { useToast } from '#/lib/hooks/useToast'
+import { getErrorMessage } from '#/lib/utils'
 
 export function useTruckList(params?: { search?: string; status?: string }) {
   return useQuery({
@@ -23,15 +24,12 @@ export function useTruckDetails(id: string) {
   })
 }
 
-function getErrorMessage(err: any): string {
-  return err?.response?.data?.message || err?.message || 'An unexpected error occurred'
-}
-
 export function useCreateTruck() {
   const queryClient = useQueryClient()
   const toast = useToast()
 
   return useMutation({
+    retry: false,
     mutationFn: async (data: Record<string, any>) => {
       const res = await api.post('/trucks', data)
       return res.data
@@ -51,6 +49,7 @@ export function useUpdateTruck() {
   const toast = useToast()
 
   return useMutation({
+    retry: false,
     mutationFn: async ({ id, data }: { id: string; data: Record<string, any> }) => {
       const res = await api.patch(`/trucks/${id}`, data)
       return res.data
@@ -70,6 +69,7 @@ export function useDeleteTruck() {
   const toast = useToast()
 
   return useMutation({
+    retry: false,
     mutationFn: async (id: string) => {
       const res = await api.delete(`/trucks/${id}`)
       return res.data

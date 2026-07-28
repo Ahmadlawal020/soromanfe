@@ -1,11 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '#/lib/api/http'
 import { useToast } from '#/lib/hooks/useToast'
+import { getErrorMessage } from '#/lib/utils'
 import type { FilingStation } from '#/lib/types'
-
-function getErrorMessage(err: any): string {
-  return err?.response?.data?.message || err?.message || 'An unexpected error occurred'
-}
 
 export function useFilingStations(params?: { search?: string, page?: number, limit?: number }) {
   return useQuery({
@@ -33,6 +30,7 @@ export function useCreateFilingStation() {
   const toast = useToast()
 
   return useMutation({
+    retry: false,
     mutationFn: async (data: Partial<FilingStation>) => {
       const res = await api.post('/filing-stations', data)
       return res.data
@@ -52,6 +50,7 @@ export function useUpdateFilingStation() {
   const toast = useToast()
 
   return useMutation({
+    retry: false,
     mutationFn: async ({ id, data }: { id: string; data: Partial<FilingStation> }) => {
       const res = await api.patch(`/filing-stations/${id}`, data)
       return res.data
@@ -71,6 +70,7 @@ export function useDeleteFilingStation() {
   const toast = useToast()
 
   return useMutation({
+    retry: false,
     mutationFn: async (id: string) => {
       const res = await api.delete(`/filing-stations/${id}`)
       return res.data
@@ -84,6 +84,3 @@ export function useDeleteFilingStation() {
     },
   })
 }
-
-
-

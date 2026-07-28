@@ -69,6 +69,9 @@ export function UnifiedDeliveryCustomerForm({
   // Notes
   const [notes, setNotes] = useState('')
 
+  // Validation errors
+  const [errors, setErrors] = useState<Record<string, string>>({})
+
   // Prefill state when activeCustomer is loaded
   useEffect(() => {
     if (activeCustomer) {
@@ -119,7 +122,14 @@ export function UnifiedDeliveryCustomerForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!name.trim() || !phoneNumber.trim()) return
+    const newErrors: Record<string, string> = {}
+    if (!name.trim()) newErrors.name = 'Name is required'
+    if (!phoneNumber.trim()) newErrors.phone = 'Phone number is required'
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
+      return
+    }
+    setErrors({})
 
     const payload: DeliveryCustomerPayload = {
       customerType,
@@ -248,7 +258,7 @@ export function UnifiedDeliveryCustomerForm({
         </CardContent>
       </Card>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} noValidate className="space-y-6">
         {/* Core Identity */}
         <Card>
           <CardHeader>
@@ -263,8 +273,10 @@ export function UnifiedDeliveryCustomerForm({
                 placeholder={customerType === 'filling_station' ? 'TotalEnergies Lekki Phase 1' : 'John Doe'}
                 required
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => { setName(e.target.value); if (errors.name) setErrors(prev => ({ ...prev, name: '' })) }}
+                className={errors.name ? 'border-destructive' : ''}
               />
+              {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
             </div>
 
             <div className="space-y-2">
@@ -274,8 +286,10 @@ export function UnifiedDeliveryCustomerForm({
                 placeholder="+234 801 234 5678"
                 required
                 value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
+                onChange={(e) => { setPhoneNumber(e.target.value); if (errors.phone) setErrors(prev => ({ ...prev, phone: '' })) }}
+                className={errors.phone ? 'border-destructive' : ''}
               />
+              {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
             </div>
 
             <div className="space-y-2">

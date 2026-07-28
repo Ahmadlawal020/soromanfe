@@ -305,9 +305,9 @@ function AllocateTrucksPage() {
         {/* Left Column: Form Details */}
         <div className="lg:col-span-1 space-y-5">
           {/* Step 1: PFI Selection */}
-          <div className="bg-white p-5 rounded-xl border border-border shadow-sm space-y-4">
+          <div className="bg-card p-5 rounded-xl border border-border shadow-sm space-y-4">
             <div className="flex items-center gap-2 text-sm font-bold text-foreground">
-              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold">1</span>
+              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-xs font-extrabold">1</span>
               Select PFI Source <span className="text-red-500">*</span>
             </div>
 
@@ -320,7 +320,7 @@ function AllocateTrucksPage() {
                   const pfi = pfiMap.get(e.target.value)
                   if (pfi?.locationName) setLoadDepot(pfi.locationName)
                 }}
-                className="h-10 w-full rounded-lg border border-border bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
+                className="h-10 w-full rounded-lg border border-border bg-background text-foreground px-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
               >
                 <option value="">Select a PFI...</option>
                 {activePfiOptions.map(p => (
@@ -331,12 +331,12 @@ function AllocateTrucksPage() {
               </select>
 
               {selectedPfi ? (
-                <div className="p-3.5 bg-emerald-50/70 border border-emerald-200 rounded-lg text-xs space-y-1.5">
-                  <div className="flex justify-between font-bold text-emerald-900">
+                <div className="p-3.5 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-xs space-y-1.5">
+                  <div className="flex justify-between font-bold text-emerald-900 dark:text-emerald-300">
                     <span>{selectedPfi.pfiNumber}</span>
-                    <span className="bg-emerald-200 text-emerald-900 px-2 py-0.5 rounded text-[10px] uppercase font-bold">Active</span>
+                    <span className="bg-emerald-500/20 text-emerald-800 dark:text-emerald-200 px-2 py-0.5 rounded text-[10px] uppercase font-bold">Active</span>
                   </div>
-                  <div className="text-emerald-800 space-y-1">
+                  <div className="text-emerald-800 dark:text-emerald-300 space-y-1">
                     <p className="flex items-center gap-1.5">
                       <Droplets size={13} />
                       Product: <strong>{selectedPfi.productName || 'N/A'}</strong>
@@ -363,9 +363,9 @@ function AllocateTrucksPage() {
           </div>
 
           {/* Step 2: Allocation Code & Date */}
-          <div className="bg-white p-5 rounded-xl border border-border shadow-sm space-y-4">
+          <div className="bg-card p-5 rounded-xl border border-border shadow-sm space-y-4">
             <div className="flex items-center gap-2 text-sm font-bold text-foreground">
-              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold">2</span>
+              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-xs font-extrabold">2</span>
               Allocation Details
             </div>
 
@@ -397,7 +397,7 @@ function AllocateTrucksPage() {
                       aria-label="Allocation Code"
                       value={loadCode}
                       onChange={e => setLoadCode(e.target.value)}
-                      className="h-9 flex-1 rounded-lg border border-border bg-white px-3 text-sm font-mono font-medium"
+                      className="h-9 flex-1 rounded-lg border border-border bg-background text-foreground px-3 text-sm font-mono font-medium"
                     >
                       <option value="">No Code (Unassigned)</option>
                       {deliveryCodes.map(c => (
@@ -482,11 +482,11 @@ function AllocateTrucksPage() {
         </div>
 
         {/* Right Column: Truck Selection List */}
-        <div className="lg:col-span-2 bg-white p-5 rounded-xl border border-border shadow-sm space-y-4">
+        <div className="lg:col-span-2 bg-card p-5 rounded-xl border border-border shadow-sm space-y-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-border pb-3">
             <div>
               <div className="flex items-center gap-2 text-sm font-bold text-foreground">
-                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold">3</span>
+                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-xs font-extrabold">3</span>
                 Select Fleet Trucks <span className="text-red-500">*</span>
               </div>
               <p className="text-xs text-muted-foreground">
@@ -498,7 +498,7 @@ function AllocateTrucksPage() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 text-xs text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50 cursor-pointer"
+                className="h-8 text-xs text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10 cursor-pointer"
                 onClick={selectAllFilteredTrucks}
                 disabled={filteredTrucks.length === 0}
               >
@@ -508,7 +508,7 @@ function AllocateTrucksPage() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 text-xs text-slate-500 hover:text-slate-800 cursor-pointer"
+                  className="h-8 text-xs text-muted-foreground hover:text-foreground cursor-pointer"
                   onClick={clearTruckSelection}
                 >
                   Clear Selection
@@ -532,8 +532,8 @@ function AllocateTrucksPage() {
           <div className="max-h-[500px] overflow-y-auto pr-1 space-y-2">
             {filteredTrucks.length === 0 ? (
               <div className="p-12 text-center border-2 border-dashed border-border rounded-xl">
-                <Truck className="mx-auto text-slate-300 mb-2" size={36} />
-                <p className="text-sm font-medium text-slate-600">
+                <Truck className="mx-auto text-muted-foreground/40 mb-2" size={36} />
+                <p className="text-sm font-medium text-muted-foreground">
                   {availableTrucks.length === 0
                     ? 'All registered trucks are currently loaded in transit.'
                     : 'No available trucks match your search query.'}
@@ -555,15 +555,15 @@ function AllocateTrucksPage() {
                       key={truckId}
                       onClick={() => toggleTruck(truckId)}
                       className={`p-3.5 rounded-xl border-2 cursor-pointer transition-all flex items-start gap-3 select-none ${isSelected
-                          ? 'border-emerald-600 bg-emerald-50/70 shadow-sm'
-                          : 'border-border hover:border-slate-300 bg-white hover:bg-slate-50/50'
+                          ? 'border-emerald-600 bg-emerald-500/10 dark:bg-emerald-950/30 shadow-sm'
+                          : 'border-border hover:border-border/80 bg-card hover:bg-muted/50'
                         }`}
                     >
                       <input
                         type="checkbox"
                         checked={isSelected}
                         onChange={() => { }} // handled by parent onClick
-                        className="h-4 w-4 mt-1 rounded border-slate-300 accent-emerald-600 cursor-pointer"
+                        className="h-4 w-4 mt-1 rounded border-border accent-emerald-600 cursor-pointer"
                       />
 
                       <div className="flex-1 min-w-0">
@@ -573,8 +573,8 @@ function AllocateTrucksPage() {
                           </span>
                           <span
                             className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${capacity > 0
-                                ? 'bg-emerald-100 text-emerald-800'
-                                : 'bg-slate-100 text-slate-600'
+                                ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'
+                                : 'bg-muted text-muted-foreground'
                               }`}
                           >
                             {capacity > 0 ? `${capacity.toLocaleString()} L` : 'N/A'}
@@ -582,11 +582,11 @@ function AllocateTrucksPage() {
                         </div>
 
                         <p className="text-xs text-muted-foreground truncate mt-1">
-                          Driver: <strong className="text-slate-700">{driverName}</strong>
+                          Driver: <strong className="text-foreground">{driverName}</strong>
                         </p>
 
                         {truck.model && (
-                          <p className="text-[11px] text-slate-400 truncate mt-0.5">
+                          <p className="text-[11px] text-muted-foreground truncate mt-0.5">
                             Model: {truck.model}
                           </p>
                         )}

@@ -5,7 +5,10 @@ import { Button } from '#/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '#/components/ui/card'
 import { Input } from '#/components/ui/input'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '#/components/ui/select'
-import { Fuel, Search, Plus, Eye, Edit, Layers, Flame, SearchX, X, Loader2 } from 'lucide-react'
+import { Fuel, Search, Plus, Eye, Edit, Layers, Flame, X, Package } from 'lucide-react'
+import { PageLoader } from '#/components/PageLoader'
+import { PageError } from '#/components/PageError'
+import { PageEmpty } from '#/components/PageEmpty'
 import { useProductList } from '#/lib/hooks/useProducts'
 
 export const Route = createFileRoute('/products/')({
@@ -39,12 +42,13 @@ function ProductsDashboard() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
 
-  const { data, isLoading } = useProductList({
+  const { data, isLoading, isError, error, refetch } = useProductList({
     search: searchTerm || undefined,
     category: selectedCategory !== 'all' ? selectedCategory : undefined,
   })
 
   const products: ProductItem[] = data?.products || []
+  const hasFilters = !!(searchTerm || selectedCategory !== 'all')
 
   const statsCards = [
     { title: 'Total Products', value: data?.pagination?.total ?? products.length, sub: 'Petroleum products registered', icon: Fuel },
@@ -60,7 +64,7 @@ function ProductsDashboard() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {statsCards.map((card, idx) => (
+        {!isLoading && !isError && statsCards.map((card, idx) => (
           <Card key={idx} className="stats-card"><CardContent className="p-4 flex justify-between items-center"><div><p className="text-sm text-muted-foreground">{card.title}</p><p className="text-2xl font-bold">{card.value}</p><p className="text-xs text-muted-foreground">{card.sub}</p></div><card.icon className="w-8 h-8 text-primary" /></CardContent></Card>
         ))}
       </div>
@@ -85,14 +89,19 @@ function ProductsDashboard() {
           </div>
 
           {isLoading ? (
-            <div className="flex items-center justify-center py-16"><Loader2 size={24} className="animate-spin text-muted-foreground" /></div>
+            <PageLoader message="Loading products..." />
+          ) : isError ? (
+            <PageError message={(error as any)?.message || 'Failed to load'} onRetry={() => refetch()} />
           ) : products.length === 0 ? (
-            <div className="col-span-full p-16 text-center">
-              <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-muted border border-border mb-4"><SearchX size={24} className="text-muted-foreground" /></div>
-              <p className="text-sm font-medium text-foreground">No products found</p>
-              <p className="text-xs text-muted-foreground mt-1">Try adjusting your search or filter criteria.</p>
-              <Button variant="ghost" size="sm" onClick={() => { setSearchTerm(''); setSelectedCategory('all') }} className="mt-4 text-primary"><X size={14} /> Clear filters</Button>
-            </div>
+            <PageEmpty
+              icon={<Package size={24} className="text-muted-foreground" />}
+              title={hasFilters ? 'No products match your filters' : 'No products yet'}
+              description={hasFilters ? 'Try adjusting your search or filter criteria.' : 'Add your first product to get started.'}
+              actionLabel="Add Product"
+              onAction={() => navigate({ to: '/products/form', search: { id: '' } })}
+              hasFilters={hasFilters}
+              onClearFilters={() => { setSearchTerm(''); setSelectedCategory('all') }}
+            />
           ) : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {products.map((product) => (

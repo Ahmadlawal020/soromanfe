@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '#/lib/api/http'
 import { useToast } from '#/lib/hooks/useToast'
+import { getErrorMessage } from '#/lib/utils'
 import type { Deposit } from '#/lib/types'
 
 export type { Deposit }
@@ -22,6 +23,7 @@ export function useCreateDeposit() {
   const toast = useToast()
 
   return useMutation({
+    retry: false,
     mutationFn: async (data: {
       customer: string | number
       amount: number
@@ -47,8 +49,7 @@ export function useCreateDeposit() {
       toast.success(res?.message || 'Deposit recorded successfully!')
     },
     onError: (err: any) => {
-      const msg = err?.response?.data?.message || err?.message || 'Failed to record deposit'
-      toast.error(msg)
+      toast.error(getErrorMessage(err))
     },
   })
 }

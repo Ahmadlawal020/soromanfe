@@ -13,11 +13,11 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90 focus-visible:ring-destructive/20",
         outline:
-          "border border-slate-200 bg-white text-slate-900 hover:bg-slate-50",
+          "border border-border bg-background text-foreground hover:bg-accent",
         secondary:
-          "bg-slate-100 text-slate-900 hover:bg-slate-200/70",
+          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost:
-          "text-slate-900 hover:bg-slate-100",
+          "text-foreground hover:bg-accent",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
@@ -42,6 +42,7 @@ function Button({
   className,
   variant = "default",
   size = "default",
+  type = "button",
   asChild = false,
   ...props
 }: React.ComponentProps<"button"> &
@@ -52,6 +53,7 @@ function Button({
 
   return (
     <Comp
+      type={asChild ? undefined : type}
       data-slot="button"
       data-variant={variant}
       data-size={size}

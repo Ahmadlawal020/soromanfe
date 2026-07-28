@@ -600,14 +600,14 @@ function FilingStationDetailsView() {
             <Loader2 size={24} className="animate-spin text-muted-foreground" />
           </div>
         ) : stationGroups.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-sm border border-border p-16 text-center">
+          <div className="bg-card rounded-xl shadow-sm border border-border p-16 text-center">
             <Fuel className="mx-auto text-muted-foreground mb-3" size={40} />
             <p className="text-muted-foreground font-medium">No allocations found for this station</p>
             <p className="text-sm text-muted-foreground/70 mt-1">Allocations will appear here once trucks are assigned to this station.</p>
           </div>
         ) : (
           stationGroups.map((group) => (
-            <div key={group.key} className="bg-white rounded-xl shadow-sm border border-border overflow-hidden">
+            <div key={group.key} className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
               {/* Group Header */}
               <div className="p-4 sm:p-5">
                 <div className="flex items-start justify-between gap-3">
@@ -617,7 +617,7 @@ function FilingStationDetailsView() {
                         {group.truckNumber || 'Unassigned Truck'}
                       </h3>
                       {group.code && (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold border bg-sky-100 text-sky-800 border-sky-200">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold border bg-sky-500/10 text-sky-700 dark:text-sky-300 border-sky-500/20">
                           {group.code}
                         </span>
                       )}
@@ -821,7 +821,7 @@ function FilingStationDetailsView() {
                   className={cn(
                     'flex-1 py-2 text-xs font-semibold rounded-md transition-all flex items-center justify-center gap-1.5 cursor-pointer',
                     activeEntryTab === tab.key
-                      ? 'bg-white text-foreground shadow-sm border border-border/50'
+                      ? 'bg-card text-foreground shadow-sm border border-border/50'
                       : 'text-muted-foreground hover:text-foreground'
                   )}
                   onClick={() => setActiveEntryTab(tab.key)}
