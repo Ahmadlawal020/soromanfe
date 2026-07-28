@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '#/components/ui/card'
-import { ArrowLeft, AlertCircle, DollarSign, ArrowDownLeft, ArrowUpRight, Calendar, User, Building2, Phone, Hash, FileText, Clock, Landmark, CreditCard, Globe, Send, ShieldCheck, Banknote, ArrowRightLeft, Info } from 'lucide-react'
+import { ArrowLeft, AlertCircle, DollarSign, ArrowDownLeft, Calendar, User, Building2, Phone, Hash, FileText, Clock, Landmark, CreditCard, Globe, Send, ShieldCheck, Banknote, ArrowRightLeft, Info } from 'lucide-react'
 import type { Deposit } from '#/lib/hooks/useDeposits'
 import { toNum } from '#/lib/utils'
 
@@ -38,7 +38,6 @@ function DepositDetailPage() {
     )
   }
 
-  const isCredit = deposit.type === 'credit'
   const ps = deposit.paystackDetails as Record<string, any> | null | undefined
 
   return (
@@ -58,13 +57,13 @@ function DepositDetailPage() {
       <Card className="card-hover">
         <CardContent className="p-6 md:p-8 bg-gradient-to-r from-primary/5 to-success/5">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-            <div className={`w-20 h-20 rounded-full flex items-center justify-center shadow-lg shrink-0 ${isCredit ? 'bg-success text-success-foreground' : 'bg-destructive text-destructive-foreground'}`}>
-              {isCredit ? <ArrowDownLeft size={36} /> : <ArrowUpRight size={36} />}
+            <div className="w-20 h-20 rounded-full flex items-center justify-center shadow-lg shrink-0 bg-success text-success-foreground">
+              <ArrowDownLeft size={36} />
             </div>
             <div className="flex-1">
               <div className="flex flex-wrap items-center gap-2">
-                <Badge className={isCredit ? 'bg-success text-success-foreground' : 'bg-destructive text-destructive-foreground'}>
-                  {isCredit ? 'Credit' : 'Debit'}
+                <Badge className="bg-success text-success-foreground">
+                  Deposit
                 </Badge>
                 {deposit.reference && (
                   <Badge variant="outline" className="font-mono text-xs">Ref: {deposit.reference}</Badge>
@@ -73,8 +72,8 @@ function DepositDetailPage() {
                   <Badge variant="outline" className="font-mono text-xs capitalize">{String(ps.channel).replace(/_/g, ' ')}</Badge>
                 )}
               </div>
-              <p className={`text-3xl font-bold mt-2 ${isCredit ? 'text-success' : 'text-destructive'}`}>
-                {isCredit ? '+' : '-'}{formatCurrency(toNum(deposit.amount))}
+              <p className="text-3xl font-bold mt-2 text-success">
+                +{formatCurrency(toNum(deposit.amount))}
               </p>
               {deposit.customerName && (
                 <p className="text-muted-foreground mt-1.5 text-sm flex items-center gap-1.5">
@@ -119,15 +118,9 @@ function DepositDetailPage() {
             <div>
               <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Transaction Type</p>
               <div className="mt-1">
-                {isCredit ? (
-                  <Badge className="bg-success text-success-foreground gap-1">
-                    <ArrowDownLeft size={12} /> Credit
-                  </Badge>
-                ) : (
-                  <Badge variant="destructive" className="gap-1">
-                    <ArrowUpRight size={12} /> Debit
-                  </Badge>
-                )}
+                <Badge className="bg-success text-success-foreground gap-1">
+                  <ArrowDownLeft size={12} /> Deposit (Credit)
+                </Badge>
               </div>
             </div>
             <div>
@@ -201,8 +194,8 @@ function DepositDetailPage() {
           <CardContent className="space-y-4 pt-6">
             <div>
               <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Amount</p>
-              <p className={`text-2xl font-bold mt-1 ${isCredit ? 'text-success' : 'text-destructive'}`}>
-                {isCredit ? '+' : '-'}{formatCurrency(toNum(deposit.amount))}
+              <p className="text-2xl font-bold mt-1 text-success">
+                +{formatCurrency(toNum(deposit.amount))}
               </p>
             </div>
             <div>

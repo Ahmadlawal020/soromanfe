@@ -448,3 +448,29 @@ export interface AccountEntry {
   bank: string
   number: string
 }
+
+export interface BankAccount {
+  id: string | number
+  bankName: string
+  accountName: string
+  accountNumber: string
+  bankCode?: string
+  branchName?: string
+  currency: string
+  status: 'Active' | 'Inactive' | 'Suspended'
+  isDefault: boolean
+  depotIds: (string | number)[]
+  depots?: Array<{
+    id: string | number
+    name: string
+    code: string
+    city?: string
+    state?: string
+    country?: string
+    status?: string
+  }>
+  notes?: string
+  createdAt?: string
+  updatedAt?: string
+}
+

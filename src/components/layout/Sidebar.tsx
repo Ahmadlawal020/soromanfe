@@ -17,6 +17,7 @@ import {
   DollarSign,
   Ticket,
   Fuel,
+  Landmark,
 } from 'lucide-react'
 import { useAuthStore, useAdminLogout } from '#/modules/auth'
 import { useLayoutStore } from '#/stores/layoutStore'
@@ -59,6 +60,7 @@ const navCategories: NavCategory[] = [
     category: 'Finance',
     items: [
       { title: 'Deposits', icon: DollarSign, path: '/deposits' },
+      { title: 'Bank Accounts', icon: Landmark, path: '/bank-accounts' },
     ],
   },
   {

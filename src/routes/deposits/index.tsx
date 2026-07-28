@@ -6,7 +6,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '#/com
 import { Input } from '#/components/ui/input'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '#/components/ui/table'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '#/components/ui/select'
-import { Search, Loader2, SearchX, ArrowDownLeft, ArrowUpRight, Eye, X, Banknote } from 'lucide-react'
+import { Search, Loader2, SearchX, ArrowDownLeft, Eye, X, Banknote, Plus } from 'lucide-react'
 import { useDepositList } from '#/lib/hooks/useDeposits'
 import type { Deposit } from '#/lib/hooks/useDeposits'
 import { toNum } from '#/lib/utils'
@@ -40,8 +40,7 @@ function DepositsDashboard() {
     return (
       customerName.includes(term) ||
       (d.description || '').toLowerCase().includes(term) ||
-      (d.reference || '').toLowerCase().includes(term) ||
-      d.type.includes(term)
+      (d.reference || '').toLowerCase().includes(term)
     )
   })
 
@@ -52,7 +51,7 @@ function DepositsDashboard() {
     currentPage * pageSize
   )
 
-  const totalCredits = deposits.filter((d: Deposit) => d.type === 'credit').reduce((sum: number, d: Deposit) => sum + toNum(d.amount), 0)
+  const totalCredits = deposits.reduce((sum: number, d: Deposit) => sum + toNum(d.amount), 0)
 
   const statsCards = [
     { title: 'Total Transactions', value: pagination?.total || 0, icon: Banknote },
@@ -61,9 +60,17 @@ function DepositsDashboard() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Deposits Management</h1>
-        <p className="text-muted-foreground">View all customer deposit transactions.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Deposits Management</h1>
+          <p className="text-muted-foreground">View and record customer deposit transactions.</p>
+        </div>
+        <Button
+          className="gradient-primary text-white gap-2 shadow-md hover:shadow-lg transition-all"
+          onClick={() => navigate({ to: '/deposits/manual-deposit' as any })}
+        >
+          <Plus size={16} /> Record Manual Deposit
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -94,7 +101,7 @@ function DepositsDashboard() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Search by description, reference, or type..."
+              placeholder="Search by description, reference, or customer..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -136,7 +143,6 @@ function DepositsDashboard() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Date</TableHead>
-                      <TableHead>Type</TableHead>
                       <TableHead>Amount</TableHead>
                       <TableHead>Description</TableHead>
                       <TableHead>Reference</TableHead>
@@ -161,21 +167,8 @@ function DepositsDashboard() {
                             })
                             : '—'}
                         </TableCell>
-                        <TableCell>
-                          {deposit.type === 'credit' ? (
-                            <Badge className="bg-success text-success-foreground text-xs gap-1">
-                              <ArrowDownLeft size={12} />
-                              Credit
-                            </Badge>
-                          ) : (
-                            <Badge variant="destructive" className="text-xs gap-1">
-                              <ArrowUpRight size={12} />
-                              Debit
-                            </Badge>
-                          )}
-                        </TableCell>
-                        <TableCell className={`font-semibold ${deposit.type === 'credit' ? 'text-success' : 'text-destructive'}`}>
-                          {deposit.type === 'credit' ? '+' : '-'}{formatCurrency(toNum(deposit.amount))}
+                        <TableCell className="font-semibold text-success">
+                          +{formatCurrency(toNum(deposit.amount))}
                         </TableCell>
                         <TableCell className="text-sm max-w-[200px] truncate">
                           {deposit.description || '—'}

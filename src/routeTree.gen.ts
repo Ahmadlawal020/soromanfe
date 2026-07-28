@@ -17,6 +17,9 @@ import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminDetailsRouteImport } from './routes/admin/details'
 import { Route as AdminFormRouteImport } from './routes/admin/form'
 import { Route as AdminUpdateRouteImport } from './routes/admin/update'
+import { Route as BankAccountsIndexRouteImport } from './routes/bank-accounts/index'
+import { Route as BankAccountsDetailsRouteImport } from './routes/bank-accounts/details'
+import { Route as BankAccountsFormRouteImport } from './routes/bank-accounts/form'
 import { Route as CustomersIndexRouteImport } from './routes/customers/index'
 import { Route as CustomersDetailsRouteImport } from './routes/customers/details'
 import { Route as CustomersFormRouteImport } from './routes/customers/form'
@@ -29,6 +32,7 @@ import { Route as DeliveryOperationsAllocationDetailsRouteImport } from './route
 import { Route as DeliveryOperationsDetailsRouteImport } from './routes/delivery-operations/details'
 import { Route as DepositsIndexRouteImport } from './routes/deposits/index'
 import { Route as DepositsDetailsRouteImport } from './routes/deposits/details'
+import { Route as DepositsManualDepositRouteImport } from './routes/deposits/manual-deposit'
 import { Route as DepotsIndexRouteImport } from './routes/depots/index'
 import { Route as DepotsDetailsRouteImport } from './routes/depots/details'
 import { Route as DepotsFormRouteImport } from './routes/depots/form'
@@ -96,6 +100,21 @@ const AdminUpdateRoute = AdminUpdateRouteImport.update({
   path: '/admin/update',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BankAccountsIndexRoute = BankAccountsIndexRouteImport.update({
+  id: '/bank-accounts/',
+  path: '/bank-accounts/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BankAccountsDetailsRoute = BankAccountsDetailsRouteImport.update({
+  id: '/bank-accounts/details',
+  path: '/bank-accounts/details',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BankAccountsFormRoute = BankAccountsFormRouteImport.update({
+  id: '/bank-accounts/form',
+  path: '/bank-accounts/form',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CustomersIndexRoute = CustomersIndexRouteImport.update({
   id: '/customers/',
   path: '/customers/',
@@ -157,6 +176,11 @@ const DepositsIndexRoute = DepositsIndexRouteImport.update({
 const DepositsDetailsRoute = DepositsDetailsRouteImport.update({
   id: '/deposits/details',
   path: '/deposits/details',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DepositsManualDepositRoute = DepositsManualDepositRouteImport.update({
+  id: '/deposits/manual-deposit',
+  path: '/deposits/manual-deposit',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DepotsIndexRoute = DepotsIndexRouteImport.update({
@@ -298,6 +322,8 @@ export interface FileRoutesByFullPath {
   '/admin/details': typeof AdminDetailsRoute
   '/admin/form': typeof AdminFormRoute
   '/admin/update': typeof AdminUpdateRoute
+  '/bank-accounts/details': typeof BankAccountsDetailsRoute
+  '/bank-accounts/form': typeof BankAccountsFormRoute
   '/customers/details': typeof CustomersDetailsRoute
   '/customers/form': typeof CustomersFormRoute
   '/delivery-customer/details': typeof DeliveryCustomerDetailsRoute
@@ -306,6 +332,7 @@ export interface FileRoutesByFullPath {
   '/delivery-operations/allocation-details': typeof DeliveryOperationsAllocationDetailsRoute
   '/delivery-operations/details': typeof DeliveryOperationsDetailsRoute
   '/deposits/details': typeof DepositsDetailsRoute
+  '/deposits/manual-deposit': typeof DepositsManualDepositRoute
   '/depots/details': typeof DepotsDetailsRoute
   '/depots/form': typeof DepotsFormRoute
   '/drivers/details': typeof DriversDetailsRoute
@@ -324,6 +351,7 @@ export interface FileRoutesByFullPath {
   '/trucks/form': typeof TrucksFormRoute
   '/admin-order/': typeof AdminOrderIndexRoute
   '/admin/': typeof AdminIndexRoute
+  '/bank-accounts/': typeof BankAccountsIndexRoute
   '/customers/': typeof CustomersIndexRoute
   '/delivery-customer/': typeof DeliveryCustomerIndexRoute
   '/delivery-operations/': typeof DeliveryOperationsIndexRoute
@@ -346,6 +374,8 @@ export interface FileRoutesByTo {
   '/admin/details': typeof AdminDetailsRoute
   '/admin/form': typeof AdminFormRoute
   '/admin/update': typeof AdminUpdateRoute
+  '/bank-accounts/details': typeof BankAccountsDetailsRoute
+  '/bank-accounts/form': typeof BankAccountsFormRoute
   '/customers/details': typeof CustomersDetailsRoute
   '/customers/form': typeof CustomersFormRoute
   '/delivery-customer/details': typeof DeliveryCustomerDetailsRoute
@@ -354,6 +384,7 @@ export interface FileRoutesByTo {
   '/delivery-operations/allocation-details': typeof DeliveryOperationsAllocationDetailsRoute
   '/delivery-operations/details': typeof DeliveryOperationsDetailsRoute
   '/deposits/details': typeof DepositsDetailsRoute
+  '/deposits/manual-deposit': typeof DepositsManualDepositRoute
   '/depots/details': typeof DepotsDetailsRoute
   '/depots/form': typeof DepotsFormRoute
   '/drivers/details': typeof DriversDetailsRoute
@@ -372,6 +403,7 @@ export interface FileRoutesByTo {
   '/trucks/form': typeof TrucksFormRoute
   '/admin-order': typeof AdminOrderIndexRoute
   '/admin': typeof AdminIndexRoute
+  '/bank-accounts': typeof BankAccountsIndexRoute
   '/customers': typeof CustomersIndexRoute
   '/delivery-customer': typeof DeliveryCustomerIndexRoute
   '/delivery-operations': typeof DeliveryOperationsIndexRoute
@@ -395,6 +427,8 @@ export interface FileRoutesById {
   '/admin/details': typeof AdminDetailsRoute
   '/admin/form': typeof AdminFormRoute
   '/admin/update': typeof AdminUpdateRoute
+  '/bank-accounts/details': typeof BankAccountsDetailsRoute
+  '/bank-accounts/form': typeof BankAccountsFormRoute
   '/customers/details': typeof CustomersDetailsRoute
   '/customers/form': typeof CustomersFormRoute
   '/delivery-customer/details': typeof DeliveryCustomerDetailsRoute
@@ -403,6 +437,7 @@ export interface FileRoutesById {
   '/delivery-operations/allocation-details': typeof DeliveryOperationsAllocationDetailsRoute
   '/delivery-operations/details': typeof DeliveryOperationsDetailsRoute
   '/deposits/details': typeof DepositsDetailsRoute
+  '/deposits/manual-deposit': typeof DepositsManualDepositRoute
   '/depots/details': typeof DepotsDetailsRoute
   '/depots/form': typeof DepotsFormRoute
   '/drivers/details': typeof DriversDetailsRoute
@@ -421,6 +456,7 @@ export interface FileRoutesById {
   '/trucks/form': typeof TrucksFormRoute
   '/admin-order/': typeof AdminOrderIndexRoute
   '/admin/': typeof AdminIndexRoute
+  '/bank-accounts/': typeof BankAccountsIndexRoute
   '/customers/': typeof CustomersIndexRoute
   '/delivery-customer/': typeof DeliveryCustomerIndexRoute
   '/delivery-operations/': typeof DeliveryOperationsIndexRoute
@@ -445,6 +481,8 @@ export interface FileRouteTypes {
     | '/admin/details'
     | '/admin/form'
     | '/admin/update'
+    | '/bank-accounts/details'
+    | '/bank-accounts/form'
     | '/customers/details'
     | '/customers/form'
     | '/delivery-customer/details'
@@ -453,6 +491,7 @@ export interface FileRouteTypes {
     | '/delivery-operations/allocation-details'
     | '/delivery-operations/details'
     | '/deposits/details'
+    | '/deposits/manual-deposit'
     | '/depots/details'
     | '/depots/form'
     | '/drivers/details'
@@ -471,6 +510,7 @@ export interface FileRouteTypes {
     | '/trucks/form'
     | '/admin-order/'
     | '/admin/'
+    | '/bank-accounts/'
     | '/customers/'
     | '/delivery-customer/'
     | '/delivery-operations/'
@@ -493,6 +533,8 @@ export interface FileRouteTypes {
     | '/admin/details'
     | '/admin/form'
     | '/admin/update'
+    | '/bank-accounts/details'
+    | '/bank-accounts/form'
     | '/customers/details'
     | '/customers/form'
     | '/delivery-customer/details'
@@ -501,6 +543,7 @@ export interface FileRouteTypes {
     | '/delivery-operations/allocation-details'
     | '/delivery-operations/details'
     | '/deposits/details'
+    | '/deposits/manual-deposit'
     | '/depots/details'
     | '/depots/form'
     | '/drivers/details'
@@ -519,6 +562,7 @@ export interface FileRouteTypes {
     | '/trucks/form'
     | '/admin-order'
     | '/admin'
+    | '/bank-accounts'
     | '/customers'
     | '/delivery-customer'
     | '/delivery-operations'
@@ -541,6 +585,8 @@ export interface FileRouteTypes {
     | '/admin/details'
     | '/admin/form'
     | '/admin/update'
+    | '/bank-accounts/details'
+    | '/bank-accounts/form'
     | '/customers/details'
     | '/customers/form'
     | '/delivery-customer/details'
@@ -549,6 +595,7 @@ export interface FileRouteTypes {
     | '/delivery-operations/allocation-details'
     | '/delivery-operations/details'
     | '/deposits/details'
+    | '/deposits/manual-deposit'
     | '/depots/details'
     | '/depots/form'
     | '/drivers/details'
@@ -567,6 +614,7 @@ export interface FileRouteTypes {
     | '/trucks/form'
     | '/admin-order/'
     | '/admin/'
+    | '/bank-accounts/'
     | '/customers/'
     | '/delivery-customer/'
     | '/delivery-operations/'
@@ -590,6 +638,8 @@ export interface RootRouteChildren {
   AdminDetailsRoute: typeof AdminDetailsRoute
   AdminFormRoute: typeof AdminFormRoute
   AdminUpdateRoute: typeof AdminUpdateRoute
+  BankAccountsDetailsRoute: typeof BankAccountsDetailsRoute
+  BankAccountsFormRoute: typeof BankAccountsFormRoute
   CustomersDetailsRoute: typeof CustomersDetailsRoute
   CustomersFormRoute: typeof CustomersFormRoute
   DeliveryCustomerDetailsRoute: typeof DeliveryCustomerDetailsRoute
@@ -598,6 +648,7 @@ export interface RootRouteChildren {
   DeliveryOperationsAllocationDetailsRoute: typeof DeliveryOperationsAllocationDetailsRoute
   DeliveryOperationsDetailsRoute: typeof DeliveryOperationsDetailsRoute
   DepositsDetailsRoute: typeof DepositsDetailsRoute
+  DepositsManualDepositRoute: typeof DepositsManualDepositRoute
   DepotsDetailsRoute: typeof DepotsDetailsRoute
   DepotsFormRoute: typeof DepotsFormRoute
   DriversDetailsRoute: typeof DriversDetailsRoute
@@ -616,6 +667,7 @@ export interface RootRouteChildren {
   TrucksFormRoute: typeof TrucksFormRoute
   AdminOrderIndexRoute: typeof AdminOrderIndexRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  BankAccountsIndexRoute: typeof BankAccountsIndexRoute
   CustomersIndexRoute: typeof CustomersIndexRoute
   DeliveryCustomerIndexRoute: typeof DeliveryCustomerIndexRoute
   DeliveryOperationsIndexRoute: typeof DeliveryOperationsIndexRoute
@@ -688,6 +740,27 @@ declare module '@tanstack/react-router' {
       path: '/admin/update'
       fullPath: '/admin/update'
       preLoaderRoute: typeof AdminUpdateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bank-accounts/': {
+      id: '/bank-accounts/'
+      path: '/bank-accounts'
+      fullPath: '/bank-accounts/'
+      preLoaderRoute: typeof BankAccountsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bank-accounts/details': {
+      id: '/bank-accounts/details'
+      path: '/bank-accounts/details'
+      fullPath: '/bank-accounts/details'
+      preLoaderRoute: typeof BankAccountsDetailsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bank-accounts/form': {
+      id: '/bank-accounts/form'
+      path: '/bank-accounts/form'
+      fullPath: '/bank-accounts/form'
+      preLoaderRoute: typeof BankAccountsFormRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/customers/': {
@@ -772,6 +845,13 @@ declare module '@tanstack/react-router' {
       path: '/deposits/details'
       fullPath: '/deposits/details'
       preLoaderRoute: typeof DepositsDetailsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/deposits/manual-deposit': {
+      id: '/deposits/manual-deposit'
+      path: '/deposits/manual-deposit'
+      fullPath: '/deposits/manual-deposit'
+      preLoaderRoute: typeof DepositsManualDepositRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/depots/': {
@@ -966,6 +1046,8 @@ const rootRouteChildren: RootRouteChildren = {
   AdminDetailsRoute: AdminDetailsRoute,
   AdminFormRoute: AdminFormRoute,
   AdminUpdateRoute: AdminUpdateRoute,
+  BankAccountsDetailsRoute: BankAccountsDetailsRoute,
+  BankAccountsFormRoute: BankAccountsFormRoute,
   CustomersDetailsRoute: CustomersDetailsRoute,
   CustomersFormRoute: CustomersFormRoute,
   DeliveryCustomerDetailsRoute: DeliveryCustomerDetailsRoute,
@@ -975,6 +1057,7 @@ const rootRouteChildren: RootRouteChildren = {
     DeliveryOperationsAllocationDetailsRoute,
   DeliveryOperationsDetailsRoute: DeliveryOperationsDetailsRoute,
   DepositsDetailsRoute: DepositsDetailsRoute,
+  DepositsManualDepositRoute: DepositsManualDepositRoute,
   DepotsDetailsRoute: DepotsDetailsRoute,
   DepotsFormRoute: DepotsFormRoute,
   DriversDetailsRoute: DriversDetailsRoute,
@@ -993,6 +1076,7 @@ const rootRouteChildren: RootRouteChildren = {
   TrucksFormRoute: TrucksFormRoute,
   AdminOrderIndexRoute: AdminOrderIndexRoute,
   AdminIndexRoute: AdminIndexRoute,
+  BankAccountsIndexRoute: BankAccountsIndexRoute,
   CustomersIndexRoute: CustomersIndexRoute,
   DeliveryCustomerIndexRoute: DeliveryCustomerIndexRoute,
   DeliveryOperationsIndexRoute: DeliveryOperationsIndexRoute,
