@@ -289,7 +289,7 @@ function DepotForm() {
         status: formData.status,
         establishedYear: formData.establishedYear,
         productCapacities: productCapacities.map((pc) => ({
-          product: pc.product._id,
+          product: pc.product.id || pc.product._id,
           capacity: pc.capacity,
         })),
         staffIds: selectedStaffIds,
