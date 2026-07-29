@@ -14,7 +14,6 @@ import {
   Users,
   ShoppingBag,
   PlusCircle,
-  DollarSign,
   Ticket,
   Fuel,
   Landmark,

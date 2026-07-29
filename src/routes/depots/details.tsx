@@ -96,18 +96,8 @@ function OrderDepositBreakdown({ order }: { order: any }) {
             <CreditCard size={12} className="text-primary" />
             <span>Paid via DVA: <strong>{order.virtualAccountBank || 'Bank'}</strong> &bull; <strong className="text-foreground">{order.virtualAccountNumber}</strong></span>
           </div>
-      )}
-      <ConfirmDialog
-        open={showDeleteDialog}
-        onOpenChange={setShowDeleteDialog}
-        title="Remove Depot Hub"
-        description="Are you sure you want to remove this depot hub? This action cannot be undone."
-        confirmLabel="Delete"
-        variant="destructive"
-        onConfirm={confirmDelete}
-        loading={deleteDepot.isPending}
-      />
-    </div>
+        )}
+      </div>
 
       {creditDeposits.length === 0 ? (
         <div className="p-3.5 rounded-md bg-background/80 border text-xs text-muted-foreground text-center">

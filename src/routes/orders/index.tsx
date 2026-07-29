@@ -69,7 +69,7 @@ function OrdersDashboard() {
     currentPage * pageSize
   )
 
-  const hasFilters = searchTerm || selectedStatus !== 'all'
+  const hasFilters = Boolean(searchTerm || selectedStatus !== 'all')
 
   const totalOrders = filteredOrders.length
   const completedOrders = filteredOrders.filter((o: any) => o.status === 'Completed').length

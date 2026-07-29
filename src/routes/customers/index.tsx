@@ -62,7 +62,7 @@ function CustomerDashboard() {
   }
   const getInitials = (name: string) => { const parts = (name || '').split(' '); return `${parts[0]?.[0] || ''}${parts[1]?.[0] || ''}`.toUpperCase() }
 
-  const hasFilters = searchTerm || selectedStatus !== 'all'
+  const hasFilters = Boolean(searchTerm || selectedStatus !== 'all')
 
   return (
     <div className="space-y-6 animate-fade-in">

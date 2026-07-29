@@ -59,7 +59,7 @@ function TrucksDashboard() {
     maintenance: trucks.filter((t: any) => t.status === 'Maintenance').length,
   }
 
-  const hasFilters = searchTerm || selectedStatus !== 'all'
+  const hasFilters = Boolean(searchTerm || selectedStatus !== 'all')
 
   return (
     <div className="space-y-6 animate-fade-in">

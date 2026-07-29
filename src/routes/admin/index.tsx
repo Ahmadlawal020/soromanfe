@@ -131,7 +131,7 @@ function StaffManagement() {
     currentPage * pageSize
   )
 
-  const hasFilters = searchTerm || selectedLocation !== 'all' || roleFilter !== 'all'
+  const hasFilters = Boolean(searchTerm || selectedLocation !== 'all' || roleFilter !== 'all')
 
   async function confirmDelete() {
     if (!deleteTarget) return
