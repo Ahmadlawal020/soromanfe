@@ -158,6 +158,7 @@ export interface DepotItem {
   state: string
   country: string
   postcode: string
+  maxCapacity?: number
   status: string
   establishedYear: string
   productCapacities: ProductCapacity[]

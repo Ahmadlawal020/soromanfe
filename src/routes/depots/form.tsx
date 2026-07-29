@@ -276,6 +276,7 @@ function DepotForm() {
     if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return }
     setIsSubmitting(true)
     try {
+      const computedMaxCapacity = productCapacities.reduce((sum, pc) => sum + (Number(pc.capacity) || 0), 0)
       const data = {
         name: formData.name,
         code: formData.code,
@@ -284,6 +285,7 @@ function DepotForm() {
         state: formData.state,
         country: formData.country,
         postcode: formData.postcode,
+        maxCapacity: computedMaxCapacity,
         status: formData.status,
         establishedYear: formData.establishedYear,
         productCapacities: productCapacities.map((pc) => ({

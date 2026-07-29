@@ -564,8 +564,8 @@ function DepotDetailPage() {
           <button
             onClick={() => setActiveTab('overview')}
             className={`px-4 py-2.5 text-xs font-semibold border-b-2 transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${activeTab === 'overview'
-                ? 'border-primary text-primary bg-primary/5 rounded-t-md'
-                : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
+              ? 'border-primary text-primary bg-primary/5 rounded-t-md'
+              : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
               }`}
           >
             <BarChart3 size={15} />
@@ -575,8 +575,8 @@ function DepotDetailPage() {
           <button
             onClick={() => setActiveTab('inventory')}
             className={`px-4 py-2.5 text-xs font-semibold border-b-2 transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${activeTab === 'inventory'
-                ? 'border-primary text-primary bg-primary/5 rounded-t-md'
-                : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
+              ? 'border-primary text-primary bg-primary/5 rounded-t-md'
+              : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
               }`}
           >
             <Layers size={15} />
@@ -586,8 +586,8 @@ function DepotDetailPage() {
           <button
             onClick={() => setActiveTab('pfis')}
             className={`px-4 py-2.5 text-xs font-semibold border-b-2 transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${activeTab === 'pfis'
-                ? 'border-primary text-primary bg-primary/5 rounded-t-md'
-                : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
+              ? 'border-primary text-primary bg-primary/5 rounded-t-md'
+              : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
               }`}
           >
             <FileText size={15} />
@@ -600,8 +600,8 @@ function DepotDetailPage() {
           <button
             onClick={() => setActiveTab('orders')}
             className={`px-4 py-2.5 text-xs font-semibold border-b-2 transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${activeTab === 'orders'
-                ? 'border-primary text-primary bg-primary/5 rounded-t-md'
-                : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
+              ? 'border-primary text-primary bg-primary/5 rounded-t-md'
+              : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
               }`}
           >
             <ShoppingBag size={15} />
@@ -614,8 +614,8 @@ function DepotDetailPage() {
           <button
             onClick={() => setActiveTab('activity')}
             className={`px-4 py-2.5 text-xs font-semibold border-b-2 transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${activeTab === 'activity'
-                ? 'border-primary text-primary bg-primary/5 rounded-t-md'
-                : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
+              ? 'border-primary text-primary bg-primary/5 rounded-t-md'
+              : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
               }`}
           >
             <Activity size={15} />
@@ -1195,8 +1195,8 @@ function DepotDetailPage() {
                       key={st}
                       onClick={() => setStatusFilter(st)}
                       className={`px-3 py-1 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer ${isActive
-                          ? 'bg-primary text-primary-foreground shadow-sm font-semibold'
-                          : 'bg-secondary text-secondary-foreground hover:bg-muted'
+                        ? 'bg-primary text-primary-foreground shadow-sm font-semibold'
+                        : 'bg-secondary text-secondary-foreground hover:bg-muted'
                         }`}
                     >
                       <span>{st}</span>
