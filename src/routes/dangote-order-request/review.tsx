@@ -8,7 +8,7 @@ import { Label } from '#/components/ui/label'
 import { CommaInput } from '#/components/ui/comma-input'
 import {
   ArrowLeft, Package, MapPin, Truck, DollarSign, Calendar, Clock, CheckCircle, XCircle,
-  User, Building2, FileText, Mail, Phone,
+  User, FileText, Mail, Phone,
 } from 'lucide-react'
 import { useDangoteOrderRequestDetails, useReviewDangoteOrderRequest } from '#/lib/hooks/useDangoteOrders'
 import { PageLoader } from '#/components/PageLoader'
