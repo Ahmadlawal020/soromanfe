@@ -35,11 +35,8 @@ import {
   Search,
   X,
   RefreshCw,
-  Filter,
   CheckCircle,
-  Clock,
   Fuel,
-  Truck,
   FileText,
   Download,
   BarChart3,
@@ -75,11 +72,7 @@ function formatNaira(amount: number) {
   return `₦${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 }
 
-function statusBadge(status: string) {
-  if (status === 'paid')
-    return <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20">Paid</Badge>
-  return <Badge className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/20">Pending</Badge>
-}
+
 
 const QUICK_DATES = [
   { label: 'Today', value: 'today' },
