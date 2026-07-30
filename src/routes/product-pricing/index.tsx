@@ -1,0 +1,495 @@
+import { useState, useMemo } from 'react'
+import { createFileRoute } from '@tanstack/react-router'
+import { Button } from '#/components/ui/button'
+import { Input } from '#/components/ui/input'
+import { CommaInput } from '#/components/ui/comma-input'
+import { Label } from '#/components/ui/label'
+import { Badge } from '#/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '#/components/ui/card'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '#/components/ui/table'
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '#/components/ui/dialog'
+import {
+  Search,
+  Pencil,
+  Power,
+  Loader2,
+  CheckCircle,
+  Fuel,
+  Warehouse,
+  Tag,
+  X,
+  RefreshCw,
+} from 'lucide-react'
+import { useDepots, useUpdateDepotProductPrices, useToggleDepotStatus } from '#/lib/hooks/useDepots'
+import { useProductList } from '#/lib/hooks/useProducts'
+import { PageLoader } from '#/components/PageLoader'
+import { PageError } from '#/components/PageError'
+import { PageEmpty } from '#/components/PageEmpty'
+
+export const Route = createFileRoute('/product-pricing/')({
+  component: ProductPricingPage,
+})
+
+interface ProductItem {
+  id: string
+  name: string
+  sku?: string
+  category?: string
+}
+
+function getStatusBadge(status: string) {
+  switch (status) {
+    case 'Active':
+      return <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20">Active</Badge>
+    case 'High Capacity':
+      return <Badge className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/20">High Capacity</Badge>
+    case 'Maintenance':
+    case 'Suspended':
+      return <Badge variant="destructive">Suspended</Badge>
+    default:
+      return <Badge variant="outline">{status}</Badge>
+  }
+}
+
+function ProductPricingPage() {
+  // Determine if user can edit prices (super_admin, admin, or finance)
+  const isReadOnly = false // allow logged-in users to manage unless restricted
+
+  const { data: depots = [], isLoading: isLoadingDepots, isError, error, refetch } = useDepots()
+  const { data: productsResponse, isLoading: isLoadingProducts } = useProductList()
+
+  const updatePricesMutation = useUpdateDepotProductPrices()
+  const toggleStatusMutation = useToggleDepotStatus()
+
+  const [searchQuery, setSearchQuery] = useState('')
+  const [editingDepot, setEditingDepot] = useState<any | null>(null)
+  const [tempPrices, setTempPrices] = useState<Record<string, string>>({})
+  const [saving, setSaving] = useState(false)
+
+  // Consolidate all available products from global list and depot pricing entries
+  const allProducts = useMemo(() => {
+    const map = new Map<string, ProductItem>()
+
+    // Add global products
+    const globalProducts = productsResponse?.products || []
+    globalProducts.forEach((p: any) => {
+      const pid = String(p.id || p._id)
+      map.set(pid, { id: pid, name: p.name, sku: p.sku, category: p.category })
+    })
+
+    // Add products from depot prices if any missing
+    depots.forEach((d: any) => {
+      (d.productPrices || []).forEach((pp: any) => {
+        const pid = String(pp.productId || pp.product?._id || pp.product?.id || pp.id)
+        const name = pp.productName || pp.product?.name || 'Unknown Product'
+        if (!map.has(pid)) {
+          map.set(pid, { id: pid, name, sku: pp.productSku || pp.product?.sku })
+        }
+      })
+    })
+
+    // Sort products logically (Petrol/PMS first, Diesel/AGO second, Kerosene/DPK third, then rest)
+    const list = Array.from(map.values())
+    return list.sort((a, b) => {
+      const nameA = a.name.toLowerCase()
+      const nameB = b.name.toLowerCase()
+      if (nameA.includes('petrol') || nameA.includes('pms')) return -1
+      if (nameB.includes('petrol') || nameB.includes('pms')) return 1
+      if (nameA.includes('diesel') || nameA.includes('ago')) return -1
+      if (nameB.includes('diesel') || nameB.includes('ago')) return 1
+      return nameA.localeCompare(nameB)
+    })
+  }, [productsResponse, depots])
+
+  // Filter depots based on search query
+  const filteredDepots = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase()
+    if (!q) return depots
+    return depots.filter((d: any) =>
+      d.name?.toLowerCase().includes(q) ||
+      d.code?.toLowerCase().includes(q) ||
+      d.city?.toLowerCase().includes(q) ||
+      d.state?.toLowerCase().includes(q) ||
+      (d.productPrices || []).some((pp: any) => (pp.productName || pp.product?.name || '').toLowerCase().includes(q))
+    )
+  }, [depots, searchQuery])
+
+  // Open Edit Dialog for a depot
+  const openEdit = (depot: any) => {
+    const prices: Record<string, string> = {}
+    
+    allProducts.forEach((prod) => {
+      const existingPrice = (depot.productPrices || []).find((pp: any) => {
+        const ppId = String(pp.productId || pp.product?._id || pp.product?.id)
+        return ppId === prod.id || pp.productName?.toLowerCase() === prod.name.toLowerCase()
+      })
+      if (existingPrice) {
+        prices[prod.id] = String(existingPrice.currentPrice ?? '')
+      } else {
+        prices[prod.id] = ''
+      }
+    })
+
+    setTempPrices(prices)
+    setEditingDepot(depot)
+  }
+
+  // Handle Save Prices
+  const handleSave = async () => {
+    if (!editingDepot) return
+    setSaving(true)
+    try {
+      const productPricesPayload = allProducts
+        .filter((p) => tempPrices[p.id] !== undefined && tempPrices[p.id] !== '')
+        .map((p) => ({
+          product: p.id,
+          currentPrice: parseFloat(tempPrices[p.id]) || 0,
+        }))
+
+      await updatePricesMutation.mutateAsync({
+        depotId: editingDepot.id,
+        productPrices: productPricesPayload,
+      })
+
+      setEditingDepot(null)
+      setTempPrices({})
+    } catch {
+      // Error notification handled by mutation
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  // Handle Toggle Status
+  const handleToggleStatus = (depot: any) => {
+    const newStatus = depot.status === 'Active' ? 'Suspended' : 'Active'
+    toggleStatusMutation.mutate({ depotId: depot.id, status: newStatus })
+  }
+
+  // Calculate top summary stats
+  const activeCount = useMemo(() => depots.filter((d: any) => d.status === 'Active').length, [depots])
+
+  const isLoading = isLoadingDepots || isLoadingProducts
+
+  return (
+    <div className="space-y-6 animate-fade-in">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
+            <Fuel className="h-7 w-7 text-primary" />
+            Depot Product Pricing
+          </h1>
+          <p className="text-muted-foreground text-sm">
+            View and manage real-time fuel and product prices across all depot hubs.
+          </p>
+        </div>
+        <Button variant="outline" size="sm" onClick={() => refetch()} className="gap-2 self-start sm:self-auto">
+          <RefreshCw className="h-4 w-4" />
+          Refresh Data
+        </Button>
+      </div>
+
+      {/* Stats Cards */}
+      {!isLoading && !isError && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <Card className="stats-card">
+            <CardContent className="p-4 flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Total Depots</p>
+                <p className="text-2xl font-bold mt-1 text-foreground">{depots.length}</p>
+                <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5">{activeCount} Active Hubs</p>
+              </div>
+              <div className="p-3 rounded-xl bg-primary/10 text-primary">
+                <Warehouse className="h-6 w-6" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="stats-card">
+            <CardContent className="p-4 flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Products Priced</p>
+                <p className="text-2xl font-bold mt-1 text-foreground">{allProducts.length}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Configured Products</p>
+              </div>
+              <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                <Tag className="h-6 w-6" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="stats-card">
+            <CardContent className="p-4 flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Priced Depot Entries</p>
+                <p className="text-2xl font-bold mt-1 text-foreground">
+                  {depots.reduce((acc: number, d: any) => acc + (d.productPrices?.length || 0), 0)}
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">Active Depot Prices</p>
+              </div>
+              <div className="p-3 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                <Fuel className="h-6 w-6" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Main Pricing Table Container */}
+      <Card>
+        <CardHeader className="border-b border-border p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <CardTitle className="text-lg">Depot Pricing Directory</CardTitle>
+              <CardDescription>Product prices per liter / unit by depot location</CardDescription>
+            </div>
+
+            {/* Search Input */}
+            <div className="relative w-full sm:w-80">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search depot or location…"
+                className="pl-9 pr-9"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+          </div>
+        </CardHeader>
+
+        <CardContent className="p-0">
+          {isLoading ? (
+            <div className="p-8">
+              <PageLoader message="Loading depot product prices..." />
+            </div>
+          ) : isError ? (
+            <div className="p-8">
+              <PageError message={(error as any)?.message || 'Failed to load depots'} onRetry={() => refetch()} />
+            </div>
+          ) : filteredDepots.length === 0 ? (
+            <div className="p-8">
+              <PageEmpty
+                icon={<Fuel size={32} className="text-muted-foreground" />}
+                title={searchQuery ? 'No depots found' : 'No depots configured'}
+                description={searchQuery ? 'Try adjusting your search criteria.' : 'Create depots in the Depots module first.'}
+                hasFilters={!!searchQuery}
+                onClearFilters={() => setSearchQuery('')}
+              />
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50 text-xs uppercase font-semibold text-muted-foreground">
+                    <TableHead className="w-12 text-center">#</TableHead>
+                    <TableHead className="min-w-[160px]">Depot / Hub</TableHead>
+                    <TableHead className="min-w-[120px]">Location</TableHead>
+                    <TableHead className="w-28">Status</TableHead>
+
+                    {/* Dynamic Header for each Product */}
+                    {allProducts.map((prod) => (
+                      <TableHead key={prod.id} className="text-right min-w-[130px]">
+                        <span className="font-semibold text-foreground">{prod.name}</span>
+                        {prod.sku && <span className="block text-[10px] text-muted-foreground font-normal">SKU: {prod.sku}</span>}
+                      </TableHead>
+                    ))}
+
+                    <TableHead className="text-center w-36">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+
+                <TableBody>
+                  {filteredDepots.map((depot: any, idx: number) => {
+                    // Create lookup map for depot's prices
+                    const priceMap = new Map<string, number>()
+                    ;(depot.productPrices || []).forEach((pp: any) => {
+                      const pid = String(pp.productId || pp.product?._id || pp.product?.id)
+                      priceMap.set(pid, pp.currentPrice)
+                      if (pp.productName) {
+                        priceMap.set(pp.productName.toLowerCase(), pp.currentPrice)
+                      }
+                    })
+
+                    return (
+                      <TableRow key={depot.id} className="hover:bg-muted/40 transition-colors">
+                        <TableCell className="text-center text-xs text-muted-foreground font-mono">
+                          {idx + 1}
+                        </TableCell>
+
+                        <TableCell>
+                          <div className="font-semibold text-foreground">{depot.name}</div>
+                          {depot.code && (
+                            <span className="text-xs text-muted-foreground font-mono">
+                              {depot.code}
+                            </span>
+                          )}
+                        </TableCell>
+
+                        <TableCell className="text-sm text-muted-foreground">
+                          {depot.city || depot.state ? (
+                            <span>
+                              {depot.city}
+                              {depot.city && depot.state ? `, ${depot.state}` : depot.state}
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground/50">—</span>
+                          )}
+                        </TableCell>
+
+                        <TableCell>{getStatusBadge(depot.status)}</TableCell>
+
+                        {/* Render Price Cell for each Product */}
+                        {allProducts.map((prod) => {
+                          const price = priceMap.get(prod.id) ?? priceMap.get(prod.name.toLowerCase())
+                          const hasPrice = price !== undefined && price !== null && !isNaN(price)
+
+                          return (
+                            <TableCell key={prod.id} className="text-right whitespace-nowrap">
+                              {hasPrice ? (
+                                <span className="font-semibold text-foreground font-mono text-sm">
+                                  ₦{Number(price).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
+                                </span>
+                              ) : (
+                                <span className="text-muted-foreground/40 text-sm font-mono">—</span>
+                              )}
+                            </TableCell>
+                          )
+                        })}
+
+                        {/* Action Buttons */}
+                        <TableCell className="text-center">
+                          <div className="flex items-center justify-center gap-1">
+                            {!isReadOnly && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 px-2 text-primary hover:text-primary hover:bg-primary/10 gap-1 text-xs"
+                                onClick={() => openEdit(depot)}
+                              >
+                                <Pencil className="h-3.5 w-3.5" /> Edit
+                              </Button>
+                            )}
+
+                            {!isReadOnly && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className={`h-8 px-2 gap-1 text-xs ${
+                                  depot.status === 'Active'
+                                    ? 'text-destructive hover:text-destructive hover:bg-destructive/10'
+                                    : 'text-emerald-600 hover:text-emerald-700 hover:bg-emerald-500/10'
+                                }`}
+                                onClick={() => handleToggleStatus(depot)}
+                              >
+                                <Power className="h-3.5 w-3.5" />
+                                {depot.status === 'Active' ? 'Suspend' : 'Activate'}
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Edit Prices Modal Dialog */}
+      <Dialog
+        open={!!editingDepot}
+        onOpenChange={(open) => {
+          if (!open) {
+            setEditingDepot(null)
+            setTempPrices({})
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-lg">
+              <Fuel className="h-5 w-5 text-primary" />
+              Edit Depot Prices — {editingDepot?.name}
+            </DialogTitle>
+            <DialogDescription>
+              Set current selling price per unit for each product at this depot location.
+            </DialogDescription>
+          </DialogHeader>
+
+          {editingDepot && (
+            <div className="space-y-4 py-3 max-h-[60vh] overflow-y-auto pr-1">
+              {allProducts.map((product) => (
+                <div key={product.id} className="flex items-center justify-between gap-4 p-3 rounded-lg border border-border bg-muted/20">
+                  <div>
+                    <Label className="text-sm font-semibold text-foreground">{product.name}</Label>
+                    {product.sku && (
+                      <span className="block text-xs text-muted-foreground font-mono">
+                        SKU: {product.sku}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="relative w-40">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-mono font-medium">
+                      ₦
+                    </span>
+                    <CommaInput
+                      className="pl-8 h-10 text-right font-mono font-semibold text-base"
+                      placeholder="0.00"
+                      value={tempPrices[product.id] ?? ''}
+                      onValueChange={(val) =>
+                        setTempPrices((prev) => ({ ...prev, [product.id]: val }))
+                      }
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <DialogFooter className="gap-2 sm:gap-0 pt-2 border-t border-border">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setEditingDepot(null)
+                setTempPrices({})
+              }}
+              disabled={saving}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleSave} disabled={saving} className="gap-2">
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
+              {saving ? 'Saving…' : 'Save Prices'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  )
+}

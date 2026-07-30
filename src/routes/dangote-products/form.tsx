@@ -1,195 +1,141 @@
-import { useState, useEffect } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Button } from "#/components/ui/button";
-import { Input } from "#/components/ui/input";
-import { Label } from "#/components/ui/label";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "#/components/ui/select";
-import {
-  ArrowLeft,
-  Scale,
-  Save,
-  Loader2,
-  Package,
-  AlertTriangle,
-  FileText,
-} from "lucide-react";
-import {
-  useProductDetails,
-  useCreateProduct,
-  useUpdateProduct,
-} from "#/lib/hooks/useProducts";
+import { useState, useEffect } from 'react'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { Button } from '#/components/ui/button'
+import { Input } from '#/components/ui/input'
+import { Label } from '#/components/ui/label'
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '#/components/ui/select'
+import { ArrowLeft, Scale, Save, Loader2, Package, AlertTriangle, FileText } from 'lucide-react'
+import { useProductDetails, useCreateProduct, useUpdateProduct } from '#/lib/hooks/useProducts'
 
-export const Route = createFileRoute("/products/form")({
+export const Route = createFileRoute('/dangote-products/form')({
   validateSearch: (search: Record<string, unknown>) => ({
-    id: (search.id as string) || "",
+    id: (search.id as string) || '',
   }),
-  component: ProductForm,
-});
+  component: DangoteProductForm,
+})
 
 const categoriesList = [
-  "PMS (Premium Motor Spirit)",
-  "AGO (Automotive Gas Oil)",
-  "DPK (Dual Purpose Kerosene)",
-  "Jet A-1 (Aviation Fuel)",
-  "LPG (Liquefied Petroleum Gas)",
-  "LPFO / Heavy Fuel Oil",
-  "Lubricants & Base Oils",
-];
-const hazardClassesList = [
-  "Class 2.1 Flammable Gas",
-  "Class 3 Flammable Liquid",
-  "Class 9 Environmentally Hazardous",
-  "Non-Hazardous",
-];
-const unitsList = [
-  "Liters",
-  "Metric Tonnes",
-  "Kilograms",
-  "Barrels",
-  "US Gallons",
-];
+  'PMS (Premium Motor Spirit)',
+  'AGO (Automotive Gas Oil)',
+  'DPK (Dual Purpose Kerosene)',
+  'Jet A-1 (Aviation Fuel)',
+  'LPG (Liquefied Petroleum Gas)',
+  'LPFO / Heavy Fuel Oil',
+  'Lubricants & Base Oils',
+]
+const hazardClassesList = ['Class 2.1 Flammable Gas', 'Class 3 Flammable Liquid', 'Class 9 Environmentally Hazardous', 'Non-Hazardous']
+const unitsList = ['Liters', 'Metric Tonnes', 'Kilograms', 'Barrels', 'US Gallons']
 
 const categoryLegacyMap: Record<string, string> = {
-  "Motor Fuel": "PMS (Premium Motor Spirit)",
-  "Diesel Fuel": "AGO (Automotive Gas Oil)",
-  Kerosene: "DPK (Dual Purpose Kerosene)",
-  "Cooking Gas": "LPG (Liquefied Petroleum Gas)",
-  "Industrial Fuel": "LPFO / Heavy Fuel Oil",
-  Lubricants: "Lubricants & Base Oils",
-};
+  'Motor Fuel': 'PMS (Premium Motor Spirit)',
+  'Diesel Fuel': 'AGO (Automotive Gas Oil)',
+  'Kerosene': 'DPK (Dual Purpose Kerosene)',
+  'Cooking Gas': 'LPG (Liquefied Petroleum Gas)',
+  'Industrial Fuel': 'LPFO / Heavy Fuel Oil',
+  'Lubricants': 'Lubricants & Base Oils',
+}
 
-function ProductForm() {
-  const navigate = useNavigate();
-  const { id } = Route.useSearch();
-  const isEdit = !!id;
-  const { data: editingProduct, isLoading: isLoadingProduct } =
-    useProductDetails(id);
-  const createProduct = useCreateProduct();
-  const updateProduct = useUpdateProduct();
+function DangoteProductForm() {
+  const navigate = useNavigate()
+  const { id } = Route.useSearch()
+  const isEdit = !!id
+  const { data: editingProduct, isLoading: isLoadingProduct } = useProductDetails(id)
+  const createProduct = useCreateProduct()
+  const updateProduct = useUpdateProduct()
 
   const [formData, setFormData] = useState({
-    name: "",
-    sku: "",
-    category: "PMS (Premium Motor Spirit)",
-    productType: 'soroman',
-    gradeClass: "",
-    description: "",
-    density: "",
-    flashPoint: "",
-    unNumber: "",
-    hazardClass: "Class 3 Flammable Liquid",
-    unit: "Liters",
-    supplier: "",
-  });
+    name: '',
+    sku: '',
+    category: 'PMS (Premium Motor Spirit)',
+    productType: 'dangote',
+    gradeClass: '',
+    description: '',
+    density: '',
+    flashPoint: '',
+    unNumber: '',
+    hazardClass: 'Class 3 Flammable Liquid',
+    unit: 'Liters',
+    supplier: '',
+  })
 
   useEffect(() => {
     if (isEdit && editingProduct) {
-      const rawCategory = editingProduct.category || "";
-      const mappedCategory =
-        categoryLegacyMap[rawCategory] ||
-        rawCategory ||
-        "PMS (Premium Motor Spirit)";
+      const rawCategory = editingProduct.category || ''
+      const mappedCategory = categoryLegacyMap[rawCategory] || rawCategory || 'PMS (Premium Motor Spirit)'
 
-      const rawHazard = editingProduct.hazardClass || "";
-      const mappedHazard =
-        rawHazard === "None"
-          ? "Non-Hazardous"
-          : rawHazard || "Class 3 Flammable Liquid";
+      const rawHazard = editingProduct.hazardClass || ''
+      const mappedHazard = rawHazard === 'None' ? 'Non-Hazardous' : (rawHazard || 'Class 3 Flammable Liquid')
 
       setFormData({
-        name: editingProduct.name || "",
-        sku: editingProduct.sku || "",
+        name: editingProduct.name || '',
+        sku: editingProduct.sku || '',
         category: mappedCategory,
-        productType: 'soroman',
-        gradeClass: editingProduct.gradeClass || "",
-        description: editingProduct.description || "",
-        density: editingProduct.density || "",
-        flashPoint: editingProduct.flashPoint || "",
-        unNumber: editingProduct.unNumber || "",
+        productType: 'dangote',
+        gradeClass: editingProduct.gradeClass || '',
+        description: editingProduct.description || '',
+        density: editingProduct.density || '',
+        flashPoint: editingProduct.flashPoint || '',
+        unNumber: editingProduct.unNumber || '',
         hazardClass: mappedHazard,
-        unit: editingProduct.unit || "Liters",
-        supplier: editingProduct.supplier || "",
-      });
+        unit: editingProduct.unit || 'Liters',
+        supplier: editingProduct.supplier || '',
+      })
     }
-  }, [isEdit, editingProduct]);
+  }, [isEdit, editingProduct])
 
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [apiError, setApiError] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [apiError, setApiError] = useState('')
 
   const validate = () => {
-    const newErrors: Record<string, string> = {};
-    if (!formData.name.trim()) newErrors.name = "Product name is required";
-    if (!formData.sku.trim()) newErrors.sku = "SKU code is required";
-    if (!formData.gradeClass.trim())
-      newErrors.gradeClass = "Quality Grade is required";
-    return newErrors;
-  };
+    const newErrors: Record<string, string> = {}
+    if (!formData.name.trim()) newErrors.name = 'Product name is required'
+    if (!formData.sku.trim()) newErrors.sku = 'SKU code is required'
+    return newErrors
+  }
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name])
-      setErrors((prev) => {
-        const next = { ...prev };
-        delete next[name];
-        return next;
-      });
-    if (apiError) setApiError("");
-  };
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+    if (errors[name]) setErrors((prev) => { const next = { ...prev }; delete next[name]; return next })
+    if (apiError) setApiError('')
+  }
 
   const handleSelectChange = (name: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name])
-      setErrors((prev) => {
-        const next = { ...prev };
-        delete next[name];
-        return next;
-      });
-    if (apiError) setApiError("");
-  };
+    setFormData((prev) => ({ ...prev, [name]: value }))
+    if (errors[name]) setErrors((prev) => { const next = { ...prev }; delete next[name]; return next })
+    if (apiError) setApiError('')
+  }
 
-  const isSubmitting = createProduct.isPending || updateProduct.isPending;
+  const isSubmitting = createProduct.isPending || updateProduct.isPending
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const newErrors = validate();
+    e.preventDefault()
+    const newErrors = validate()
     if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
+      setErrors(newErrors)
+      return
     }
-    setApiError("");
+    setApiError('')
 
     try {
       if (isEdit && editingProduct?._id) {
-        await updateProduct.mutateAsync({
-          id: editingProduct._id,
-          data: formData,
-        });
+        await updateProduct.mutateAsync({ id: editingProduct._id, data: formData })
       } else {
-        await createProduct.mutateAsync(formData);
+        await createProduct.mutateAsync(formData)
       }
-      navigate({ to: "/products" });
+      navigate({ to: '/dangote-products' })
     } catch (err: any) {
-      const message =
-        err?.response?.data?.message || err?.message || "Something went wrong";
-      setApiError(message);
+      const message = err?.response?.data?.message || err?.message || 'Something went wrong'
+      setApiError(message)
     }
-  };
+  }
 
   if (isEdit && isLoadingProduct) {
     return (
       <div className="flex items-center justify-center py-24">
         <Loader2 size={32} className="animate-spin text-muted-foreground" />
       </div>
-    );
+    )
   }
 
   return (
@@ -199,19 +145,17 @@ function ProductForm() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate({ to: "/products" })}
+            onClick={() => navigate({ to: '/dangote-products' })}
             className="mb-2"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Products
+            Back to Dangote Products
           </Button>
           <h1 className="text-3xl font-bold tracking-tight">
-            {isEdit ? "Edit Product" : "Register New Product"}
+            {isEdit ? 'Edit Dangote Product' : 'Register New Dangote Product'}
           </h1>
           <p className="text-muted-foreground">
-            {isEdit
-              ? "Modify details of this petroleum listing"
-              : "Fill in the details to add a new product"}
+            {isEdit ? 'Modify details of this Dangote product listing' : 'Fill in the details to add a new Dangote product'}
           </p>
         </div>
       </header>
@@ -241,7 +185,7 @@ function ProductForm() {
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="e.g. Premium Motor Spirit"
-                  className={errors.name ? "border-destructive" : ""}
+                  className={errors.name ? 'border-destructive' : ''}
                 />
                 {errors.name && (
                   <p className="text-sm text-destructive mt-1">{errors.name}</p>
@@ -255,8 +199,8 @@ function ProductForm() {
                   name="sku"
                   value={formData.sku}
                   onChange={handleChange}
-                  placeholder="e.g. PMS-4920-A"
-                  className={errors.sku ? "border-destructive" : ""}
+                  placeholder="e.g. DNG-PMS-001"
+                  className={errors.sku ? 'border-destructive' : ''}
                 />
                 {errors.sku && (
                   <p className="text-sm text-destructive mt-1">{errors.sku}</p>
@@ -268,20 +212,14 @@ function ProductForm() {
                 <Select
                   key={`category-${formData.category}`}
                   value={formData.category}
-                  onValueChange={(v) => handleSelectChange("category", v)}
+                  onValueChange={(v) => handleSelectChange('category', v)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Array.from(
-                      new Set(
-                        [...categoriesList, formData.category].filter(Boolean),
-                      ),
-                    ).map((c) => (
-                      <SelectItem key={c} value={c}>
-                        {c}
-                      </SelectItem>
+                    {Array.from(new Set([...categoriesList, formData.category].filter(Boolean))).map((c) => (
+                      <SelectItem key={c} value={c}>{c}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -292,38 +230,28 @@ function ProductForm() {
                 <Select
                   key={`unit-${formData.unit}`}
                   value={formData.unit}
-                  onValueChange={(v) => handleSelectChange("unit", v)}
+                  onValueChange={(v) => handleSelectChange('unit', v)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select measurement unit" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Array.from(
-                      new Set([...unitsList, formData.unit].filter(Boolean)),
-                    ).map((u) => (
-                      <SelectItem key={u} value={u}>
-                        {u}
-                      </SelectItem>
+                    {Array.from(new Set([...unitsList, formData.unit].filter(Boolean))).map((u) => (
+                      <SelectItem key={u} value={u}>{u}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
 
               <div>
-                <Label htmlFor="gradeClass">Quality Grade*</Label>
+                <Label htmlFor="gradeClass">Quality Grade</Label>
                 <Input
                   id="gradeClass"
                   name="gradeClass"
                   value={formData.gradeClass}
                   onChange={handleChange}
                   placeholder="e.g. Grade A"
-                  className={errors.gradeClass ? "border-destructive" : ""}
                 />
-                {errors.gradeClass && (
-                  <p className="text-sm text-destructive mt-1">
-                    {errors.gradeClass}
-                  </p>
-                )}
               </div>
 
               <div>
@@ -408,22 +336,14 @@ function ProductForm() {
                 <Select
                   key={`hazardClass-${formData.hazardClass}`}
                   value={formData.hazardClass}
-                  onValueChange={(v) => handleSelectChange("hazardClass", v)}
+                  onValueChange={(v) => handleSelectChange('hazardClass', v)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select hazard class" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Array.from(
-                      new Set(
-                        [...hazardClassesList, formData.hazardClass].filter(
-                          Boolean,
-                        ),
-                      ),
-                    ).map((h) => (
-                      <SelectItem key={h} value={h}>
-                        {h}
-                      </SelectItem>
+                    {Array.from(new Set([...hazardClassesList, formData.hazardClass].filter(Boolean))).map((h) => (
+                      <SelectItem key={h} value={h}>{h}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -432,8 +352,7 @@ function ProductForm() {
               <div className="pt-2">
                 <div className="bg-muted/50 rounded-lg p-3 text-sm text-muted-foreground">
                   <FileText className="h-4 w-4 inline-block mr-2" />
-                  Ensure all safety data sheets (SDS) are up to date for this
-                  product.
+                  Ensure all safety data sheets (SDS) are up to date for this product.
                 </div>
               </div>
             </div>
@@ -444,24 +363,16 @@ function ProductForm() {
           <Button
             type="button"
             variant="outline"
-            onClick={() => navigate({ to: "/products" })}
+            onClick={() => navigate({ to: '/dangote-products' })}
           >
             Cancel
           </Button>
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <Save className="h-4 w-4 mr-2" />
-            )}
-            {isSubmitting
-              ? "Saving..."
-              : isEdit
-                ? "Update Product"
-                : "Save Product"}
+            {isSubmitting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+            {isSubmitting ? 'Saving...' : isEdit ? 'Update Product' : 'Save Product'}
           </Button>
         </div>
       </form>
     </div>
-  );
+  )
 }

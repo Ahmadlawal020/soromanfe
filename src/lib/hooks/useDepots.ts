@@ -106,3 +106,44 @@ export function useUpdateProductPrice() {
     },
   })
 }
+
+export function useUpdateDepotProductPrices() {
+  const queryClient = useQueryClient()
+  const toast = useToast()
+
+  return useMutation({
+    retry: false,
+    mutationFn: async ({ depotId, productPrices }: { depotId: string; productPrices: Array<{ product: string | number; currentPrice: number }> }) => {
+      const res = await api.patch(`/depots/${depotId}`, { productPrices })
+      return res.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['depots'] })
+      toast.success('Product prices saved successfully')
+    },
+    onError: (err: any) => {
+      toast.error(getErrorMessage(err))
+    },
+  })
+}
+
+export function useToggleDepotStatus() {
+  const queryClient = useQueryClient()
+  const toast = useToast()
+
+  return useMutation({
+    retry: false,
+    mutationFn: async ({ depotId, status }: { depotId: string; status: string }) => {
+      const res = await api.patch(`/depots/${depotId}`, { status })
+      return res.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['depots'] })
+      toast.success('Depot status updated')
+    },
+    onError: (err: any) => {
+      toast.error(getErrorMessage(err))
+    },
+  })
+}
+

@@ -11,8 +11,8 @@ import { PageError } from '#/components/PageError'
 import { PageEmpty } from '#/components/PageEmpty'
 import { useProductList } from '#/lib/hooks/useProducts'
 
-export const Route = createFileRoute('/products/')({
-  component: ProductsDashboard,
+export const Route = createFileRoute('/dangote-products/')({
+  component: DangoteProductsDashboard,
 })
 
 export interface ProductItem { _id: string; id?: string; name: string; sku: string; category: string; gradeClass: string; description?: string; density?: string; flashPoint?: string; unNumber?: string; hazardClass?: string; unit?: string; supplier?: string }
@@ -37,7 +37,7 @@ const categoryColors: Record<string, string> = {
   'Lubricants & Base Oils': 'from-violet-500 to-violet-400',
 }
 
-function ProductsDashboard() {
+function DangoteProductsDashboard() {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
@@ -45,14 +45,14 @@ function ProductsDashboard() {
   const { data, isLoading, isError, error, refetch } = useProductList({
     search: searchTerm || undefined,
     category: selectedCategory !== 'all' ? selectedCategory : undefined,
-    productType: 'soroman',
+    productType: 'dangote',
   })
 
   const products: ProductItem[] = data?.products || []
   const hasFilters = !!(searchTerm || selectedCategory !== 'all')
 
   const statsCards = [
-    { title: 'Total Products', value: data?.pagination?.total ?? products.length, sub: 'Petroleum products registered', icon: Fuel },
+    { title: 'Total Products', value: data?.pagination?.total ?? products.length, sub: 'Dangote products registered', icon: Fuel },
     { title: 'Categories', value: new Set(products.map((p) => p.category)).size, sub: 'Product classifications', icon: Layers },
     { title: 'Grade Types', value: new Set(products.map((p) => p.gradeClass)).size, sub: 'Quality classifications', icon: Flame },
   ]
@@ -60,8 +60,8 @@ function ProductsDashboard() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex justify-between items-center">
-        <div><h1 className="text-3xl font-bold text-foreground">Petroleum Products</h1><p className="text-muted-foreground">Manage petroleum product listings, grades, and distribution categories.</p></div>
-        <Button size="sm" className="gradient-primary text-white border-0" onClick={() => navigate({ to: '/products/form', search: { id: '' } })}><Plus className="w-4 h-4 mr-2" />Register New Product</Button>
+        <div><h1 className="text-3xl font-bold text-foreground">Dangote Products</h1><p className="text-muted-foreground">Manage Dangote product listings, grades, and distribution categories.</p></div>
+        <Button size="sm" className="gradient-primary text-white border-0" onClick={() => navigate({ to: '/dangote-products/form', search: { id: '' } })}><Plus className="w-4 h-4 mr-2" />Register New Product</Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -73,7 +73,7 @@ function ProductsDashboard() {
       <Card>
         <CardHeader className="border-b border-border">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div><CardTitle>Fuel & Petroleum Inventory</CardTitle><CardDescription>Review product grades, categories, and quality classifications</CardDescription></div>
+            <div><CardTitle>Dangote Fuel & Petroleum Inventory</CardTitle><CardDescription>Review Dangote product grades, categories, and quality classifications</CardDescription></div>
           </div>
         </CardHeader>
         <CardContent>
@@ -90,16 +90,16 @@ function ProductsDashboard() {
           </div>
 
           {isLoading ? (
-            <PageLoader message="Loading products..." />
+            <PageLoader message="Loading Dangote products..." />
           ) : isError ? (
             <PageError message={(error as any)?.message || 'Failed to load'} onRetry={() => refetch()} />
           ) : products.length === 0 ? (
             <PageEmpty
               icon={<Package size={24} className="text-muted-foreground" />}
-              title={hasFilters ? 'No products match your filters' : 'No products yet'}
-              description={hasFilters ? 'Try adjusting your search or filter criteria.' : 'Add your first product to get started.'}
+              title={hasFilters ? 'No products match your filters' : 'No Dangote products yet'}
+              description={hasFilters ? 'Try adjusting your search or filter criteria.' : 'Add your first Dangote product to get started.'}
               actionLabel="Add Product"
-              onAction={() => navigate({ to: '/products/form', search: { id: '' } })}
+              onAction={() => navigate({ to: '/dangote-products/form', search: { id: '' } })}
               hasFilters={hasFilters}
               onClearFilters={() => { setSearchTerm(''); setSelectedCategory('all') }}
             />
@@ -109,18 +109,18 @@ function ProductsDashboard() {
                 <Card
                   key={product._id}
                   className="card-hover cursor-pointer"
-                  onClick={() => navigate({ to: '/products/details', search: { id: product._id } })}
+                  onClick={() => navigate({ to: '/dangote-products/details', search: { id: product._id } })}
                 >
                   <CardContent className="pt-6">
                     <div className="flex items-start justify-between mb-1"><h3 className="text-base font-semibold text-foreground leading-snug pr-2">{product.name}</h3><Badge variant="outline" className="font-mono text-xs shrink-0">{product.sku}</Badge></div>
                     <div className="flex items-center gap-2 mb-4"><div className={`h-6 w-6 rounded-md bg-gradient-to-br ${categoryColors[product.category] || 'from-gray-400 to-gray-300'} flex items-center justify-center`}><Layers className="h-3 w-3 text-white" /></div><span className="text-xs text-muted-foreground">{product.category}</span></div>
-                    <div className="flex items-center justify-between pt-3 border-t border-border"><div className="flex items-center gap-1.5"><Flame className="h-3.5 w-3.5 text-muted-foreground" /><span className="text-xs text-muted-foreground">Grade</span></div><Badge className="bg-success text-success-foreground text-xs">{product.gradeClass}</Badge></div>
+                    {product.gradeClass && <div className="flex items-center justify-between pt-3 border-t border-border"><div className="flex items-center gap-1.5"><Flame className="h-3.5 w-3.5 text-muted-foreground" /><span className="text-xs text-muted-foreground">Grade</span></div><Badge className="bg-success text-success-foreground text-xs">{product.gradeClass}</Badge></div>}
                     <div className="flex gap-2 pt-4 mt-4 border-t border-border">
                       <Button
                         variant="outline"
                         size="sm"
                         className="flex-1"
-                        onClick={(e) => { e.stopPropagation(); navigate({ to: '/products/details', search: { id: product._id } }) }}
+                        onClick={(e) => { e.stopPropagation(); navigate({ to: '/dangote-products/details', search: { id: product._id } }) }}
                       >
                         <Eye className="h-3.5 w-3.5" /> View
                       </Button>
@@ -128,7 +128,7 @@ function ProductsDashboard() {
                         variant="outline"
                         size="sm"
                         className="flex-1"
-                        onClick={(e) => { e.stopPropagation(); navigate({ to: '/products/form', search: { id: product._id } }) }}
+                        onClick={(e) => { e.stopPropagation(); navigate({ to: '/dangote-products/form', search: { id: product._id } }) }}
                       >
                         <Edit className="h-3.5 w-3.5" /> Edit
                       </Button>

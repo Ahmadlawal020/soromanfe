@@ -4,10 +4,11 @@ import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '#/components/ui/card'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '#/components/ui/table'
-import { User, ArrowLeft, Edit, Trash2, Calendar, AlertCircle, Phone, Mail, Building2, MapPin, Wallet, Banknote, TrendingUp, Package, Loader2, SearchX, Warehouse, Clock, DollarSign, ArrowDownLeft, ArrowUpRight, Copy, CheckCircle, CreditCard, Hash } from 'lucide-react'
+import { User, ArrowLeft, Edit, Trash2, Calendar, AlertCircle, Phone, Mail, Building2, MapPin, Wallet, Banknote, TrendingUp, Package, Loader2, SearchX, Warehouse, Clock, DollarSign, ArrowDownLeft, ArrowUpRight, Copy, CheckCircle, CreditCard, Hash, Fuel } from 'lucide-react'
 import { useCustomerDetails, useDeleteCustomer } from '#/lib/hooks/useCustomers'
 import { useOrderList } from '#/lib/hooks/useOrders'
 import { useDepositList } from '#/lib/hooks/useDeposits'
+import { useCommissions, useCommissionSummary } from '#/lib/hooks/useCommissions'
 import { useToast } from '#/lib/hooks/useToast'
 import { toNum } from '#/lib/utils'
 import { Breadcrumbs } from '#/components/Breadcrumbs'
@@ -61,6 +62,14 @@ function CustomerDetailPage() {
 
   const { data: depositData, isLoading: depositsLoading } = useDepositList(
     customerId ? { customer: String(customerId), limit: 100 } : undefined
+  )
+
+  const { data: commissionData, isLoading: commissionsLoading } = useCommissions(
+    customerId ? { customerId: String(customerId), limit: 100 } : undefined
+  )
+
+  const { data: commissionSummary } = useCommissionSummary(
+    customerId ? { customerId: String(customerId) } : undefined
   )
 
   const customer = customerDetails || customerState
@@ -124,6 +133,11 @@ function CustomerDetailPage() {
   const totalDeposits = deposits.length
   const totalCredits = deposits.filter((d: any) => d.type === 'credit').reduce((sum: number, d: any) => sum + toNum(d.amount), 0)
   const totalDebits = deposits.filter((d: any) => d.type === 'debit').reduce((sum: number, d: any) => sum + toNum(d.amount), 0)
+
+  const customerCommissions = commissionData?.commissions || []
+  const totalCommissions = customerCommissions.length
+  const totalCommissionAmount = commissionSummary?.pendingAmount || 0
+  const totalCommissionQuantity = commissionSummary?.totalQuantity || 0
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -602,6 +616,108 @@ function CustomerDetailPage() {
                         </TableCell>
                         <TableCell className="text-right font-mono text-sm font-medium">
                           {formatCurrency(toNum(deposit.balanceAfter))}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Commission History */}
+      <Card>
+        <CardHeader className="border-b border-border">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="h-8 w-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-600">
+                <DollarSign size={16} />
+              </div>
+              <div>
+                <CardTitle className="text-sm">Commission History</CardTitle>
+                <CardDescription className="text-xs">Commissions earned by this customer</CardDescription>
+              </div>
+            </div>
+            <Badge variant="secondary">{totalCommissions} commission{totalCommissions !== 1 ? 's' : ''}</Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="pt-6">
+          {commissionsLoading ? (
+            <div className="flex items-center justify-center py-16">
+              <Loader2 size={24} className="animate-spin text-muted-foreground" />
+            </div>
+          ) : customerCommissions.length === 0 ? (
+            <div className="p-16 text-center">
+              <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-muted border border-border mb-4">
+                <SearchX size={24} className="text-muted-foreground" />
+              </div>
+              <p className="text-sm font-medium text-foreground">No commissions found</p>
+              <p className="text-xs text-muted-foreground mt-1">Commissions will appear here once orders are paid and commission rates are set.</p>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border border-border">
+                  <div className="flex items-center gap-2">
+                    <DollarSign size={14} className="text-primary" />
+                    <span className="text-xs text-muted-foreground">Commissions</span>
+                  </div>
+                  <span className="text-sm font-bold">{totalCommissions}</span>
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border border-border">
+                  <div className="flex items-center gap-2">
+                    <Fuel size={14} className="text-info" />
+                    <span className="text-xs text-muted-foreground">Total Quantity</span>
+                  </div>
+                  <span className="text-sm font-bold">{totalCommissionQuantity.toLocaleString()} L</span>
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border border-border">
+                  <div className="flex items-center gap-2">
+                    <Banknote size={14} className="text-success" />
+                    <span className="text-xs text-muted-foreground">Total Earned</span>
+                  </div>
+                  <span className="text-sm font-bold text-success">{formatCurrency(totalCommissionAmount)}</span>
+                </div>
+              </div>
+
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Order Ref</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Depot</TableHead>
+                      <TableHead>Product</TableHead>
+                      <TableHead>Quantity</TableHead>
+                      <TableHead>Rate</TableHead>
+                      <TableHead className="text-right">Amount</TableHead>
+                      <TableHead>Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {customerCommissions.map((c) => (
+                      <TableRow key={c.id} className="hover:bg-muted/50 transition">
+                        <TableCell className="font-mono font-semibold text-primary text-sm">
+                          {c.orderNumber}
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {c.orderCreatedAt ? new Date(c.orderCreatedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
+                        </TableCell>
+                        <TableCell className="text-sm">{c.depotName}</TableCell>
+                        <TableCell className="text-sm">{c.productName}</TableCell>
+                        <TableCell className="font-medium text-sm">{c.quantity.toLocaleString()} L</TableCell>
+                        <TableCell className="text-sm text-muted-foreground">₦{c.commissionRate}/L</TableCell>
+                        <TableCell className="text-right font-semibold text-foreground">
+                          {formatCurrency(c.commissionAmount)}
+                        </TableCell>
+                        <TableCell>
+                          {c.status === 'paid' ? (
+                            <Badge className="bg-success text-success-foreground text-xs">Credited</Badge>
+                          ) : (
+                            <Badge className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/20 text-xs">Pending</Badge>
+                          )}
                         </TableCell>
                       </TableRow>
                     ))}

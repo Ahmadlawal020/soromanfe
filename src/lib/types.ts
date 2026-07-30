@@ -97,6 +97,7 @@ export interface Product {
   name: string
   sku: string
   category: string
+  productType?: string
   gradeClass?: string
   description?: string
   density?: string
@@ -473,5 +474,56 @@ export interface BankAccount {
   notes?: string
   createdAt?: string
   updatedAt?: string
+}
+
+export interface CommissionRate {
+  id: number
+  depotId: number
+  depotName: string
+  depotCity?: string
+  depotState?: string
+  productId: number
+  productName: string
+  productSku?: string
+  commissionRate: number
+  createdAt?: string
+  updatedAt?: string
+}
+
+export interface Commission {
+  id: number
+  orderId: number
+  orderNumber: string
+  orderCreatedAt?: string
+  customerId: number
+  customerName: string
+  customerPhone?: string
+  customerCompanyName?: string
+  customerCommissionBankName?: string
+  customerCommissionAccountName?: string
+  customerCommissionAccountNumber?: string
+  depotId: number
+  depotName: string
+  depotCity?: string
+  depotState?: string
+  productId: number
+  productName: string
+  productSku?: string
+  quantity: number
+  commissionRate: number
+  commissionAmount: number
+  status: 'pending' | 'paid'
+  paidAt?: string | null
+  paidBy?: number | null
+  paidByName?: string | null
+  trucks?: { truckNumber: string; quantity: number }[]
+  createdAt?: string
+}
+
+export interface CommissionSummary {
+  totalOrders: number
+  totalQuantity: number
+  pendingAmount: number
+  paidAmount: number
 }
 

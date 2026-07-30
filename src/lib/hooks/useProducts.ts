@@ -3,7 +3,7 @@ import api from '#/lib/api/http'
 import { useToast } from '#/lib/hooks/useToast'
 import { getErrorMessage } from '#/lib/utils'
 
-export function useProductList(params?: { search?: string; category?: string }) {
+export function useProductList(params?: { search?: string; category?: string; productType?: string }) {
   return useQuery({
     queryKey: ['products', params],
     queryFn: async () => {

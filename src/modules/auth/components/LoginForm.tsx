@@ -83,8 +83,8 @@ export function LoginForm() {
 
           <form onSubmit={handleSubmit} noValidate className="space-y-6">
             {sessionExpired && (
-              <div className="p-3 bg-warning/10 border border-warning/25 rounded-lg text-sm text-warning-foreground flex items-start gap-2">
-                <AlertTriangle size={16} className="shrink-0 mt-0.5" />
+              <div className="p-3 bg-amber-50 border border-amber-200 dark:bg-amber-950/40 dark:border-amber-800/50 rounded-lg text-sm font-medium text-amber-900 dark:text-amber-200 flex items-start gap-2.5 shadow-sm">
+                <AlertTriangle size={16} className="shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
                 <span>Your session has expired. Please sign in again.</span>
               </div>
             )}

@@ -13,6 +13,8 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as SetPasswordRouteImport } from './routes/set-password'
 import { Route as AdminOrderIndexRouteImport } from './routes/admin-order/index'
+import { Route as AdminOrderDangoteRequestFormRouteImport } from './routes/admin-order/dangote-request-form'
+import { Route as AdminOrderDepotRouteImport } from './routes/admin-order/depot'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminDetailsRouteImport } from './routes/admin/details'
 import { Route as AdminFormRouteImport } from './routes/admin/form'
@@ -20,9 +22,17 @@ import { Route as AdminUpdateRouteImport } from './routes/admin/update'
 import { Route as BankAccountsIndexRouteImport } from './routes/bank-accounts/index'
 import { Route as BankAccountsDetailsRouteImport } from './routes/bank-accounts/details'
 import { Route as BankAccountsFormRouteImport } from './routes/bank-accounts/form'
+import { Route as CommissionsIndexRouteImport } from './routes/commissions/index'
 import { Route as CustomersIndexRouteImport } from './routes/customers/index'
 import { Route as CustomersDetailsRouteImport } from './routes/customers/details'
 import { Route as CustomersFormRouteImport } from './routes/customers/form'
+import { Route as DangoteOrderRequestIndexRouteImport } from './routes/dangote-order-request/index'
+import { Route as DangoteOrderRequestReviewRouteImport } from './routes/dangote-order-request/review'
+import { Route as DangoteOrdersIndexRouteImport } from './routes/dangote-orders/index'
+import { Route as DangoteOrdersDetailsRouteImport } from './routes/dangote-orders/details'
+import { Route as DangoteProductsIndexRouteImport } from './routes/dangote-products/index'
+import { Route as DangoteProductsDetailsRouteImport } from './routes/dangote-products/details'
+import { Route as DangoteProductsFormRouteImport } from './routes/dangote-products/form'
 import { Route as DeliveryCustomerIndexRouteImport } from './routes/delivery-customer/index'
 import { Route as DeliveryCustomerDetailsRouteImport } from './routes/delivery-customer/details'
 import { Route as DeliveryCustomerFormRouteImport } from './routes/delivery-customer/form'
@@ -48,6 +58,7 @@ import { Route as OverviewIndexRouteImport } from './routes/overview/index'
 import { Route as PfiIndexRouteImport } from './routes/pfi/index'
 import { Route as PfiDetailsRouteImport } from './routes/pfi/details'
 import { Route as PfiFormRouteImport } from './routes/pfi/form'
+import { Route as ProductPricingIndexRouteImport } from './routes/product-pricing/index'
 import { Route as ProductsIndexRouteImport } from './routes/products/index'
 import { Route as ProductsDetailsRouteImport } from './routes/products/details'
 import { Route as ProductsFormRouteImport } from './routes/products/form'
@@ -78,6 +89,17 @@ const SetPasswordRoute = SetPasswordRouteImport.update({
 const AdminOrderIndexRoute = AdminOrderIndexRouteImport.update({
   id: '/admin-order/',
   path: '/admin-order/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminOrderDangoteRequestFormRoute =
+  AdminOrderDangoteRequestFormRouteImport.update({
+    id: '/admin-order/dangote-request-form',
+    path: '/admin-order/dangote-request-form',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const AdminOrderDepotRoute = AdminOrderDepotRouteImport.update({
+  id: '/admin-order/depot',
+  path: '/admin-order/depot',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -115,6 +137,11 @@ const BankAccountsFormRoute = BankAccountsFormRouteImport.update({
   path: '/bank-accounts/form',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CommissionsIndexRoute = CommissionsIndexRouteImport.update({
+  id: '/commissions/',
+  path: '/commissions/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CustomersIndexRoute = CustomersIndexRouteImport.update({
   id: '/customers/',
   path: '/customers/',
@@ -128,6 +155,43 @@ const CustomersDetailsRoute = CustomersDetailsRouteImport.update({
 const CustomersFormRoute = CustomersFormRouteImport.update({
   id: '/customers/form',
   path: '/customers/form',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DangoteOrderRequestIndexRoute =
+  DangoteOrderRequestIndexRouteImport.update({
+    id: '/dangote-order-request/',
+    path: '/dangote-order-request/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const DangoteOrderRequestReviewRoute =
+  DangoteOrderRequestReviewRouteImport.update({
+    id: '/dangote-order-request/review',
+    path: '/dangote-order-request/review',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const DangoteOrdersIndexRoute = DangoteOrdersIndexRouteImport.update({
+  id: '/dangote-orders/',
+  path: '/dangote-orders/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DangoteOrdersDetailsRoute = DangoteOrdersDetailsRouteImport.update({
+  id: '/dangote-orders/details',
+  path: '/dangote-orders/details',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DangoteProductsIndexRoute = DangoteProductsIndexRouteImport.update({
+  id: '/dangote-products/',
+  path: '/dangote-products/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DangoteProductsDetailsRoute = DangoteProductsDetailsRouteImport.update({
+  id: '/dangote-products/details',
+  path: '/dangote-products/details',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DangoteProductsFormRoute = DangoteProductsFormRouteImport.update({
+  id: '/dangote-products/form',
+  path: '/dangote-products/form',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DeliveryCustomerIndexRoute = DeliveryCustomerIndexRouteImport.update({
@@ -258,6 +322,11 @@ const PfiFormRoute = PfiFormRouteImport.update({
   path: '/pfi/form',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProductPricingIndexRoute = ProductPricingIndexRouteImport.update({
+  id: '/product-pricing/',
+  path: '/product-pricing/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProductsIndexRoute = ProductsIndexRouteImport.update({
   id: '/products/',
   path: '/products/',
@@ -319,6 +388,8 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/set-password': typeof SetPasswordRoute
+  '/admin-order/dangote-request-form': typeof AdminOrderDangoteRequestFormRoute
+  '/admin-order/depot': typeof AdminOrderDepotRoute
   '/admin/details': typeof AdminDetailsRoute
   '/admin/form': typeof AdminFormRoute
   '/admin/update': typeof AdminUpdateRoute
@@ -326,6 +397,10 @@ export interface FileRoutesByFullPath {
   '/bank-accounts/form': typeof BankAccountsFormRoute
   '/customers/details': typeof CustomersDetailsRoute
   '/customers/form': typeof CustomersFormRoute
+  '/dangote-order-request/review': typeof DangoteOrderRequestReviewRoute
+  '/dangote-orders/details': typeof DangoteOrdersDetailsRoute
+  '/dangote-products/details': typeof DangoteProductsDetailsRoute
+  '/dangote-products/form': typeof DangoteProductsFormRoute
   '/delivery-customer/details': typeof DeliveryCustomerDetailsRoute
   '/delivery-customer/form': typeof DeliveryCustomerFormRoute
   '/delivery-operations/allocate-trucks': typeof DeliveryOperationsAllocateTrucksRoute
@@ -352,7 +427,11 @@ export interface FileRoutesByFullPath {
   '/admin-order/': typeof AdminOrderIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/bank-accounts/': typeof BankAccountsIndexRoute
+  '/commissions/': typeof CommissionsIndexRoute
   '/customers/': typeof CustomersIndexRoute
+  '/dangote-order-request/': typeof DangoteOrderRequestIndexRoute
+  '/dangote-orders/': typeof DangoteOrdersIndexRoute
+  '/dangote-products/': typeof DangoteProductsIndexRoute
   '/delivery-customer/': typeof DeliveryCustomerIndexRoute
   '/delivery-operations/': typeof DeliveryOperationsIndexRoute
   '/deposits/': typeof DepositsIndexRoute
@@ -362,6 +441,7 @@ export interface FileRoutesByFullPath {
   '/orders/': typeof OrdersIndexRoute
   '/overview/': typeof OverviewIndexRoute
   '/pfi/': typeof PfiIndexRoute
+  '/product-pricing/': typeof ProductPricingIndexRoute
   '/products/': typeof ProductsIndexRoute
   '/sales-ledger/': typeof SalesLedgerIndexRoute
   '/ticket/': typeof TicketIndexRoute
@@ -371,6 +451,8 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/set-password': typeof SetPasswordRoute
+  '/admin-order/dangote-request-form': typeof AdminOrderDangoteRequestFormRoute
+  '/admin-order/depot': typeof AdminOrderDepotRoute
   '/admin/details': typeof AdminDetailsRoute
   '/admin/form': typeof AdminFormRoute
   '/admin/update': typeof AdminUpdateRoute
@@ -378,6 +460,10 @@ export interface FileRoutesByTo {
   '/bank-accounts/form': typeof BankAccountsFormRoute
   '/customers/details': typeof CustomersDetailsRoute
   '/customers/form': typeof CustomersFormRoute
+  '/dangote-order-request/review': typeof DangoteOrderRequestReviewRoute
+  '/dangote-orders/details': typeof DangoteOrdersDetailsRoute
+  '/dangote-products/details': typeof DangoteProductsDetailsRoute
+  '/dangote-products/form': typeof DangoteProductsFormRoute
   '/delivery-customer/details': typeof DeliveryCustomerDetailsRoute
   '/delivery-customer/form': typeof DeliveryCustomerFormRoute
   '/delivery-operations/allocate-trucks': typeof DeliveryOperationsAllocateTrucksRoute
@@ -404,7 +490,11 @@ export interface FileRoutesByTo {
   '/admin-order': typeof AdminOrderIndexRoute
   '/admin': typeof AdminIndexRoute
   '/bank-accounts': typeof BankAccountsIndexRoute
+  '/commissions': typeof CommissionsIndexRoute
   '/customers': typeof CustomersIndexRoute
+  '/dangote-order-request': typeof DangoteOrderRequestIndexRoute
+  '/dangote-orders': typeof DangoteOrdersIndexRoute
+  '/dangote-products': typeof DangoteProductsIndexRoute
   '/delivery-customer': typeof DeliveryCustomerIndexRoute
   '/delivery-operations': typeof DeliveryOperationsIndexRoute
   '/deposits': typeof DepositsIndexRoute
@@ -414,6 +504,7 @@ export interface FileRoutesByTo {
   '/orders': typeof OrdersIndexRoute
   '/overview': typeof OverviewIndexRoute
   '/pfi': typeof PfiIndexRoute
+  '/product-pricing': typeof ProductPricingIndexRoute
   '/products': typeof ProductsIndexRoute
   '/sales-ledger': typeof SalesLedgerIndexRoute
   '/ticket': typeof TicketIndexRoute
@@ -424,6 +515,8 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/set-password': typeof SetPasswordRoute
+  '/admin-order/dangote-request-form': typeof AdminOrderDangoteRequestFormRoute
+  '/admin-order/depot': typeof AdminOrderDepotRoute
   '/admin/details': typeof AdminDetailsRoute
   '/admin/form': typeof AdminFormRoute
   '/admin/update': typeof AdminUpdateRoute
@@ -431,6 +524,10 @@ export interface FileRoutesById {
   '/bank-accounts/form': typeof BankAccountsFormRoute
   '/customers/details': typeof CustomersDetailsRoute
   '/customers/form': typeof CustomersFormRoute
+  '/dangote-order-request/review': typeof DangoteOrderRequestReviewRoute
+  '/dangote-orders/details': typeof DangoteOrdersDetailsRoute
+  '/dangote-products/details': typeof DangoteProductsDetailsRoute
+  '/dangote-products/form': typeof DangoteProductsFormRoute
   '/delivery-customer/details': typeof DeliveryCustomerDetailsRoute
   '/delivery-customer/form': typeof DeliveryCustomerFormRoute
   '/delivery-operations/allocate-trucks': typeof DeliveryOperationsAllocateTrucksRoute
@@ -457,7 +554,11 @@ export interface FileRoutesById {
   '/admin-order/': typeof AdminOrderIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/bank-accounts/': typeof BankAccountsIndexRoute
+  '/commissions/': typeof CommissionsIndexRoute
   '/customers/': typeof CustomersIndexRoute
+  '/dangote-order-request/': typeof DangoteOrderRequestIndexRoute
+  '/dangote-orders/': typeof DangoteOrdersIndexRoute
+  '/dangote-products/': typeof DangoteProductsIndexRoute
   '/delivery-customer/': typeof DeliveryCustomerIndexRoute
   '/delivery-operations/': typeof DeliveryOperationsIndexRoute
   '/deposits/': typeof DepositsIndexRoute
@@ -467,6 +568,7 @@ export interface FileRoutesById {
   '/orders/': typeof OrdersIndexRoute
   '/overview/': typeof OverviewIndexRoute
   '/pfi/': typeof PfiIndexRoute
+  '/product-pricing/': typeof ProductPricingIndexRoute
   '/products/': typeof ProductsIndexRoute
   '/sales-ledger/': typeof SalesLedgerIndexRoute
   '/ticket/': typeof TicketIndexRoute
@@ -478,6 +580,8 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/set-password'
+    | '/admin-order/dangote-request-form'
+    | '/admin-order/depot'
     | '/admin/details'
     | '/admin/form'
     | '/admin/update'
@@ -485,6 +589,10 @@ export interface FileRouteTypes {
     | '/bank-accounts/form'
     | '/customers/details'
     | '/customers/form'
+    | '/dangote-order-request/review'
+    | '/dangote-orders/details'
+    | '/dangote-products/details'
+    | '/dangote-products/form'
     | '/delivery-customer/details'
     | '/delivery-customer/form'
     | '/delivery-operations/allocate-trucks'
@@ -511,7 +619,11 @@ export interface FileRouteTypes {
     | '/admin-order/'
     | '/admin/'
     | '/bank-accounts/'
+    | '/commissions/'
     | '/customers/'
+    | '/dangote-order-request/'
+    | '/dangote-orders/'
+    | '/dangote-products/'
     | '/delivery-customer/'
     | '/delivery-operations/'
     | '/deposits/'
@@ -521,6 +633,7 @@ export interface FileRouteTypes {
     | '/orders/'
     | '/overview/'
     | '/pfi/'
+    | '/product-pricing/'
     | '/products/'
     | '/sales-ledger/'
     | '/ticket/'
@@ -530,6 +643,8 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/set-password'
+    | '/admin-order/dangote-request-form'
+    | '/admin-order/depot'
     | '/admin/details'
     | '/admin/form'
     | '/admin/update'
@@ -537,6 +652,10 @@ export interface FileRouteTypes {
     | '/bank-accounts/form'
     | '/customers/details'
     | '/customers/form'
+    | '/dangote-order-request/review'
+    | '/dangote-orders/details'
+    | '/dangote-products/details'
+    | '/dangote-products/form'
     | '/delivery-customer/details'
     | '/delivery-customer/form'
     | '/delivery-operations/allocate-trucks'
@@ -563,7 +682,11 @@ export interface FileRouteTypes {
     | '/admin-order'
     | '/admin'
     | '/bank-accounts'
+    | '/commissions'
     | '/customers'
+    | '/dangote-order-request'
+    | '/dangote-orders'
+    | '/dangote-products'
     | '/delivery-customer'
     | '/delivery-operations'
     | '/deposits'
@@ -573,6 +696,7 @@ export interface FileRouteTypes {
     | '/orders'
     | '/overview'
     | '/pfi'
+    | '/product-pricing'
     | '/products'
     | '/sales-ledger'
     | '/ticket'
@@ -582,6 +706,8 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/set-password'
+    | '/admin-order/dangote-request-form'
+    | '/admin-order/depot'
     | '/admin/details'
     | '/admin/form'
     | '/admin/update'
@@ -589,6 +715,10 @@ export interface FileRouteTypes {
     | '/bank-accounts/form'
     | '/customers/details'
     | '/customers/form'
+    | '/dangote-order-request/review'
+    | '/dangote-orders/details'
+    | '/dangote-products/details'
+    | '/dangote-products/form'
     | '/delivery-customer/details'
     | '/delivery-customer/form'
     | '/delivery-operations/allocate-trucks'
@@ -615,7 +745,11 @@ export interface FileRouteTypes {
     | '/admin-order/'
     | '/admin/'
     | '/bank-accounts/'
+    | '/commissions/'
     | '/customers/'
+    | '/dangote-order-request/'
+    | '/dangote-orders/'
+    | '/dangote-products/'
     | '/delivery-customer/'
     | '/delivery-operations/'
     | '/deposits/'
@@ -625,6 +759,7 @@ export interface FileRouteTypes {
     | '/orders/'
     | '/overview/'
     | '/pfi/'
+    | '/product-pricing/'
     | '/products/'
     | '/sales-ledger/'
     | '/ticket/'
@@ -635,6 +770,8 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
   SetPasswordRoute: typeof SetPasswordRoute
+  AdminOrderDangoteRequestFormRoute: typeof AdminOrderDangoteRequestFormRoute
+  AdminOrderDepotRoute: typeof AdminOrderDepotRoute
   AdminDetailsRoute: typeof AdminDetailsRoute
   AdminFormRoute: typeof AdminFormRoute
   AdminUpdateRoute: typeof AdminUpdateRoute
@@ -642,6 +779,10 @@ export interface RootRouteChildren {
   BankAccountsFormRoute: typeof BankAccountsFormRoute
   CustomersDetailsRoute: typeof CustomersDetailsRoute
   CustomersFormRoute: typeof CustomersFormRoute
+  DangoteOrderRequestReviewRoute: typeof DangoteOrderRequestReviewRoute
+  DangoteOrdersDetailsRoute: typeof DangoteOrdersDetailsRoute
+  DangoteProductsDetailsRoute: typeof DangoteProductsDetailsRoute
+  DangoteProductsFormRoute: typeof DangoteProductsFormRoute
   DeliveryCustomerDetailsRoute: typeof DeliveryCustomerDetailsRoute
   DeliveryCustomerFormRoute: typeof DeliveryCustomerFormRoute
   DeliveryOperationsAllocateTrucksRoute: typeof DeliveryOperationsAllocateTrucksRoute
@@ -668,7 +809,11 @@ export interface RootRouteChildren {
   AdminOrderIndexRoute: typeof AdminOrderIndexRoute
   AdminIndexRoute: typeof AdminIndexRoute
   BankAccountsIndexRoute: typeof BankAccountsIndexRoute
+  CommissionsIndexRoute: typeof CommissionsIndexRoute
   CustomersIndexRoute: typeof CustomersIndexRoute
+  DangoteOrderRequestIndexRoute: typeof DangoteOrderRequestIndexRoute
+  DangoteOrdersIndexRoute: typeof DangoteOrdersIndexRoute
+  DangoteProductsIndexRoute: typeof DangoteProductsIndexRoute
   DeliveryCustomerIndexRoute: typeof DeliveryCustomerIndexRoute
   DeliveryOperationsIndexRoute: typeof DeliveryOperationsIndexRoute
   DepositsIndexRoute: typeof DepositsIndexRoute
@@ -678,6 +823,7 @@ export interface RootRouteChildren {
   OrdersIndexRoute: typeof OrdersIndexRoute
   OverviewIndexRoute: typeof OverviewIndexRoute
   PfiIndexRoute: typeof PfiIndexRoute
+  ProductPricingIndexRoute: typeof ProductPricingIndexRoute
   ProductsIndexRoute: typeof ProductsIndexRoute
   SalesLedgerIndexRoute: typeof SalesLedgerIndexRoute
   TicketIndexRoute: typeof TicketIndexRoute
@@ -712,6 +858,20 @@ declare module '@tanstack/react-router' {
       path: '/admin-order'
       fullPath: '/admin-order/'
       preLoaderRoute: typeof AdminOrderIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-order/dangote-request-form': {
+      id: '/admin-order/dangote-request-form'
+      path: '/admin-order/dangote-request-form'
+      fullPath: '/admin-order/dangote-request-form'
+      preLoaderRoute: typeof AdminOrderDangoteRequestFormRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-order/depot': {
+      id: '/admin-order/depot'
+      path: '/admin-order/depot'
+      fullPath: '/admin-order/depot'
+      preLoaderRoute: typeof AdminOrderDepotRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -763,6 +923,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BankAccountsFormRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/commissions/': {
+      id: '/commissions/'
+      path: '/commissions'
+      fullPath: '/commissions/'
+      preLoaderRoute: typeof CommissionsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/customers/': {
       id: '/customers/'
       path: '/customers'
@@ -782,6 +949,55 @@ declare module '@tanstack/react-router' {
       path: '/customers/form'
       fullPath: '/customers/form'
       preLoaderRoute: typeof CustomersFormRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dangote-order-request/': {
+      id: '/dangote-order-request/'
+      path: '/dangote-order-request'
+      fullPath: '/dangote-order-request/'
+      preLoaderRoute: typeof DangoteOrderRequestIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dangote-order-request/review': {
+      id: '/dangote-order-request/review'
+      path: '/dangote-order-request/review'
+      fullPath: '/dangote-order-request/review'
+      preLoaderRoute: typeof DangoteOrderRequestReviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dangote-orders/': {
+      id: '/dangote-orders/'
+      path: '/dangote-orders'
+      fullPath: '/dangote-orders/'
+      preLoaderRoute: typeof DangoteOrdersIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dangote-orders/details': {
+      id: '/dangote-orders/details'
+      path: '/dangote-orders/details'
+      fullPath: '/dangote-orders/details'
+      preLoaderRoute: typeof DangoteOrdersDetailsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dangote-products/': {
+      id: '/dangote-products/'
+      path: '/dangote-products'
+      fullPath: '/dangote-products/'
+      preLoaderRoute: typeof DangoteProductsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dangote-products/details': {
+      id: '/dangote-products/details'
+      path: '/dangote-products/details'
+      fullPath: '/dangote-products/details'
+      preLoaderRoute: typeof DangoteProductsDetailsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dangote-products/form': {
+      id: '/dangote-products/form'
+      path: '/dangote-products/form'
+      fullPath: '/dangote-products/form'
+      preLoaderRoute: typeof DangoteProductsFormRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/delivery-customer/': {
@@ -959,6 +1175,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PfiFormRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/product-pricing/': {
+      id: '/product-pricing/'
+      path: '/product-pricing'
+      fullPath: '/product-pricing/'
+      preLoaderRoute: typeof ProductPricingIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/products/': {
       id: '/products/'
       path: '/products'
@@ -1043,6 +1266,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
   SetPasswordRoute: SetPasswordRoute,
+  AdminOrderDangoteRequestFormRoute: AdminOrderDangoteRequestFormRoute,
+  AdminOrderDepotRoute: AdminOrderDepotRoute,
   AdminDetailsRoute: AdminDetailsRoute,
   AdminFormRoute: AdminFormRoute,
   AdminUpdateRoute: AdminUpdateRoute,
@@ -1050,6 +1275,10 @@ const rootRouteChildren: RootRouteChildren = {
   BankAccountsFormRoute: BankAccountsFormRoute,
   CustomersDetailsRoute: CustomersDetailsRoute,
   CustomersFormRoute: CustomersFormRoute,
+  DangoteOrderRequestReviewRoute: DangoteOrderRequestReviewRoute,
+  DangoteOrdersDetailsRoute: DangoteOrdersDetailsRoute,
+  DangoteProductsDetailsRoute: DangoteProductsDetailsRoute,
+  DangoteProductsFormRoute: DangoteProductsFormRoute,
   DeliveryCustomerDetailsRoute: DeliveryCustomerDetailsRoute,
   DeliveryCustomerFormRoute: DeliveryCustomerFormRoute,
   DeliveryOperationsAllocateTrucksRoute: DeliveryOperationsAllocateTrucksRoute,
@@ -1077,7 +1306,11 @@ const rootRouteChildren: RootRouteChildren = {
   AdminOrderIndexRoute: AdminOrderIndexRoute,
   AdminIndexRoute: AdminIndexRoute,
   BankAccountsIndexRoute: BankAccountsIndexRoute,
+  CommissionsIndexRoute: CommissionsIndexRoute,
   CustomersIndexRoute: CustomersIndexRoute,
+  DangoteOrderRequestIndexRoute: DangoteOrderRequestIndexRoute,
+  DangoteOrdersIndexRoute: DangoteOrdersIndexRoute,
+  DangoteProductsIndexRoute: DangoteProductsIndexRoute,
   DeliveryCustomerIndexRoute: DeliveryCustomerIndexRoute,
   DeliveryOperationsIndexRoute: DeliveryOperationsIndexRoute,
   DepositsIndexRoute: DepositsIndexRoute,
@@ -1087,6 +1320,7 @@ const rootRouteChildren: RootRouteChildren = {
   OrdersIndexRoute: OrdersIndexRoute,
   OverviewIndexRoute: OverviewIndexRoute,
   PfiIndexRoute: PfiIndexRoute,
+  ProductPricingIndexRoute: ProductPricingIndexRoute,
   ProductsIndexRoute: ProductsIndexRoute,
   SalesLedgerIndexRoute: SalesLedgerIndexRoute,
   TicketIndexRoute: TicketIndexRoute,
