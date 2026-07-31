@@ -13,7 +13,7 @@ import {
 } from 'lucide-react'
 import { uploadFile } from '#/lib/hooks/useCloudinaryUpload'
 import type { DangoteOrderWizardReturn } from '../../hooks/useDangoteOrderWizard'
-import type { CustomerLicense } from '#/lib/types'
+
 
 interface DangoteCompanyLicenseStepProps {
   wizard: DangoteOrderWizardReturn

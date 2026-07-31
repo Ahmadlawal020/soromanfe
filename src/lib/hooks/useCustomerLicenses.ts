@@ -87,7 +87,7 @@ export function useUpdateCustomerLicense() {
     mutationFn: async ({
       id,
       data,
-      customerId,
+      customerId: _customerId,
     }: {
       id: number
       data: {
@@ -122,7 +122,7 @@ export function useDeleteCustomerLicense() {
     retry: false,
     mutationFn: async ({
       id,
-      customerId,
+      customerId: _customerId,
     }: {
       id: number
       customerId: number

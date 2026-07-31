@@ -212,9 +212,9 @@ function LicenceVerification() {
                         className="cursor-pointer hover:bg-muted transition"
                         onClick={() =>
                           navigate({
-                            to: '/licence-verification/review' as any,
+                            to: '/licence-verification/review',
                             search: { id: String(license.id) },
-                          })
+                          } as any)
                         }
                       >
                         <TableCell>
