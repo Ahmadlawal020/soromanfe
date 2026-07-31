@@ -6,6 +6,7 @@ import { Label } from '#/components/ui/label'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '#/components/ui/select'
 import { ArrowLeft, Users, CheckCircle, Loader2, AlertCircle, Building2 } from 'lucide-react'
 import { useCreateCustomer, useUpdateCustomer } from '#/lib/hooks/useCustomers'
+import { CustomerLicenses } from '#/components/CustomerLicenses'
 
 export const Route = createFileRoute('/customers/form')({
   component: CustomerForm,
@@ -50,6 +51,7 @@ function CustomerForm() {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [submitted, setSubmitted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [createdCustomerId, setCreatedCustomerId] = useState<number | null>(null)
 
   const validate = () => {
     const newErrors: Record<string, string> = {}
@@ -86,7 +88,8 @@ function CustomerForm() {
       if (isEdit && formData.id) {
         await updateCustomer.mutateAsync({ id: formData.id, data: payload })
       } else {
-        await createCustomer.mutateAsync(payload)
+        const result = await createCustomer.mutateAsync(payload)
+        setCreatedCustomerId(result?.data?.customer?.id || null)
       }
       setSubmitted(true)
     } catch (err: any) {
@@ -98,27 +101,36 @@ function CustomerForm() {
 
   if (submitted) {
     return (
-      <div className="flex flex-col items-center justify-center py-24 gap-5 text-center">
-        <div className="h-16 w-16 rounded-full bg-success/10 flex items-center justify-center text-success border border-success/20">
-          <CheckCircle size={32} />
+      <div className="space-y-6">
+        <div className="flex flex-col items-center justify-center py-12 gap-5 text-center">
+          <div className="h-16 w-16 rounded-full bg-success/10 flex items-center justify-center text-success border border-success/20">
+            <CheckCircle size={32} />
+          </div>
+          <h2 className="text-2xl font-bold text-foreground">Customer {isEdit ? 'Updated' : 'Created'} Successfully!</h2>
+          <p className="text-muted-foreground max-w-sm">Customer {formData.name} has been saved to the customer directory.</p>
+          <div className="flex gap-3 mt-2">
+            {!isEdit && (
+              <Button variant="outline" onClick={() => {
+                setSubmitted(false)
+                setCreatedCustomerId(null)
+                setFormData({
+                  id: '', name: '', email: '', phone: '',
+                  companyName: '', address: '', status: 'Active',
+                })
+                setErrors({})
+              }}>
+                Add Another
+              </Button>
+            )}
+            <Button onClick={() => navigate({ to: '/customers/' as any })}>Back to Customers</Button>
+          </div>
         </div>
-        <h2 className="text-2xl font-bold text-foreground">Customer {isEdit ? 'Updated' : 'Created'} Successfully!</h2>
-        <p className="text-muted-foreground max-w-sm">Customer {formData.name} has been saved to the customer directory.</p>
-        <div className="flex gap-3 mt-2">
-          {!isEdit && (
-            <Button variant="outline" onClick={() => {
-              setSubmitted(false)
-              setFormData({
-                id: '', name: '', email: '', phone: '',
-                companyName: '', address: '', status: 'Active',
-              })
-              setErrors({})
-            }}>
-              Add Another
-            </Button>
-          )}
-          <Button onClick={() => navigate({ to: '/customers/' as any })}>Back to Customers</Button>
-        </div>
+
+        {!isEdit && createdCustomerId && (
+          <div className="max-w-2xl mx-auto">
+            <CustomerLicenses customerId={createdCustomerId} />
+          </div>
+        )}
       </div>
     )
   }
@@ -221,6 +233,10 @@ function CustomerForm() {
           </div>
 
         </div>
+
+        {isEdit && editingCustomer?.id && (
+          <CustomerLicenses customerId={Number(editingCustomer.id)} />
+        )}
 
         <div className="flex justify-end gap-3 border-t pt-4">
           <Button type="button" variant="outline" onClick={() => navigate({ to: '/customers/' as any })}>Cancel</Button>

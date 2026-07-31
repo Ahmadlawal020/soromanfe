@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useCustomerList, useCreateCustomer } from '#/lib/hooks/useCustomers'
+import { useCustomerLicenses, useCreateCustomerLicense } from '#/lib/hooks/useCustomerLicenses'
 import { useDangoteProductsActive, useCreateDangoteOrderRequest } from '#/lib/hooks/useDangoteOrders'
+import type { CustomerLicense } from '#/lib/types'
 
 export function useDangoteOrderWizard() {
   const createCustomerMutation = useCreateCustomer()
   const createDangoteOrderRequestMutation = useCreateDangoteOrderRequest()
+  const createLicenseMutation = useCreateCustomerLicense()
 
   const [step, setStep] = useState(1)
   const [error, setError] = useState('')
@@ -24,19 +27,29 @@ export function useDangoteOrderWizard() {
     address: '',
   })
 
-  // Step 2: Product
+  // Step 2: Company & Licence
+  const [selectedLicense, setSelectedLicense] = useState<CustomerLicense | null>(null)
+  const [isAddingLicense, setIsAddingLicense] = useState(false)
+  const [newLicenseForm, setNewLicenseForm] = useState({
+    companyName: '',
+    licenseUrl: '',
+    licensePublicId: '',
+    expiryDate: '',
+  })
+
+  // Step 3: Product
   const [selectedProduct, setSelectedProduct] = useState<any>(null)
 
-  // Step 3: Quantity
+  // Step 4: Quantity
   const [orderQuantity, setOrderQuantity] = useState('')
   const [quantityUnit, setQuantityUnit] = useState('Tons')
 
-  // Step 4: Delivery
+  // Step 5: Delivery
   const [deliveryAddress, setDeliveryAddress] = useState('')
   const [deliveryState, setDeliveryState] = useState('')
   const [deliveryLga, setDeliveryLga] = useState('')
 
-  // Step 5: Completion
+  // Step 6: Completion
   const [placedRequest, setPlacedRequest] = useState<any>(null)
 
   // Sync quantity unit to selected product's unit
@@ -55,6 +68,13 @@ export function useDangoteOrderWizard() {
     return () => clearTimeout(handler)
   }, [customerSearch])
 
+  // Reset licence selection when customer changes
+  useEffect(() => {
+    setSelectedLicense(null)
+    setIsAddingLicense(false)
+    setNewLicenseForm({ companyName: '', licenseUrl: '', licensePublicId: '', expiryDate: '' })
+  }, [selectedCustomer])
+
   // Backend queries
   const { data: customerSearchData, isLoading: isSearchingCustomers } = useCustomerList(
     { search: debouncedSearch || undefined, limit: 20, page: searchPage },
@@ -63,6 +83,14 @@ export function useDangoteOrderWizard() {
   const customers = customerSearchData?.customers || []
   const totalCustomers = customerSearchData?.pagination?.total || 0
   const hasMore = customers.length < totalCustomers
+
+  const customerId = selectedCustomer?._id || selectedCustomer?.id
+  const { data: customerLicenses = [], isLoading: isLoadingLicenses } = useCustomerLicenses(customerId)
+
+  // Filter licences: only show approved and pending (not rejected)
+  const availableLicenses = customerLicenses.filter(
+    (l) => l.status === 'approved' || l.status === 'pending'
+  )
 
   const { data: dangoteProducts = [], isLoading: isLoadingProducts } = useDangoteProductsActive()
 
@@ -92,11 +120,42 @@ export function useDangoteOrderWizard() {
     }
   }
 
+  const handleAddLicense = async () => {
+    setError('')
+    if (!newLicenseForm.companyName.trim()) {
+      setError('Company name is required')
+      return
+    }
+    if (!newLicenseForm.licenseUrl) {
+      setError('Please upload a licence file')
+      return
+    }
+    try {
+      const cid = Number(customerId)
+      const response = await createLicenseMutation.mutateAsync({
+        customerId: cid,
+        companyName: newLicenseForm.companyName.trim(),
+        licenseUrl: newLicenseForm.licenseUrl,
+        licensePublicId: newLicenseForm.licensePublicId,
+        expiryDate: newLicenseForm.expiryDate || undefined,
+      })
+      if (response.success && response.data?.license) {
+        setSelectedLicense(response.data.license)
+        setIsAddingLicense(false)
+        setNewLicenseForm({ companyName: '', licenseUrl: '', licensePublicId: '', expiryDate: '' })
+      }
+    } catch (err: any) {
+      setError(err?.response?.data?.message || err.message || 'Failed to add licence')
+    }
+  }
+
   const handlePlaceOrder = async () => {
     setError('')
     try {
       const payload = {
-        customerId: selectedCustomer._id || selectedCustomer.id,
+        customerId: customerId,
+        companyName: selectedLicense?.companyName || '',
+        licenseId: selectedLicense?.id || null,
         product: selectedProduct.name,
         quantity: Number(orderQuantity),
         quantityUnit,
@@ -107,7 +166,7 @@ export function useDangoteOrderWizard() {
       const response = await createDangoteOrderRequestMutation.mutateAsync(payload)
       if (response.success && response.data?.request) {
         setPlacedRequest(response.data.request)
-        setStep(6)
+        setStep(7)
       }
     } catch (err: any) {
       setError(err?.response?.data?.message || err.message || 'Failed to submit order request')
@@ -123,23 +182,29 @@ export function useDangoteOrderWizard() {
       }
       setStep(2)
     } else if (step === 2) {
-      if (!selectedProduct) {
-        setError('Please select a Dangote product')
+      if (!selectedLicense) {
+        setError('Please select a company & licence or add a new one')
         return
       }
       setStep(3)
     } else if (step === 3) {
-      if (!orderQuantity || Number(orderQuantity) <= 0) {
-        setError('Please enter a valid quantity')
+      if (!selectedProduct) {
+        setError('Please select a Dangote product')
         return
       }
       setStep(4)
     } else if (step === 4) {
+      if (!orderQuantity || Number(orderQuantity) <= 0) {
+        setError('Please enter a valid quantity')
+        return
+      }
+      setStep(5)
+    } else if (step === 5) {
       if (!deliveryAddress.trim()) {
         setError('Please enter the delivery address')
         return
       }
-      setStep(5)
+      setStep(6)
     }
   }
 
@@ -156,6 +221,9 @@ export function useDangoteOrderWizard() {
     setSearchPage(1)
     setSelectedCustomer(null)
     setIsRegisteringCustomer(false)
+    setSelectedLicense(null)
+    setIsAddingLicense(false)
+    setNewLicenseForm({ companyName: '', licenseUrl: '', licensePublicId: '', expiryDate: '' })
     setSelectedProduct(null)
     setOrderQuantity('')
     setQuantityUnit('Tons')
@@ -189,6 +257,17 @@ export function useDangoteOrderWizard() {
     isSearchingCustomers,
     createCustomerMutation,
 
+    // Licence state
+    selectedLicense,
+    setSelectedLicense,
+    isAddingLicense,
+    setIsAddingLicense,
+    newLicenseForm,
+    setNewLicenseForm,
+    customerLicenses: availableLicenses,
+    isLoadingLicenses,
+    createLicenseMutation,
+
     // Product state
     selectedProduct,
     setSelectedProduct,
@@ -215,6 +294,7 @@ export function useDangoteOrderWizard() {
 
     // Handlers
     handleRegisterCustomer,
+    handleAddLicense,
     handlePlaceOrder,
     handleNextStep,
     handlePrevStep,

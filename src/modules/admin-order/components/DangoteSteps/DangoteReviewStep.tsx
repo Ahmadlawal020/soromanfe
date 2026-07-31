@@ -1,5 +1,6 @@
 import {
   User,
+  ShieldPlus,
   Package,
   MapPin,
   Truck,
@@ -14,6 +15,7 @@ interface DangoteReviewStepProps {
 export function DangoteReviewStep({ wizard }: DangoteReviewStepProps) {
   const {
     selectedCustomer,
+    selectedLicense,
     selectedProduct,
     orderQuantity,
     quantityUnit,
@@ -58,6 +60,30 @@ export function DangoteReviewStep({ wizard }: DangoteReviewStepProps) {
               <span className="text-muted-foreground block">Email</span>
               <span className="font-medium">{selectedCustomer?.email || '—'}</span>
             </div>
+          </div>
+        </div>
+
+        {/* Company & Licence */}
+        <div className="p-4 border rounded-xl bg-muted/30">
+          <div className="flex items-center gap-2 mb-3">
+            <ShieldPlus className="text-primary w-4 h-4" />
+            <span className="font-bold text-sm">Company & Licence</span>
+          </div>
+          <div className="grid grid-cols-2 gap-3 text-xs">
+            <div>
+              <span className="text-muted-foreground block">Company Name</span>
+              <span className="font-medium">{selectedLicense?.companyName || '—'}</span>
+            </div>
+            <div>
+              <span className="text-muted-foreground block">Licence Status</span>
+              <span className="font-medium capitalize">{selectedLicense?.status || '—'}</span>
+            </div>
+            {selectedLicense?.expiryDate && (
+              <div>
+                <span className="text-muted-foreground block">Expiry Date</span>
+                <span className="font-medium">{new Date(selectedLicense.expiryDate).toLocaleDateString()}</span>
+              </div>
+            )}
           </div>
         </div>
 

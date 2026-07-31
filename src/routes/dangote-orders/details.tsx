@@ -7,6 +7,7 @@ import {
   ArrowLeft, AlertCircle, Package, MapPin,
   Calendar, Phone, Mail, Building2, Truck, FileCheck,
   Banknote, Copy, CheckCircle, Clock, XCircle, User, CircleDollarSign,
+  ShieldPlus, FileText,
 } from 'lucide-react'
 import { useDangoteOrderRequestDetails, useUpdateDangoteOrderPaymentStatus, useUpdateDangoteOrderCollectionStatus } from '#/lib/hooks/useDangoteOrders'
 import { Breadcrumbs } from '#/components/Breadcrumbs'
@@ -82,6 +83,19 @@ function requestStatusBadge(status: string) {
       return <Badge variant="destructive" className="gap-1"><XCircle size={12} /> Rejected</Badge>
     default:
       return <Badge variant="outline">{status}</Badge>
+  }
+}
+
+function licenseStatusBadge(status: string) {
+  switch (status) {
+    case 'approved':
+      return <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 gap-1"><CheckCircle size={12} /> Approved</Badge>
+    case 'pending':
+      return <Badge className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/20 gap-1"><Clock size={12} /> Pending</Badge>
+    case 'rejected':
+      return <Badge variant="destructive" className="gap-1"><XCircle size={12} /> Rejected</Badge>
+    default:
+      return <Badge variant="outline">{status || 'No Licence'}</Badge>
   }
 }
 
@@ -282,6 +296,65 @@ function DangoteOrderDetails() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Licence Information */}
+        {(request.licenseId || request.licenseCompanyName) && (
+          <Card>
+            <CardHeader className="border-b border-border">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                  <ShieldPlus size={16} />
+                </div>
+                <div>
+                  <CardTitle className="text-sm">Company Licence</CardTitle>
+                  <CardDescription className="text-xs">Licence details and verification status</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4 pt-6">
+              <div>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Company Name</p>
+                <p className="text-sm font-semibold text-foreground mt-0.5">{request.licenseCompanyName || '—'}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Licence Status</p>
+                <div className="mt-1">{licenseStatusBadge(request.licenseStatus)}</div>
+              </div>
+              {request.licenseUrl && (
+                <div>
+                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider mb-2">Licence Document</p>
+                  <div className="rounded-lg border bg-background overflow-hidden">
+                    {/\.(pdf)/i.test(request.licenseUrl) ? (
+                      <div className="p-4 flex items-center gap-3">
+                        <FileText className="h-8 w-8 text-primary shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-foreground">PDF Document</p>
+                          <p className="text-xs text-muted-foreground truncate">{request.licenseUrl}</p>
+                        </div>
+                        <a
+                          href={request.licenseUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-primary underline hover:no-underline"
+                        >
+                          View PDF
+                        </a>
+                      </div>
+                    ) : (
+                      <a href={request.licenseUrl} target="_blank" rel="noopener noreferrer">
+                        <img
+                          src={request.licenseUrl}
+                          alt={`${request.licenseCompanyName} licence`}
+                          className="w-full max-h-[500px] object-contain cursor-pointer hover:opacity-95 transition-opacity"
+                        />
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Delivery Information */}
         <Card>

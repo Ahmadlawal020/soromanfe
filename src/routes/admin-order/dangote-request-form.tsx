@@ -7,6 +7,7 @@ import {
   ArrowRight,
   AlertCircle,
   User,
+  ShieldPlus,
   Package,
   CircleDollarSign,
   MapPin,
@@ -15,6 +16,7 @@ import {
 import { useDangoteOrderWizard } from '#/modules/admin-order/hooks/useDangoteOrderWizard'
 import {
   DangoteCustomerStep,
+  DangoteCompanyLicenseStep,
   DangoteProductStep,
   DangoteQuantityStep,
   DangoteDeliveryStep,
@@ -28,6 +30,7 @@ export const Route = createFileRoute('/admin-order/dangote-request-form')({
 
 const DANGOTE_WIZARD_STEPS = [
   { title: 'Customer', shortTitle: 'Customer', icon: User },
+  { title: 'Company', shortTitle: 'Company', icon: ShieldPlus },
   { title: 'Product', shortTitle: 'Product', icon: Package },
   { title: 'Quantity', shortTitle: 'Quantity', icon: CircleDollarSign },
   { title: 'Delivery', shortTitle: 'Delivery', icon: MapPin },
@@ -103,7 +106,7 @@ function DangoteRequestForm() {
       </div>
 
       {/* Progress Indicator */}
-      {step <= 5 && <DangoteProgressBar step={step} />}
+      {step <= 6 && <DangoteProgressBar step={step} />}
 
       {/* Error Banner */}
       {error && (
@@ -117,15 +120,16 @@ function DangoteRequestForm() {
       <Card className="shadow-md">
         <CardContent className="pt-6">
           {step === 1 && <DangoteCustomerStep wizard={wizard} />}
-          {step === 2 && <DangoteProductStep wizard={wizard} />}
-          {step === 3 && <DangoteQuantityStep wizard={wizard} />}
-          {step === 4 && <DangoteDeliveryStep wizard={wizard} />}
-          {step === 5 && <DangoteReviewStep wizard={wizard} />}
-          {step === 6 && <DangoteCompletionStep wizard={wizard} />}
+          {step === 2 && <DangoteCompanyLicenseStep wizard={wizard} />}
+          {step === 3 && <DangoteProductStep wizard={wizard} />}
+          {step === 4 && <DangoteQuantityStep wizard={wizard} />}
+          {step === 5 && <DangoteDeliveryStep wizard={wizard} />}
+          {step === 6 && <DangoteReviewStep wizard={wizard} />}
+          {step === 7 && <DangoteCompletionStep wizard={wizard} />}
         </CardContent>
 
         {/* Footer Navigation */}
-        {step <= 5 && (
+        {step <= 6 && (
           <CardFooter className="border-t border-border flex justify-between pt-4 bg-muted/20">
             <Button
               variant="outline"
@@ -134,7 +138,7 @@ function DangoteRequestForm() {
             >
               <ArrowLeft className="w-4 h-4 mr-1.5" /> Back
             </Button>
-            {step === 5 ? (
+            {step === 6 ? (
               <Button
                 className="bg-primary hover:bg-primary/90 text-white border-0 min-w-[140px]"
                 onClick={handlePlaceOrder}

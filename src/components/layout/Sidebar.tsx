@@ -103,6 +103,7 @@ const navCategories: NavCategory[] = [
     category: "Admin",
     items: [
       { title: "PFI Tracking", icon: FileText, path: "/pfi" },
+      { title: "Licence Verification", icon: ShieldCheck, path: "/licence-verification" },
       { title: "Admin Settings", icon: ShieldCheck, path: "/admin" },
     ],
   },

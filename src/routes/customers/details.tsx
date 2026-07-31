@@ -13,6 +13,7 @@ import { useToast } from '#/lib/hooks/useToast'
 import { toNum } from '#/lib/utils'
 import { Breadcrumbs } from '#/components/Breadcrumbs'
 import { ConfirmDialog } from '#/components/ConfirmDialog'
+import { CustomerLicenses } from '#/components/CustomerLicenses'
 
 export const Route = createFileRoute('/customers/details')({
   validateSearch: (search: Record<string, unknown>): { id?: string; customerId?: string } => {
@@ -341,6 +342,9 @@ function CustomerDetailPage() {
             )}
           </CardContent>
         </Card>
+
+        {/* DPR / NUPRC Licenses */}
+        <CustomerLicenses customerId={Number(customerId)} />
 
         {/* Card 4: Status & Activity */}
         <Card className="md:col-span-2">

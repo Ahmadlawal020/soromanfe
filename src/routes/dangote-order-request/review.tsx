@@ -8,7 +8,7 @@ import { Label } from '#/components/ui/label'
 import { CommaInput } from '#/components/ui/comma-input'
 import {
   ArrowLeft, Package, MapPin, Truck, DollarSign, Calendar, Clock, CheckCircle, XCircle,
-  User, FileText, Mail, Phone,
+  User, FileText, Mail, Phone, ShieldPlus, AlertTriangle,
 } from 'lucide-react'
 import { useDangoteOrderRequestDetails, useReviewDangoteOrderRequest } from '#/lib/hooks/useDangoteOrders'
 import { PageLoader } from '#/components/PageLoader'
@@ -50,6 +50,19 @@ function statusBadge(status: string) {
       return <Badge variant="destructive" className="gap-1"><XCircle size={12} /> Rejected</Badge>
     default:
       return <Badge variant="outline">{status}</Badge>
+  }
+}
+
+function licenseStatusBadge(status: string) {
+  switch (status) {
+    case 'approved':
+      return <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 gap-1"><CheckCircle size={12} /> Approved</Badge>
+    case 'pending':
+      return <Badge className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/20 gap-1"><Clock size={12} /> Pending</Badge>
+    case 'rejected':
+      return <Badge variant="destructive" className="gap-1"><XCircle size={12} /> Rejected</Badge>
+    default:
+      return <Badge variant="outline">{status || 'No Licence'}</Badge>
   }
 }
 
@@ -119,6 +132,8 @@ function ReviewPage() {
 
   const computedTotal = (parseFloat(pricePerUnit) || 0) * request.quantity + (parseFloat(deliveryPrice) || 0)
   const reviewerName = [request.reviewerFirstName, request.reviewerSurname].filter(Boolean).join(' ') || 'N/A'
+  const hasLicense = !!request.licenseId
+  const licenseApproved = !hasLicense || request.licenseStatus === 'approved'
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -211,6 +226,49 @@ function ReviewPage() {
                 <p className="text-sm font-medium text-foreground">{formatDate(request.createdAt)}</p>
               </div>
             </div>
+
+            {/* Licence Info */}
+            {(request.licenseId || request.licenseCompanyName) && (
+              <div className="space-y-3 pt-3 border-t border-border">
+                <div className="flex items-center gap-3">
+                  <ShieldPlus size={16} className="text-muted-foreground shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-xs text-muted-foreground">Company Licence</p>
+                    <p className="text-sm font-semibold text-foreground">{request.licenseCompanyName || '—'}</p>
+                  </div>
+                  {licenseStatusBadge(request.licenseStatus)}
+                </div>
+                {request.licenseUrl && (
+                  <div className="rounded-lg border bg-background overflow-hidden">
+                    {/\.(pdf)/i.test(request.licenseUrl) ? (
+                      <div className="p-4 flex items-center gap-3">
+                        <FileText className="h-8 w-8 text-primary shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-foreground">PDF Document</p>
+                          <p className="text-xs text-muted-foreground truncate">{request.licenseUrl}</p>
+                        </div>
+                        <a
+                          href={request.licenseUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-primary underline hover:no-underline"
+                        >
+                          View PDF
+                        </a>
+                      </div>
+                    ) : (
+                      <a href={request.licenseUrl} target="_blank" rel="noopener noreferrer">
+                        <img
+                          src={request.licenseUrl}
+                          alt={`${request.licenseCompanyName} licence`}
+                          className="w-full max-h-[500px] object-contain cursor-pointer hover:opacity-95 transition-opacity"
+                        />
+                      </a>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -284,6 +342,19 @@ function ReviewPage() {
                   </div>
                 </div>
 
+                {/* Licence Warning */}
+                {hasLicense && !licenseApproved && (
+                  <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-start gap-2">
+                    <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-semibold text-amber-600 dark:text-amber-400">Licence Not Approved</p>
+                      <p className="text-xs text-amber-600/80 dark:text-amber-400/80">
+                        The associated licence ({request.licenseCompanyName}) is {request.licenseStatus || 'not approved'}. Approve the licence first before approving this order.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 <div className="flex gap-3 pt-2">
                   <Button
                     variant="destructive"
@@ -297,7 +368,7 @@ function ReviewPage() {
                   <Button
                     className="flex-1 gap-2"
                     onClick={() => setShowApproveConfirm(true)}
-                    disabled={!pricePerUnit || reviewMutation.isPending}
+                    disabled={!pricePerUnit || !licenseApproved || reviewMutation.isPending}
                   >
                     <CheckCircle className="h-4 w-4" />
                     Approve Request

@@ -1,4 +1,5 @@
 export { DangoteCustomerStep } from './DangoteCustomerStep'
+export { DangoteCompanyLicenseStep } from './DangoteCompanyLicenseStep'
 export { DangoteProductStep } from './DangoteProductStep'
 export { DangoteQuantityStep } from './DangoteQuantityStep'
 export { DangoteDeliveryStep } from './DangoteDeliveryStep'

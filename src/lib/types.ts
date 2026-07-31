@@ -39,6 +39,26 @@ export interface Customer {
   updatedAt?: string
 }
 
+export interface CustomerLicense {
+  id: number
+  customerId: number
+  companyName: string
+  licenseUrl: string
+  licensePublicId: string
+  expiryDate: string | null
+  status: 'pending' | 'approved' | 'rejected'
+  verifiedBy: number | null
+  verifiedByName: string
+  verifiedAt: string | null
+  verificationComment: string
+  createdAt: string
+  updatedAt: string
+  customerName?: string
+  customerEmail?: string
+  customerPhone?: string
+  customerCompanyName?: string
+}
+
 export interface Truck {
   _id: string
   plateNumber: string

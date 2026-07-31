@@ -52,6 +52,8 @@ import { Route as DriversFormRouteImport } from './routes/drivers/form'
 import { Route as FilingStationsIndexRouteImport } from './routes/filing-stations/index'
 import { Route as FilingStationsDetailsRouteImport } from './routes/filing-stations/details'
 import { Route as FilingStationsFormRouteImport } from './routes/filing-stations/form'
+import { Route as LicenceVerificationIndexRouteImport } from './routes/licence-verification/index'
+import { Route as LicenceVerificationReviewRouteImport } from './routes/licence-verification/review'
 import { Route as OrdersIndexRouteImport } from './routes/orders/index'
 import { Route as OrdersDetailsRouteImport } from './routes/orders/details'
 import { Route as OverviewIndexRouteImport } from './routes/overview/index'
@@ -292,6 +294,18 @@ const FilingStationsFormRoute = FilingStationsFormRouteImport.update({
   path: '/filing-stations/form',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LicenceVerificationIndexRoute =
+  LicenceVerificationIndexRouteImport.update({
+    id: '/licence-verification/',
+    path: '/licence-verification/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const LicenceVerificationReviewRoute =
+  LicenceVerificationReviewRouteImport.update({
+    id: '/licence-verification/review',
+    path: '/licence-verification/review',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const OrdersIndexRoute = OrdersIndexRouteImport.update({
   id: '/orders/',
   path: '/orders/',
@@ -414,6 +428,7 @@ export interface FileRoutesByFullPath {
   '/drivers/form': typeof DriversFormRoute
   '/filing-stations/details': typeof FilingStationsDetailsRoute
   '/filing-stations/form': typeof FilingStationsFormRoute
+  '/licence-verification/review': typeof LicenceVerificationReviewRoute
   '/orders/details': typeof OrdersDetailsRoute
   '/pfi/details': typeof PfiDetailsRoute
   '/pfi/form': typeof PfiFormRoute
@@ -438,6 +453,7 @@ export interface FileRoutesByFullPath {
   '/depots/': typeof DepotsIndexRoute
   '/drivers/': typeof DriversIndexRoute
   '/filing-stations/': typeof FilingStationsIndexRoute
+  '/licence-verification/': typeof LicenceVerificationIndexRoute
   '/orders/': typeof OrdersIndexRoute
   '/overview/': typeof OverviewIndexRoute
   '/pfi/': typeof PfiIndexRoute
@@ -477,6 +493,7 @@ export interface FileRoutesByTo {
   '/drivers/form': typeof DriversFormRoute
   '/filing-stations/details': typeof FilingStationsDetailsRoute
   '/filing-stations/form': typeof FilingStationsFormRoute
+  '/licence-verification/review': typeof LicenceVerificationReviewRoute
   '/orders/details': typeof OrdersDetailsRoute
   '/pfi/details': typeof PfiDetailsRoute
   '/pfi/form': typeof PfiFormRoute
@@ -501,6 +518,7 @@ export interface FileRoutesByTo {
   '/depots': typeof DepotsIndexRoute
   '/drivers': typeof DriversIndexRoute
   '/filing-stations': typeof FilingStationsIndexRoute
+  '/licence-verification': typeof LicenceVerificationIndexRoute
   '/orders': typeof OrdersIndexRoute
   '/overview': typeof OverviewIndexRoute
   '/pfi': typeof PfiIndexRoute
@@ -541,6 +559,7 @@ export interface FileRoutesById {
   '/drivers/form': typeof DriversFormRoute
   '/filing-stations/details': typeof FilingStationsDetailsRoute
   '/filing-stations/form': typeof FilingStationsFormRoute
+  '/licence-verification/review': typeof LicenceVerificationReviewRoute
   '/orders/details': typeof OrdersDetailsRoute
   '/pfi/details': typeof PfiDetailsRoute
   '/pfi/form': typeof PfiFormRoute
@@ -565,6 +584,7 @@ export interface FileRoutesById {
   '/depots/': typeof DepotsIndexRoute
   '/drivers/': typeof DriversIndexRoute
   '/filing-stations/': typeof FilingStationsIndexRoute
+  '/licence-verification/': typeof LicenceVerificationIndexRoute
   '/orders/': typeof OrdersIndexRoute
   '/overview/': typeof OverviewIndexRoute
   '/pfi/': typeof PfiIndexRoute
@@ -606,6 +626,7 @@ export interface FileRouteTypes {
     | '/drivers/form'
     | '/filing-stations/details'
     | '/filing-stations/form'
+    | '/licence-verification/review'
     | '/orders/details'
     | '/pfi/details'
     | '/pfi/form'
@@ -630,6 +651,7 @@ export interface FileRouteTypes {
     | '/depots/'
     | '/drivers/'
     | '/filing-stations/'
+    | '/licence-verification/'
     | '/orders/'
     | '/overview/'
     | '/pfi/'
@@ -669,6 +691,7 @@ export interface FileRouteTypes {
     | '/drivers/form'
     | '/filing-stations/details'
     | '/filing-stations/form'
+    | '/licence-verification/review'
     | '/orders/details'
     | '/pfi/details'
     | '/pfi/form'
@@ -693,6 +716,7 @@ export interface FileRouteTypes {
     | '/depots'
     | '/drivers'
     | '/filing-stations'
+    | '/licence-verification'
     | '/orders'
     | '/overview'
     | '/pfi'
@@ -732,6 +756,7 @@ export interface FileRouteTypes {
     | '/drivers/form'
     | '/filing-stations/details'
     | '/filing-stations/form'
+    | '/licence-verification/review'
     | '/orders/details'
     | '/pfi/details'
     | '/pfi/form'
@@ -756,6 +781,7 @@ export interface FileRouteTypes {
     | '/depots/'
     | '/drivers/'
     | '/filing-stations/'
+    | '/licence-verification/'
     | '/orders/'
     | '/overview/'
     | '/pfi/'
@@ -796,6 +822,7 @@ export interface RootRouteChildren {
   DriversFormRoute: typeof DriversFormRoute
   FilingStationsDetailsRoute: typeof FilingStationsDetailsRoute
   FilingStationsFormRoute: typeof FilingStationsFormRoute
+  LicenceVerificationReviewRoute: typeof LicenceVerificationReviewRoute
   OrdersDetailsRoute: typeof OrdersDetailsRoute
   PfiDetailsRoute: typeof PfiDetailsRoute
   PfiFormRoute: typeof PfiFormRoute
@@ -820,6 +847,7 @@ export interface RootRouteChildren {
   DepotsIndexRoute: typeof DepotsIndexRoute
   DriversIndexRoute: typeof DriversIndexRoute
   FilingStationsIndexRoute: typeof FilingStationsIndexRoute
+  LicenceVerificationIndexRoute: typeof LicenceVerificationIndexRoute
   OrdersIndexRoute: typeof OrdersIndexRoute
   OverviewIndexRoute: typeof OverviewIndexRoute
   PfiIndexRoute: typeof PfiIndexRoute
@@ -1133,6 +1161,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FilingStationsFormRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/licence-verification/': {
+      id: '/licence-verification/'
+      path: '/licence-verification'
+      fullPath: '/licence-verification/'
+      preLoaderRoute: typeof LicenceVerificationIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/licence-verification/review': {
+      id: '/licence-verification/review'
+      path: '/licence-verification/review'
+      fullPath: '/licence-verification/review'
+      preLoaderRoute: typeof LicenceVerificationReviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/orders/': {
       id: '/orders/'
       path: '/orders'
@@ -1293,6 +1335,7 @@ const rootRouteChildren: RootRouteChildren = {
   DriversFormRoute: DriversFormRoute,
   FilingStationsDetailsRoute: FilingStationsDetailsRoute,
   FilingStationsFormRoute: FilingStationsFormRoute,
+  LicenceVerificationReviewRoute: LicenceVerificationReviewRoute,
   OrdersDetailsRoute: OrdersDetailsRoute,
   PfiDetailsRoute: PfiDetailsRoute,
   PfiFormRoute: PfiFormRoute,
@@ -1317,6 +1360,7 @@ const rootRouteChildren: RootRouteChildren = {
   DepotsIndexRoute: DepotsIndexRoute,
   DriversIndexRoute: DriversIndexRoute,
   FilingStationsIndexRoute: FilingStationsIndexRoute,
+  LicenceVerificationIndexRoute: LicenceVerificationIndexRoute,
   OrdersIndexRoute: OrdersIndexRoute,
   OverviewIndexRoute: OverviewIndexRoute,
   PfiIndexRoute: PfiIndexRoute,
