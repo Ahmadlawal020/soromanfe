@@ -9,7 +9,7 @@ import {
   Banknote, Copy, CheckCircle, Clock, XCircle, User, CircleDollarSign,
   ShieldPlus, FileText,
 } from 'lucide-react'
-import { useDangoteOrderRequestDetails, useUpdateDangoteOrderPaymentStatus, useUpdateDangoteOrderCollectionStatus } from '#/lib/hooks/useDangoteOrders'
+import { useDangoteOrderRequestDetails, useUpdateDangoteOrderCollectionStatus } from '#/lib/hooks/useDangoteOrders'
 import { Breadcrumbs } from '#/components/Breadcrumbs'
 import { ConfirmDialog } from '#/components/ConfirmDialog'
 import { PageLoader } from '#/components/PageLoader'
@@ -104,30 +104,15 @@ function DangoteOrderDetails() {
   const { id } = Route.useSearch()
 
   const { data: request, isLoading, isError, error, refetch } = useDangoteOrderRequestDetails(id)
-  const updatePaymentMutation = useUpdateDangoteOrderPaymentStatus()
   const updateCollectionMutation = useUpdateDangoteOrderCollectionStatus()
 
   const [copied, setCopied] = useState(false)
-  const [showPaymentConfirm, setShowPaymentConfirm] = useState(false)
   const [showCollectionConfirm, setShowCollectionConfirm] = useState(false)
-  const [pendingPaymentStatus, setPendingPaymentStatus] = useState('')
   const [pendingCollectionStatus, setPendingCollectionStatus] = useState('')
-
-  const handleUpdatePayment = (status: string) => {
-    setPendingPaymentStatus(status)
-    setShowPaymentConfirm(true)
-  }
 
   const handleUpdateCollection = (status: string) => {
     setPendingCollectionStatus(status)
     setShowCollectionConfirm(true)
-  }
-
-  const executePaymentUpdate = async () => {
-    if (!request || !pendingPaymentStatus) return
-    await updatePaymentMutation.mutateAsync({ id: request.id, paymentStatus: pendingPaymentStatus })
-    setShowPaymentConfirm(false)
-    setPendingPaymentStatus('')
   }
 
   const executeCollectionUpdate = async () => {
@@ -523,16 +508,6 @@ function DangoteOrderDetails() {
           <CardDescription className="text-xs">Update payment and collection status</CardDescription>
         </CardHeader>
         <CardContent className="pt-6 flex flex-wrap gap-4">
-          {request.paymentStatus !== 'Paid' && (
-            <Button
-              className="bg-success text-success-foreground hover:bg-success/90 cursor-pointer"
-              onClick={() => handleUpdatePayment('Paid')}
-              disabled={updatePaymentMutation.isPending}
-            >
-              <CheckCircle className="size-4 mr-2" /> Mark as Paid
-            </Button>
-          )}
-
           {request.paymentStatus === 'Paid' && request.collectionStatus === 'Pending' && (
             <Button
               className="bg-foreground text-background hover:bg-foreground cursor-pointer"
@@ -572,16 +547,6 @@ function DangoteOrderDetails() {
       </Card>
 
       {/* Confirm Dialogs */}
-      <ConfirmDialog
-        open={showPaymentConfirm}
-        onOpenChange={setShowPaymentConfirm}
-        title="Update Payment Status"
-        description={`Are you sure you want to mark this order payment as ${pendingPaymentStatus}?`}
-        confirmLabel="Confirm"
-        onConfirm={executePaymentUpdate}
-        loading={updatePaymentMutation.isPending}
-      />
-
       <ConfirmDialog
         open={showCollectionConfirm}
         onOpenChange={setShowCollectionConfirm}

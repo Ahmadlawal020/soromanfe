@@ -46,6 +46,7 @@ const navCategories: NavCategory[] = [
     category: "Orders",
     items: [
       { title: "Orders", icon: ShoppingBag, path: "/orders" },
+      { title: "Payable Orders", icon: DollarSign, path: "/payable-orders" },
       { title: "Create Order", icon: PlusCircle, path: "/admin-order" },
       { title: "Our Customers", icon: Building2, path: "/customers" },
     ],
@@ -55,6 +56,7 @@ const navCategories: NavCategory[] = [
     category: "Dangote Delivery",
     items: [
       { title: "Dangote Orders", icon: ShoppingBag, path: "/dangote-orders" },
+      { title: "Payable Orders", icon: DollarSign, path: "/dangote-payable-orders" },
       {
         title: "Order Requests",
         icon: FileText,

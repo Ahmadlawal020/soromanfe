@@ -31,6 +31,7 @@ import { Route as DangoteOrderRequestIndexRouteImport } from './routes/dangote-o
 import { Route as DangoteOrderRequestReviewRouteImport } from './routes/dangote-order-request/review'
 import { Route as DangoteOrdersIndexRouteImport } from './routes/dangote-orders/index'
 import { Route as DangoteOrdersDetailsRouteImport } from './routes/dangote-orders/details'
+import { Route as DangotePayableOrdersIndexRouteImport } from './routes/dangote-payable-orders/index'
 import { Route as DangoteProductsIndexRouteImport } from './routes/dangote-products/index'
 import { Route as DangoteProductsDetailsRouteImport } from './routes/dangote-products/details'
 import { Route as DangoteProductsFormRouteImport } from './routes/dangote-products/form'
@@ -58,6 +59,7 @@ import { Route as LicenceVerificationReviewRouteImport } from './routes/licence-
 import { Route as OrdersIndexRouteImport } from './routes/orders/index'
 import { Route as OrdersDetailsRouteImport } from './routes/orders/details'
 import { Route as OverviewIndexRouteImport } from './routes/overview/index'
+import { Route as PayableOrdersIndexRouteImport } from './routes/payable-orders/index'
 import { Route as PfiIndexRouteImport } from './routes/pfi/index'
 import { Route as PfiDetailsRouteImport } from './routes/pfi/details'
 import { Route as PfiFormRouteImport } from './routes/pfi/form'
@@ -187,6 +189,12 @@ const DangoteOrdersDetailsRoute = DangoteOrdersDetailsRouteImport.update({
   path: '/dangote-orders/details',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DangotePayableOrdersIndexRoute =
+  DangotePayableOrdersIndexRouteImport.update({
+    id: '/dangote-payable-orders/',
+    path: '/dangote-payable-orders/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const DangoteProductsIndexRoute = DangoteProductsIndexRouteImport.update({
   id: '/dangote-products/',
   path: '/dangote-products/',
@@ -327,6 +335,11 @@ const OverviewIndexRoute = OverviewIndexRouteImport.update({
   path: '/overview/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PayableOrdersIndexRoute = PayableOrdersIndexRouteImport.update({
+  id: '/payable-orders/',
+  path: '/payable-orders/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PfiIndexRoute = PfiIndexRouteImport.update({
   id: '/pfi/',
   path: '/pfi/',
@@ -453,6 +466,7 @@ export interface FileRoutesByFullPath {
   '/customers/': typeof CustomersIndexRoute
   '/dangote-order-request/': typeof DangoteOrderRequestIndexRoute
   '/dangote-orders/': typeof DangoteOrdersIndexRoute
+  '/dangote-payable-orders/': typeof DangotePayableOrdersIndexRoute
   '/dangote-products/': typeof DangoteProductsIndexRoute
   '/delivery-customer/': typeof DeliveryCustomerIndexRoute
   '/delivery-operations/': typeof DeliveryOperationsIndexRoute
@@ -463,6 +477,7 @@ export interface FileRoutesByFullPath {
   '/licence-verification/': typeof LicenceVerificationIndexRoute
   '/orders/': typeof OrdersIndexRoute
   '/overview/': typeof OverviewIndexRoute
+  '/payable-orders/': typeof PayableOrdersIndexRoute
   '/pfi/': typeof PfiIndexRoute
   '/product-pricing/': typeof ProductPricingIndexRoute
   '/products/': typeof ProductsIndexRoute
@@ -519,6 +534,7 @@ export interface FileRoutesByTo {
   '/customers': typeof CustomersIndexRoute
   '/dangote-order-request': typeof DangoteOrderRequestIndexRoute
   '/dangote-orders': typeof DangoteOrdersIndexRoute
+  '/dangote-payable-orders': typeof DangotePayableOrdersIndexRoute
   '/dangote-products': typeof DangoteProductsIndexRoute
   '/delivery-customer': typeof DeliveryCustomerIndexRoute
   '/delivery-operations': typeof DeliveryOperationsIndexRoute
@@ -529,6 +545,7 @@ export interface FileRoutesByTo {
   '/licence-verification': typeof LicenceVerificationIndexRoute
   '/orders': typeof OrdersIndexRoute
   '/overview': typeof OverviewIndexRoute
+  '/payable-orders': typeof PayableOrdersIndexRoute
   '/pfi': typeof PfiIndexRoute
   '/product-pricing': typeof ProductPricingIndexRoute
   '/products': typeof ProductsIndexRoute
@@ -586,6 +603,7 @@ export interface FileRoutesById {
   '/customers/': typeof CustomersIndexRoute
   '/dangote-order-request/': typeof DangoteOrderRequestIndexRoute
   '/dangote-orders/': typeof DangoteOrdersIndexRoute
+  '/dangote-payable-orders/': typeof DangotePayableOrdersIndexRoute
   '/dangote-products/': typeof DangoteProductsIndexRoute
   '/delivery-customer/': typeof DeliveryCustomerIndexRoute
   '/delivery-operations/': typeof DeliveryOperationsIndexRoute
@@ -596,6 +614,7 @@ export interface FileRoutesById {
   '/licence-verification/': typeof LicenceVerificationIndexRoute
   '/orders/': typeof OrdersIndexRoute
   '/overview/': typeof OverviewIndexRoute
+  '/payable-orders/': typeof PayableOrdersIndexRoute
   '/pfi/': typeof PfiIndexRoute
   '/product-pricing/': typeof ProductPricingIndexRoute
   '/products/': typeof ProductsIndexRoute
@@ -654,6 +673,7 @@ export interface FileRouteTypes {
     | '/customers/'
     | '/dangote-order-request/'
     | '/dangote-orders/'
+    | '/dangote-payable-orders/'
     | '/dangote-products/'
     | '/delivery-customer/'
     | '/delivery-operations/'
@@ -664,6 +684,7 @@ export interface FileRouteTypes {
     | '/licence-verification/'
     | '/orders/'
     | '/overview/'
+    | '/payable-orders/'
     | '/pfi/'
     | '/product-pricing/'
     | '/products/'
@@ -720,6 +741,7 @@ export interface FileRouteTypes {
     | '/customers'
     | '/dangote-order-request'
     | '/dangote-orders'
+    | '/dangote-payable-orders'
     | '/dangote-products'
     | '/delivery-customer'
     | '/delivery-operations'
@@ -730,6 +752,7 @@ export interface FileRouteTypes {
     | '/licence-verification'
     | '/orders'
     | '/overview'
+    | '/payable-orders'
     | '/pfi'
     | '/product-pricing'
     | '/products'
@@ -786,6 +809,7 @@ export interface FileRouteTypes {
     | '/customers/'
     | '/dangote-order-request/'
     | '/dangote-orders/'
+    | '/dangote-payable-orders/'
     | '/dangote-products/'
     | '/delivery-customer/'
     | '/delivery-operations/'
@@ -796,6 +820,7 @@ export interface FileRouteTypes {
     | '/licence-verification/'
     | '/orders/'
     | '/overview/'
+    | '/payable-orders/'
     | '/pfi/'
     | '/product-pricing/'
     | '/products/'
@@ -853,6 +878,7 @@ export interface RootRouteChildren {
   CustomersIndexRoute: typeof CustomersIndexRoute
   DangoteOrderRequestIndexRoute: typeof DangoteOrderRequestIndexRoute
   DangoteOrdersIndexRoute: typeof DangoteOrdersIndexRoute
+  DangotePayableOrdersIndexRoute: typeof DangotePayableOrdersIndexRoute
   DangoteProductsIndexRoute: typeof DangoteProductsIndexRoute
   DeliveryCustomerIndexRoute: typeof DeliveryCustomerIndexRoute
   DeliveryOperationsIndexRoute: typeof DeliveryOperationsIndexRoute
@@ -863,6 +889,7 @@ export interface RootRouteChildren {
   LicenceVerificationIndexRoute: typeof LicenceVerificationIndexRoute
   OrdersIndexRoute: typeof OrdersIndexRoute
   OverviewIndexRoute: typeof OverviewIndexRoute
+  PayableOrdersIndexRoute: typeof PayableOrdersIndexRoute
   PfiIndexRoute: typeof PfiIndexRoute
   ProductPricingIndexRoute: typeof ProductPricingIndexRoute
   ProductsIndexRoute: typeof ProductsIndexRoute
@@ -1025,6 +1052,13 @@ declare module '@tanstack/react-router' {
       path: '/dangote-orders/details'
       fullPath: '/dangote-orders/details'
       preLoaderRoute: typeof DangoteOrdersDetailsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dangote-payable-orders/': {
+      id: '/dangote-payable-orders/'
+      path: '/dangote-payable-orders'
+      fullPath: '/dangote-payable-orders/'
+      preLoaderRoute: typeof DangotePayableOrdersIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dangote-products/': {
@@ -1216,6 +1250,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OverviewIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/payable-orders/': {
+      id: '/payable-orders/'
+      path: '/payable-orders'
+      fullPath: '/payable-orders/'
+      preLoaderRoute: typeof PayableOrdersIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pfi/': {
       id: '/pfi/'
       path: '/pfi'
@@ -1374,6 +1415,7 @@ const rootRouteChildren: RootRouteChildren = {
   CustomersIndexRoute: CustomersIndexRoute,
   DangoteOrderRequestIndexRoute: DangoteOrderRequestIndexRoute,
   DangoteOrdersIndexRoute: DangoteOrdersIndexRoute,
+  DangotePayableOrdersIndexRoute: DangotePayableOrdersIndexRoute,
   DangoteProductsIndexRoute: DangoteProductsIndexRoute,
   DeliveryCustomerIndexRoute: DeliveryCustomerIndexRoute,
   DeliveryOperationsIndexRoute: DeliveryOperationsIndexRoute,
@@ -1384,6 +1426,7 @@ const rootRouteChildren: RootRouteChildren = {
   LicenceVerificationIndexRoute: LicenceVerificationIndexRoute,
   OrdersIndexRoute: OrdersIndexRoute,
   OverviewIndexRoute: OverviewIndexRoute,
+  PayableOrdersIndexRoute: PayableOrdersIndexRoute,
   PfiIndexRoute: PfiIndexRoute,
   ProductPricingIndexRoute: ProductPricingIndexRoute,
   ProductsIndexRoute: ProductsIndexRoute,

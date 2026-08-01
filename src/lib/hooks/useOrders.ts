@@ -123,3 +123,54 @@ export function useUpdateOrder() {
     },
   })
 }
+
+export function usePayableOrders() {
+  return useQuery({
+    queryKey: ['orders', 'payable'],
+    queryFn: async () => {
+      const res = await api.get('/orders/payable')
+      return res.data.data.orders || []
+    },
+  })
+}
+
+export function usePayOrder() {
+  const queryClient = useQueryClient()
+  const toast = useToast()
+
+  return useMutation({
+    retry: false,
+    mutationFn: async (orderId: number) => {
+      const res = await api.post(`/orders/${orderId}/pay`)
+      return res.data
+    },
+    onSuccess: (data) => {
+      toast.success(data?.message || 'Order paid successfully')
+      queryClient.invalidateQueries({ queryKey: ['orders'] })
+      queryClient.invalidateQueries({ queryKey: ['customers'] })
+    },
+    onError: (err: any) => {
+      toast.error(getErrorMessage(err))
+    },
+  })
+}
+
+export function useCancelOrder() {
+  const queryClient = useQueryClient()
+  const toast = useToast()
+
+  return useMutation({
+    retry: false,
+    mutationFn: async ({ id, reason }: { id: string; reason?: string }) => {
+      const res = await api.post(`/orders/${id}/cancel`, { reason })
+      return res.data
+    },
+    onSuccess: (data) => {
+      toast.success(data?.message || 'Order cancelled successfully')
+      queryClient.invalidateQueries({ queryKey: ['orders'] })
+    },
+    onError: (err: any) => {
+      toast.error(getErrorMessage(err))
+    },
+  })
+}

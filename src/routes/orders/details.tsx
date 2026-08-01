@@ -3,12 +3,13 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '#/components/ui/card'
+import { Input } from '#/components/ui/input'
 import {
   ArrowLeft, Loader2, AlertCircle, ShoppingBag,
   User, Warehouse, Package, MapPin,
-  Calendar, Info, Phone, Mail, Building2, Truck, FileCheck, Banknote, Copy, CheckCircle, Ticket as TicketIcon, Check
+  Calendar, Info, Phone, Mail, Building2, Truck, FileCheck, Banknote, Copy, CheckCircle, Ticket as TicketIcon, XCircle
 } from 'lucide-react'
-import { useOrderDetails, useUpdateOrder } from '#/lib/hooks/useOrders'
+import { useOrderDetails, useUpdateOrder, useCancelOrder } from '#/lib/hooks/useOrders'
 import { Breadcrumbs } from '#/components/Breadcrumbs'
 import { ConfirmDialog } from '#/components/ConfirmDialog'
 
@@ -59,40 +60,37 @@ function RouteComponent() {
   const { data: order, isLoading } = useOrderDetails(id)
   const [copied, setCopied] = useState(false)
   const updateMutation = useUpdateOrder()
+  const cancelMutation = useCancelOrder()
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
-  const [confirmAction, setConfirmAction] = useState<{ type: 'status' | 'payment'; value: string } | null>(null)
+  const [showCancelDialog, setShowCancelDialog] = useState(false)
+  const [cancelReason, setCancelReason] = useState('')
 
   const handleBack = () => {
     window.history.length > 1 ? window.history.back() : navigate({ to: '/orders/' as any })
   }
 
-  const handleUpdateStatus = (status: string) => {
+  const handleUpdateStatus = () => {
     if (!order) return
-    setConfirmAction({ type: 'status', value: status })
-    setShowConfirmDialog(true)
-  }
-
-  const handleUpdatePayment = (paymentStatus: string) => {
-    if (!order) return
-    setConfirmAction({ type: 'payment', value: paymentStatus })
     setShowConfirmDialog(true)
   }
 
   const executeConfirmAction = async () => {
-    if (!order || !confirmAction) return
-    if (confirmAction.type === 'status') {
-      await updateMutation.mutateAsync({
-        id: order._id || order.id,
-        data: { status: confirmAction.value }
-      })
-    } else {
-      await updateMutation.mutateAsync({
-        id: order._id || order.id,
-        data: { paymentStatus: confirmAction.value }
-      })
-    }
+    if (!order) return
+    await updateMutation.mutateAsync({
+      id: order._id || order.id,
+      data: { status: 'Completed' }
+    })
     setShowConfirmDialog(false)
-    setConfirmAction(null)
+  }
+
+  const handleCancelOrder = async () => {
+    if (!order) return
+    await cancelMutation.mutateAsync({
+      id: order._id || order.id,
+      reason: cancelReason || undefined,
+    })
+    setShowCancelDialog(false)
+    setCancelReason('')
   }
 
   if (isLoading) {
@@ -430,26 +428,27 @@ function RouteComponent() {
       <Card className="border-2 border-primary/20">
         <CardHeader className="bg-primary/5 border-b border-primary/10">
           <CardTitle className="text-sm font-semibold text-primary">Order Actions & Ticket Management</CardTitle>
-          <CardDescription className="text-xs">Mark order payment, status, or view generated pickup tickets.</CardDescription>
+          <CardDescription className="text-xs">Update order status or view generated pickup tickets.</CardDescription>
         </CardHeader>
         <CardContent className="pt-6 flex flex-wrap gap-4">
-          {order.paymentStatus !== 'Paid' && (
+          {order.status !== 'Completed' && order.status !== 'Cancelled' && (
             <Button
-              className="bg-success text-success-foreground hover:bg-success/90 cursor-pointer"
-              onClick={() => handleUpdatePayment('Paid')}
+              className="bg-info text-info-foreground hover:bg-info/90 cursor-pointer"
+              onClick={() => handleUpdateStatus()}
               disabled={updateMutation.isPending}
             >
-              <Check className="size-4 mr-2" /> Mark as Paid
+              <CheckCircle className="size-4 mr-2" /> Mark as Completed
             </Button>
           )}
 
-          {order.status !== 'Completed' && (
+          {order.status !== 'Completed' && order.status !== 'Cancelled' && (
             <Button
-              className="bg-info text-info-foreground hover:bg-info/90 cursor-pointer"
-              onClick={() => handleUpdateStatus('Completed')}
-              disabled={updateMutation.isPending}
+              variant="destructive"
+              className="cursor-pointer"
+              onClick={() => setShowCancelDialog(true)}
+              disabled={cancelMutation.isPending}
             >
-              <Check className="size-4 mr-2" /> Mark as Completed
+              <XCircle className="size-4 mr-2" /> Cancel Order
             </Button>
           )}
 
@@ -475,15 +474,32 @@ function RouteComponent() {
       <ConfirmDialog
         open={showConfirmDialog}
         onOpenChange={setShowConfirmDialog}
-        title={confirmAction?.type === 'status' ? 'Update Order Status' : 'Update Payment Status'}
-        description={confirmAction?.type === 'status'
-          ? `Are you sure you want to mark this order as ${confirmAction?.value}?`
-          : `Are you sure you want to mark this order payment as ${confirmAction?.value}?`
-        }
+        title="Update Order Status"
+        description="Are you sure you want to mark this order as Completed?"
         confirmLabel="Confirm"
         onConfirm={executeConfirmAction}
         loading={updateMutation.isPending}
       />
+
+      <ConfirmDialog
+        open={showCancelDialog}
+        onOpenChange={setShowCancelDialog}
+        title="Cancel Order"
+        description="Are you sure you want to cancel this order? This will release any held wallet funds and restore stock."
+        confirmLabel="Cancel Order"
+        variant="destructive"
+        onConfirm={handleCancelOrder}
+        loading={cancelMutation.isPending}
+      >
+        <div className="mt-3">
+          <label className="text-sm text-muted-foreground block mb-1.5">Reason (optional)</label>
+          <Input
+            placeholder="Enter cancellation reason..."
+            value={cancelReason}
+            onChange={(e) => setCancelReason(e.target.value)}
+          />
+        </div>
+      </ConfirmDialog>
     </div>
   )
 }

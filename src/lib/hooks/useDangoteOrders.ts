@@ -143,3 +143,34 @@ export function useUpdateDangoteOrderCollectionStatus() {
     },
   })
 }
+
+export function usePayableDangoteOrders() {
+  return useQuery({
+    queryKey: ['dangote-order-requests', 'payable'],
+    queryFn: async () => {
+      const res = await api.get('/dangote-order-requests/payable')
+      return res.data.data.orders || []
+    },
+  })
+}
+
+export function usePayDangoteOrder() {
+  const queryClient = useQueryClient()
+  const toast = useToast()
+
+  return useMutation({
+    retry: false,
+    mutationFn: async (orderId: number) => {
+      const res = await api.put(`/dangote-order-requests/${orderId}/pay`)
+      return res.data
+    },
+    onSuccess: (data) => {
+      toast.success(data?.message || 'Dangote order paid successfully')
+      queryClient.invalidateQueries({ queryKey: ['dangote-order-requests'] })
+      queryClient.invalidateQueries({ queryKey: ['customers'] })
+    },
+    onError: (err: any) => {
+      toast.error(getErrorMessage(err))
+    },
+  })
+}
