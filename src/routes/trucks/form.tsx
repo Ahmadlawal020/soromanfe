@@ -78,23 +78,23 @@ function DriverSearchSelect({ value, onChange, editingTruck }: DriverSearchSelec
     <div className="relative" ref={containerRef}>
       <button
         type="button"
-        className="flex h-9 w-full items-center justify-between gap-2 rounded-lg border bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus:border-ring focus:ring-[3px] focus:ring-ring/50 text-left"
+        className="flex h-9 w-full items-center justify-between gap-2 rounded-lg border bg-transparent px-3 py-2 text-sm outline-none focus:border-ring focus:ring-[3px] focus:ring-ring/50 text-left"
         onClick={() => setIsOpen(!isOpen)}
-      >
+ >
         <span className="truncate">{selectedDriverName}</span>
         <ChevronDown className="size-4 opacity-50 shrink-0" />
       </button>
       {isOpen && (
-        <div className="absolute z-50 mt-1 w-full rounded-lg border bg-popover p-2 text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95 flex flex-col gap-1.5">
+        <div className="absolute z-50 mt-1 w-full rounded-lg border bg-popover p-2 text-popover-foreground animate-in fade-in-0 zoom-in-95 flex flex-col gap-1.5">
           <div className="relative flex items-center">
-            <Search className="absolute left-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
+            <Search className="absolute left-2.5 size-4 text-muted-foreground pointer-events-none" />
             <Input
               placeholder="Search by name, email, license..."
               className="pl-8 h-8 text-xs bg-background"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               autoFocus
-            />
+ />
           </div>
           <div className="space-y-1 max-h-48 overflow-y-auto">
             <button
@@ -105,13 +105,13 @@ function DriverSearchSelect({ value, onChange, editingTruck }: DriverSearchSelec
                 setIsOpen(false)
                 setSearchTerm('')
               }}
-            >
+ >
               <span>No Driver (Unassigned)</span>
               {value === '' && <Check className="size-4 text-primary" />}
             </button>
             {isLoading ? (
               <div className="p-4 text-center text-sm text-muted-foreground flex items-center justify-center gap-2">
-                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                <Loader2 className="size-4 animate-spin text-primary" />
                 <span>Searching...</span>
               </div>
             ) : drivers.length === 0 ? (
@@ -129,7 +129,7 @@ function DriverSearchSelect({ value, onChange, editingTruck }: DriverSearchSelec
                     setIsOpen(false)
                     setSearchTerm('')
                   }}
-                >
+ >
                   <div className="flex flex-col min-w-0">
                     <span className="font-medium truncate">{driver.name}</span>
                     <span className="text-xs text-muted-foreground truncate">
@@ -265,10 +265,10 @@ function TruckForm() {
   if (submitted) {
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-5 text-center">
-        <div className="h-16 w-16 rounded-full bg-success/10 flex items-center justify-center text-success border border-success/20">
-          <CheckCircle size={32} />
+        <div className="size-16 rounded-full bg-success/10 flex items-center justify-center text-success border border-success/20">
+          <CheckCircle className="size-8" />
         </div>
-        <h2 className="text-2xl font-bold text-foreground">Truck {isEdit ? 'Updated' : 'Registered'} Successfully!</h2>
+        <h2 className="text-lg md:text-xl font-semibold text-foreground tracking-tight">Truck {isEdit ? 'Updated' : 'Registered'} Successfully!</h2>
         <p className="text-muted-foreground max-w-sm">Vehicle {formData.plateNumber.toUpperCase()} has been saved to the fleet catalog.</p>
         <div className="flex gap-3 mt-2">
           {!isEdit && (
@@ -308,11 +308,11 @@ function TruckForm() {
       <header className="flex items-center justify-between">
         <div>
           <Button variant="ghost" size="sm" onClick={() => navigate({ to: '/trucks/' as any })} className="mb-2">
-            <ArrowLeft className="h-4 w-4 mr-2" />Back to Trucks
+            <ArrowLeft className="size-4 mr-2" />Back to Trucks
           </Button>
-          <h1 className="text-3xl font-bold tracking-tight">{isEdit ? 'Edit Truck' : 'Register New Truck'}</h1>
+          <h1 className="text-xl md:text-2xl font-semibold tracking-tight text-balance">{isEdit ? 'Edit Truck' : 'Register New Truck'}</h1>
           <p className="text-muted-foreground">{isEdit ? 'Modify vehicle specifications and operator credentials' : 'Register a new heavy-duty truck to your company fleet'}</p>
-          {errors.form && <p className="text-sm text-destructive mt-1 flex items-center gap-1.5"><AlertCircle size={14} />{errors.form}</p>}
+          {errors.form && <p className="text-sm text-destructive mt-1 flex items-center gap-1.5"><AlertCircle className="size-3.5" />{errors.form}</p>}
         </div>
       </header>
 
@@ -322,7 +322,7 @@ function TruckForm() {
           {/* Section 1: Identity & Specifications */}
           <div className="space-y-4 border rounded-lg p-5 bg-card">
             <div className="flex items-center space-x-2 border-b pb-2">
-              <Truck className="h-5 w-5 text-primary" />
+              <Truck className="size-5 text-primary" />
               <h2 className="text-lg font-semibold">Identity & Specs</h2>
             </div>
             <div className="space-y-3">
@@ -333,7 +333,7 @@ function TruckForm() {
                   onChange={(e) => handleInputChange('plateNumber', e.target.value)}
                   placeholder="e.g. LA-982-BB"
                   className={errors.plateNumber ? 'border-destructive' : ''}
-                />
+ />
                 {errors.plateNumber && <p className="text-sm text-destructive mt-1">{errors.plateNumber}</p>}
               </div>
 
@@ -344,7 +344,7 @@ function TruckForm() {
                     value={formData.make}
                     onChange={(e) => handleInputChange('make', e.target.value)}
                     placeholder="e.g. Scania, Volvo"
-                  />
+ />
                 </div>
                 <div>
                   <Label>Model*</Label>
@@ -353,7 +353,7 @@ function TruckForm() {
                     onChange={(e) => handleInputChange('model', e.target.value)}
                     placeholder="e.g. R450, Actros"
                     className={errors.model ? 'border-destructive' : ''}
-                  />
+ />
                   {errors.model && <p className="text-sm text-destructive mt-1">{errors.model}</p>}
                 </div>
               </div>
@@ -367,7 +367,7 @@ function TruckForm() {
                     onChange={(e) => handleInputChange('year', Number(e.target.value))}
                     placeholder="2022"
                     className={errors.year ? 'border-destructive' : ''}
-                  />
+ />
                   {errors.year && <p className="text-sm text-destructive mt-1">{errors.year}</p>}
                 </div>
                 <div>
@@ -388,7 +388,7 @@ function TruckForm() {
                   onChange={(e) => handleInputChange('vin', e.target.value.toUpperCase())}
                   placeholder="17-character VIN"
                   className="font-mono uppercase"
-                />
+ />
               </div>
 
               <div>
@@ -398,7 +398,7 @@ function TruckForm() {
                   onChange={(e) => handleInputChange('capacity', e.target.value)}
                   placeholder="e.g. 20 Tons, 30,000 Liters"
                   className={errors.capacity ? 'border-destructive' : ''}
-                />
+ />
                 {errors.capacity && <p className="text-sm text-destructive mt-1">{errors.capacity}</p>}
               </div>
 
@@ -410,7 +410,7 @@ function TruckForm() {
                   value={formData.capacityLitres || ''}
                   onChange={(e) => handleInputChange('capacityLitres', Number(e.target.value) || 0)}
                   placeholder="e.g. 30000"
-                />
+ />
                 <p className="text-[11px] text-muted-foreground mt-1">
                   Numeric capacity in litres — used for delivery allocation calculations.
                 </p>
@@ -421,7 +421,7 @@ function TruckForm() {
           {/* Section 2: Assignments & Status */}
           <div className="space-y-4 border rounded-lg p-5 bg-card">
             <div className="flex items-center space-x-2 border-b pb-2">
-              <Compass className="h-5 w-5 text-primary" />
+              <Compass className="size-5 text-primary" />
               <h2 className="text-lg font-semibold">Status & Assignment</h2>
             </div>
             <div className="space-y-3">
@@ -441,7 +441,7 @@ function TruckForm() {
                   value={formData.driverRef}
                   onChange={(v) => handleInputChange('driverRef', v)}
                   editingTruck={editingTruck}
-                />
+ />
               </div>
             </div>
           </div>
@@ -449,7 +449,7 @@ function TruckForm() {
           {/* Section 3: Telemetry, Expiries & Service */}
           <div className="space-y-4 border rounded-lg p-5 bg-card">
             <div className="flex items-center space-x-2 border-b pb-2">
-              <ShieldAlert className="h-5 w-5 text-primary" />
+              <ShieldAlert className="size-5 text-primary" />
               <h2 className="text-lg font-semibold">Telemetry & Compliance</h2>
             </div>
             <div className="space-y-3">
@@ -460,7 +460,7 @@ function TruckForm() {
                     value={formData.mileage}
                     onChange={(e) => handleInputChange('mileage', e.target.value)}
                     placeholder="e.g. 15,200 km"
-                  />
+ />
                 </div>
                 <div>
                   <Label>Fuel Level (%)</Label>
@@ -471,7 +471,7 @@ function TruckForm() {
                     value={formData.fuelLevel}
                     onChange={(e) => handleInputChange('fuelLevel', Number(e.target.value))}
                     className={errors.fuelLevel ? 'border-destructive' : ''}
-                  />
+ />
                   {errors.fuelLevel && <p className="text-sm text-destructive mt-1">{errors.fuelLevel}</p>}
                 </div>
               </div>
@@ -483,7 +483,7 @@ function TruckForm() {
                   value={formData.nextServiceMileage}
                   onChange={(e) => handleInputChange('nextServiceMileage', Number(e.target.value))}
                   className={errors.nextServiceMileage ? 'border-destructive' : ''}
-                />
+ />
                 {errors.nextServiceMileage && <p className="text-sm text-destructive mt-1">{errors.nextServiceMileage}</p>}
               </div>
 
@@ -494,7 +494,7 @@ function TruckForm() {
                     type="date"
                     value={formData.insuranceExpiry}
                     onChange={(e) => handleInputChange('insuranceExpiry', e.target.value)}
-                  />
+ />
                 </div>
               </div>
 
@@ -505,7 +505,7 @@ function TruckForm() {
                     type="date"
                     value={formData.registrationExpiry}
                     onChange={(e) => handleInputChange('registrationExpiry', e.target.value)}
-                  />
+ />
                 </div>
               </div>
             </div>
@@ -515,8 +515,8 @@ function TruckForm() {
 
         <div className="flex justify-end gap-3 border-t pt-4">
           <Button type="button" variant="outline" onClick={() => navigate({ to: '/trucks/' as any })}>Cancel</Button>
-          <Button type="submit" disabled={isSubmitting} className="gradient-primary text-white border-0 min-w-[150px]">
-            {isSubmitting ? <><Loader2 size={16} className="animate-spin mr-2" />Saving...</> : isEdit ? 'Update Truck' : 'Register Truck'}
+          <Button type="submit" disabled={isSubmitting} className="min-w-[150px]">
+            {isSubmitting ? <><Loader2 className="size-4 animate-spin mr-2" />Saving...</> : isEdit ? 'Update Truck' : 'Register Truck'}
           </Button>
         </div>
       </form>

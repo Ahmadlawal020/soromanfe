@@ -103,10 +103,10 @@ function CustomerForm() {
     return (
       <div className="space-y-6">
         <div className="flex flex-col items-center justify-center py-12 gap-5 text-center">
-          <div className="h-16 w-16 rounded-full bg-success/10 flex items-center justify-center text-success border border-success/20">
-            <CheckCircle size={32} />
+          <div className="size-16 rounded-full bg-success/10 flex items-center justify-center text-success border border-success/20">
+            <CheckCircle className="size-8" />
           </div>
-          <h2 className="text-2xl font-bold text-foreground">Customer {isEdit ? 'Updated' : 'Created'} Successfully!</h2>
+          <h2 className="text-lg md:text-xl font-semibold text-foreground tracking-tight">Customer {isEdit ? 'Updated' : 'Created'} Successfully!</h2>
           <p className="text-muted-foreground max-w-sm">Customer {formData.name} has been saved to the customer directory.</p>
           <div className="flex gap-3 mt-2">
             {!isEdit && (
@@ -140,11 +140,11 @@ function CustomerForm() {
       <header className="flex items-center justify-between">
         <div>
           <Button variant="ghost" size="sm" onClick={() => navigate({ to: '/customers/' as any })} className="mb-2">
-            <ArrowLeft className="h-4 w-4 mr-2" />Back to Customers
+            <ArrowLeft className="size-4 mr-2" />Back to Customers
           </Button>
-          <h1 className="text-3xl font-bold tracking-tight">{isEdit ? 'Edit Customer' : 'Add New Customer'}</h1>
+          <h1 className="text-xl md:text-2xl font-semibold tracking-tight text-balance">{isEdit ? 'Edit Customer' : 'Add New Customer'}</h1>
           <p className="text-muted-foreground">{isEdit ? 'Modify customer information and account details' : 'Register a new customer to your company directory'}</p>
-          {errors.form && <p className="text-sm text-destructive mt-1 flex items-center gap-1.5"><AlertCircle size={14} />{errors.form}</p>}
+          {errors.form && <p className="text-sm text-destructive mt-1 flex items-center gap-1.5"><AlertCircle className="size-3.5" />{errors.form}</p>}
         </div>
       </header>
 
@@ -154,7 +154,7 @@ function CustomerForm() {
           {/* Section 1: Personal & Contact Info */}
           <div className="space-y-4 border rounded-lg p-5 bg-card">
             <div className="flex items-center space-x-2 border-b pb-2">
-              <Users className="h-5 w-5 text-primary" />
+              <Users className="size-5 text-primary" />
               <h2 className="text-lg font-semibold">Personal & Contact</h2>
             </div>
             <div className="space-y-3">
@@ -165,7 +165,7 @@ function CustomerForm() {
                   onChange={(e) => handleInputChange('name', e.target.value)}
                   placeholder="e.g. Ahmad Ibrahim"
                   className={errors.name ? 'border-destructive' : ''}
-                />
+ />
                 {errors.name && <p className="text-sm text-destructive mt-1">{errors.name}</p>}
               </div>
 
@@ -176,7 +176,7 @@ function CustomerForm() {
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
                   placeholder="e.g. ahmed@example.com"
-                />
+ />
               </div>
 
               <div>
@@ -189,7 +189,7 @@ function CustomerForm() {
                   onChange={(e) => handleInputChange('phone', e.target.value)}
                   placeholder="e.g. 08012345678"
                   className={errors.phone ? 'border-destructive' : ''}
-                />
+ />
                 {errors.phone && <p className="text-sm text-destructive mt-1">{errors.phone}</p>}
               </div>
             </div>
@@ -198,7 +198,7 @@ function CustomerForm() {
           {/* Section 2: Company & Address */}
           <div className="space-y-4 border rounded-lg p-5 bg-card">
             <div className="flex items-center space-x-2 border-b pb-2">
-              <Building2 className="h-5 w-5 text-primary" />
+              <Building2 className="size-5 text-primary" />
               <h2 className="text-lg font-semibold">Company & Address</h2>
             </div>
             <div className="space-y-3">
@@ -208,7 +208,7 @@ function CustomerForm() {
                   value={formData.companyName}
                   onChange={(e) => handleInputChange('companyName', e.target.value)}
                   placeholder="e.g. Soroman Energy Ltd"
-                />
+ />
               </div>
 
               <div>
@@ -217,7 +217,7 @@ function CustomerForm() {
                   value={formData.address}
                   onChange={(e) => handleInputChange('address', e.target.value)}
                   placeholder="e.g. 12 Marina Road, Lagos"
-                />
+ />
               </div>
 
               <div>
@@ -240,8 +240,8 @@ function CustomerForm() {
 
         <div className="flex justify-end gap-3 border-t pt-4">
           <Button type="button" variant="outline" onClick={() => navigate({ to: '/customers/' as any })}>Cancel</Button>
-          <Button type="submit" disabled={isSubmitting} className="gradient-primary text-white border-0 min-w-[150px]">
-            {isSubmitting ? <><Loader2 size={16} className="animate-spin mr-2" />Saving...</> : isEdit ? 'Update Customer' : 'Add Customer'}
+          <Button type="submit" disabled={isSubmitting} className="min-w-[150px]">
+            {isSubmitting ? <><Loader2 className="size-4 animate-spin mr-2" />Saving...</> : isEdit ? 'Update Customer' : 'Add Customer'}
           </Button>
         </div>
       </form>

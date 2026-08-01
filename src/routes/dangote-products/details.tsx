@@ -43,7 +43,7 @@ function DangoteProductDetailPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 size={32} className="animate-spin text-muted-foreground" />
+        <Loader2 className="size-8 animate-spin text-muted-foreground" />
       </div>
     )
   }
@@ -51,12 +51,12 @@ function DangoteProductDetailPage() {
   if (!product) {
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-5 text-center">
-        <div className="h-16 w-16 rounded-full bg-warning/10 flex items-center justify-center text-warning border border-warning/20">
-          <AlertCircle size={32} />
+        <div className="size-16 rounded-full bg-warning/10 flex items-center justify-center text-warning border border-warning/20">
+          <AlertCircle className="size-8" />
         </div>
-        <h2 className="text-2xl font-bold text-foreground">Product Not Found</h2>
+        <h2 className="text-lg md:text-xl font-semibold text-foreground tracking-tight">Product Not Found</h2>
         <p className="text-muted-foreground max-w-sm">The Dangote product you're looking for doesn't exist or may have been removed.</p>
-        <Button onClick={handleBack}><ArrowLeft size={16} /> Back to Dangote Products</Button>
+        <Button onClick={handleBack}><ArrowLeft className="size-4" /> Back to Dangote Products</Button>
       </div>
     )
   }
@@ -86,36 +86,36 @@ function DangoteProductDetailPage() {
       <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center gap-4">
           <Button variant="outline" size="icon" onClick={handleBack}>
-            <ArrowLeft size={16} />
+            <ArrowLeft className="size-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-foreground">{product.name}</h1>
+            <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">{product.name}</h1>
             <p className="text-muted-foreground">Dangote product details and specifications</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={() => navigate({ to: '/dangote-products/form', search: { id: product._id } } as any)}>
-            <Edit size={16} /> Edit Product
+            <Edit className="size-4" /> Edit Product
           </Button>
           <Button variant="destructive" onClick={() => setShowDeleteDialog(true)} disabled={deleteProduct.isPending}>
-            <Trash2 size={16} /> {deleteProduct.isPending ? 'Removing...' : 'Remove Product'}
+            <Trash2 className="size-4" /> {deleteProduct.isPending ? 'Removing...' : 'Remove Product'}
           </Button>
         </div>
       </header>
 
       {/* Hero Badge */}
       <Card className="card-hover">
-        <CardContent className="p-6 md:p-8 bg-gradient-to-r from-primary/5 to-info/5">
+        <CardContent className="bg-primary/5 p-6 md:p-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-            <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center text-primary-foreground text-2xl font-bold shadow-lg shrink-0">
-              <Fuel size={32} />
+            <div className="size-20 bg-primary rounded-full flex items-center justify-center text-primary-foreground text-2xl font-semibold shrink-0 tabular-nums">
+              <Fuel className="size-8" />
             </div>
             <div className="flex-1">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant="outline" className="font-mono text-xs">{product.sku}</Badge>
                 {product.gradeClass && <Badge className="bg-success text-success-foreground">{product.gradeClass}</Badge>}
               </div>
-              <h2 className="text-3xl font-bold text-foreground mt-2">{product.name}</h2>
+              <h2 className="text-lg md:text-xl font-semibold text-foreground mt-2 tracking-tight">{product.name}</h2>
               <p className="text-muted-foreground mt-1.5 text-sm">{product.description || 'No description provided'}</p>
             </div>
           </div>
@@ -128,8 +128,8 @@ function DangoteProductDetailPage() {
         <Card>
           <CardHeader className="border-b border-border">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-info/10 flex items-center justify-center text-info">
-                <Package size={16} />
+              <div className="size-8 rounded-lg bg-info/10 flex items-center justify-center text-info">
+                <Package className="size-4" />
               </div>
               <div>
                 <CardTitle className="text-sm">Product Information</CardTitle>
@@ -139,7 +139,7 @@ function DangoteProductDetailPage() {
           <CardContent className="space-y-4 pt-4">
             {detailRows.map((row) => (
               <div key={row.label} className="flex items-center gap-3">
-                <row.icon size={16} className="text-muted-foreground shrink-0" />
+                <row.icon className="size-4 text-muted-foreground shrink-0" />
                 <div className="flex-1">
                   <p className="text-xs text-muted-foreground">{row.label}</p>
                   <p className="text-sm font-medium text-foreground">{row.value}</p>
@@ -153,8 +153,8 @@ function DangoteProductDetailPage() {
         <Card>
           <CardHeader className="border-b border-border">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-warning/10 flex items-center justify-center text-warning">
-                <Scale size={16} />
+              <div className="size-8 rounded-lg bg-warning/10 flex items-center justify-center text-warning">
+                <Scale className="size-4" />
               </div>
               <div>
                 <CardTitle className="text-sm">Technical Specifications</CardTitle>
@@ -164,7 +164,7 @@ function DangoteProductDetailPage() {
           <CardContent className="space-y-4 pt-4">
             {technicalRows.map((row) => (
               <div key={row.label} className="flex items-center gap-3">
-                <row.icon size={16} className="text-muted-foreground shrink-0" />
+                <row.icon className="size-4 text-muted-foreground shrink-0" />
                 <div className="flex-1">
                   <p className="text-xs text-muted-foreground">{row.label}</p>
                   <p className="text-sm font-medium text-foreground">{row.value}</p>

@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
+import { StatCard, StatCardGrid } from '#/components/ui/stat-card'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
@@ -13,6 +14,17 @@ import { PageEmpty } from '#/components/PageEmpty'
 import { Pagination } from '#/components/Pagination'
 import { usePfiList, type Pfi } from '#/lib/hooks/usePfis'
 import { toNum } from '#/lib/utils'
+
+/** "Sold · Remaining" meta line — accent for what has moved, amber for what is left. */
+function SplitMeta({ sold, rem }: { sold: string; rem: string }) {
+  return (
+    <span className="truncate">
+      <span className="font-medium text-accent">Sold: {sold}</span>
+      <span className="mx-1 text-muted-foreground/50">·</span>
+      <span className="font-medium text-warning">Rem: {rem}</span>
+    </span>
+  )
+}
 
 export const Route = createFileRoute('/pfi/')({
   component: PFIDashboard,
@@ -190,92 +202,63 @@ function PFIDashboard() {
     <div className="space-y-6 animate-fade-in">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">PFI Tracking</h1>
+          <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">PFI Tracking</h1>
           <p className="text-muted-foreground">Monitor PFIs by location and product, track weight & volume inventory, and review cumulative PFI costs.</p>
         </div>
-        <Button size="sm" className="gradient-primary text-white border-0" onClick={() => navigate({ to: '/pfi/form' })}>
-          <Plus className="w-4 h-4 mr-2" />Add PFI
+        <Button size="sm"  onClick={() => navigate({ to: '/pfi/form' })}>
+          <Plus className="size-4 mr-2" />Add PFI
         </Button>
       </div>
 
       {/* Compact Stat Cards Grid */}
       {!isLoading && !isError && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-          {/* Card 1: Status Overview */}
-          <Card className="stats-card hover:border-primary/40 transition-all border-border/80">
-            <CardContent className="p-3.5 flex justify-between items-center">
-              <div>
-                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Status Overview</p>
-                <div className="flex items-baseline gap-2 mt-1">
-                  <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400">{stats.activeCount} <span className="text-[11px] font-normal text-muted-foreground">Active</span></span>
-                  <span className="text-sm font-semibold text-muted-foreground">• {stats.finishedCount} <span className="text-[11px] font-normal text-muted-foreground">Finished</span></span>
-                </div>
-                <p className="text-[11px] text-muted-foreground mt-0.5">{stats.total} total PFIs</p>
-              </div>
-              <div className="h-9 w-9 rounded-xl bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                <FileSearch2 className="w-4 h-4" />
-              </div>
-            </CardContent>
-          </Card>
+        <StatCardGrid count={4}>
+          <StatCard
+            icon={<FileSearch2 />}
+            label="Status overview"
+            value={
+              <>
+                {stats.activeCount}
+                <span className="ml-1 text-xs font-normal text-muted-foreground">active</span>
+                <span className="mx-1.5 text-muted-foreground/50">·</span>
+                <span className="text-muted-foreground">{stats.finishedCount}</span>
+                <span className="ml-1 text-xs font-normal text-muted-foreground">finished</span>
+              </>
+            }
+            description={`${stats.total} total PFIs`}
+          />
 
-          {/* Card 2: Volume Inventory (L) */}
-          <Card className="stats-card hover:border-blue-500/40 transition-all border-border/80">
-            <CardContent className="p-3.5 flex justify-between items-center">
-              <div className="min-w-0 flex-1">
-                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Volume (L)</p>
-                <p className="text-xl font-bold text-foreground mt-0.5 truncate">
-                  {fmtQty(stats.totalStartingLitres)} <span className="text-[11px] font-medium text-muted-foreground">L</span>
-                </p>
-                <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
-                  <span className="text-emerald-600 dark:text-emerald-400 font-medium">Sold: {fmtQty(stats.totalSoldLitres)} L</span>
-                  <span className="mx-1">•</span>
-                  <span className="text-amber-600 dark:text-amber-400 font-medium">Rem: {fmtQty(stats.totalRemainingLitres)} L</span>
-                </p>
-              </div>
-              <div className="h-9 w-9 rounded-xl bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 flex items-center justify-center shrink-0 ml-2">
-                <DropletIcon className="w-4 h-4" />
-              </div>
-            </CardContent>
-          </Card>
+          <StatCard
+            icon={<DropletIcon />}
+            label="Volume"
+            value={
+              <>
+                {fmtQty(stats.totalStartingLitres)}
+                <span className="ml-0.5 text-xs font-normal text-muted-foreground">L</span>
+              </>
+            }
+            description={<SplitMeta sold={`${fmtQty(stats.totalSoldLitres)} L`} rem={`${fmtQty(stats.totalRemainingLitres)} L`} />}
+          />
 
-          {/* Card 3: Weight Inventory (MT) */}
-          <Card className="stats-card hover:border-purple-500/40 transition-all border-border/80">
-            <CardContent className="p-3.5 flex justify-between items-center">
-              <div className="min-w-0 flex-1">
-                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Weight (MT)</p>
-                <p className="text-xl font-bold text-foreground mt-0.5 truncate">
-                  {fmtQty(stats.totalStartingMt, 2)} <span className="text-[11px] font-medium text-muted-foreground">MT</span>
-                </p>
-                <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
-                  <span className="text-emerald-600 dark:text-emerald-400 font-medium">Sold: {fmtQty(stats.totalSoldMt, 2)} MT</span>
-                  <span className="mx-1">•</span>
-                  <span className="text-amber-600 dark:text-amber-400 font-medium">Rem: {fmtQty(stats.totalRemainingMt, 2)} MT</span>
-                </p>
-              </div>
-              <div className="h-9 w-9 rounded-xl bg-purple-500/10 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400 flex items-center justify-center shrink-0 ml-2">
-                <Scale className="w-4 h-4" />
-              </div>
-            </CardContent>
-          </Card>
+          <StatCard
+            icon={<Scale />}
+            label="Weight"
+            value={
+              <>
+                {fmtQty(stats.totalStartingMt, 2)}
+                <span className="ml-0.5 text-xs font-normal text-muted-foreground">MT</span>
+              </>
+            }
+            description={<SplitMeta sold={`${fmtQty(stats.totalSoldMt, 2)} MT`} rem={`${fmtQty(stats.totalRemainingMt, 2)} MT`} />}
+          />
 
-          {/* Card 4: Cumulative PFI Cost */}
-          <Card className="stats-card hover:border-primary/40 transition-all border-primary/20 bg-gradient-to-br from-card via-card to-primary/5">
-            <CardContent className="p-3.5 flex justify-between items-center">
-              <div className="min-w-0 flex-1">
-                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Cumulative PFI Cost</p>
-                <p className="text-lg font-extrabold text-primary mt-0.5 truncate">{fmtCurrency(stats.cumulativeCost)}</p>
-                <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
-                  <span className="text-emerald-600 dark:text-emerald-400 font-medium">Sold: {fmtCurrency(stats.cumulativeSoldCost)}</span>
-                  <span className="mx-1">•</span>
-                  <span className="text-amber-600 dark:text-amber-400 font-medium">Rem: {fmtCurrency(stats.cumulativeRemainingCost)}</span>
-                </p>
-              </div>
-              <div className="h-9 w-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 ml-2">
-                <Banknote className="w-4 h-4" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+          <StatCard
+            icon={<Banknote />}
+            label="Cumulative PFI cost"
+            value={<span className="text-xl md:text-2xl">{fmtCurrency(stats.cumulativeCost)}</span>}
+            description={<SplitMeta sold={fmtCurrency(stats.cumulativeSoldCost)} rem={fmtCurrency(stats.cumulativeRemainingCost)} />}
+          />
+        </StatCardGrid>
       )}
 
       {/* Directory Table Card */}
@@ -288,9 +271,9 @@ function PFIDashboard() {
             </div>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               <div className="relative flex-1 sm:w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground size-4" />
                 <Input type="text" placeholder="Search PFI number, product..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
-                {searchTerm && <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground flex items-center justify-center cursor-pointer transition-colors" aria-label="Clear search"><X size={10} /></button>}
+                {searchTerm && <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 size-5 rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground flex items-center justify-center cursor-pointer transition-colors duration-250 ease-luxe" aria-label="Clear search"><X className="size-2.5" /></button>}
               </div>
               <Select value={selectedStatus} onValueChange={setSelectedStatus}>
                 <SelectTrigger className="w-full sm:w-[180px]"><SelectValue placeholder="All Statuses" /></SelectTrigger>
@@ -310,14 +293,14 @@ function PFIDashboard() {
             <PageError message={(error as any)?.message || 'Failed to load'} onRetry={() => refetch()} />
           ) : pfis.length === 0 ? (
             <PageEmpty
-              icon={<FileText size={24} className="text-muted-foreground" />}
+              icon={<FileText className="size-6 text-muted-foreground" />}
               title={hasFilters ? 'No PFIs match your filters' : 'No PFIs yet'}
               description={hasFilters ? 'Try adjusting your search or filter criteria.' : 'Create your first PFI to get started.'}
               actionLabel="Create PFI"
               onAction={() => navigate({ to: '/pfi/form' })}
               hasFilters={hasFilters}
               onClearFilters={() => { setSearchTerm(''); setSelectedStatus('all') }}
-            />
+ />
           ) : (
             <>
               <div className="overflow-x-auto">
@@ -345,8 +328,8 @@ function PFIDashboard() {
                         <TableRow key={pfi._id || pfi.id} className="cursor-pointer hover:bg-muted transition" onClick={() => navigate({ to: '/pfi/details' as any, search: { id: String(pfi._id || pfi.id) } as any })}>
                           <TableCell>
                             <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary font-medium shrink-0">
-                                <FileText size={18} />
+                              <div className="size-10 bg-primary/10 rounded-full flex items-center justify-center text-primary font-medium shrink-0">
+                                <FileText className="size-4" />
                               </div>
                               <div>
                                 <p className="font-semibold text-primary">{pfi.pfiNumber}</p>
@@ -358,19 +341,19 @@ function PFIDashboard() {
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-1.5 text-sm">
-                              <MapPin size={14} className="text-muted-foreground shrink-0" />
+                              <MapPin className="size-3.5 text-muted-foreground shrink-0" />
                               <span>{pfi.locationName || '—'}</span>
                             </div>
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-1.5 text-sm">
-                              <Package size={14} className="text-muted-foreground shrink-0" />
+                              <Package className="size-3.5 text-muted-foreground shrink-0" />
                               <span>{pfi.productName || '—'}</span>
                             </div>
                           </TableCell>
                           <TableCell>
                             <Badge variant="outline" className="font-medium text-xs">
-                              {q.isWeight ? <Scale size={12} className="mr-1 text-info inline" /> : <DropletIcon size={12} className="mr-1 text-primary inline" />}
+                              {q.isWeight ? <Scale className="size-3 mr-1 text-info inline" /> : <DropletIcon className="size-3 mr-1 text-primary inline" />}
                               {q.unit}
                             </Badge>
                           </TableCell>
@@ -402,7 +385,7 @@ function PFIDashboard() {
                 totalItems={totalItems}
                 onPageChange={setCurrentPage}
                 onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1) }}
-              />
+ />
             </>
           )}
         </CardContent>

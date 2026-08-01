@@ -305,7 +305,7 @@ function DepotForm() {
   if (isEdit && isLoadingDepot && !stateDepot) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 size={32} className="animate-spin text-muted-foreground" />
+        <Loader2 className="size-8 animate-spin text-muted-foreground" />
       </div>
     )
   }
@@ -313,8 +313,8 @@ function DepotForm() {
   if (submitted) {
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-5 text-center">
-        <div className="h-16 w-16 rounded-full bg-success/10 flex items-center justify-center text-success border border-success/20"><CheckCircle size={32} /></div>
-        <h2 className="text-2xl font-bold text-foreground">Depot {isEdit ? 'Updated' : 'Registered'} Successfully!</h2>
+        <div className="size-16 rounded-full bg-success/10 flex items-center justify-center text-success border border-success/20"><CheckCircle className="size-8" /></div>
+        <h2 className="text-lg md:text-xl font-semibold text-foreground tracking-tight">Depot {isEdit ? 'Updated' : 'Registered'} Successfully!</h2>
         <p className="text-muted-foreground max-w-sm">{formData.name} has been successfully saved to the hub management directory.</p>
         <div className="flex gap-3 mt-2">
           {!isEdit && <Button variant="outline" onClick={() => { setSubmitted(false); setFormData({ id: '', name: '', code: '', address: '', city: '', state: '', country: '', postcode: '', status: 'Active', establishedYear: new Date().getFullYear().toString() }); setProductCapacities([]); setSelectedStaffIds([]); setErrors({}) }}>Add Another</Button>}
@@ -328,17 +328,17 @@ function DepotForm() {
     <div className="space-y-6">
       <header className="flex items-center justify-between">
         <div>
-          <Button variant="ghost" size="sm" onClick={() => navigate({ to: '/depots/' as any })} className="mb-2"><ArrowLeft className="h-4 w-4 mr-2" />Back to Depots</Button>
-          <h1 className="text-3xl font-bold tracking-tight">{isEdit ? 'Edit Depot' : 'Register New Depot'}</h1>
+          <Button variant="ghost" size="sm" onClick={() => navigate({ to: '/depots/' as any })} className="mb-2"><ArrowLeft className="size-4 mr-2" />Back to Depots</Button>
+          <h1 className="text-xl md:text-2xl font-semibold tracking-tight text-balance">{isEdit ? 'Edit Depot' : 'Register New Depot'}</h1>
           <p className="text-muted-foreground">{isEdit ? 'Modify details of this operational logistics hub' : 'Fill in the details to add a new hub to the logistics network'}</p>
-          {errors.form && <p className="text-sm text-destructive mt-1 flex items-center gap-1.5"><AlertCircle size={14} />{errors.form}</p>}
+          {errors.form && <p className="text-sm text-destructive mt-1 flex items-center gap-1.5"><AlertCircle className="size-3.5" />{errors.form}</p>}
         </div>
       </header>
 
       <form onSubmit={handleSubmit} noValidate className="space-y-6">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-4 border rounded-lg p-4">
-            <div className="flex items-center space-x-2"><Warehouse className="h-5 w-5 text-primary" /><h2 className="text-lg font-medium">Depot Identity</h2></div>
+            <div className="flex items-center space-x-2"><Warehouse className="size-5 text-primary" /><h2 className="text-lg font-medium">Depot Identity</h2></div>
             <div className="space-y-3">
               <div><Label>Depot / Hub Name*</Label><Input value={formData.name} onChange={(e) => handleInputChange('name', e.target.value)} placeholder="e.g. Lagos Port Depot" className={errors.name ? 'border-destructive' : ''} />{errors.name && <p className="text-sm text-destructive mt-1">{errors.name}</p>}</div>
               <div><Label>Depot Code*</Label><Input value={formData.code} onChange={(e) => handleInputChange('code', e.target.value)} placeholder="e.g. DP-LOS-01" className={errors.code ? 'border-destructive' : ''} />{errors.code && <p className="text-sm text-destructive mt-1">{errors.code}</p>}</div>
@@ -347,7 +347,7 @@ function DepotForm() {
           </div>
 
           <div className="space-y-4 border rounded-lg p-4">
-            <div className="flex items-center space-x-2"><MapPin className="h-5 w-5 text-primary" /><h2 className="text-lg font-medium">Location Details</h2></div>
+            <div className="flex items-center space-x-2"><MapPin className="size-5 text-primary" /><h2 className="text-lg font-medium">Location Details</h2></div>
             <div className="space-y-3">
               <div>
                 <Label>Physical Address*</Label>
@@ -361,7 +361,7 @@ function DepotForm() {
                   key={`country-${formData.country}`}
                   value={formData.country}
                   onValueChange={handleCountryChange}
-                >
+ >
                   <SelectTrigger className={errors.country ? 'border-destructive' : ''}>
                     <SelectValue placeholder="Select Country" />
                   </SelectTrigger>
@@ -382,7 +382,7 @@ function DepotForm() {
                       key={`state-${formData.state}`}
                       value={formData.state}
                       onValueChange={handleStateChange}
-                    >
+ >
                       <SelectTrigger className={errors.state ? 'border-destructive' : ''}>
                         <SelectValue placeholder="Select State" />
                       </SelectTrigger>
@@ -402,7 +402,7 @@ function DepotForm() {
                       value={formData.city}
                       onValueChange={handleLgaChange}
                       disabled={!formData.state}
-                    >
+ >
                       <SelectTrigger className={errors.city ? 'border-destructive' : ''}>
                         <SelectValue placeholder={formData.state ? "Select LGA" : "Select a state first"} />
                       </SelectTrigger>
@@ -440,7 +440,7 @@ function DepotForm() {
           </div>
 
           <div className="space-y-4 border rounded-lg p-4">
-            <div className="flex items-center space-x-2"><Activity className="h-5 w-5 text-primary" /><h2 className="text-lg font-medium">Hub Status</h2></div>
+            <div className="flex items-center space-x-2"><Activity className="size-5 text-primary" /><h2 className="text-lg font-medium">Hub Status</h2></div>
             <div className="space-y-3">
               <div>
                 <Label>Hub Status</Label>
@@ -448,7 +448,7 @@ function DepotForm() {
                   key={`status-${formData.status}`}
                   value={formData.status}
                   onValueChange={(v) => handleInputChange('status', v)}
-                >
+ >
                   <SelectTrigger>
                     <SelectValue placeholder="Select hub status" />
                   </SelectTrigger>
@@ -463,7 +463,7 @@ function DepotForm() {
           </div>
 
           <div className="space-y-4 border rounded-lg p-4">
-            <div className="flex items-center space-x-2"><Users className="h-5 w-5 text-primary" /><h2 className="text-lg font-medium">Assign Staff</h2></div>
+            <div className="flex items-center space-x-2"><Users className="size-5 text-primary" /><h2 className="text-lg font-medium">Assign Staff</h2></div>
             <div className="space-y-3">
               {selectedStaffIds.length > 0 && (
                 <div className="space-y-2">
@@ -473,12 +473,12 @@ function DepotForm() {
                       const staff = getStaffDetails(staffId)
                       return (
                         <div key={staffId} className="flex items-center gap-2 bg-secondary px-3 py-1 rounded-full text-sm">
-                          <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-bold text-primary">
+                          <div className="size-6 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-semibold text-primary">
                             {staff ? (staff.full_name?.charAt(0) || '?') : '?'}
                           </div>
                           <span>{staff?.full_name || 'Unknown'}</span>
                           <button type="button" onClick={() => removeStaff(staffId)} className="text-muted-foreground hover:text-foreground">
-                            <X className="h-4 w-4" />
+                            <X className="size-4" />
                           </button>
                         </div>
                       )
@@ -490,7 +490,7 @@ function DepotForm() {
               <div>
                 <Label>Search Staff</Label>
                 <div className="relative">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Search className="absolute left-3 top-3 size-4 text-muted-foreground" />
                   <Input placeholder="Search by name or email..." className="pl-10" value={staffSearchTerm} onChange={(e) => setStaffSearchTerm(e.target.value)} />
                 </div>
               </div>
@@ -506,8 +506,8 @@ function DepotForm() {
                           key={sId}
                           className={`flex items-center p-3 hover:bg-secondary cursor-pointer ${isSelected ? 'bg-secondary' : ''}`}
                           onClick={() => toggleStaff(sId)}
-                        >
-                          <div className="h-9 w-9 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold text-primary">
+ >
+                          <div className="size-9 rounded-full bg-primary/20 flex items-center justify-center text-sm font-semibold text-primary">
                             {staff.full_name?.charAt(0) || '?'}
                           </div>
                           <div className="ml-4 space-y-1">
@@ -516,7 +516,7 @@ function DepotForm() {
                           </div>
                           {isSelected && (
                             <div className="ml-auto">
-                              <UserCheck className="h-4 w-4 text-primary" />
+                              <UserCheck className="size-4 text-primary" />
                             </div>
                           )}
                         </div>
@@ -533,11 +533,11 @@ function DepotForm() {
 
         <div className="border rounded-lg p-6 bg-card space-y-6">
           <div className="flex items-center space-x-2 border-b pb-3">
-            <Layers className="h-5 w-5 text-primary" />
+            <Layers className="size-5 text-primary" />
             <div>
               <h2 className="text-lg font-medium">Product Holding Capacities*</h2>
               <p className="text-xs text-muted-foreground">Map products directly from the database to their storage capacities at this depot (at least 1 required)</p>
-              {errors.productCapacities && <p className="text-sm text-destructive flex items-center gap-1.5 mt-1.5"><AlertCircle size={14} />{errors.productCapacities}</p>}
+              {errors.productCapacities && <p className="text-sm text-destructive flex items-center gap-1.5 mt-1.5"><AlertCircle className="size-3.5" />{errors.productCapacities}</p>}
             </div>
           </div>
 
@@ -574,15 +574,15 @@ function DepotForm() {
                 value={productCapacityVal}
                 onChange={(e) => setProductCapacityVal(e.target.value)}
                 className="bg-background"
-              />
+ />
             </div>
 
             <Button
               type="button"
               onClick={handleAddProductCapacity}
-              className="gradient-primary text-white border-0 w-full sm:w-auto"
-            >
-              <Plus className="h-4 w-4 mr-2" /> Add Capacity
+              className="w-full sm:w-auto"
+ >
+              <Plus className="size-4 mr-2" /> Add Capacity
             </Button>
           </div>
 
@@ -596,23 +596,23 @@ function DepotForm() {
                 {productCapacities.map((pc) => {
                   const pId = String(pc.product.id || pc.product._id)
                   return (
-                    <div key={pId} className="flex items-center justify-between p-3 bg-background hover:bg-muted/10 transition-colors">
+                    <div key={pId} className="flex items-center justify-between p-3 bg-background hover:bg-muted/10 transition-colors duration-250 ease-luxe">
                       <div>
                         <p className="text-sm font-semibold text-foreground">{pc.product.name} ({pc.product.sku})</p>
                         <p className="text-xs text-muted-foreground">{pc.product.category}</p>
                       </div>
                       <div className="flex items-center gap-4">
-                        <span className="text-sm font-mono font-bold bg-secondary px-2.5 py-1 rounded">
+                        <span className="text-sm font-mono font-semibold bg-secondary px-2.5 py-1 rounded">
                           {pc.capacity.toLocaleString()} Max Units
                         </span>
                         <Button
                           type="button"
                           variant="ghost"
                           size="icon"
-                          className="text-destructive hover:bg-destructive/10 hover:text-destructive h-8 w-8"
+                          className="text-destructive hover:bg-destructive/10 hover:text-destructive size-8"
                           onClick={() => handleRemoveProductCapacity(pId)}
-                        >
-                          <Trash2 className="h-4 w-4" />
+ >
+                          <Trash2 className="size-4" />
                         </Button>
                       </div>
                     </div>
@@ -625,8 +625,8 @@ function DepotForm() {
 
         <div className="flex flex-col sm:flex-row justify-end gap-3">
           <Button type="button" variant="outline" onClick={() => navigate({ to: '/depots/' as any })}>Cancel</Button>
-          <Button type="submit" disabled={isSubmitting} className="gradient-primary text-white border-0 min-w-[160px]">
-            {isSubmitting ? (<><Loader2 size={16} className="animate-spin mr-2" />Saving...</>) : isEdit ? 'Update Depot' : 'Register Depot'}
+          <Button type="submit" disabled={isSubmitting} className="min-w-[160px]">
+            {isSubmitting ? (<><Loader2 className="size-4 animate-spin mr-2" />Saving...</>) : isEdit ? 'Update Depot' : 'Register Depot'}
           </Button>
         </div>
       </form>

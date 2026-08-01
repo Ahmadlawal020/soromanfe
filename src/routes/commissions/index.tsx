@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback } from 'react'
+import { StatCard } from '#/components/ui/stat-card'
 import { createFileRoute } from '@tanstack/react-router'
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
@@ -121,8 +122,8 @@ function CommissionsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
-            <DollarSign className="h-7 w-7 text-primary" />
+          <h1 className="text-2xl sm:text-xl md:text-2xl font-semibold tracking-tight text-foreground flex items-center gap-2 text-balance">
+            <DollarSign className="size-7 text-primary" />
             Commissions
           </h1>
           <p className="text-muted-foreground text-sm">
@@ -135,27 +136,27 @@ function CommissionsPage() {
       <div className="flex gap-1 p-1 bg-muted rounded-lg w-fit">
         <button
           className={`px-4 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer ${
-            activeTab === 'commissions'
-              ? 'bg-background text-foreground shadow-sm'
-              : 'text-muted-foreground hover:text-foreground'
-          }`}
+ activeTab === 'commissions'
+ ? 'bg-background text-foreground '
+ : 'text-muted-foreground hover:text-foreground'
+ }`}
           onClick={() => setActiveTab('commissions')}
         >
           <span className="flex items-center gap-2">
-            <DollarSign className="h-4 w-4" />
+            <DollarSign className="size-4" />
             Commissions
           </span>
         </button>
         <button
           className={`px-4 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer ${
-            activeTab === 'rates'
-              ? 'bg-background text-foreground shadow-sm'
-              : 'text-muted-foreground hover:text-foreground'
-          }`}
+ activeTab === 'rates'
+ ? 'bg-background text-foreground '
+ : 'text-muted-foreground hover:text-foreground'
+ }`}
           onClick={() => setActiveTab('rates')}
         >
           <span className="flex items-center gap-2">
-            <TrendingUp className="h-4 w-4" />
+            <TrendingUp className="size-4" />
             Rate Management
           </span>
         </button>
@@ -221,21 +222,21 @@ function CommissionsTab() {
         title: 'Eligible Orders',
         value: String(summary?.totalOrders || 0),
         description: 'Orders with commission',
-        icon: <Package className="h-5 w-5" />,
+        icon: <Package className="size-5" />,
         tone: 'blue',
       },
       {
         title: 'Total Quantity Loaded',
         value: `${(summary?.totalQuantity || 0).toLocaleString()} L`,
         description: 'Litres across all orders',
-        icon: <Fuel className="h-5 w-5" />,
+        icon: <Fuel className="size-5" />,
         tone: 'neutral',
       },
       {
         title: 'Total Commission',
         value: formatNaira(summary?.pendingAmount || 0),
         description: 'To be credited to facilitators',
-        icon: <Banknote className="h-5 w-5" />,
+        icon: <Banknote className="size-5" />,
         tone: 'amber',
       },
     ],
@@ -405,19 +406,19 @@ function CommissionsTab() {
               </div>
               <div className="flex items-center gap-2 flex-wrap">
                 <Button variant="outline" size="sm" onClick={() => setShowDailyReport(true)} className="gap-2">
-                  <FileText className="h-4 w-4" />
+                  <FileText className="size-4" />
                   Daily Report
                 </Button>
                 <Button variant="outline" size="sm" onClick={handleExportExcel} className="gap-2">
-                  <Download className="h-4 w-4" />
+                  <Download className="size-4" />
                   Excel
                 </Button>
                 <Button variant="outline" size="sm" onClick={handleExportPDF} className="gap-2">
-                  <Download className="h-4 w-4" />
+                  <Download className="size-4" />
                   PDF
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => refetch()} className="gap-2">
-                  <RefreshCw className="h-4 w-4" />
+                  <RefreshCw className="size-4" />
                   Refresh
                 </Button>
               </div>
@@ -426,7 +427,7 @@ function CommissionsTab() {
             {/* Search + Filter Row */}
             <div className="flex flex-col lg:flex-row gap-3">
               <div className="relative flex-1 max-w-sm">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
                 <Input
                   placeholder="Search ref, customer, truck, PFI…"
                   className="pl-9 pr-9"
@@ -438,7 +439,7 @@ function CommissionsTab() {
                     onClick={() => { setSearchQuery(''); setPage(1) }}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
                   >
-                    <X className="h-4 w-4" />
+                    <X className="size-4" />
                   </button>
                 )}
               </div>
@@ -517,7 +518,7 @@ function CommissionsTab() {
           ) : commissions.length === 0 ? (
             <div className="p-8">
               <PageEmpty
-                icon={<DollarSign size={32} className="text-muted-foreground" />}
+                icon={<DollarSign className="size-8 text-muted-foreground" />}
                 title="No commissions found"
                 description="Commissions are created automatically when orders are paid. Adjust your filters or set up commission rates first."
                 hasFilters={!!searchQuery || depotFilter !== 'all' || datePreset !== 'all'}
@@ -552,7 +553,7 @@ function CommissionsTab() {
                   </TableHeader>
                   <TableBody>
                     {commissions.map((c, idx) => (
-                      <TableRow key={c.id} className="hover:bg-muted/40 transition-colors">
+                      <TableRow key={c.id} className="hover:bg-muted/40 transition-colors duration-250 ease-luxe">
                         <TableCell className="text-center text-xs text-muted-foreground font-mono">
                           {(page - 1) * 50 + idx + 1}
                         </TableCell>
@@ -597,7 +598,7 @@ function CommissionsTab() {
                           {c.quantity.toLocaleString()} L
                         </TableCell>
                         <TableCell className="text-right">
-                          <div className="font-mono text-sm font-bold text-foreground">
+                          <div className="font-mono text-sm font-semibold text-foreground">
                             {formatNaira(c.commissionAmount)}
                           </div>
                           <div className="text-[10px] text-muted-foreground">
@@ -620,15 +621,15 @@ function CommissionsTab() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="h-8 px-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-500/10 gap-1 text-xs"
+                              className="h-8 px-2 text-accent hover:text-accent/80 hover:bg-accent/10 gap-1 text-xs"
                               onClick={() => setConfirmTarget(c)}
                             >
-                              <CheckCircle className="h-3.5 w-3.5" />
+                              <CheckCircle className="size-3.5" />
                               Confirm Commission
                             </Button>
                           ) : (
-                            <span className="text-xs text-emerald-600 flex items-center justify-center gap-1">
-                              <CheckCircle className="h-3.5 w-3.5" />
+                            <span className="text-xs text-accent flex items-center justify-center gap-1">
+                              <CheckCircle className="size-3.5" />
                               Confirmed
                             </span>
                           )}
@@ -811,7 +812,7 @@ function DailyReportDialog({
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-lg">
-            <FileText className="h-5 w-5 text-primary" />
+            <FileText className="size-5 text-primary" />
             Daily Commission Report
           </DialogTitle>
           <DialogDescription>
@@ -819,7 +820,7 @@ function DailyReportDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-3 max-h-[60vh] overflow-y-auto pr-1">
+        <div className="space-y-4 py-3 max-h-[60svh] overflow-y-auto pr-1">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label className="text-xs">Location</Label>
@@ -920,7 +921,7 @@ function DailyReportDialog({
           <div>
             <Label className="text-xs">Remarks</Label>
             <textarea
-              className="w-full mt-1 p-2 border border-input rounded-md text-sm bg-background min-h-[80px] resize-y"
+              className="w-full mt-1 p-2 border border-input rounded-lg text-base md:text-sm bg-background min-h-[80px] resize-y"
               placeholder="Any notes or remarks…"
               value={form.remarks}
               onChange={(e) => updateField('remarks', e.target.value)}
@@ -933,7 +934,7 @@ function DailyReportDialog({
             Cancel
           </Button>
           <Button onClick={handleSubmit} disabled={generating} className="gap-2">
-            {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />}
+            {generating ? <Loader2 className="size-4 animate-spin" /> : <FileText className="size-4" />}
             {generating ? 'Generating…' : 'Generate PDF'}
           </Button>
         </DialogFooter>
@@ -996,32 +997,8 @@ function RatesTab() {
     <div className="space-y-6">
       {/* Rate Summary */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Card className="stats-card">
-          <CardContent className="p-4 flex items-center justify-between">
-            <div>
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Rates Configured</p>
-              <p className="text-2xl font-bold mt-1 text-foreground">{rates.length}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Depot × Product combinations</p>
-            </div>
-            <div className="p-3 rounded-xl bg-primary/10 text-primary">
-              <TrendingUp className="h-6 w-6" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="stats-card">
-          <CardContent className="p-4 flex items-center justify-between">
-            <div>
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Depots Covered</p>
-              <p className="text-2xl font-bold mt-1 text-foreground">
-                {new Set(rates.map((r) => r.depotId)).size}
-              </p>
-              <p className="text-xs text-muted-foreground mt-0.5">With commission rates set</p>
-            </div>
-            <div className="p-3 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
-              <BarChart3 className="h-6 w-6" />
-            </div>
-          </CardContent>
-        </Card>
+        <StatCard icon={<TrendingUp />} label="Rates Configured" value={rates.length} description="Depot × Product combinations" />
+        <StatCard icon={<BarChart3 />} label="Depots Covered" value={new Set(rates.map((r) => r.depotId)).size} description="With commission rates set" />
       </div>
 
       {/* Rates Table */}
@@ -1034,11 +1011,11 @@ function RatesTab() {
             </div>
             <div className="flex gap-2">
               <Button variant="outline" size="sm" onClick={() => refetch()} className="gap-2">
-                <RefreshCw className="h-4 w-4" />
+                <RefreshCw className="size-4" />
                 Refresh
               </Button>
               <Button size="sm" onClick={openAddNew} className="gap-2">
-                <Plus className="h-4 w-4" />
+                <Plus className="size-4" />
                 Add Rate
               </Button>
             </div>
@@ -1057,7 +1034,7 @@ function RatesTab() {
           ) : rates.length === 0 ? (
             <div className="p-8">
               <PageEmpty
-                icon={<TrendingUp size={32} className="text-muted-foreground" />}
+                icon={<TrendingUp className="size-8 text-muted-foreground" />}
                 title="No commission rates configured"
                 description="Add commission rates per depot and product to start tracking commissions."
                 actionLabel="Add First Rate"
@@ -1080,7 +1057,7 @@ function RatesTab() {
                 </TableHeader>
                 <TableBody>
                   {rates.map((rate, idx) => (
-                    <TableRow key={rate.id} className="hover:bg-muted/40 transition-colors">
+                    <TableRow key={rate.id} className="hover:bg-muted/40 transition-colors duration-250 ease-luxe">
                       <TableCell className="text-center text-xs text-muted-foreground font-mono">
                         {idx + 1}
                       </TableCell>
@@ -1097,7 +1074,7 @@ function RatesTab() {
                         )}
                       </TableCell>
                       <TableCell className="text-right">
-                        <span className="font-mono text-sm font-bold text-foreground">
+                        <span className="font-mono text-sm font-semibold text-foreground">
                           ₦{rate.commissionRate.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/L
                         </span>
                       </TableCell>
@@ -1108,10 +1085,10 @@ function RatesTab() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-8 px-2 text-primary hover:text-primary hover:bg-primary/10 gap-1 text-xs"
+                          className="h-8 px-2 text-primary hover:text-primary/80 hover:bg-primary/10 gap-1 text-xs"
                           onClick={() => openEdit(rate)}
                         >
-                          <Pencil className="h-3.5 w-3.5" />
+                          <Pencil className="size-3.5" />
                           Edit
                         </Button>
                       </TableCell>
@@ -1129,7 +1106,7 @@ function RatesTab() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-lg">
-              <TrendingUp className="h-5 w-5 text-primary" />
+              <TrendingUp className="size-5 text-primary" />
               {editingRate ? 'Edit Commission Rate' : 'Add Commission Rate'}
             </DialogTitle>
             <DialogDescription>
@@ -1205,7 +1182,7 @@ function RatesTab() {
               disabled={saving || !editForm.depotId || !editForm.productId || !editForm.commissionRate}
               className="gap-2"
             >
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
+              {saving ? <Loader2 className="size-4 animate-spin" /> : <CheckCircle className="size-4" />}
               {saving ? 'Saving…' : 'Save Rate'}
             </Button>
           </DialogFooter>

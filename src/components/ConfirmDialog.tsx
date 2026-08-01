@@ -7,7 +7,7 @@ import {
   DialogFooter,
 } from '#/components/ui/dialog'
 import { Button } from '#/components/ui/button'
-import { AlertTriangle } from 'lucide-react'
+import { AlertTriangle, Loader2 } from 'lucide-react'
 
 interface ConfirmDialogProps {
   open: boolean
@@ -36,10 +36,10 @@ export function ConfirmDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <div className="flex items-center gap-3">
+          <div className="flex items-start gap-3">
             {variant === 'destructive' && (
-              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center">
-                <AlertTriangle size={20} className="text-destructive" />
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-destructive/10">
+                <AlertTriangle className="size-4 text-destructive" />
               </div>
             )}
             <div>
@@ -48,17 +48,13 @@ export function ConfirmDialog({
             </div>
           </div>
         </DialogHeader>
-        <DialogFooter className="gap-2 sm:gap-0">
+        <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
             {cancelLabel}
           </Button>
-          <Button
-            variant={variant === 'destructive' ? 'destructive' : 'default'}
-            className={variant === 'default' ? 'gradient-primary text-white border-0' : ''}
-            onClick={onConfirm}
-            disabled={loading}
-          >
-            {loading ? 'Processing...' : confirmLabel}
+          <Button variant={variant} onClick={onConfirm} disabled={loading}>
+            {loading && <Loader2 className="animate-spin" />}
+            {loading ? 'Processing…' : confirmLabel}
           </Button>
         </DialogFooter>
       </DialogContent>

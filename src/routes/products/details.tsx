@@ -48,7 +48,7 @@ function ProductDetailPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 size={32} className="animate-spin text-muted-foreground" />
+        <Loader2 className="size-8 animate-spin text-muted-foreground" />
       </div>
     )
   }
@@ -56,10 +56,10 @@ function ProductDetailPage() {
   if (!product) {
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-5 text-center">
-        <div className="h-16 w-16 rounded-full bg-warning/10 flex items-center justify-center text-warning border border-warning/20"><AlertCircle size={32} /></div>
-        <h2 className="text-2xl font-bold text-foreground">No Product Selected</h2>
+        <div className="size-16 rounded-full bg-warning/10 flex items-center justify-center text-warning border border-warning/20"><AlertCircle className="size-8" /></div>
+        <h2 className="text-lg md:text-xl font-semibold text-foreground tracking-tight">No Product Selected</h2>
         <p className="text-muted-foreground max-w-sm">Please select a product from the directory to view its details.</p>
-        <Button onClick={() => navigate({ to: '/products/' as any })}><ArrowLeft size={16} /> Back to Inventory</Button>
+        <Button onClick={() => navigate({ to: '/products/' as any })}><ArrowLeft className="size-4" /> Back to Inventory</Button>
       </div>
     )
   }
@@ -67,11 +67,11 @@ function ProductDetailPage() {
   const categoryColors: Record<string, string> = {
     'PMS (Premium Motor Spirit)': 'from-primary to-[#7ed3bf]',
     'AGO (Automotive Gas Oil)': 'from-success to-[#6ec89a]',
-    'DPK (Dual Purpose Kerosene)': 'from-warning to-amber-400',
-    'Jet A-1 (Aviation Fuel)': 'from-sky-500 to-sky-400',
-    'LPG (Liquefied Petroleum Gas)': 'from-info to-cyan-400',
-    'LPFO / Heavy Fuel Oil': 'from-destructive to-rose-400',
-    'Lubricants & Base Oils': 'from-violet-500 to-violet-400',
+    'DPK (Dual Purpose Kerosene)': 'from-warning to-warning',
+    'Jet A-1 (Aviation Fuel)': 'from-muted to-muted',
+    'LPG (Liquefied Petroleum Gas)': 'from-info to-muted',
+    'LPFO / Heavy Fuel Oil': 'from-destructive to-destructive',
+    'Lubricants & Base Oils': 'from-muted to-muted',
   }
 
 
@@ -103,24 +103,24 @@ function ProductDetailPage() {
       <Breadcrumbs items={[{ label: 'Products', href: '/products' }, { label: product?.name || 'Details' }]} />
       <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" onClick={handleBack}><ArrowLeft size={16} /></Button>
-          <div><h1 className="text-3xl font-bold text-foreground">Product Details</h1><p className="text-muted-foreground">View specifications, inventory levels, and hazard ratings</p></div>
+          <Button variant="outline" size="icon" onClick={handleBack}><ArrowLeft className="size-4" /></Button>
+          <div><h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">Product Details</h1><p className="text-muted-foreground">View specifications, inventory levels, and hazard ratings</p></div>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => navigate({ to: '/products/form', search: { id: product._id } })}><Edit size={16} /> Edit</Button>
+          <Button variant="outline" onClick={() => navigate({ to: '/products/form', search: { id: product._id } })}><Edit className="size-4" /> Edit</Button>
           <Button variant="destructive" onClick={handleDelete} disabled={deleteProduct.isPending}>
-            {deleteProduct.isPending ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />} Delete
+            {deleteProduct.isPending ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />} Delete
           </Button>
         </div>
       </header>
 
       <Card className="card-hover">
-        <CardContent className="p-6 md:p-8 bg-gradient-to-r from-primary/5 to-success/5">
+        <CardContent className="bg-primary/5 p-6 md:p-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-            <div className={`w-20 h-20 rounded-full bg-gradient-to-br ${categoryColors[product.category] || 'from-gray-400 to-gray-300'} flex items-center justify-center text-white shadow-lg`}><Fuel size={36} /></div>
+            <div className={`size-20 rounded-full ${categoryColors[product.category] || 'from-muted to-muted'} flex items-center justify-center text-white `}><Fuel className="size-9" /></div>
             <div className="flex-1">
               <div className="flex flex-wrap items-center gap-2"><Badge variant="outline" className="font-mono text-xs">{product.sku}</Badge><Badge className="bg-success text-success-foreground text-xs">{product.gradeClass}</Badge></div>
-              <h2 className="text-2xl font-bold text-foreground mt-2">{product.name}</h2>
+              <h2 className="text-lg md:text-xl font-semibold text-foreground mt-2 tracking-tight">{product.name}</h2>
               <p className="text-muted-foreground mt-1.5 max-w-2xl text-sm leading-relaxed">{product.description || 'No description provided.'}</p>
             </div>
           </div>
@@ -129,28 +129,28 @@ function ProductDetailPage() {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card>
-          <CardHeader className="border-b border-border"><div className="flex items-center gap-2"><div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary"><Scale size={16} /></div><div><CardTitle className="text-sm">Technical Specifications</CardTitle><p className="text-xs text-muted-foreground">Quality & chemical specs</p></div></div></CardHeader>
+          <CardHeader className="border-b border-border"><div className="flex items-center gap-2"><div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary"><Scale className="size-4" /></div><div><CardTitle className="text-sm">Technical Specifications</CardTitle><p className="text-xs text-muted-foreground">Quality & chemical specs</p></div></div></CardHeader>
           <CardContent className="space-y-4">
-            <div><p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Density</p><p className="text-sm text-foreground mt-0.5">{product.density || 'N/A'}</p></div>
-            <div><p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Flash Point</p><p className="text-sm text-foreground mt-0.5 flex items-center gap-1"><Thermometer size={14} className="text-muted-foreground" />{product.flashPoint || 'N/A'}</p></div>
-            <div><p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Quality Grade</p><p className="text-sm text-foreground mt-0.5">{product.gradeClass || 'N/A'}</p></div>
+            <div><p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Density</p><p className="text-sm text-foreground mt-0.5">{product.density || 'N/A'}</p></div>
+            <div><p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Flash Point</p><p className="text-sm text-foreground mt-0.5 flex items-center gap-1"><Thermometer className="size-3.5 text-muted-foreground" />{product.flashPoint || 'N/A'}</p></div>
+            <div><p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Quality Grade</p><p className="text-sm text-foreground mt-0.5">{product.gradeClass || 'N/A'}</p></div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="border-b border-border"><div className="flex items-center gap-2"><div className="h-8 w-8 rounded-lg bg-destructive/10 flex items-center justify-center text-destructive"><ShieldAlert size={16} /></div><div><CardTitle className="text-sm">Safety & Regulation</CardTitle><p className="text-xs text-muted-foreground">Hazard & storage info</p></div></div></CardHeader>
+          <CardHeader className="border-b border-border"><div className="flex items-center gap-2"><div className="size-8 rounded-lg bg-destructive/10 flex items-center justify-center text-destructive"><ShieldAlert className="size-4" /></div><div><CardTitle className="text-sm">Safety & Regulation</CardTitle><p className="text-xs text-muted-foreground">Hazard & storage info</p></div></div></CardHeader>
           <CardContent className="space-y-4">
-            <div><p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">UN Number</p><p className="text-sm font-mono text-foreground mt-0.5 bg-muted border border-border px-2 py-0.5 rounded w-fit text-xs font-semibold">{product.unNumber || 'N/A'}</p></div>
-            <div><p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Hazard Classification</p><p className="text-sm text-foreground mt-0.5 flex items-center gap-1.5"><AlertOctagon size={14} className="text-destructive shrink-0" />{product.hazardClass || 'N/A'}</p></div>
-            <div><p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Category</p><p className="text-sm text-foreground mt-0.5 flex items-center gap-1.5"><Layers size={14} className="text-muted-foreground" />{product.category || 'N/A'}</p></div>
+            <div><p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">UN Number</p><p className="text-sm font-mono text-foreground mt-0.5 bg-muted border border-border px-2 py-0.5 rounded w-fit text-xs font-semibold">{product.unNumber || 'N/A'}</p></div>
+            <div><p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Hazard Classification</p><p className="text-sm text-foreground mt-0.5 flex items-center gap-1.5"><AlertOctagon className="size-3.5 text-destructive shrink-0" />{product.hazardClass || 'N/A'}</p></div>
+            <div><p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Category</p><p className="text-sm text-foreground mt-0.5 flex items-center gap-1.5"><Layers className="size-3.5 text-muted-foreground" />{product.category || 'N/A'}</p></div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="border-b border-border"><div className="flex items-center gap-2"><div className="h-8 w-8 rounded-lg bg-success/10 flex items-center justify-center text-success"><Archive size={16} /></div><div><CardTitle className="text-sm">Commercial & Unit Info</CardTitle><p className="text-xs text-muted-foreground">Measurement unit & supplier</p></div></div></CardHeader>
+          <CardHeader className="border-b border-border"><div className="flex items-center gap-2"><div className="size-8 rounded-lg bg-success/10 flex items-center justify-center text-success"><Archive className="size-4" /></div><div><CardTitle className="text-sm">Commercial & Unit Info</CardTitle><p className="text-xs text-muted-foreground">Measurement unit & supplier</p></div></div></CardHeader>
           <CardContent className="space-y-4">
-            <div><p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Measurement Unit</p><p className="text-sm text-foreground mt-0.5">{product.unit || 'Liters'}</p></div>
-            <div><p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Primary Supplier</p><p className="text-sm text-foreground mt-0.5 flex items-center gap-1.5"><Truck size={14} className="text-muted-foreground" />{product.supplier || 'N/A'}</p></div>
+            <div><p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Measurement Unit</p><p className="text-sm text-foreground mt-0.5">{product.unit || 'Liters'}</p></div>
+            <div><p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Primary Supplier</p><p className="text-sm text-foreground mt-0.5 flex items-center gap-1.5"><Truck className="size-3.5 text-muted-foreground" />{product.supplier || 'N/A'}</p></div>
           </CardContent>
         </Card>
       </div>
@@ -179,8 +179,8 @@ function ProductDetailPage() {
           <Card className="mt-6">
             <CardHeader className="border-b border-border">
               <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-lg bg-info/10 flex items-center justify-center text-info">
-                  <Warehouse size={16} />
+                <div className="size-8 rounded-lg bg-info/10 flex items-center justify-center text-info">
+                  <Warehouse className="size-4" />
                 </div>
                 <div>
                   <CardTitle className="text-sm">Supporting Depots & Pricing</CardTitle>
@@ -196,7 +196,7 @@ function ProductDetailPage() {
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm text-left">
-                    <thead className="bg-muted/50 text-xs uppercase tracking-wider text-muted-foreground border-b border-border">
+                    <thead className="bg-muted/50 text-xs uppercase tracking-[0.22em] text-muted-foreground border-b border-border">
                       <tr>
                         <th className="px-6 py-3 font-semibold">Depot Name</th>
                         <th className="px-6 py-3 font-semibold">Location</th>
@@ -206,11 +206,11 @@ function ProductDetailPage() {
                     </thead>
                     <tbody className="divide-y divide-border">
                       {supportingDepots.map((depot) => (
-                        <tr key={depot.id} className="hover:bg-muted/30 transition-colors">
+                        <tr key={depot.id} className="hover:bg-muted/30 transition-colors duration-250 ease-luxe">
                           <td className="px-6 py-4 font-medium text-foreground">
                             <button
                               onClick={() => navigate({ to: '/depots/details' as any, state: { depot: depot.rawDepot } } as any)}
-                              className="flex items-center gap-2 hover:text-primary transition-colors text-left"
+                              className="flex items-center gap-2 hover:text-primary transition-colors text-left duration-250 ease-luxe"
                             >
                               <span>{depot.name}</span>
                               <Badge variant="outline" className="font-mono text-[10px] py-0 px-1.5">{depot.code}</Badge>
@@ -222,7 +222,7 @@ function ProductDetailPage() {
                           <td className="px-6 py-4 text-right font-mono text-foreground font-medium">
                             {depot.capacity.toLocaleString()} {getUnitAbbreviation(product.unit)}
                           </td>
-                          <td className="px-6 py-4 text-right font-mono font-bold text-foreground">
+                          <td className="px-6 py-4 text-right font-mono font-semibold text-foreground">
                             {depot.price !== null ? (
                               `₦${depot.price.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} / ${getSingularUnit(product.unit)}`
                             ) : (

@@ -42,11 +42,11 @@ function getRatingStars(rating: number) {
   const stars = []
   for (let i = 1; i <= 5; i++) {
     if (i <= Math.floor(rating)) {
-      stars.push(<Star key={i} size={16} className="text-warning fill-warning" />)
+      stars.push(<Star key={i} className="size-4 text-warning fill-warning" />)
     } else if (i - rating < 1 && i - rating > 0) {
-      stars.push(<Star key={i} size={16} className="text-warning fill-warning/50" />)
+      stars.push(<Star key={i} className="size-4 text-warning fill-warning/50" />)
     } else {
-      stars.push(<Star key={i} size={16} className="text-muted-foreground/30" />)
+      stars.push(<Star key={i} className="size-4 text-muted-foreground/30" />)
     }
   }
   return stars
@@ -114,7 +114,7 @@ function DriverDetailPage() {
   if (!driver && isLoading) {
     return (
       <div className="flex items-center justify-center py-32">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+        <div className="animate-spin rounded-full size-8 border-b-2 border-primary" />
       </div>
     )
   }
@@ -122,12 +122,12 @@ function DriverDetailPage() {
   if (!driver) {
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-5 text-center">
-        <div className="h-16 w-16 rounded-full bg-warning/10 flex items-center justify-center text-warning border border-warning/20">
-          <AlertCircle size={32} />
+        <div className="size-16 rounded-full bg-warning/10 flex items-center justify-center text-warning border border-warning/20">
+          <AlertCircle className="size-8" />
         </div>
-        <h2 className="text-2xl font-bold text-foreground">No Driver Selected</h2>
+        <h2 className="text-lg md:text-xl font-semibold text-foreground tracking-tight">No Driver Selected</h2>
         <p className="text-muted-foreground max-w-sm">Please select a driver from the directory to view details.</p>
-        <Button onClick={() => navigate({ to: '/drivers/' as any })}><ArrowLeft size={16} /> Back to Drivers</Button>
+        <Button onClick={() => navigate({ to: '/drivers/' as any })}><ArrowLeft className="size-4" /> Back to Drivers</Button>
       </div>
     )
   }
@@ -148,28 +148,28 @@ function DriverDetailPage() {
       <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center gap-4">
           <Button variant="outline" size="icon" onClick={handleBack}>
-            <ArrowLeft size={16} />
+            <ArrowLeft className="size-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Driver Profile</h1>
+            <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">Driver Profile</h1>
             <p className="text-muted-foreground">License credentials, safety metrics, and contact information</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={handleEdit}>
-            <Edit size={16} /> Edit Profile
+            <Edit className="size-4" /> Edit Profile
           </Button>
           <Button variant="destructive" onClick={handleDelete} disabled={deleteDriver.isPending}>
-            <Trash2 size={16} /> {deleteDriver.isPending ? 'Removing...' : 'Remove Driver'}
+            <Trash2 className="size-4" /> {deleteDriver.isPending ? 'Removing...' : 'Remove Driver'}
           </Button>
         </div>
       </header>
 
       {/* Hero Badge Panel */}
       <Card className="card-hover">
-        <CardContent className="p-6 md:p-8 bg-gradient-to-r from-primary/5 to-info/5">
+        <CardContent className="bg-primary/5 p-6 md:p-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-            <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center text-primary-foreground text-2xl font-bold shadow-lg shrink-0">
+            <div className="size-20 bg-primary rounded-full flex items-center justify-center text-primary-foreground text-2xl font-semibold shrink-0 tabular-nums">
               {getInitials(driver.name)}
             </div>
             <div className="flex-1">
@@ -177,13 +177,13 @@ function DriverDetailPage() {
                 <Badge variant="outline" className="font-mono text-xs">DL: {driver.licenseNumber}</Badge>
                 {getStatusBadge(driver.status)}
               </div>
-              <h2 className="text-3xl font-bold text-foreground mt-2">{driver.name}</h2>
+              <h2 className="text-lg md:text-xl font-semibold text-foreground mt-2 tracking-tight">{driver.name}</h2>
               <p className="text-muted-foreground mt-1.5 text-sm flex items-center gap-1.5">
                 License Class {driver.licenseClass} &bull;{' '}
                 {assignedTruckName && assignedTruckName !== 'None' && assignedTruckId ? (
                   <button
                     onClick={() => navigate({ to: '/trucks/details' as any, search: { id: assignedTruckId } as any, state: { id: assignedTruckId } } as any)}
-                    className="text-foreground hover:text-primary font-medium transition-colors underline underline-offset-2"
+                    className="text-foreground hover:text-primary font-medium transition-colors underline underline-offset-2 duration-250 ease-luxe"
                   >
                     Assigned to {assignedTruckName}
                   </button>
@@ -205,8 +205,8 @@ function DriverDetailPage() {
         <Card>
           <CardHeader className="border-b border-border">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                <FileText size={16} />
+              <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                <FileText className="size-4" />
               </div>
               <div>
                 <CardTitle className="text-sm">License & Credentials</CardTitle>
@@ -217,17 +217,17 @@ function DriverDetailPage() {
           <CardContent className="space-y-5 pt-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">License Number</p>
-                <p className="text-lg font-bold font-mono text-foreground mt-1">{driver.licenseNumber}</p>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">License Number</p>
+                <p className="text-lg font-semibold font-mono text-foreground mt-1">{driver.licenseNumber}</p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">License Class</p>
-                <p className="text-lg font-bold text-foreground mt-1">{driver.licenseClass}</p>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">License Class</p>
+                <p className="text-lg font-semibold text-foreground mt-1">{driver.licenseClass}</p>
               </div>
             </div>
 
             <div className="border-t pt-4">
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">License Expiry</p>
+              <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">License Expiry</p>
               <div className="flex items-center justify-between mt-1">
                 <span className="text-sm font-semibold text-foreground">
                   {driver.licenseExpiry ? new Date(driver.licenseExpiry).toLocaleDateString() : 'N/A'}
@@ -240,7 +240,7 @@ function DriverDetailPage() {
 
             {licenseStatus.alert && (
               <div className="mt-2 p-3 bg-destructive/5 border border-destructive/10 rounded flex items-start gap-2">
-                <ShieldAlert className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+                <ShieldAlert className="size-4 text-destructive shrink-0 mt-0.5" />
                 <p className="text-xs text-destructive-foreground font-medium">
                   Attention: License requires immediate renewal. Driver may not be legally permitted to operate.
                 </p>
@@ -253,8 +253,8 @@ function DriverDetailPage() {
         <Card>
           <CardHeader className="border-b border-border">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-info/10 flex items-center justify-center text-info">
-                <User size={16} />
+              <div className="size-8 rounded-lg bg-info/10 flex items-center justify-center text-info">
+                <User className="size-4" />
               </div>
               <div>
                 <CardTitle className="text-sm">Contact & Truck Assignment</CardTitle>
@@ -265,14 +265,14 @@ function DriverDetailPage() {
           <CardContent className="space-y-4 pt-4">
             <div className="space-y-3">
               <div className="flex items-center gap-3">
-                <Mail size={16} className="text-muted-foreground shrink-0" />
+                <Mail className="size-4 text-muted-foreground shrink-0" />
                 <div>
                   <p className="text-xs text-muted-foreground">Email</p>
                   <p className="text-sm font-medium text-foreground">{driver.email || 'Not provided'}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <Phone size={16} className="text-muted-foreground shrink-0" />
+                <Phone className="size-4 text-muted-foreground shrink-0" />
                 <div>
                   <p className="text-xs text-muted-foreground">Phone</p>
                   <p className="text-sm font-medium text-foreground">{driver.phone}</p>
@@ -282,13 +282,13 @@ function DriverDetailPage() {
 
             <div className="border-t pt-4">
               <div className="flex items-center gap-3">
-                <Truck size={16} className="text-muted-foreground shrink-0" />
+                <Truck className="size-4 text-muted-foreground shrink-0" />
                 <div>
                   <p className="text-xs text-muted-foreground">Assigned Truck</p>
                   {assignedTruckName && assignedTruckName !== 'None' && assignedTruckId ? (
                     <button
                       onClick={() => navigate({ to: '/trucks/details' as any, search: { id: assignedTruckId } as any, state: { id: assignedTruckId } } as any)}
-                      className="text-sm font-semibold text-foreground hover:text-primary transition-colors underline underline-offset-2"
+                      className="text-sm font-semibold text-foreground hover:text-primary transition-colors underline underline-offset-2 duration-250 ease-luxe"
                     >
                       {assignedTruckName}
                     </button>
@@ -307,8 +307,8 @@ function DriverDetailPage() {
         <Card>
           <CardHeader className="border-b border-border">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-warning/10 flex items-center justify-center text-warning">
-                <Star size={16} />
+              <div className="size-8 rounded-lg bg-warning/10 flex items-center justify-center text-warning">
+                <Star className="size-4" />
               </div>
               <div>
                 <CardTitle className="text-sm">Performance & Safety</CardTitle>
@@ -319,16 +319,16 @@ function DriverDetailPage() {
           <CardContent className="space-y-5 pt-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Driver Rating</p>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Driver Rating</p>
                 <div className="flex items-center gap-1.5 mt-2">
                   {getRatingStars(driver.rating || 0)}
-                  <span className="text-sm font-bold text-foreground ml-1">{(driver.rating || 0).toFixed(1)}</span>
+                  <span className="text-sm font-semibold text-foreground ml-1">{(driver.rating || 0).toFixed(1)}</span>
                 </div>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Safety Score</p>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Safety Score</p>
                 <div className={`inline-flex items-center gap-1.5 mt-2 px-2.5 py-0.5 rounded-full text-xs font-semibold ${getSafetyColor(driver.safetyScore || 0)}`}>
-                  <Gauge size={12} /> {driver.safetyScore || 0}%
+                  <Gauge className="size-3" /> {driver.safetyScore || 0}%
                 </div>
               </div>
             </div>
@@ -354,8 +354,8 @@ function DriverDetailPage() {
         <Card>
           <CardHeader className="border-b border-border">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-success/10 flex items-center justify-center text-success">
-                <Calendar size={16} />
+              <div className="size-8 rounded-lg bg-success/10 flex items-center justify-center text-success">
+                <Calendar className="size-4" />
               </div>
               <div>
                 <CardTitle className="text-sm">Status & Activity</CardTitle>
@@ -365,7 +365,7 @@ function DriverDetailPage() {
           </CardHeader>
           <CardContent className="space-y-4 pt-4">
             <div>
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Current Status</p>
+              <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Current Status</p>
               <div className="mt-2">
                 {getStatusBadge(driver.status)}
               </div>
@@ -394,8 +394,8 @@ function DriverDetailPage() {
       <Card className="md:col-span-2">
         <CardHeader className="border-b border-border">
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-secondary flex items-center justify-center text-muted-foreground">
-              <Truck size={16} />
+            <div className="size-8 rounded-lg bg-secondary flex items-center justify-center text-muted-foreground">
+              <Truck className="size-4" />
             </div>
             <div>
               <CardTitle className="text-sm">Previous Trucks History</CardTitle>
@@ -409,16 +409,16 @@ function DriverDetailPage() {
           ) : (
             <div className="divide-y divide-border">
               {driver.previousTrucks.map((record: any, idx: number) => (
-                <div key={idx} className="flex items-center justify-between py-3 hover:bg-muted/10 px-2 rounded-lg transition-colors">
+                <div key={idx} className="flex items-center justify-between py-3 hover:bg-muted/10 px-2 rounded-lg transition-colors duration-250 ease-luxe">
                   <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center text-xs font-bold text-muted-foreground">
+                    <div className="size-8 rounded-full bg-secondary flex items-center justify-center text-xs font-semibold text-muted-foreground">
                       {record.truckPlate?.charAt(0) || '?'}
                     </div>
                     <div>
                       {record.truckRef && typeof record.truckRef === 'object' ? (
                         <button
                           onClick={() => navigate({ to: '/trucks/details' as any, search: { id: record.truckRef._id || record.truckRef } as any, state: { id: record.truckRef._id || record.truckRef } } as any)}
-                          className="font-medium text-sm text-foreground hover:text-primary transition-colors text-left block"
+                          className="font-medium text-sm text-foreground hover:text-primary transition-colors text-left block duration-250 ease-luxe"
                         >
                           {record.truckPlate}
                           {record.truckRef.model && (

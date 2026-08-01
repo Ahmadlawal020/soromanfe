@@ -24,7 +24,7 @@ export function Pagination({
   const endItem = Math.min(currentPage * pageSize, totalItems)
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border mt-4">
+    <div className="mt-4 flex flex-col items-center justify-between gap-4 border-t border-border pt-4 sm:flex-row">
       <div className="flex items-center gap-2">
         <span className="text-xs text-muted-foreground">Rows per page:</span>
         <Select
@@ -33,7 +33,7 @@ export function Pagination({
             onPageSizeChange(Number(val))
           }}
         >
-          <SelectTrigger className="h-8 w-[70px]">
+          <SelectTrigger size="sm" className="w-[70px] tabular-nums">
             <SelectValue placeholder={pageSize.toString()} />
           </SelectTrigger>
           <SelectContent>
@@ -42,7 +42,7 @@ export function Pagination({
             ))}
           </SelectContent>
         </Select>
-        <p className="text-xs text-muted-foreground ml-4">
+        <p className="ml-4 text-xs text-muted-foreground tabular-nums">
           Showing {startItem} to {endItem} of {totalItems} entries
         </p>
       </div>
@@ -51,7 +51,6 @@ export function Pagination({
           <Button
             variant="outline"
             size="sm"
-            className="h-8"
             disabled={currentPage <= 1}
             onClick={() => onPageChange(Math.max(currentPage - 1, 1))}
           >
@@ -63,12 +62,13 @@ export function Pagination({
               const showEllipsis = idx > 0 && p - arr[idx - 1] > 1
               return (
                 <div key={p} className="flex items-center">
-                  {showEllipsis && <span className="px-2 text-xs text-muted-foreground">...</span>}
+                  {showEllipsis && <span className="px-2 text-xs text-muted-foreground">…</span>}
                   <Button
                     variant={currentPage === p ? 'default' : 'outline'}
-                    size="sm"
-                    className={`h-8 w-8 p-0 ${currentPage === p ? 'gradient-primary text-white border-0' : ''}`}
+                    size="icon-sm"
+                    className="tabular-nums"
                     onClick={() => onPageChange(p)}
+                    aria-current={currentPage === p ? 'page' : undefined}
                   >
                     {p}
                   </Button>
@@ -78,7 +78,6 @@ export function Pagination({
           <Button
             variant="outline"
             size="sm"
-            className="h-8"
             disabled={currentPage >= totalPages}
             onClick={() => onPageChange(Math.min(currentPage + 1, totalPages))}
           >

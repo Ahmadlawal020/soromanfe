@@ -324,19 +324,19 @@ export function RecordPaymentDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[900px] max-h-[90svh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3">
-            <div className={`p-2 rounded-lg ${assignMode ? 'bg-amber-100' : 'bg-emerald-100'}`}>
+            <div className={`p-2 rounded-lg ${assignMode ? 'bg-warning/10' : 'bg-accent/10'}`}>
               {assignMode
-                ? <UserPlus className="w-5 h-5 text-amber-600" />
-                : <Banknote className="w-5 h-5 text-emerald-600" />}
+                ? <UserPlus className="size-5 text-warning" />
+                : <Banknote className="size-5 text-accent" />}
             </div>
             <div>
               <h2 className="text-lg font-semibold">
                 {assignMode ? 'Assign Customer to Cycle' : 'Record Payment'}
               </h2>
-              <p className="text-sm font-normal text-slate-500 mt-0.5">
+              <p className="text-sm font-normal text-muted-foreground mt-0.5">
                 {assignMode
                   ? 'Link customers to this truck cycle now — add rate & payment later.'
                   : 'Select a loaded truck, then add one row per customer.'}
@@ -348,14 +348,14 @@ export function RecordPaymentDialog({
 
         <div className="space-y-4 py-2">
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-slate-700 flex items-center gap-1.5">
-              <Truck size={15} className="text-slate-500" /> Select Loaded Truck <span className="text-red-500">*</span>
+            <Label className="text-sm font-medium text-foreground flex items-center gap-1.5">
+              <Truck className="size-4 text-muted-foreground" /> Select Loaded Truck <span className="text-destructive">*</span>
             </Label>
             <select
               aria-label="Select loaded truck"
               value={truckLoadingId}
               onChange={e => handleTruckSelect(e.target.value)}
-              className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              className="h-8 w-full rounded-lg border border-input bg-background px-2.5 py-1 text-base md:text-sm"
             >
               <option value="">Select a truck…</option>
               {trucks.map(t => {
@@ -374,19 +374,19 @@ export function RecordPaymentDialog({
           </div>
 
           {truckNumber && (
-            <div className="bg-blue-50/60 border border-blue-100 rounded-lg p-3">
+            <div className="bg-muted/60 border border-border rounded-lg p-3">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-1.5 text-sm">
                 <div>
-                  <span className="text-slate-500 text-xs">Truck:</span>{' '}
-                  <span className="font-bold text-slate-800">{truckNumber}</span>
+                  <span className="text-muted-foreground text-xs">Truck:</span>{' '}
+                  <span className="font-semibold text-foreground">{truckNumber}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 text-xs">Depot:</span>{' '}
-                  <span className="font-medium text-slate-800">{depot || '—'}</span>
+                  <span className="text-muted-foreground text-xs">Depot:</span>{' '}
+                  <span className="font-medium text-foreground">{depot || '—'}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 text-xs">Date Loaded:</span>{' '}
-                  <span className="font-medium text-slate-800">
+                  <span className="text-muted-foreground text-xs">Date Loaded:</span>{' '}
+                  <span className="font-medium text-foreground">
                     {dateLoaded ? (() => { try { return format(parseISO(dateLoaded), 'dd MMM yyyy') } catch { return dateLoaded } })() : '—'}
                   </span>
                 </div>
@@ -396,14 +396,14 @@ export function RecordPaymentDialog({
 
           {truckNumber && tripCodes.length > 0 && (
             <div className="space-y-1.5">
-              <Label className="text-sm font-medium text-slate-700 flex items-center gap-1.5">
-                <Tag size={14} className="text-purple-500" /> Allocation Code
+              <Label className="text-sm font-medium text-foreground flex items-center gap-1.5">
+                <Tag className="size-3.5 text-muted-foreground" /> Allocation Code
               </Label>
               <select
                 aria-label="Select allocation code"
                 value={dialogTripCode}
                 onChange={e => setDialogTripCode(e.target.value)}
-                className={`h-10 w-full rounded-md border bg-background px-3 py-2 text-sm ${dialogTripCode ? 'border-purple-500 bg-purple-50 text-purple-900 font-semibold' : 'border-input'}`}
+                className={`h-10 w-full rounded-md border bg-background px-3 py-2 text-sm ${dialogTripCode ? 'border-border bg-muted text-foreground font-semibold' : 'border-input'}`}
               >
                 <option value="">No allocation code</option>
                 {tripCodes.map(code => (
@@ -416,11 +416,11 @@ export function RecordPaymentDialog({
           {truckNumber && (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em]">
                   Customer ({saleRows.length})
                 </p>
                 <Button type="button" variant="outline" size="sm" className="gap-1.5 text-xs h-8" onClick={addSaleRow}>
-                  <UserPlus size={13} /> Add Customer
+                  <UserPlus className="size-3.5" /> Add Customer
                 </Button>
               </div>
 
@@ -430,23 +430,23 @@ export function RecordPaymentDialog({
                 const hasError = rowErrors[row.uid] && Object.keys(rowErrors[row.uid]).length
 
                 return (
-                  <div key={row.uid} className={`border rounded-lg p-3 space-y-3 relative ${hasError ? 'border-red-300 bg-red-50/30' : isFS ? 'border-amber-200 bg-amber-50/30' : 'border-slate-200 bg-slate-50/50'}`}>
+                  <div key={row.uid} className={`border rounded-lg p-3 space-y-3 relative ${hasError ? 'border-destructive/40 bg-destructive/30' : isFS ? 'border-warning/40 bg-warning/30' : 'border-border bg-muted/50'}`}>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-                        {isFS ? <Fuel size={12} className="text-amber-500" /> : null}
+                      <span className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em] flex items-center gap-1.5">
+                        {isFS ? <Fuel className="size-3 text-warning" /> : null}
                         Customer #{idx + 1}
-                        {isFS && <span className="ml-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-700 border border-amber-200 normal-case tracking-normal">Filling Station</span>}
+                        {isFS && <span className="ml-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-warning/10 text-warning border border-warning/40 normal-case tracking-normal">Filling Station</span>}
                       </span>
                       {saleRows.length > 1 && (
-                        <button type="button" onClick={() => removeSaleRow(row.uid)} className="text-slate-400 hover:text-red-500 transition-colors p-0.5 rounded" title="Remove row">
-                          <X size={15} />
+                        <button type="button" onClick={() => removeSaleRow(row.uid)} className="text-muted-foreground hover:text-destructive transition-colors p-0.5 rounded duration-250 ease-luxe" title="Remove row">
+                          <X className="size-4" />
                         </button>
                       )}
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div className="space-y-1">
-                        <Label className="text-xs text-slate-600">Customer <span className="text-red-500">*</span></Label>
+                        <Label className="text-xs text-muted-foreground">Customer <span className="text-destructive">*</span></Label>
                         <select
                           aria-label={`Customer for row ${idx + 1}`}
                           value={row.customer}
@@ -456,30 +456,30 @@ export function RecordPaymentDialog({
                             updateSaleRow(row.uid, 'customer', custId)
                             if (cust) updateSaleRow(row.uid, 'customer_name', cust.name)
                           }}
-                          className={`h-9 w-full rounded-md border bg-background px-3 py-2 text-sm ${rowErrors[row.uid]?.customer ? 'border-red-400 bg-red-50' : 'border-input'}`}
+                          className={`h-9 w-full rounded-md border bg-background px-3 py-2 text-sm ${rowErrors[row.uid]?.customer ? 'border-destructive bg-destructive/10' : 'border-input'}`}
                         >
                           <option value="">Select customer…</option>
                           {customers.map(c => (
                             <option key={c._id || c.id} value={c._id || c.id || ''}>{c.name}</option>
                           ))}
                         </select>
-                        {rowErrors[row.uid]?.customer && <p className="text-[11px] text-red-500">{rowErrors[row.uid].customer}</p>}
+                        {rowErrors[row.uid]?.customer && <p className="text-[11px] text-destructive">{rowErrors[row.uid].customer}</p>}
                       </div>
                       <div className="space-y-1">
-                        <Label className="text-xs text-slate-600">Destination <span className="text-red-500">*</span></Label>
-                        <Input placeholder="e.g. Kano, Abuja…" className={`h-9 text-sm ${rowErrors[row.uid]?.location ? 'border-red-400 bg-red-50' : ''}`} value={row.location} onChange={e => updateSaleRow(row.uid, 'location', e.target.value)} />
-                        {rowErrors[row.uid]?.location && <p className="text-[11px] text-red-500">{rowErrors[row.uid].location}</p>}
+                        <Label className="text-xs text-muted-foreground">Destination <span className="text-destructive">*</span></Label>
+                        <Input placeholder="e.g. Kano, Abuja…" className={`h-9 text-sm ${rowErrors[row.uid]?.location ? 'border-destructive bg-destructive/10' : ''}`} value={row.location} onChange={e => updateSaleRow(row.uid, 'location', e.target.value)} />
+                        {rowErrors[row.uid]?.location && <p className="text-[11px] text-destructive">{rowErrors[row.uid].location}</p>}
                       </div>
                       <div className="space-y-1">
-                        <Label className="text-xs text-slate-600">Quantity (L)</Label>
+                        <Label className="text-xs text-muted-foreground">Quantity (L)</Label>
                         <Input type="text" inputMode="decimal" placeholder="e.g. 33,000" className="h-9 text-sm" value={row.quantity} onChange={e => updateSaleRow(row.uid, 'quantity', e.target.value)} />
                       </div>
                     </div>
 
                     {assignMode && (
-                      <div className="flex items-start gap-2 p-2.5 bg-amber-50 border border-amber-200 rounded-lg">
-                        <UserPlus size={14} className="text-amber-500 mt-0.5 shrink-0" />
-                        <p className="text-xs text-amber-700">
+                      <div className="flex items-start gap-2 p-2.5 bg-warning/10 border border-warning/40 rounded-lg">
+                        <UserPlus className="size-3.5 text-warning mt-0.5 shrink-0" />
+                        <p className="text-xs text-warning">
                           <span className="font-semibold">Assign Only</span> — customer linked to this cycle now. Edit later to add rate and payment.
                         </p>
                       </div>
@@ -489,30 +489,30 @@ export function RecordPaymentDialog({
                       <>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                           <div className="space-y-1">
-                            <Label className="text-xs text-slate-600 flex items-center gap-1">
-                              Rate (₦/L) <span className="text-red-500">*</span>
-                              {row.rateLocked && <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-700 border border-amber-200"><FileText size={9} /> Locked</span>}
+                            <Label className="text-xs text-muted-foreground flex items-center gap-1">
+                              Rate (₦/L) <span className="text-destructive">*</span>
+                              {row.rateLocked && <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-warning/10 text-warning border border-warning/40"><FileText className="size-2.5" /> Locked</span>}
                             </Label>
-                            <Input type="text" inputMode="decimal" placeholder="e.g. 1,210" className={`h-9 text-sm ${row.rateLocked ? 'bg-amber-50 text-amber-800 font-semibold cursor-not-allowed' : rowErrors[row.uid]?.rate ? 'border-red-400 bg-red-50' : ''}`} value={row.rate} readOnly={row.rateLocked} onChange={e => updateSaleRow(row.uid, 'rate', e.target.value)} />
-                            {rowErrors[row.uid]?.rate && <p className="text-[11px] text-red-500">{rowErrors[row.uid].rate}</p>}
+                            <Input type="text" inputMode="decimal" placeholder="e.g. 1,210" className={`h-9 text-sm ${row.rateLocked ? 'bg-warning/10 text-warning font-semibold cursor-not-allowed' : rowErrors[row.uid]?.rate ? 'border-destructive bg-destructive/10' : ''}`} value={row.rate} readOnly={row.rateLocked} onChange={e => updateSaleRow(row.uid, 'rate', e.target.value)} />
+                            {rowErrors[row.uid]?.rate && <p className="text-[11px] text-destructive">{rowErrors[row.uid].rate}</p>}
                           </div>
                           <div className="space-y-1">
-                            <Label className="text-xs text-slate-600">Expected (₦)</Label>
-                            <Input readOnly className="h-9 text-sm bg-white font-semibold text-slate-700" value={row.sales_value ? `₦${row.sales_value}` : '—'} />
+                            <Label className="text-xs text-muted-foreground">Expected (₦)</Label>
+                            <Input readOnly className="h-9 text-sm bg-white font-semibold text-foreground" value={row.sales_value ? `₦${row.sales_value}` : '—'} />
                           </div>
                           <div className="space-y-1">
-                            <Label className="text-xs text-slate-600">Amount Paid (₦)</Label>
+                            <Label className="text-xs text-muted-foreground">Amount Paid (₦)</Label>
                             <Input type="text" inputMode="decimal" className="h-9 text-sm" value={row.payment_amount} onChange={e => updateSaleRow(row.uid, 'payment_amount', e.target.value)} />
                           </div>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <div className="space-y-1">
-                            <Label className="text-xs text-slate-600"><CalendarIcon size={11} className="inline mr-1" />Date of Payment</Label>
+                            <Label className="text-xs text-muted-foreground"><CalendarIcon className="size-3 inline mr-1" />Date of Payment</Label>
                             <Input type="date" className="h-9 text-sm" value={row.date_of_payment} onChange={e => updateSaleRow(row.uid, 'date_of_payment', e.target.value)} />
                           </div>
                           <div className="space-y-1">
-                            <Label className="text-xs text-slate-600">Payer's Name</Label>
-                            <Input className={`h-9 text-sm ${rowErrors[row.uid]?.payer_name ? 'border-red-400 bg-red-50' : ''}`} value={row.payer_name} onChange={e => updateSaleRow(row.uid, 'payer_name', e.target.value.replace(/[0-9]/g, ''))} />
+                            <Label className="text-xs text-muted-foreground">Payer's Name</Label>
+                            <Input className={`h-9 text-sm ${rowErrors[row.uid]?.payer_name ? 'border-destructive bg-destructive/10' : ''}`} value={row.payer_name} onChange={e => updateSaleRow(row.uid, 'payer_name', e.target.value.replace(/[0-9]/g, ''))} />
                           </div>
                         </div>
                       </>
@@ -520,11 +520,11 @@ export function RecordPaymentDialog({
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div className="space-y-1">
-                        <Label className="text-xs text-slate-600">Phone Number</Label>
+                        <Label className="text-xs text-muted-foreground">Phone Number</Label>
                         <Input placeholder="e.g. 08012345678" className="h-9 text-sm" value={row.phone_number} onChange={e => updateSaleRow(row.uid, 'phone_number', e.target.value)} />
                       </div>
                       <div className="space-y-1">
-                        <Label className="text-xs text-slate-600">Remarks</Label>
+                        <Label className="text-xs text-muted-foreground">Remarks</Label>
                         <Input placeholder={isFS ? 'e.g. Awaiting sale…' : 'e.g. Partial Payment…'} className="h-9 text-sm" value={row.remarks} onChange={e => updateSaleRow(row.uid, 'remarks', e.target.value)} />
                       </div>
                     </div>
@@ -538,7 +538,7 @@ export function RecordPaymentDialog({
         <DialogFooter className="gap-2 sm:gap-0">
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>Cancel</Button>
           <Button onClick={handleSave} disabled={saving} className="gap-2">
-            {saving ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+            {saving ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-4" />}
             {saving ? 'Saving…' : `Record ${saleRows.filter(r => r.customer).length || ''} Payment${saleRows.filter(r => r.customer).length !== 1 ? 's' : ''}`}
           </Button>
         </DialogFooter>
@@ -615,12 +615,12 @@ export function QuickPaymentDialog({ open, onOpenChange, target, customerMap: _c
       <DialogContent className="sm:max-w-[520px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-emerald-100">
-              <Banknote className="w-5 h-5 text-emerald-600" />
+            <div className="p-2 rounded-lg bg-accent/10">
+              <Banknote className="size-5 text-accent" />
             </div>
             <div>
               <h2 className="text-lg font-semibold">Add Payment</h2>
-              <p className="text-sm font-normal text-slate-500 mt-0.5">
+              <p className="text-sm font-normal text-muted-foreground mt-0.5">
                 {target ? `${target.truckNumber} · ${target.customerName || 'Customer pending'}${target.code ? ` · ${target.code}` : ''}` : ''}
               </p>
             </div>
@@ -630,15 +630,15 @@ export function QuickPaymentDialog({ open, onOpenChange, target, customerMap: _c
 
         <div className="space-y-4 py-2">
           {target && (
-            <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm space-y-2">
-              <div className="grid grid-cols-2 gap-3 pb-2 border-b border-dashed border-slate-200">
+            <div className="bg-muted border border-border rounded-lg p-3 text-sm space-y-2">
+              <div className="grid grid-cols-2 gap-3 pb-2 border-b border-dashed border-border">
                 <div>
-                  <p className="text-xs text-slate-400 font-medium">Expected</p>
-                  <p className="font-bold text-slate-800 mt-0.5">{target.expected > 0 ? fmt(target.expected) : '—'}</p>
+                  <p className="text-xs text-muted-foreground font-medium">Expected</p>
+                  <p className="font-semibold text-foreground mt-0.5">{target.expected > 0 ? fmt(target.expected) : '—'}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-slate-400 font-medium">Current Balance</p>
-                  <p className={`font-bold mt-0.5 ${target.balance > 0 ? 'text-red-600' : 'text-emerald-600'}`}>
+                  <p className="text-xs text-muted-foreground font-medium">Current Balance</p>
+                  <p className={`font-semibold mt-0.5 ${target.balance > 0 ? 'text-destructive' : 'text-accent'}`}>
                     {target.expected > 0 ? (target.balance > 0 ? fmt(target.balance) : 'Fully Paid') : '—'}
                   </p>
                 </div>
@@ -646,12 +646,12 @@ export function QuickPaymentDialog({ open, onOpenChange, target, customerMap: _c
               {amountTyped > 0 && (
                 <div className="grid grid-cols-2 gap-3 pt-1">
                   <div>
-                    <p className="text-xs text-indigo-500 font-semibold">Payment Preview</p>
-                    <p className="font-extrabold text-indigo-600 mt-0.5">{fmt(amountTyped)}</p>
+                    <p className="text-xs text-muted-foreground font-semibold">Payment Preview</p>
+                    <p className="font-semibold text-muted-foreground mt-0.5">{fmt(amountTyped)}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-slate-400 font-medium">New Balance</p>
-                    <p className={`font-extrabold mt-0.5 ${remainingBalance === 0 ? 'text-emerald-600' : remainingBalance > 0 ? 'text-red-600' : 'text-blue-600'}`}>
+                    <p className="text-xs text-muted-foreground font-medium">New Balance</p>
+                    <p className={`font-semibold mt-0.5 ${remainingBalance === 0 ? 'text-accent' : remainingBalance > 0 ? 'text-destructive' : 'text-muted-foreground'}`}>
                       {remainingBalance === 0 ? 'Fully Settled' : remainingBalance > 0 ? fmt(remainingBalance) : `+${fmt(Math.abs(remainingBalance))} Overpaid`}
                     </p>
                   </div>
@@ -688,7 +688,7 @@ export function QuickPaymentDialog({ open, onOpenChange, target, customerMap: _c
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>Cancel</Button>
           <Button onClick={handleSave} disabled={saving} className="gap-2">
-            {saving ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+            {saving ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-4" />}
             {saving ? 'Saving…' : 'Save Payment'}
           </Button>
         </DialogFooter>
@@ -799,12 +799,12 @@ export function RowSetupDialog({ open, onOpenChange, target, customers, customer
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-amber-100">
-              <UserPlus className="w-5 h-5 text-amber-600" />
+            <div className="p-2 rounded-lg bg-warning/10">
+              <UserPlus className="size-5 text-warning" />
             </div>
             <div>
               <h2 className="text-lg font-semibold">Row Setup</h2>
-              <p className="text-sm font-normal text-slate-500 mt-0.5">
+              <p className="text-sm font-normal text-muted-foreground mt-0.5">
                 {target ? `${target.truckNumber} · ${target.dateLoaded ? (() => { try { return format(parseISO(target.dateLoaded), 'dd MMM yyyy') } catch { return target.dateLoaded } })() : 'No date'}` : 'Assign customer and destination'}
               </p>
             </div>
@@ -816,7 +816,7 @@ export function RowSetupDialog({ open, onOpenChange, target, customers, customer
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1">
               <Label>Customer</Label>
-              <select aria-label="Setup customer" value={setupCustomer} onChange={e => setSetupCustomer(e.target.value)} className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+              <select aria-label="Setup customer" value={setupCustomer} onChange={e => setSetupCustomer(e.target.value)} className="h-8 w-full rounded-lg border border-input bg-background px-2.5 py-1 text-base md:text-sm">
                 <option value="">Select customer…</option>
                 {customers.map(c => (
                   <option key={c._id || c.id} value={c._id || c.id || ''}>{c.name}</option>
@@ -854,7 +854,7 @@ export function RowSetupDialog({ open, onOpenChange, target, customers, customer
 
           <div className="space-y-1">
             <Label>Allocation Code</Label>
-            <select aria-label="Setup allocation code" value={setupCode} onChange={e => setSetupCode(e.target.value)} className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+            <select aria-label="Setup allocation code" value={setupCode} onChange={e => setSetupCode(e.target.value)} className="h-8 w-full rounded-lg border border-input bg-background px-2.5 py-1 text-base md:text-sm">
               <option value="">No allocation code</option>
               {tripCodes.map(code => (
                 <option key={code} value={code}>{code}</option>
@@ -866,7 +866,7 @@ export function RowSetupDialog({ open, onOpenChange, target, customers, customer
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>Cancel</Button>
           <Button onClick={handleSave} disabled={saving} className="gap-2">
-            {saving ? <Loader2 size={14} className="animate-spin" /> : <UserPlus size={14} />}
+            {saving ? <Loader2 className="size-3.5 animate-spin" /> : <UserPlus className="size-3.5" />}
             {saving ? 'Saving…' : 'Save Setup'}
           </Button>
         </DialogFooter>
@@ -971,15 +971,15 @@ export function EditEntryDialog({ open, onOpenChange, target, tripCodes, custome
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[600px] max-h-[90svh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-blue-100">
-              <Pencil className="w-5 h-5 text-blue-600" />
+            <div className="p-2 rounded-lg bg-muted">
+              <Pencil className="size-5 text-muted-foreground" />
             </div>
             <div>
               <h2 className="text-lg font-semibold">Edit Entry</h2>
-              <p className="text-sm font-normal text-slate-500 mt-0.5">
+              <p className="text-sm font-normal text-muted-foreground mt-0.5">
                 {target?.truckNumber} — {target?.customerName || `Customer #${target?.customerId}`}
               </p>
             </div>
@@ -990,19 +990,19 @@ export function EditEntryDialog({ open, onOpenChange, target, tripCodes, custome
         {form && target && (
           <div className="space-y-4 py-2">
             {(!toNum(target.rate) || !toNum(target.salesValue)) && (
-              <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                <Fuel size={14} className="text-amber-500 mt-0.5 shrink-0" />
-                <p className="text-xs text-amber-700">This entry has no rate or revenue yet — fill them in below.</p>
+              <div className="flex items-start gap-2 p-3 bg-warning/10 border border-warning/40 rounded-lg">
+                <Fuel className="size-3.5 text-warning mt-0.5 shrink-0" />
+                <p className="text-xs text-warning">This entry has no rate or revenue yet — fill them in below.</p>
               </div>
             )}
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <Label className="text-xs text-slate-600">Destination</Label>
+                <Label className="text-xs text-muted-foreground">Destination</Label>
                 <Input value={form.location} onChange={e => setForm(f => f ? { ...f, location: e.target.value } : f)} className="h-9 text-sm" placeholder="e.g. Kano" />
               </div>
               <div className="space-y-1">
-                <Label className="text-xs text-slate-600">Quantity (L)</Label>
+                <Label className="text-xs text-muted-foreground">Quantity (L)</Label>
                 <Input type="text" inputMode="decimal" value={form.quantity} onChange={e => {
                   const qty = formatWithCommas(e.target.value)
                   const r = Number(stripCommas(form.rate)) || 0
@@ -1015,8 +1015,8 @@ export function EditEntryDialog({ open, onOpenChange, target, tripCodes, custome
 
             {tripCodes.length > 0 && (
               <div className="space-y-1">
-                <Label className="text-xs text-slate-600 flex items-center gap-1.5"><Tag size={11} className="text-purple-500" /> Code</Label>
-                <select aria-label="Code" value={editTripCode} onChange={e => setEditTripCode(e.target.value)} className={`h-9 w-full rounded-md border bg-background px-3 py-1 text-sm ${editTripCode ? 'border-purple-500 bg-purple-50 text-purple-900 font-semibold' : 'border-input'}`}>
+                <Label className="text-xs text-muted-foreground flex items-center gap-1.5"><Tag className="size-3 text-muted-foreground" /> Code</Label>
+                <select aria-label="Code" value={editTripCode} onChange={e => setEditTripCode(e.target.value)} className={`h-9 w-full rounded-md border bg-background px-3 py-1 text-sm ${editTripCode ? 'border-border bg-muted text-foreground font-semibold' : 'border-input'}`}>
                   <option value="">No code</option>
                   {tripCodes.map(code => (<option key={code} value={code}>{code}</option>))}
                 </select>
@@ -1025,7 +1025,7 @@ export function EditEntryDialog({ open, onOpenChange, target, tripCodes, custome
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <Label className="text-xs text-slate-600">Rate (₦/L)</Label>
+                <Label className="text-xs text-muted-foreground">Rate (₦/L)</Label>
                 <Input type="text" inputMode="decimal" value={form.rate} onChange={e => {
                   const rate = formatWithCommas(e.target.value)
                   const r = Number(stripCommas(rate)) || 0
@@ -1035,41 +1035,41 @@ export function EditEntryDialog({ open, onOpenChange, target, tripCodes, custome
                 }} className="h-9 text-sm" placeholder="e.g. 1,210" />
               </div>
               <div className="space-y-1">
-                <Label className="text-xs text-slate-600">Total Expected (₦)</Label>
+                <Label className="text-xs text-muted-foreground">Total Expected (₦)</Label>
                 <Input type="text" inputMode="decimal" value={form.sales_value} onChange={e => setForm(f => f ? { ...f, sales_value: formatWithCommas(e.target.value) } : f)} className="h-9 text-sm font-semibold" placeholder="Auto-computed or manual" />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <Label className="text-xs text-slate-600">Amount Paid (₦)</Label>
+                <Label className="text-xs text-muted-foreground">Amount Paid (₦)</Label>
                 <Input type="text" inputMode="decimal" value={form.payment_amount} onChange={e => setForm(f => f ? { ...f, payment_amount: formatWithCommas(e.target.value) } : f)} className="h-9 text-sm" placeholder="e.g. 5,000,000" />
               </div>
               <div className="space-y-1">
-                <Label className="text-xs text-slate-600">Date of Payment</Label>
+                <Label className="text-xs text-muted-foreground">Date of Payment</Label>
                 <Input type="date" value={form.date_of_payment} onChange={e => setForm(f => f ? { ...f, date_of_payment: e.target.value } : f)} className="h-9 text-sm" />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <Label className="text-xs text-slate-600">Payer's Name</Label>
+                <Label className="text-xs text-muted-foreground">Payer's Name</Label>
                 <Input value={form.payer_name} onChange={e => setForm(f => f ? { ...f, payer_name: e.target.value.replace(/[0-9]/g, '') } : f)} className="h-9 text-sm" placeholder="Name only" />
               </div>
               <div className="space-y-1">
-                <Label className="text-xs text-slate-600">Phone Number</Label>
+                <Label className="text-xs text-muted-foreground">Phone Number</Label>
                 <Input value={form.phone_number} onChange={e => setForm(f => f ? { ...f, phone_number: e.target.value } : f)} className="h-9 text-sm" placeholder="e.g. 08012345678" />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <Label className="text-xs text-slate-600">Payment Bank Account</Label>
+                <Label className="text-xs text-muted-foreground">Payment Bank Account</Label>
                 <select
                   aria-label="Payment Bank Account"
                   value={form.bank}
                   onChange={e => setForm(f => f ? { ...f, bank: e.target.value } : f)}
-                  className="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm"
+                  className="h-8 w-full rounded-lg border border-input bg-background px-2.5 py-1 text-base md:text-sm"
                 >
                   <option value="">No Bank Selected / Cash</option>
                   {BANK_ACCOUNTS.map(acct => (
@@ -1080,7 +1080,7 @@ export function EditEntryDialog({ open, onOpenChange, target, tripCodes, custome
                 </select>
               </div>
               <div className="space-y-1">
-                <Label className="text-xs text-slate-600">Remarks</Label>
+                <Label className="text-xs text-muted-foreground">Remarks</Label>
                 <Input value={form.remarks} onChange={e => setForm(f => f ? { ...f, remarks: e.target.value } : f)} className="h-9 text-sm" placeholder="e.g. Full Payment" />
               </div>
             </div>
@@ -1090,7 +1090,7 @@ export function EditEntryDialog({ open, onOpenChange, target, tripCodes, custome
         <DialogFooter className="gap-2 sm:gap-0">
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>Cancel</Button>
           <Button onClick={handleSave} disabled={saving} className="gap-2">
-            {saving ? <Loader2 size={16} className="animate-spin" /> : <Pencil size={16} />}
+            {saving ? <Loader2 className="size-4 animate-spin" /> : <Pencil className="size-4" />}
             {saving ? 'Saving…' : 'Save Changes'}
           </Button>
         </DialogFooter>
@@ -1135,19 +1135,19 @@ export function DeleteConfirmDialog({ open, onOpenChange, target }: DeleteConfir
       <DialogContent className="sm:max-w-[400px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3">
-            <div className="bg-red-100 p-2 rounded-lg">
-              <Trash2 className="w-5 h-5 text-red-600" />
+            <div className="bg-destructive/10 p-2 rounded-lg">
+              <Trash2 className="size-5 text-destructive" />
             </div>
             <span>Confirm Delete</span>
           </DialogTitle>
-          <DialogDescription className="pt-2 text-slate-600">
+          <DialogDescription className="pt-2 text-muted-foreground">
             Are you sure you want to delete <strong>{target?.label}</strong>? This action cannot be undone.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="gap-2 sm:gap-0">
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={deleting}>Cancel</Button>
           <Button variant="destructive" onClick={handleDelete} disabled={deleting} className="gap-2">
-            {deleting ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
+            {deleting ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
             {deleting ? 'Deleting…' : 'Delete'}
           </Button>
         </DialogFooter>

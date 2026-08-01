@@ -1,20 +1,17 @@
 import * as React from "react"
-import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "#/lib/utils.ts"
 
-const labelVariants = cva(
-  "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-)
-
-function Label({
-  className,
-  ...props
-}: React.ComponentProps<"label"> & VariantProps<typeof labelVariants>) {
+function Label({ className, ...props }: React.ComponentProps<"label">) {
   return (
     <label
       data-slot="label"
-      className={cn(labelVariants(), className)}
+      className={cn(
+        "flex items-center gap-2 text-sm leading-none font-medium select-none",
+        "peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
+        "group-data-[disabled=true]/field:opacity-50",
+        className
+      )}
       {...props}
     />
   )

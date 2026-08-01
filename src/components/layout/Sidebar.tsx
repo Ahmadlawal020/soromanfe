@@ -20,9 +20,11 @@ import {
   ShoppingBag,
   PlusCircle,
   DollarSign,
+  FileSpreadsheet,
 } from "lucide-react";
 import { useAuthStore, useAdminLogout } from "#/modules/auth";
 import { useLayoutStore } from "#/stores/layoutStore";
+import { Avatar, AvatarFallback } from "#/components/ui/avatar";
 
 type NavItem = {
   title: string;
@@ -75,6 +77,7 @@ const navCategories: NavCategory[] = [
     items: [
       { title: "Deposits", icon: Receipt, path: "/deposits" },
       { title: "Bank Accounts", icon: Landmark, path: "/bank-accounts" },
+      { title: "Bank Statements", icon: FileSpreadsheet, path: "/bank-statements" },
       { title: "Commissions", icon: DollarSign, path: "/commissions" },
     ],
   },
@@ -124,13 +127,15 @@ function NavGroup({
 }) {
   return (
     <div className="mb-2">
+      {/* Group labels sit on the tracking ladder at 0.22em — the rung between
+          panel headers (0.25em) and stepper labels (0.2em). */}
       {label && expanded && (
-        <div className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-white/40 select-none">
+        <div className="px-3 py-2 text-[0.65rem] tracking-[0.22em] uppercase text-muted-foreground/70 select-none">
           {label}
         </div>
       )}
       {label && !expanded && (
-        <div className="mx-auto my-2 h-px w-6 border-t border-white/10" />
+        <div className="mx-auto my-2 h-px w-6 bg-sidebar-border" />
       )}
       {items.map((item) => {
         const isActive =
@@ -143,36 +148,39 @@ function NavGroup({
             to={item.path as any}
             onClick={onItemClick}
             className={cn(
-              "group flex items-center rounded-lg text-sm h-10 transition-all duration-200 cursor-pointer relative mx-1",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-0",
+              "group relative mx-1 flex h-8 cursor-pointer items-center rounded-lg text-sm transition-colors duration-250 ease-luxe outline-none",
+              "focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-sidebar-ring/50",
               expanded ? "gap-3 px-3" : "justify-center px-0",
+              // Emerald marks the active item; everything else stays neutral.
               isActive
-                ? "bg-white/10 text-white font-semibold shadow-sm"
-                : "text-white/80 hover:bg-white/5 hover:text-white border-l-[3px] border-transparent",
+                ? "bg-sidebar-accent font-medium text-sidebar-primary"
+                : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground",
             )}
-            title={expanded ? undefined : item.title}
             aria-current={isActive ? "page" : undefined}
           >
             <item.icon
-              size={18}
               className={cn(
-                "shrink-0 transition-transform duration-200 group-hover:scale-110",
-                isActive
-                  ? "text-white"
-                  : "text-white/70 group-hover:text-white",
+                "size-4 shrink-0",
+                isActive ? "text-sidebar-primary" : "text-muted-foreground",
               )}
             />
 
             {expanded && (
-              <span className="min-w-0 flex-1 truncate font-medium">
-                {item.title}
-              </span>
+              <span className="min-w-0 flex-1 truncate">{item.title}</span>
             )}
 
+            {/* Collapsed rail needs the label on hover; inverted, like the
+                Tooltip primitive. Also fires on keyboard focus. */}
             {!expanded && (
-              <div className="absolute left-full ml-3 px-2 py-1 bg-white/10 text-white border border-white/10 backdrop-blur-md text-xs rounded-md opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-150 ease-out group-hover:scale-100 scale-95 whitespace-nowrap z-50 shadow-md">
-                {item.title}
-              </div>
+              <>
+                <span className="sr-only">{item.title}</span>
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute left-full z-50 ml-3 scale-95 rounded-md bg-foreground px-3 py-1.5 text-xs whitespace-nowrap text-background opacity-0 transition-all duration-200 ease-luxe group-hover:scale-100 group-hover:opacity-100 group-focus-visible:scale-100 group-focus-visible:opacity-100"
+                >
+                  {item.title}
+                </span>
+              </>
             )}
           </Link>
         );
@@ -207,7 +215,7 @@ export default function Sidebar() {
     <>
       {isMobileOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm md:hidden transition-opacity duration-300"
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ease-luxe md:hidden"
           onClick={() => setMobileOpen(false)}
           aria-hidden="true"
         />
@@ -215,44 +223,42 @@ export default function Sidebar() {
 
       <aside
         className={cn(
-          "fixed top-0 bottom-0 left-0 z-50 flex flex-col border-r overflow-hidden",
-          "bg-sidebar-background text-sidebar-foreground border-sidebar-border",
-          "transition-[width] duration-300 ease-in-out",
-          "shadow-[0_1px_0_rgba(255,255,255,0.1)_inset,0_22px_44px_rgba(30,90,72,0.06)]",
+          "fixed top-0 bottom-0 left-0 z-50 flex flex-col overflow-hidden border-r",
+          "border-sidebar-border bg-sidebar text-sidebar-foreground",
+          // The guide drives sidebar width at 200ms on a linear curve — the
+          // one place in the system that isn't ease-luxe.
+          "transition-[width] duration-200 ease-linear",
           isMobileOpen ? "translate-x-0" : "-translate-x-full",
           "md:translate-x-0",
-          expanded ? "w-64" : "w-[72px]",
+          expanded ? "w-64" : "w-12",
         )}
         aria-label="Sidebar navigation"
       >
         {/* Header */}
-        <div className="flex h-16 items-center justify-between px-4 border-b border-white/10 shrink-0">
+        <div className="flex h-12 shrink-0 items-center justify-between border-b border-sidebar-border px-3">
           <div
             className={cn(
-              "flex items-center gap-3 min-w-0",
-              !expanded && "justify-center flex-1",
+              "flex min-w-0 items-center gap-2.5",
+              !expanded && "flex-1 justify-center",
             )}
-            title={expanded ? undefined : "Soroman"}
           >
             <img
               src="/logo.png"
-              alt="Soroman"
-              className={cn("shrink-0", expanded ? "w-9 h-9" : "w-8 h-8")}
+              alt=""
+              aria-hidden
+              className="size-6 shrink-0"
             />
             {expanded && (
-              <div className="min-w-0 leading-tight">
-                <div className="font-semibold text-sm tracking-tight text-white">
-                  Soroman
-                </div>
-                <div className="text-[11px] text-white/60">Dashboard</div>
-              </div>
+              <span className="min-w-0 truncate text-sm font-medium tracking-tight">
+                Soroman
+              </span>
             )}
           </div>
         </div>
 
         {/* Navigation Categories */}
         <nav
-          className="flex-1 overflow-y-auto overflow-x-hidden py-3 space-y-1 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent"
+          className="flex-1 space-y-1 overflow-x-hidden overflow-y-auto py-3"
           aria-label="Primary"
         >
           {navCategories.map((group) => (
@@ -268,43 +274,44 @@ export default function Sidebar() {
         </nav>
 
         {/* User / Logout Footer */}
-        <div className="border-t border-white/10 p-3 shrink-0">
+        <div className="shrink-0 border-t border-sidebar-border p-2">
           {expanded ? (
-            <div className="mb-3 flex items-center gap-3 px-2 rounded-lg py-1.5">
-              <div className="h-9 w-9 rounded-full bg-white/10 flex items-center justify-center text-xs font-semibold text-white shrink-0">
-                {initials}
-              </div>
+            <div className="mb-2 flex items-center gap-2.5 rounded-lg px-1 py-1.5">
+              <Avatar>
+                <AvatarFallback className="text-xs font-medium">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
               <div className="min-w-0">
-                <div className="truncate text-sm font-medium text-white">
-                  {displayName}
-                </div>
-                <div className="truncate text-xs text-white/60">
+                <div className="truncate text-sm font-medium">{displayName}</div>
+                <div className="truncate text-xs text-muted-foreground">
                   {user?.email || "admin"}
                 </div>
               </div>
             </div>
           ) : (
-            <div className="flex justify-center mb-2">
-              <div className="h-9 w-9 rounded-full bg-white/10 flex items-center justify-center text-xs font-semibold text-white shrink-0">
-                {initials}
-              </div>
+            <div className="mb-2 flex justify-center">
+              <Avatar>
+                <AvatarFallback className="text-xs font-medium">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
             </div>
           )}
 
+          {/* Tinted, never solid red. */}
           <button
             type="button"
             className={cn(
-              "h-10 w-full rounded-lg flex items-center transition-all cursor-pointer font-medium text-sm",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30",
+              "flex h-8 w-full cursor-pointer items-center rounded-lg text-sm font-medium",
+              "text-destructive transition-colors duration-250 ease-luxe outline-none",
+              "hover:bg-destructive/10 focus-visible:ring-3 focus-visible:ring-destructive/20",
               expanded ? "justify-start gap-2 px-3" : "justify-center px-0",
-              "text-red-300 hover:text-red-200 hover:bg-red-500/10",
             )}
             onClick={handleLogout}
-            title="Logout"
-            aria-label="Logout"
           >
-            <LogOut size={16} className="shrink-0 text-red-300" />
-            {expanded && <span>Logout</span>}
+            <LogOut className="size-4 shrink-0" />
+            {expanded ? <span>Logout</span> : <span className="sr-only">Logout</span>}
           </button>
         </div>
       </aside>

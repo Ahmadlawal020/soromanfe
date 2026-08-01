@@ -32,20 +32,10 @@ export const Route = createRootRoute({
         title: 'Soroman Admin Dashboard',
       },
     ],
+    // Inter Variable is self-hosted via @fontsource-variable/inter/opsz.css,
+    // imported from styles.css — no CDN round-trip, and the optical-size axis
+    // survives (the plain index.css entry ships wght only).
     links: [
-      {
-        rel: 'preconnect',
-        href: 'https://fonts.googleapis.com',
-      },
-      {
-        rel: 'preconnect',
-        href: 'https://fonts.gstatic.com',
-        crossOrigin: 'anonymous' as const,
-      },
-      {
-        rel: 'stylesheet',
-        href: 'https://fonts.googleapis.com/css2?family=Onest:wght@100..900&display=swap',
-      },
       {
         rel: 'stylesheet',
         href: appCss,
@@ -59,14 +49,14 @@ export const Route = createRootRoute({
 function NotFound() {
   return (
     <div className="flex flex-col items-center justify-center py-24 gap-5 text-center">
-      <div className="h-16 w-16 rounded-full bg-warning/10 flex items-center justify-center text-warning border border-warning/20">
-        <AlertTriangle size={32} />
+      <div className="size-16 rounded-full bg-warning/10 flex items-center justify-center text-warning border border-warning/20">
+        <AlertTriangle className="size-8" />
       </div>
-      <h2 className="text-2xl font-bold text-foreground">Page Not Found</h2>
+      <h2 className="text-lg md:text-xl font-semibold text-foreground tracking-tight">Page Not Found</h2>
       <p className="text-muted-foreground max-w-sm">The page you&apos;re looking for doesn&apos;t exist or has been moved.</p>
       <Link to="/overview">
         <Button>
-          <ArrowLeft size={16} className="mr-2" />
+          <ArrowLeft className="size-4 mr-2" />
           Back to Overview
         </Button>
       </Link>
@@ -97,10 +87,10 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
 
   if (!isReady && !isPublicRoute) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-background text-foreground transition-colors duration-300">
+      <div className="flex min-h-svh flex-col items-center justify-center bg-background text-foreground transition-colors duration-300 ease-luxe">
         <div className="relative flex flex-col items-center">
           {/* Logo container with pulse & subtle ring */}
-          <div className="relative flex items-center justify-center w-24 h-24 mb-4">
+          <div className="relative flex items-center justify-center size-24 mb-4">
             {/* Spinning gradient ring */}
             <div className="absolute inset-0 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
 
@@ -111,12 +101,12 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
             <img
               src="/logo.png"
               alt="Soroman"
-              className="relative w-10 h-10 object-contain"
+              className="relative size-10 object-contain"
             />
           </div>
 
           {/* Brand/Loading text */}
-          <h2 className="text-sm font-semibold tracking-wider text-foreground uppercase animate-pulse">
+          <h2 className="text-sm font-semibold tracking-tight text-foreground uppercase animate-pulse">
             Soroman
           </h2>
           <p className="mt-1 text-xs text-muted-foreground">
@@ -143,21 +133,29 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         {isPublicRoute ? (
           children
         ) : (
-          <div className="flex min-h-screen text-foreground bg-background">
+          // svh, never vh — mobile browser chrome would clip the shell.
+          // The ground is bg-sidebar so the inset content card below can float
+          // off it as its own rounded surface.
+          <div className="flex min-h-svh bg-sidebar text-foreground">
             <Sidebar />
 
             <div
-              className={`flex flex-col flex-1 min-w-0 transition-all duration-300 ease-in-out
-                ${isCollapsed ? 'md:pl-[72px]' : 'md:pl-64'}
-              `}
+              className={`flex min-w-0 flex-1 flex-col transition-[padding] duration-200 ease-linear
+ ${isCollapsed ? 'md:pl-12' : 'md:pl-64'}
+ `}
             >
-              <Navbar />
+              {/* With shadows gone, the inset card needs the hairline to
+                  separate it from the sidebar ground. */}
+              <div className="flex min-h-svh min-w-0 flex-1 flex-col overflow-hidden bg-background md:m-2 md:ml-0 md:min-h-[calc(100svh-1rem)] md:rounded-xl md:border md:border-border">
+                <Navbar />
 
-              <main className="flex-1 p-4 md:p-6 overflow-y-auto">
-                <div className="mx-auto max-w-7xl animate-fade-in">
-                  {children}
-                </div>
-              </main>
+                <main className="flex-1 overflow-y-auto p-4 md:p-6">
+                  {/* max-w-6xl is the content column across the whole app. */}
+                  <div className="mx-auto max-w-6xl animate-fade-in">
+                    {children}
+                  </div>
+                </main>
+              </div>
             </div>
           </div>
         )}

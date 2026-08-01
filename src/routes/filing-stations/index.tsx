@@ -104,14 +104,14 @@ const getPresetRange = (preset: TimePreset): { from: Date | null; to: Date | nul
 }
 
 const CODE_PALETTE = [
-  { row: 'bg-sky-50/60 border-l-sky-300', badge: 'bg-sky-100 text-sky-800 border-sky-200' },
-  { row: 'bg-emerald-50/60 border-l-emerald-300', badge: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
-  { row: 'bg-orange-50/60 border-l-orange-300', badge: 'bg-orange-100 text-orange-800 border-orange-200' },
-  { row: 'bg-violet-50/60 border-l-violet-300', badge: 'bg-violet-100 text-violet-800 border-violet-200' },
-  { row: 'bg-pink-50/60 border-l-pink-300', badge: 'bg-pink-100 text-pink-800 border-pink-200' },
-  { row: 'bg-amber-50/60 border-l-amber-300', badge: 'bg-amber-100 text-amber-800 border-amber-200' },
-  { row: 'bg-teal-50/60 border-l-teal-300', badge: 'bg-teal-100 text-teal-800 border-teal-200' },
-  { row: 'bg-indigo-50/60 border-l-indigo-300', badge: 'bg-indigo-100 text-indigo-800 border-indigo-200' },
+  { row: 'bg-muted/60 border-l-sky-300', badge: 'bg-muted text-foreground border-border' },
+  { row: 'bg-accent/60 border-l-emerald-300', badge: 'bg-accent/10 text-accent border-accent/40' },
+  { row: 'bg-warning/60 border-l-orange-300', badge: 'bg-warning/10 text-warning border-warning/40' },
+  { row: 'bg-muted/60 border-l-violet-300', badge: 'bg-muted text-foreground border-border' },
+  { row: 'bg-muted/60 border-l-pink-300', badge: 'bg-muted text-foreground border-border' },
+  { row: 'bg-warning/60 border-l-amber-300', badge: 'bg-warning/10 text-warning border-warning/40' },
+  { row: 'bg-accent/60 border-l-teal-300', badge: 'bg-accent/10 text-accent border-accent/40' },
+  { row: 'bg-muted/60 border-l-indigo-300', badge: 'bg-muted text-foreground border-border' },
 ]
 
 const getCodeTheme = (code: string) => {
@@ -648,42 +648,42 @@ function FilingStationsDashboard() {
       title: 'Active Stations',
       value: String(totals.truckCount),
       description: `${totals.stationCount} station${totals.stationCount === 1 ? '' : 's'} · ${totals.entries} entries`,
-      icon: <Truck size={20} />,
+      icon: <Truck className="size-5" />,
       tone: 'neutral',
     },
     {
       title: 'Volume Sold / Allocated',
       value: totals.totalQtyAllocated > 0 ? `${totals.totalQtySold.toLocaleString()} / ${totals.totalQtyAllocated.toLocaleString()} L` : '0 L',
       description: totals.totalQtyAllocated > 0 ? `${Math.round((totals.totalQtySold / totals.totalQtyAllocated) * 100)}% of allocated volume sold` : 'No allocations yet',
-      icon: <Fuel size={20} />,
+      icon: <Fuel className="size-5" />,
       tone: 'neutral',
     },
     {
       title: 'Expected Revenue',
       value: fmt(totals.totalExpected),
       description: 'Target value of all daily pump sales',
-      icon: <TrendingUp size={20} />,
+      icon: <TrendingUp className="size-5" />,
       tone: 'neutral',
     },
     {
       title: 'Total Deposited',
       value: fmt(totals.totalPaid),
       description: 'Bank deposits & collections received',
-      icon: <Banknote size={20} />,
+      icon: <Banknote className="size-5" />,
       tone: 'green',
     },
     {
       title: 'Total Expenses',
       value: fmt(totals.totalExpenses),
       description: 'Operating costs recorded against stations',
-      icon: <Receipt size={20} />,
+      icon: <Receipt className="size-5" />,
       tone: 'amber',
     },
     {
       title: 'Outstanding Balance',
       value: totals.balance > 0 ? fmt(totals.balance) : totals.balance < 0 ? `+${fmt(Math.abs(totals.balance))}` : '₦0.00 ✓',
       description: totals.balance > 0 ? 'Yet to be collected' : totals.balance < 0 ? 'Overpaid' : 'Fully reconciled',
-      icon: <Wallet size={20} />,
+      icon: <Wallet className="size-5" />,
       tone: totals.balance > 0 ? 'red' : 'green',
     },
   ], [totals])
@@ -931,43 +931,43 @@ function FilingStationsDashboard() {
           <>
             <Button
               size="sm"
-              className="gradient-primary text-white border-0 cursor-pointer shadow-md shadow-primary/20"
+              className="cursor-pointer"
               onClick={() => navigate({ to: '/filing-stations/form' as any })}
-            >
-              <Plus className="w-4 h-4 mr-2" />Create Station
+ >
+              <Plus className="size-4 mr-2" />Create Station
             </Button>
             <Button
               size="sm"
               variant="outline"
               className="cursor-pointer"
               onClick={() => openQuickPaymentDialog()}
-            >
-              <Plus className="w-4 h-4 mr-1.5" />Record Entry
+ >
+              <Plus className="size-4 mr-1.5" />Record Entry
             </Button>
             <Button variant="outline" size="sm" className="cursor-pointer" onClick={exportCSV} disabled={filteredLedgerGroups.length === 0}>
-              <Download size={14} className="mr-1.5" /> Export CSV
+              <Download className="size-3.5 mr-1.5" /> Export CSV
             </Button>
           </>
         }
-      />
+ />
 
       {/* Summary Cards */}
       <SummaryCards cards={summaryCards} />
 
       {/* Filter Panel */}
-      <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
+      <div className="bg-card rounded-xl border border-border overflow-hidden">
         <div className="px-4 py-3 flex flex-wrap items-center gap-3">
           <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={14} />
+            <Search className="size-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Search station, truck, code…"
               className="pl-8 h-9 text-sm"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-            />
+ />
             {searchQuery && (
               <button title="Clear" onClick={() => setSearchQuery('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                <X size={13} />
+                <X className="size-3.5" />
               </button>
             )}
           </div>
@@ -979,12 +979,12 @@ function FilingStationsDashboard() {
                 type="button"
                 onClick={() => handlePresetChange(tp)}
                 className={cn(
-                  'px-2.5 py-1 text-xs font-medium rounded-full border transition-colors cursor-pointer',
+                  'px-2.5 py-1 text-xs font-medium rounded-full border transition-colors cursor-pointer duration-250 ease-luxe',
                   timePreset === tp
                     ? 'bg-foreground text-background border-foreground'
                     : 'bg-card text-muted-foreground border-border hover:border-foreground/40'
                 )}
-              >
+ >
                 {tp === 'all' ? 'All' : tp.charAt(0).toUpperCase() + tp.slice(1)}
               </button>
             ))}
@@ -994,20 +994,20 @@ function FilingStationsDashboard() {
             type="button"
             onClick={() => setShowAdvancedFilters(f => !f)}
             className={cn(
-              'inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full border transition-colors cursor-pointer',
+              'inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full border transition-colors cursor-pointer duration-250 ease-luxe',
               showAdvancedFilters || [truckFilter, locationFilter, stationFilter, allocationCodeFilter, rateFilter, cycleFilter].some(f => f !== 'all')
                 ? 'bg-foreground text-background border-foreground'
                 : 'bg-card text-muted-foreground border-border hover:border-foreground/40'
             )}
-          >
-            <Filter size={11} />
+ >
+            <Filter className="size-3" />
             Filters
             {[truckFilter, locationFilter, stationFilter, allocationCodeFilter, rateFilter, cycleFilter].filter(f => f !== 'all').length > 0 && (
-              <span className="ml-0.5 bg-background text-foreground rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold">
+              <span className="ml-0.5 bg-background text-foreground rounded-full size-4 flex items-center justify-center text-[10px] font-semibold">
                 {[truckFilter, locationFilter, stationFilter, allocationCodeFilter, rateFilter, cycleFilter].filter(f => f !== 'all').length}
               </span>
             )}
-            <ChevronDown size={11} className={cn('transition-transform', showAdvancedFilters && 'rotate-180')} />
+            <ChevronDown className={cn('size-3 transition-transform duration-250 ease-luxe', showAdvancedFilters && 'rotate-180')} />
           </button>
         </div>
 
@@ -1027,7 +1027,7 @@ function FilingStationsDashboard() {
         {showAdvancedFilters && (
           <div className="border-t border-border px-4 py-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
             <div className="space-y-1">
-              <label className="flex items-center gap-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider"><Truck size={10} /> Truck</label>
+              <label className="flex items-center gap-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em]"><Truck className="size-2.5" /> Truck</label>
               <select aria-label="Truck" value={truckFilter} onChange={e => setTruckFilter(e.target.value)}
                 className={cn('h-8 w-full rounded-md border bg-background text-foreground px-2 text-xs', truckFilter !== 'all' ? 'border-foreground font-semibold' : 'border-border text-muted-foreground')}>
                 <option value="all">All</option>
@@ -1035,7 +1035,7 @@ function FilingStationsDashboard() {
               </select>
             </div>
             <div className="space-y-1">
-              <label className="flex items-center gap-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider"><MapPin size={10} /> Destination</label>
+              <label className="flex items-center gap-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em]"><MapPin className="size-2.5" /> Destination</label>
               <select aria-label="Destination" value={locationFilter} onChange={e => setLocationFilter(e.target.value)}
                 className={cn('h-8 w-full rounded-md border bg-background text-foreground px-2 text-xs', locationFilter !== 'all' ? 'border-foreground font-semibold' : 'border-border text-muted-foreground')}>
                 <option value="all">All</option>
@@ -1043,7 +1043,7 @@ function FilingStationsDashboard() {
               </select>
             </div>
             <div className="space-y-1">
-              <label className="flex items-center gap-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider"><Users size={10} /> Station</label>
+              <label className="flex items-center gap-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em]"><Users className="size-2.5" /> Station</label>
               <select aria-label="Station" value={stationFilter} onChange={e => setStationFilter(e.target.value)}
                 className={cn('h-8 w-full rounded-md border bg-background text-foreground px-2 text-xs', stationFilter !== 'all' ? 'border-foreground font-semibold' : 'border-border text-muted-foreground')}>
                 <option value="all">All</option>
@@ -1052,9 +1052,9 @@ function FilingStationsDashboard() {
             </div>
             {uniqueAllocationCodes.length > 0 && (
               <div className="space-y-1">
-                <label className="flex items-center gap-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider"><Tag size={10} /> Code</label>
+                <label className="flex items-center gap-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em]"><Tag className="size-2.5" /> Code</label>
                 <select aria-label="Code" value={allocationCodeFilter} onChange={e => setAllocationCodeFilter(e.target.value)}
-                  className={cn('h-8 w-full rounded-md border bg-background text-foreground px-2 text-xs', allocationCodeFilter !== 'all' ? 'border-purple-600 font-semibold text-purple-900 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40' : 'border-border text-muted-foreground')}>
+                  className={cn('h-8 w-full rounded-md border bg-background text-foreground px-2 text-xs', allocationCodeFilter !== 'all' ? 'border-border font-semibold text-foreground dark:text-muted-foreground bg-muted dark:bg-foreground/40' : 'border-border text-muted-foreground')}>
                   <option value="all">All</option>
                   {uniqueAllocationCodes.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
@@ -1062,7 +1062,7 @@ function FilingStationsDashboard() {
             )}
             {uniqueRates.length > 0 && (
               <div className="space-y-1">
-                <label className="flex items-center gap-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider"><TrendingUp size={10} /> Rate (₦/L)</label>
+                <label className="flex items-center gap-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em]"><TrendingUp className="size-2.5" /> Rate (₦/L)</label>
                 <select aria-label="Rate" value={rateFilter} onChange={e => setRateFilter(e.target.value)}
                   className={cn('h-8 w-full rounded-md border bg-background text-foreground px-2 text-xs', rateFilter !== 'all' ? 'border-foreground font-semibold' : 'border-border text-muted-foreground')}>
                   <option value="all">All Rates</option>
@@ -1072,7 +1072,7 @@ function FilingStationsDashboard() {
             )}
             {uniqueCycleOptions.length > 0 && (
               <div className="space-y-1">
-                <label className="flex items-center gap-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider"><Receipt size={10} /> Cycle</label>
+                <label className="flex items-center gap-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em]"><Receipt className="size-2.5" /> Cycle</label>
                 <select aria-label="Cycle" value={cycleFilter} onChange={e => setCycleFilter(e.target.value)}
                   className={cn('h-8 w-full rounded-md border bg-background text-foreground px-2 text-xs', cycleFilter !== 'all' ? 'border-foreground font-semibold' : 'border-border text-muted-foreground')}>
                   <option value="all">All Cycles</option>
@@ -1085,12 +1085,12 @@ function FilingStationsDashboard() {
 
         {(truckFilter !== 'all' || locationFilter !== 'all' || stationFilter !== 'all' || allocationCodeFilter !== 'all' || rateFilter !== 'all' || cycleFilter !== 'all') && (
           <div className="px-4 pb-3 flex flex-wrap gap-1.5">
-            {truckFilter !== 'all' && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted text-foreground text-xs font-medium"><Truck size={9} />{truckFilter}<button type="button" title="Remove" onClick={() => setTruckFilter('all')}><X size={9} /></button></span>}
-            {locationFilter !== 'all' && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted text-foreground text-xs font-medium"><MapPin size={9} />{locationFilter}<button type="button" title="Remove" onClick={() => setLocationFilter('all')}><X size={9} /></button></span>}
-            {stationFilter !== 'all' && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted text-foreground text-xs font-medium"><Users size={9} />{uniqueStationOptions.find(c => c.id === stationFilter)?.name || stationFilter}<button type="button" title="Remove" onClick={() => setStationFilter('all')}><X size={9} /></button></span>}
-            {allocationCodeFilter !== 'all' && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 text-xs font-medium"><Tag size={9} />{allocationCodeFilter}<button type="button" title="Remove" onClick={() => setAllocationCodeFilter('all')}><X size={9} /></button></span>}
-            {rateFilter !== 'all' && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted text-foreground text-xs font-medium">₦{Number(rateFilter).toLocaleString()}/L<button type="button" title="Remove" onClick={() => setRateFilter('all')}><X size={9} /></button></span>}
-            {cycleFilter !== 'all' && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted text-foreground text-xs font-medium">Cycle {cycleFilter}<button type="button" title="Remove" onClick={() => setCycleFilter('all')}><X size={9} /></button></span>}
+            {truckFilter !== 'all' && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted text-foreground text-xs font-medium"><Truck className="size-2.5" />{truckFilter}<button type="button" title="Remove" onClick={() => setTruckFilter('all')}><X className="size-2.5" /></button></span>}
+            {locationFilter !== 'all' && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted text-foreground text-xs font-medium"><MapPin className="size-2.5" />{locationFilter}<button type="button" title="Remove" onClick={() => setLocationFilter('all')}><X className="size-2.5" /></button></span>}
+            {stationFilter !== 'all' && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted text-foreground text-xs font-medium"><Users className="size-2.5" />{uniqueStationOptions.find(c => c.id === stationFilter)?.name || stationFilter}<button type="button" title="Remove" onClick={() => setStationFilter('all')}><X className="size-2.5" /></button></span>}
+            {allocationCodeFilter !== 'all' && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted text-foreground text-xs font-medium"><Tag className="size-2.5" />{allocationCodeFilter}<button type="button" title="Remove" onClick={() => setAllocationCodeFilter('all')}><X className="size-2.5" /></button></span>}
+            {rateFilter !== 'all' && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted text-foreground text-xs font-medium">₦{Number(rateFilter).toLocaleString()}/L<button type="button" title="Remove" onClick={() => setRateFilter('all')}><X className="size-2.5" /></button></span>}
+            {cycleFilter !== 'all' && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted text-foreground text-xs font-medium">Cycle {cycleFilter}<button type="button" title="Remove" onClick={() => setCycleFilter('all')}><X className="size-2.5" /></button></span>}
           </div>
         )}
       </div>
@@ -1099,11 +1099,11 @@ function FilingStationsDashboard() {
       <div className="space-y-4">
         {isLoading ? (
           <div className="flex items-center justify-center py-24">
-            <Loader2 size={24} className="animate-spin text-muted-foreground" />
+            <Loader2 className="size-6 animate-spin text-muted-foreground" />
           </div>
         ) : filteredLedgerGroups.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-sm border border-border p-16 text-center">
-            <Fuel className="mx-auto text-muted-foreground mb-3" size={40} />
+          <div className="bg-white rounded-xl border border-border p-16 text-center">
+            <Fuel className="size-10 mx-auto text-muted-foreground mb-3" />
             <p className="text-muted-foreground font-medium">No filling station allocations found</p>
             <p className="text-sm text-muted-foreground/70 mt-1">Assign filling stations in the inventory or create a new station first.</p>
           </div>
@@ -1118,10 +1118,10 @@ function FilingStationsDashboard() {
                 <div
                   key={group.key}
                   className={cn(
-                    'bg-card rounded-xl shadow-sm border overflow-hidden transition-all',
-                    isExpanded ? 'border-emerald-200 dark:border-emerald-800 ring-1 ring-emerald-100 dark:ring-emerald-900/30' : 'border-border'
+                    'bg-card rounded-xl border overflow-hidden transition-all duration-250 ease-luxe',
+                    isExpanded ? 'border-accent/40 dark:border-accent ring-1 ring-accent dark:ring-accent/30' : 'border-border'
                   )}
-                >
+ >
                   {/* Card Header */}
                   <div className="p-4 sm:p-5">
                     <div className="flex items-start justify-between gap-3">
@@ -1129,22 +1129,22 @@ function FilingStationsDashboard() {
                         <button
                           type="button"
                           onClick={() => toggleCard(group.key)}
-                          className="mt-0.5 shrink-0 p-1 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-                        >
-                          <ChevronRight size={16} className={cn('transition-transform duration-200', isExpanded && 'rotate-90 text-emerald-600')} />
+                          className="mt-0.5 shrink-0 p-1 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer duration-250 ease-luxe"
+ >
+                          <ChevronRight className={cn('size-4 transition-transform duration-200 ease-luxe', isExpanded && 'rotate-90 text-accent')} />
                         </button>
                         <div className="min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <h3 className="font-bold text-foreground text-sm uppercase tracking-tight truncate">
+                            <h3 className="font-semibold text-foreground text-sm uppercase tracking-tight truncate">
                               {group.stationName || 'Unnamed Station'}
                             </h3>
                             {group.cycleNum && (
-                              <span className="shrink-0 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+                              <span className="shrink-0 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-accent/10 text-accent border border-accent/20">
                                 Cycle {group.cycleNum}
                               </span>
                             )}
                             {group.code ? (
-                              <span className={cn('shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold border cursor-pointer', theme ? theme.badge : 'bg-muted text-muted-foreground border-border')} onClick={() => openCodeEditDialog(group)}>
+                              <span className={cn('shrink-0 px-2 py-0.5 rounded-full text-[10px] font-semibold border cursor-pointer', theme ? theme.badge : 'bg-muted text-muted-foreground border-border')} onClick={() => openCodeEditDialog(group)}>
                                 {group.code}
                               </span>
                             ) : (
@@ -1152,22 +1152,22 @@ function FilingStationsDashboard() {
                                 type="button"
                                 onClick={() => openCodeEditDialog(group)}
                                 className="text-[10px] text-muted-foreground hover:text-foreground underline decoration-dashed"
-                              >
+ >
                                 + Add Code
                               </button>
                             )}
                           </div>
                           <div className="flex items-center gap-2 mt-1 text-[11px] text-muted-foreground flex-wrap">
-                            <span className="flex items-center gap-1"><Truck size={11} className="text-amber-500" />{group.truckNumber || '—'}</span>
+                            <span className="flex items-center gap-1"><Truck className="size-3 text-warning" />{group.truckNumber || '—'}</span>
                             <span className="text-muted-foreground/40">·</span>
                             <span className="flex items-center gap-1">
-                              <CalendarIcon size={11} className="text-muted-foreground/60" />
+                              <CalendarIcon className="size-3 text-muted-foreground/60" />
                               {group.dateLoaded ? (() => { try { return format(parseISO(group.dateLoaded), 'dd MMM yyyy') } catch { return group.dateLoaded } })() : '—'}
                             </span>
                             {group.location && (
                               <>
                                 <span className="text-muted-foreground/40">·</span>
-                                <span className="flex items-center gap-1"><MapPin size={11} className="text-muted-foreground/60" />{group.location}</span>
+                                <span className="flex items-center gap-1"><MapPin className="size-3 text-muted-foreground/60" />{group.location}</span>
                               </>
                             )}
                           </div>
@@ -1180,16 +1180,16 @@ function FilingStationsDashboard() {
                           variant="outline"
                           className="h-8 text-xs gap-1 cursor-pointer"
                           onClick={() => openQuickPaymentDialog(group)}
-                        >
-                          <Plus size={13} /> Record Entry
+ >
+                          <Plus className="size-3.5" /> Record Entry
                         </Button>
                         <Button
                           size="sm"
                           variant="outline"
                           className="h-8 text-xs gap-1.5 cursor-pointer"
                           onClick={() => navigate({ to: '/filing-stations/details' as any, search: { stationId: group.stationId } as any })}
-                        >
-                          <Eye size={13} /> View Details
+ >
+                          <Eye className="size-3.5" /> View Details
                         </Button>
                       </div>
                     </div>
@@ -1197,26 +1197,26 @@ function FilingStationsDashboard() {
                     {/* Summary Metrics */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 pt-4 border-t border-border">
                       <div className="space-y-0.5">
-                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Allocated</p>
-                        <p className="text-sm font-bold text-foreground">{group.quantity > 0 ? `${fmtQty(group.quantity)} L` : '—'}</p>
+                        <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-semibold">Allocated</p>
+                        <p className="text-sm font-semibold text-foreground">{group.quantity > 0 ? `${fmtQty(group.quantity)} L` : '—'}</p>
                         <div className="flex items-center gap-1.5 mt-1">
                           <div className="h-1 flex-1 bg-muted rounded-full overflow-hidden">
-                            <div className={cn('h-full rounded-full', pctSold >= 100 ? 'bg-emerald-500' : pctSold >= 60 ? 'bg-amber-400' : 'bg-muted-foreground/30')} style={{ width: `${pctSold}%` }} />
+                            <div className={cn('h-full rounded-full', pctSold >= 100 ? 'bg-accent' : pctSold >= 60 ? 'bg-warning' : 'bg-muted-foreground/30')} style={{ width: `${pctSold}%` }} />
                           </div>
                           <span className="text-[10px] text-muted-foreground font-semibold shrink-0">{pctSold}%</span>
                         </div>
                       </div>
                       <div className="space-y-0.5">
-                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Sold</p>
-                        <p className="text-sm font-bold text-foreground">{group.totalQtySold > 0 ? `${fmtQty(group.totalQtySold)} L` : '—'}</p>
+                        <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-semibold">Sold</p>
+                        <p className="text-sm font-semibold text-foreground">{group.totalQtySold > 0 ? `${fmtQty(group.totalQtySold)} L` : '—'}</p>
                       </div>
                       <div className="space-y-0.5">
-                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Deposited</p>
-                        <p className="text-sm font-bold text-emerald-600">{group.totalPaid > 0 ? fmt(group.totalPaid) : '—'}</p>
+                        <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-semibold">Deposited</p>
+                        <p className="text-sm font-semibold text-accent">{group.totalPaid > 0 ? fmt(group.totalPaid) : '—'}</p>
                       </div>
                       <div className="space-y-0.5">
-                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Balance</p>
-                        <p className={cn('text-sm font-bold', group.balance === 0 ? 'text-emerald-600' : group.balance > 0 ? 'text-red-600' : 'text-blue-600')}>
+                        <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-semibold">Balance</p>
+                        <p className={cn('text-sm font-semibold', group.balance === 0 ? 'text-accent' : group.balance > 0 ? 'text-destructive' : 'text-muted-foreground')}>
                           {group.balance === 0 ? '✓ Settled' : group.balance > 0 ? fmt(group.balance) : `+${fmt(Math.abs(group.balance))}`}
                         </p>
                       </div>
@@ -1225,9 +1225,9 @@ function FilingStationsDashboard() {
                     {(group.collectionAccounts.length > 0 || group.remittanceAccounts.length > 0) && (
                       <div className="mt-3 pt-3 border-t border-border grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {group.collectionAccounts.length > 0 && (
-                          <div className="rounded-lg bg-indigo-50/60 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/50 px-3 py-2 space-y-2">
-                            <p className="text-[10px] uppercase tracking-wider text-indigo-500 font-semibold flex items-center gap-1">
-                              <Wallet size={10} /> Collection Account{group.collectionAccounts.length > 1 ? 's' : ''}
+                          <div className="rounded-lg bg-muted/60 dark:bg-foreground/40 border border-border dark:border-border/50 px-3 py-2 space-y-2">
+                            <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-semibold flex items-center gap-1">
+                              <Wallet className="size-2.5" /> Collection Account{group.collectionAccounts.length > 1 ? 's' : ''}
                             </p>
                             {group.collectionAccounts.map((acc, i) => (
                               <div key={i}>
@@ -1238,9 +1238,9 @@ function FilingStationsDashboard() {
                           </div>
                         )}
                         {group.remittanceAccounts.length > 0 && (
-                          <div className="rounded-lg bg-violet-50/60 dark:bg-violet-950/40 border border-violet-100 dark:border-violet-900/50 px-3 py-2 space-y-2">
-                            <p className="text-[10px] uppercase tracking-wider text-violet-500 font-semibold flex items-center gap-1">
-                              <ArrowRightLeft size={10} /> Remittance Account{group.remittanceAccounts.length > 1 ? 's' : ''}
+                          <div className="rounded-lg bg-muted/60 dark:bg-foreground/40 border border-border dark:border-border/50 px-3 py-2 space-y-2">
+                            <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-semibold flex items-center gap-1">
+                              <ArrowRightLeft className="size-2.5" /> Remittance Account{group.remittanceAccounts.length > 1 ? 's' : ''}
                             </p>
                             {group.remittanceAccounts.map((acc, i) => (
                               <div key={i}>
@@ -1265,8 +1265,8 @@ function FilingStationsDashboard() {
                             variant="outline"
                             className="mt-2 text-xs"
                             onClick={() => openQuickPaymentDialog(group)}
-                          >
-                            <Plus size={12} className="mr-1" /> Add First Entry
+ >
+                            <Plus className="size-3 mr-1" /> Add First Entry
                           </Button>
                         </div>
                       ) : (
@@ -1311,7 +1311,7 @@ function FilingStationsDashboard() {
                                       <TableCell className="text-right font-semibold text-foreground">{isSale ? `${fmtQty(saleQty)} L` : '—'}</TableCell>
                                       <TableCell className="text-right text-muted-foreground">{isSale ? `₦${saleRate.toLocaleString()}` : '—'}</TableCell>
                                       <TableCell className="text-right text-foreground font-medium">{isSale ? fmt(saleVal) : '—'}</TableCell>
-                                      <TableCell className="text-right font-semibold text-emerald-600">{depositAmt > 0 ? fmt(depositAmt) : '—'}</TableCell>
+                                      <TableCell className="text-right font-semibold text-accent">{depositAmt > 0 ? fmt(depositAmt) : '—'}</TableCell>
                                       <TableCell className="text-muted-foreground">{entry.payerName || '—'}</TableCell>
                                       <TableCell className="text-muted-foreground">{entry.bank ? entry.bank.split(' · ')[1] || entry.bank : '—'}</TableCell>
                                       <TableCell>
@@ -1321,23 +1321,23 @@ function FilingStationsDashboard() {
                                             disabled={updatingStatusId === entryId}
                                             onClick={() => handleToggleDepositStatus(entry)}
                                             title="Click to toggle status (Confirmed / Pending)"
-                                            className={cn('inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold border transition-all cursor-pointer hover:opacity-80', isConfirmed ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200')}
-                                          >
-                                            {updatingStatusId === entryId && <Loader2 size={10} className="animate-spin" />}
+                                            className={cn('inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold border transition-all cursor-pointer hover:opacity-80 duration-250 ease-luxe', isConfirmed ? 'bg-accent/10 text-accent border-accent/40' : 'bg-warning/10 text-warning border-warning/40')}
+ >
+                                            {updatingStatusId === entryId && <Loader2 className="size-2.5 animate-spin" />}
                                             {isConfirmed ? 'Confirmed' : 'Pending'}
                                           </button>
                                         ) : '—'}
                                       </TableCell>
-                                      <TableCell className="text-right text-amber-600">{expenseAmt > 0 ? fmt(expenseAmt) : '—'}</TableCell>
+                                      <TableCell className="text-right text-warning">{expenseAmt > 0 ? fmt(expenseAmt) : '—'}</TableCell>
                                       <TableCell className="text-right px-4">
                                         <div className="flex items-center justify-end gap-1">
                                           <button
                                             type="button"
                                             title="Edit Entry"
                                             onClick={() => openEditDialog(entry, group)}
-                                            className="p-1 text-muted-foreground hover:text-foreground hover:bg-muted rounded transition-colors"
-                                          >
-                                            <Pencil size={13} />
+                                            className="p-1 text-muted-foreground hover:text-foreground hover:bg-muted rounded transition-colors duration-250 ease-luxe"
+ >
+                                            <Pencil className="size-3.5" />
                                           </button>
                                           <button
                                             type="button"
@@ -1347,9 +1347,9 @@ function FilingStationsDashboard() {
                                               mode: 'entry',
                                               label: `Entry on ${entryDate || 'selected date'}`,
                                             })}
-                                            className="p-1 text-muted-foreground hover:text-red-600 hover:bg-red-50 rounded transition-colors"
-                                          >
-                                            <Trash2 size={13} />
+                                            className="p-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded transition-colors duration-250 ease-luxe"
+ >
+                                            <Trash2 className="size-3.5" />
                                           </button>
                                         </div>
                                       </TableCell>
@@ -1367,35 +1367,35 @@ function FilingStationsDashboard() {
             })}
 
             {/* Totals Bar */}
-            <div className="bg-foreground text-background rounded-xl shadow-sm px-5 sm:px-6 py-4">
+            <div className="bg-foreground text-background rounded-xl px-5 sm:px-6 py-4">
               <div className="flex flex-wrap items-center justify-between gap-4">
-                <p className="text-xs uppercase tracking-wider text-background/60 font-semibold">
+                <p className="text-xs uppercase tracking-[0.22em] text-background/60 font-semibold">
                   Totals across {filteredLedgerGroups.length} allocation{filteredLedgerGroups.length === 1 ? '' : 's'}
                 </p>
                 <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
                   <div>
-                    <span className="text-background/50 text-[11px] uppercase tracking-wide mr-1.5">Allocated</span>
-                    <span className="font-bold">{totals.totalQtyAllocated > 0 ? `${fmtQty(totals.totalQtyAllocated)} L` : '—'}</span>
+                    <span className="text-background/50 text-[11px] uppercase tracking-[0.14em] mr-1.5">Allocated</span>
+                    <span className="font-semibold">{totals.totalQtyAllocated > 0 ? `${fmtQty(totals.totalQtyAllocated)} L` : '—'}</span>
                   </div>
                   <div>
-                    <span className="text-background/50 text-[11px] uppercase tracking-wide mr-1.5">Sold</span>
-                    <span className="font-bold">{totals.totalQtySold > 0 ? `${fmtQty(totals.totalQtySold)} L` : '—'}</span>
+                    <span className="text-background/50 text-[11px] uppercase tracking-[0.14em] mr-1.5">Sold</span>
+                    <span className="font-semibold">{totals.totalQtySold > 0 ? `${fmtQty(totals.totalQtySold)} L` : '—'}</span>
                   </div>
                   <div>
-                    <span className="text-background/50 text-[11px] uppercase tracking-wide mr-1.5">Expected</span>
-                    <span className="font-bold">{fmt(totals.totalExpected)}</span>
+                    <span className="text-background/50 text-[11px] uppercase tracking-[0.14em] mr-1.5">Expected</span>
+                    <span className="font-semibold">{fmt(totals.totalExpected)}</span>
                   </div>
                   <div>
-                    <span className="text-background/50 text-[11px] uppercase tracking-wide mr-1.5">Deposited</span>
-                    <span className="font-bold text-emerald-400">{fmt(totals.totalPaid)}</span>
+                    <span className="text-background/50 text-[11px] uppercase tracking-[0.14em] mr-1.5">Deposited</span>
+                    <span className="font-semibold text-accent">{fmt(totals.totalPaid)}</span>
                   </div>
                   <div>
-                    <span className="text-background/50 text-[11px] uppercase tracking-wide mr-1.5">Expenses</span>
-                    <span className="font-bold text-amber-400">{fmt(totals.totalExpenses)}</span>
+                    <span className="text-background/50 text-[11px] uppercase tracking-[0.14em] mr-1.5">Expenses</span>
+                    <span className="font-semibold text-warning">{fmt(totals.totalExpenses)}</span>
                   </div>
                   <div>
-                    <span className="text-background/50 text-[11px] uppercase tracking-wide mr-1.5">Outstanding</span>
-                    <span className={cn('font-bold', totals.balance > 0 ? 'text-red-400' : 'text-emerald-400')}>
+                    <span className="text-background/50 text-[11px] uppercase tracking-[0.14em] mr-1.5">Outstanding</span>
+                    <span className={cn('font-semibold', totals.balance > 0 ? 'text-destructive' : 'text-accent')}>
                       {totals.balance === 0 ? '₦0.00 ✓' : totals.balance > 0 ? fmt(totals.balance) : `+${fmt(Math.abs(totals.balance))}`}
                     </span>
                   </div>
@@ -1421,22 +1421,22 @@ function FilingStationsDashboard() {
             <button
               type="button"
               onClick={() => setActiveEntryTab('sale')}
-              className={cn('flex-1 py-2 text-xs font-semibold border-b-2 text-center transition-colors cursor-pointer', activeEntryTab === 'sale' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground')}
-            >
+              className={cn('flex-1 py-2 text-xs font-semibold border-b-2 text-center transition-colors cursor-pointer duration-250 ease-luxe', activeEntryTab === 'sale' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground')}
+ >
               Daily Pump Sale
             </button>
             <button
               type="button"
               onClick={() => setActiveEntryTab('deposit')}
-              className={cn('flex-1 py-2 text-xs font-semibold border-b-2 text-center transition-colors cursor-pointer', activeEntryTab === 'deposit' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground')}
-            >
+              className={cn('flex-1 py-2 text-xs font-semibold border-b-2 text-center transition-colors cursor-pointer duration-250 ease-luxe', activeEntryTab === 'deposit' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground')}
+ >
               Bank Deposit
             </button>
             <button
               type="button"
               onClick={() => setActiveEntryTab('expense')}
-              className={cn('flex-1 py-2 text-xs font-semibold border-b-2 text-center transition-colors cursor-pointer', activeEntryTab === 'expense' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground')}
-            >
+              className={cn('flex-1 py-2 text-xs font-semibold border-b-2 text-center transition-colors cursor-pointer duration-250 ease-luxe', activeEntryTab === 'expense' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground')}
+ >
               Expense
             </button>
           </div>
@@ -1452,7 +1452,7 @@ function FilingStationsDashboard() {
                       placeholder="e.g. 5,000"
                       value={formatWithCommas(quickPaymentForm.quantity)}
                       onChange={e => setQuickPaymentForm(f => ({ ...f, quantity: stripCommas(e.target.value) }))}
-                    />
+ />
                   </div>
                   <div className="space-y-1">
                     <Label className="text-xs">Rate (₦/Litre)</Label>
@@ -1461,13 +1461,13 @@ function FilingStationsDashboard() {
                       placeholder="e.g. 850"
                       value={formatWithCommas(quickPaymentForm.rate)}
                       onChange={e => setQuickPaymentForm(f => ({ ...f, rate: stripCommas(e.target.value) }))}
-                    />
+ />
                   </div>
                 </div>
                 {toNum(quickPaymentForm.quantity) > 0 && toNum(quickPaymentForm.rate) > 0 && (
                   <div className="bg-muted/40 p-2.5 rounded-lg flex items-center justify-between text-xs">
                     <span className="text-muted-foreground">Total Sales Value:</span>
-                    <span className="font-bold text-foreground text-sm">{fmt(toNum(quickPaymentForm.quantity) * toNum(quickPaymentForm.rate))}</span>
+                    <span className="font-semibold text-foreground text-sm">{fmt(toNum(quickPaymentForm.quantity) * toNum(quickPaymentForm.rate))}</span>
                   </div>
                 )}
               </>
@@ -1482,7 +1482,7 @@ function FilingStationsDashboard() {
                     placeholder="e.g. 2,500,000"
                     value={formatWithCommas(quickPaymentForm.payment_amount)}
                     onChange={e => setQuickPaymentForm(f => ({ ...f, payment_amount: stripCommas(e.target.value) }))}
-                  />
+ />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
@@ -1491,15 +1491,15 @@ function FilingStationsDashboard() {
                       placeholder="Payer / Station Manager"
                       value={quickPaymentForm.payer_name}
                       onChange={e => setQuickPaymentForm(f => ({ ...f, payer_name: e.target.value }))}
-                    />
+ />
                   </div>
                   <div className="space-y-1">
                     <Label className="text-xs">Target Bank Account</Label>
                     <select
                       value={quickPaymentForm.bank_account_id}
                       onChange={e => setQuickPaymentForm(f => ({ ...f, bank_account_id: e.target.value }))}
-                      className="h-9 w-full rounded-md border border-border bg-background text-foreground px-2 text-xs"
-                    >
+                      className="h-8 w-full rounded-lg border border-border bg-background text-foreground px-2 text-xs"
+ >
                       {BANK_ACCOUNTS.map(b => (
                         <option key={b.id} value={b.id}>{b.bank_name} - {b.account_number} ({b.account_name})</option>
                       ))}
@@ -1517,7 +1517,7 @@ function FilingStationsDashboard() {
                   placeholder="e.g. 45,000"
                   value={formatWithCommas(quickPaymentForm.payment_amount)}
                   onChange={e => setQuickPaymentForm(f => ({ ...f, payment_amount: stripCommas(e.target.value) }))}
-                />
+ />
               </div>
             )}
 
@@ -1528,7 +1528,7 @@ function FilingStationsDashboard() {
                   type="date"
                   value={quickPaymentForm.date_of_payment}
                   onChange={e => setQuickPaymentForm(f => ({ ...f, date_of_payment: e.target.value }))}
-                />
+ />
               </div>
               <div className="space-y-1">
                 <Label className="text-xs">Remarks / Notes</Label>
@@ -1536,7 +1536,7 @@ function FilingStationsDashboard() {
                   placeholder="Optional notes…"
                   value={quickPaymentForm.remarks}
                   onChange={e => setQuickPaymentForm(f => ({ ...f, remarks: e.target.value }))}
-                />
+ />
               </div>
             </div>
           </div>
@@ -1546,7 +1546,7 @@ function FilingStationsDashboard() {
               Cancel
             </Button>
             <Button onClick={handleSaveQuickPayment} disabled={quickPaymentSaving}>
-              {quickPaymentSaving ? <Loader2 size={14} className="animate-spin mr-1.5" /> : null} Save Entry
+              {quickPaymentSaving ? <Loader2 className="size-3.5 animate-spin mr-1.5" /> : null} Save Entry
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1571,7 +1571,7 @@ function FilingStationsDashboard() {
                     type="date"
                     value={editForm.date_of_payment}
                     onChange={e => setEditForm(f => f ? ({ ...f, date_of_payment: e.target.value }) : null)}
-                  />
+ />
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs">Volume (L)</Label>
@@ -1579,7 +1579,7 @@ function FilingStationsDashboard() {
                     type="text"
                     value={formatWithCommas(editForm.quantity)}
                     onChange={e => setEditForm(f => f ? ({ ...f, quantity: stripCommas(e.target.value) }) : null)}
-                  />
+ />
                 </div>
               </div>
 
@@ -1590,7 +1590,7 @@ function FilingStationsDashboard() {
                     type="text"
                     value={formatWithCommas(editForm.rate)}
                     onChange={e => setEditForm(f => f ? ({ ...f, rate: stripCommas(e.target.value) }) : null)}
-                  />
+ />
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs">Deposited (₦)</Label>
@@ -1598,7 +1598,7 @@ function FilingStationsDashboard() {
                     type="text"
                     value={formatWithCommas(editForm.payment_amount)}
                     onChange={e => setEditForm(f => f ? ({ ...f, payment_amount: stripCommas(e.target.value) }) : null)}
-                  />
+ />
                 </div>
               </div>
 
@@ -1609,14 +1609,14 @@ function FilingStationsDashboard() {
                     type="text"
                     value={formatWithCommas(editForm.expenses_amount)}
                     onChange={e => setEditForm(f => f ? ({ ...f, expenses_amount: stripCommas(e.target.value) }) : null)}
-                  />
+ />
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs">Depositor Payer</Label>
                   <Input
                     value={editForm.payer_name}
                     onChange={e => setEditForm(f => f ? ({ ...f, payer_name: e.target.value }) : null)}
-                  />
+ />
                 </div>
               </div>
 
@@ -1625,7 +1625,7 @@ function FilingStationsDashboard() {
                 <Input
                   value={editForm.remarks}
                   onChange={e => setEditForm(f => f ? ({ ...f, remarks: e.target.value }) : null)}
-                />
+ />
               </div>
             </div>
 
@@ -1634,7 +1634,7 @@ function FilingStationsDashboard() {
                 Cancel
               </Button>
               <Button onClick={handleSaveEdit} disabled={editSaving}>
-                {editSaving ? <Loader2 size={14} className="animate-spin mr-1.5" /> : null} Save Changes
+                {editSaving ? <Loader2 className="size-3.5 animate-spin mr-1.5" /> : null} Save Changes
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -1655,12 +1655,12 @@ function FilingStationsDashboard() {
                 placeholder="e.g. ALLOC-001"
                 value={codeInputValue}
                 onChange={e => setCodeInputValue(e.target.value)}
-              />
+ />
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setCodeEditTarget(null)} disabled={codeSaving}>Cancel</Button>
               <Button onClick={handleSaveAllocationCode} disabled={codeSaving}>
-                {codeSaving ? <Loader2 size={14} className="animate-spin mr-1.5" /> : null} Save Code
+                {codeSaving ? <Loader2 className="size-3.5 animate-spin mr-1.5" /> : null} Save Code
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -1670,10 +1670,10 @@ function FilingStationsDashboard() {
       {/* Delete Confirmation Dialog */}
       {deleteTarget && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-card border border-border rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl">
-            <div className="flex items-center gap-3 text-red-500">
-              <Trash2 size={24} />
-              <h3 className="font-bold text-lg text-foreground">Confirm Delete</h3>
+          <div className="bg-card border border-border rounded-xl max-w-md w-full p-6 space-y-4">
+            <div className="flex items-center gap-3 text-destructive">
+              <Trash2 className="size-6" />
+              <h3 className="font-semibold text-lg text-foreground">Confirm Delete</h3>
             </div>
             <p className="text-sm text-muted-foreground">
               Are you sure you want to delete <strong>{deleteTarget.label}</strong>? This action cannot be undone.
@@ -1683,7 +1683,7 @@ function FilingStationsDashboard() {
                 Cancel
               </Button>
               <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
-                {deleting ? <Loader2 size={14} className="animate-spin mr-1.5" /> : null} Delete
+                {deleting ? <Loader2 className="size-3.5 animate-spin mr-1.5" /> : null} Delete
               </Button>
             </div>
           </div>

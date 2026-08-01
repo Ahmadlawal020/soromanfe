@@ -43,14 +43,14 @@ const toNum = (v: string | number | undefined | null): number => {
 const fmtQty = (n: number) => n.toLocaleString(undefined, { maximumFractionDigits: 0 })
 
 const CODE_PALETTE = [
-  { header: 'bg-sky-50', row: 'border-l-sky-300', badge: 'bg-sky-100 text-sky-800 border-sky-200' },
-  { header: 'bg-emerald-50', row: 'border-l-emerald-300', badge: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
-  { header: 'bg-orange-50', row: 'border-l-orange-300', badge: 'bg-orange-100 text-orange-800 border-orange-200' },
-  { header: 'bg-violet-50', row: 'border-l-violet-300', badge: 'bg-violet-100 text-violet-800 border-violet-200' },
-  { header: 'bg-pink-50', row: 'border-l-pink-300', badge: 'bg-pink-100 text-pink-800 border-pink-200' },
-  { header: 'bg-amber-50', row: 'border-l-amber-300', badge: 'bg-amber-100 text-amber-800 border-amber-200' },
-  { header: 'bg-teal-50', row: 'border-l-teal-300', badge: 'bg-teal-100 text-teal-800 border-teal-200' },
-  { header: 'bg-indigo-50', row: 'border-l-indigo-300', badge: 'bg-indigo-100 text-indigo-800 border-indigo-200' },
+  { header: 'bg-muted', row: 'border-l-sky-300', badge: 'bg-muted text-foreground border-border' },
+  { header: 'bg-accent/10', row: 'border-l-emerald-300', badge: 'bg-accent/10 text-accent border-accent/40' },
+  { header: 'bg-warning/10', row: 'border-l-orange-300', badge: 'bg-warning/10 text-warning border-warning/40' },
+  { header: 'bg-muted', row: 'border-l-violet-300', badge: 'bg-muted text-foreground border-border' },
+  { header: 'bg-muted', row: 'border-l-pink-300', badge: 'bg-muted text-foreground border-border' },
+  { header: 'bg-warning/10', row: 'border-l-amber-300', badge: 'bg-warning/10 text-warning border-warning/40' },
+  { header: 'bg-accent/10', row: 'border-l-teal-300', badge: 'bg-accent/10 text-accent border-accent/40' },
+  { header: 'bg-muted', row: 'border-l-indigo-300', badge: 'bg-muted text-foreground border-border' },
 ]
 
 const getCodeTheme = (code: string) => {
@@ -61,8 +61,8 @@ const getCodeTheme = (code: string) => {
 }
 
 const statusBadge: Record<string, { label: string; cls: string; icon: typeof CheckCircle2 }> = {
-  loaded: { label: 'In Transit', cls: 'bg-amber-50 text-amber-700 border-amber-200', icon: Truck },
-  offloaded: { label: 'Sold', cls: 'bg-emerald-50 text-emerald-700 border-emerald-200', icon: CheckCircle2 },
+  loaded: { label: 'In Transit', cls: 'bg-warning/10 text-warning border-warning/40', icon: Truck },
+  offloaded: { label: 'Sold', cls: 'bg-accent/10 text-accent border-accent/40', icon: CheckCircle2 },
 }
 
 type StatusFilter = 'all' | 'active' | 'delivered'
@@ -358,19 +358,19 @@ function DeliveryOperationsPage() {
     {
       title: 'Trucks in Transit',
       value: String(totals.activeCount),
-      icon: <Truck size={20} />,
+      icon: <Truck className="size-5" />,
       tone: totals.activeCount > 0 ? 'amber' : 'neutral',
     },
     {
       title: 'Volume in Transit',
       value: `${fmtQty(totals.totalInTransit)} Ltrs`,
-      icon: <Droplets size={20} />,
+      icon: <Droplets className="size-5" />,
       tone: totals.totalInTransit > 0 ? 'amber' : 'neutral',
     },
     {
       title: 'Quantity Sold',
       value: `${fmtQty(totals.totalDelivered)} Ltrs`,
-      icon: <CheckCircle2 size={20} />,
+      icon: <CheckCircle2 className="size-5" />,
       tone: 'green',
     },
   ], [totals])
@@ -570,14 +570,14 @@ function DeliveryOperationsPage() {
         actions={
           <div className="flex gap-2">
             <Button variant="outline" className="gap-2 cursor-pointer" onClick={exportCSV} disabled={filtered.length === 0}>
-              <Download size={16} /> Export
+              <Download className="size-4" /> Export
             </Button>
             <Button variant="outline" className="gap-2 cursor-pointer" onClick={() => setManageCodesOpen(true)}>
-              <Settings size={16} /> Manage Codes
+              <Settings className="size-4" /> Manage Codes
             </Button>
             <Link to="/delivery-operations/allocate-trucks">
-              <Button className="gap-2 bg-emerald-700 hover:bg-emerald-800 text-white cursor-pointer">
-                <Plus size={16} /> Allocate Trucks
+              <Button className="gap-2 bg-accent hover:bg-accent/80 text-accent-foreground cursor-pointer">
+                <Plus className="size-4" /> Allocate Trucks
               </Button>
             </Link>
           </div>
@@ -588,10 +588,10 @@ function DeliveryOperationsPage() {
       <SummaryCards cards={summaryCards} />
 
       {/* Search + Filters Bar */}
-      <div className="bg-card p-4 rounded-xl shadow-sm border border-border space-y-3">
+      <div className="bg-card p-4 rounded-xl border border-border space-y-3">
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
+            <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Search truck, PFI, product, customer, depot, destination, code…"
               className="pl-9 h-9 text-sm"
@@ -603,7 +603,7 @@ function DeliveryOperationsPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 pt-2 border-t border-border">
           <div className="flex flex-col gap-1">
-            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Status</label>
+            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em]">Status</label>
             <select aria-label="Filter by status" value={statusFilter}
               onChange={e => setStatusFilter(e.target.value as StatusFilter)}
               className="h-8 rounded-md border border-border bg-background text-foreground px-2 text-xs">
@@ -614,7 +614,7 @@ function DeliveryOperationsPage() {
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Truck</label>
+            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em]">Truck</label>
             <select aria-label="Filter by truck" value={truckFilter}
               onChange={e => setTruckFilter(e.target.value)}
               className="h-8 rounded-md border border-border bg-background text-foreground px-2 text-xs">
@@ -626,7 +626,7 @@ function DeliveryOperationsPage() {
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Customer</label>
+            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em]">Customer</label>
             <select aria-label="Filter by customer" value={customerFilter}
               onChange={e => setCustomerFilter(e.target.value)}
               className="h-8 rounded-md border border-border bg-background text-foreground px-2 text-xs">
@@ -638,7 +638,7 @@ function DeliveryOperationsPage() {
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Customer Type</label>
+            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em]">Customer Type</label>
             <select aria-label="Filter by Customer Type" value={customerTypeFilter}
               onChange={e => setCustomerTypeFilter(e.target.value as any)}
               className="h-8 rounded-md border border-border bg-background text-foreground px-2 text-xs">
@@ -649,7 +649,7 @@ function DeliveryOperationsPage() {
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Allocation Code</label>
+            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em]">Allocation Code</label>
             <select aria-label="Filter by allocation code" value={codeFilter}
               onChange={e => setCodeFilter(e.target.value)}
               className="h-8 rounded-md border border-border bg-background text-foreground px-2 text-xs font-medium">
@@ -683,7 +683,7 @@ function DeliveryOperationsPage() {
                 <span key={chip.label} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-foreground text-background">
                   {chip.label}
                   <button title={`Remove: ${chip.label}`} onClick={chip.clear} className="hover:text-muted-foreground ml-0.5">
-                    <X size={10} />
+                    <X className="size-2.5" />
                   </button>
                 </span>
               ))}
@@ -697,11 +697,11 @@ function DeliveryOperationsPage() {
       {/* Allocation Cards */}
       {isLoading ? (
         <div className="flex items-center justify-center py-24">
-          <Loader2 size={24} className="animate-spin text-muted-foreground" />
+          <Loader2 className="size-6 animate-spin text-muted-foreground" />
         </div>
       ) : filtered.length === 0 ? (
-        <div className="bg-card rounded-xl shadow-sm border border-border p-16 text-center">
-          <Truck className="mx-auto text-muted-foreground mb-3" size={40} />
+        <div className="bg-card rounded-xl border border-border p-16 text-center">
+          <Truck className="size-10 mx-auto text-muted-foreground mb-3" />
           <p className="text-muted-foreground font-medium">
             {hasAnyFilter ? 'No records match your filters' : 'No truck records yet'}
           </p>
@@ -712,7 +712,7 @@ function DeliveryOperationsPage() {
           </p>
           {hasAnyFilter && (
             <Button variant="outline" size="sm" className="mt-3 gap-1.5 cursor-pointer" onClick={clearAllFilters}>
-              <X size={13} /> Clear all filters
+              <X className="size-3.5" /> Clear all filters
             </Button>
           )}
         </div>
@@ -746,23 +746,23 @@ function DeliveryOperationsPage() {
                   className="block group"
                 >
                   <div className={cn(
-                    'bg-card rounded-xl shadow-sm border border-border p-5 transition-all cursor-pointer space-y-3',
-                    'hover:shadow-md hover:border-emerald-300 dark:hover:border-emerald-700 hover:-translate-y-0.5',
+                    'bg-card rounded-xl border border-border p-5 transition-all cursor-pointer space-y-3 duration-250 ease-luxe',
+                    ' hover:border-accent/40 dark:hover:border-accent hover:-translate-y-0.5',
                     theme && `${theme.header}`
                   )}>
                     {/* Top: Code + Truck Count */}
                     <div className="flex items-start justify-between">
                       {code ? (
-                        <span className={cn('inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border', theme?.badge || 'bg-muted text-muted-foreground border-border')}>
-                          <Tag size={11} /> {code}
+                        <span className={cn('inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border', theme?.badge || 'bg-muted text-muted-foreground border-border')}>
+                          <Tag className="size-3" /> {code}
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border bg-muted text-muted-foreground border-border">
-                          <Tag size={11} /> No Code
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border bg-muted text-muted-foreground border-border">
+                          <Tag className="size-3" /> No Code
                         </span>
                       )}
-                      <span className="flex items-center gap-1.5 text-xs font-bold text-foreground bg-card/90 px-2.5 py-1 rounded-lg border border-border/80 shadow-2xs">
-                        <Truck size={14} className="text-emerald-600" />
+                      <span className="flex items-center gap-1.5 text-xs font-semibold text-foreground bg-card/90 px-2.5 py-1 rounded-lg border border-border/80">
+                        <Truck className="size-3.5 text-accent" />
                         {records.length} {records.length === 1 ? 'truck' : 'trucks'}
                       </span>
                     </div>
@@ -771,7 +771,7 @@ function DeliveryOperationsPage() {
                     {(distinctProducts.length > 0 || distinctDepots.length > 0) && (
                       <div className="flex items-center justify-between gap-2 text-xs pt-0.5">
                         {distinctProducts.length > 0 && (
-                          <span className="font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-100/80 dark:bg-emerald-950/60 px-2 py-0.5 rounded text-[11px]">
+                          <span className="font-semibold text-accent bg-accent/80 dark:bg-accent/60 px-2 py-0.5 rounded text-[11px]">
                             {distinctProducts.join(', ')}
                           </span>
                         )}
@@ -785,7 +785,7 @@ function DeliveryOperationsPage() {
 
                     {/* PFI Reference */}
                     <div>
-                      <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">PFI Reference</div>
+                      <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1">PFI Reference</div>
                       {distinctPfis.length > 0 ? (
                         <div className="flex flex-wrap gap-1.5">
                           {distinctPfis.slice(0, 3).map(pfi => (
@@ -803,10 +803,10 @@ function DeliveryOperationsPage() {
                     </div>
 
                     {/* Total Quantity / Volume */}
-                    <div className="flex items-center justify-between bg-slate-50/80 dark:bg-slate-900/60 p-2.5 rounded-lg border border-slate-200/70 dark:border-slate-800">
-                      <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Total Volume</span>
-                      <span className="flex items-center gap-1.5 text-sm font-extrabold text-slate-900 dark:text-slate-100">
-                        <Droplets size={14} className="text-violet-600 dark:text-violet-400" />
+                    <div className="flex items-center justify-between bg-muted/80 dark:bg-foreground/60 p-2.5 rounded-lg border border-border/70 dark:border-border">
+                      <span className="text-xs font-medium text-muted-foreground">Total Volume</span>
+                      <span className="flex items-center gap-1.5 text-sm font-semibold text-foreground dark:text-muted-foreground">
+                        <Droplets className="size-3.5 text-muted-foreground" />
                         {fmtQty(totalQty)} {unit}
                       </span>
                     </div>
@@ -814,12 +814,12 @@ function DeliveryOperationsPage() {
                     {/* Status Badges */}
                     <div className="flex items-center gap-2 flex-wrap">
                       {loadedCount > 0 && (
-                        <span className="text-[11px] font-medium text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-500/20">
+                        <span className="text-[11px] font-medium text-warning bg-warning/10 px-2 py-0.5 rounded-full border border-warning/40 dark:border-warning/20">
                           {loadedCount} in transit ({fmtQty(loadedQty)} L)
                         </span>
                       )}
                       {soldCount > 0 && (
-                        <span className="text-[11px] font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-500/20">
+                        <span className="text-[11px] font-medium text-accent bg-accent/10 px-2 py-0.5 rounded-full border border-accent/40 dark:border-accent/20">
                           {soldCount} sold ({fmtQty(soldQty)} L)
                         </span>
                       )}
@@ -829,7 +829,7 @@ function DeliveryOperationsPage() {
                     {latestDate && (
                       <div className="pt-2.5 border-t border-border/60 flex items-center justify-between text-xs text-muted-foreground">
                         <span className="flex items-center gap-1.5">
-                          <Calendar size={12} />
+                          <Calendar className="size-3" />
                           {(() => { try { return format(parseISO(latestDate), 'dd MMM yyyy') } catch { return latestDate } })()}
                         </span>
                         {distinctDestinations.length > 0 && (

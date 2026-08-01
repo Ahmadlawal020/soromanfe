@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { StatCard, StatCardGrid } from '#/components/ui/stat-card'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
@@ -35,7 +36,7 @@ export const Route = createFileRoute('/bank-accounts/')({
 function getStatusBadge(status: string) {
   switch (status) {
     case 'Active':
-      return <Badge className="bg-emerald-500/15 text-emerald-400 border-emerald-500/30 font-medium">{status}</Badge>
+      return <Badge className="bg-accent/15 text-accent border-accent/30 font-medium">{status}</Badge>
     case 'Inactive':
       return <Badge variant="outline" className="text-muted-foreground">{status}</Badge>
     case 'Suspended':
@@ -102,21 +103,21 @@ function BankAccountsIndex() {
       value: bankAccounts.length,
       sub: `${activeCount} Active`,
       icon: Landmark,
-      color: 'text-emerald-400',
+      color: 'text-accent',
     },
     {
       title: 'Depots Connected',
       value: uniqueLinkedDepotIds.size,
       sub: `Out of ${depots.length} total depots`,
       icon: Warehouse,
-      color: 'text-blue-400',
+      color: 'text-muted-foreground',
     },
     {
       title: 'Primary Operating Account',
       value: defaultAccount ? defaultAccount.bankName : 'None set',
       sub: defaultAccount ? defaultAccount.accountNumber : 'Set a default account',
       icon: ShieldCheck,
-      color: 'text-amber-400',
+      color: 'text-warning',
     },
   ]
 
@@ -125,43 +126,38 @@ function BankAccountsIndex() {
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground tracking-tight">Bank Accounts Management</h1>
+          <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">Bank Accounts Management</h1>
           <p className="text-muted-foreground mt-1">
             Manage corporate bank accounts and depot collection assignments. Multiple depots can share a single bank account.
           </p>
         </div>
         <Button
           size="sm"
-          className="gradient-primary text-white border-0 shadow-md hover:shadow-lg transition-all shrink-0"
+          className="shrink-0"
           onClick={() => navigate({ to: '/bank-accounts/form' })}
-        >
-          <Plus className="w-4 h-4 mr-2" />
+ >
+          <Plus className="size-4 mr-2" />
           Add Bank Account
         </Button>
       </div>
 
       {/* Stats Cards */}
       {!isLoading && !isError && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {statsCards.map((card, idx) => (
-            <Card key={idx} className="stats-card border-border/40 bg-card/60 backdrop-blur-sm">
-              <CardContent className="p-5 flex justify-between items-center">
-                <div>
-                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{card.title}</p>
-                  <p className="text-2xl font-bold text-foreground mt-1">{card.value}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{card.sub}</p>
-                </div>
-                <div className="p-3 rounded-xl bg-primary/10 border border-primary/20">
-                  <card.icon className={`w-6 h-6 ${card.color}`} />
-                </div>
-              </CardContent>
-            </Card>
+        <StatCardGrid count={statsCards.length}>
+          {statsCards.map((card) => (
+            <StatCard
+              key={card.title}
+              icon={<card.icon />}
+              label={card.title}
+              value={card.value}
+              description={card.sub}
+            />
           ))}
-        </div>
+        </StatCardGrid>
       )}
 
       {/* Main Content Card */}
-      <Card className="border-border/50 shadow-sm">
+      <Card className="border-border/50">
         <CardHeader className="border-b border-border/40 pb-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
@@ -174,21 +170,21 @@ function BankAccountsIndex() {
           {/* Filters */}
           <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 mb-6">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
               <Input
                 type="text"
                 placeholder="Search by bank name, account number, or depot..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 pr-9 bg-background/50"
-              />
+ />
               {searchTerm && (
                 <button
                   onClick={() => setSearchTerm('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground flex items-center justify-center cursor-pointer transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 size-5 rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground flex items-center justify-center cursor-pointer transition-colors duration-250 ease-luxe"
                   aria-label="Clear search"
-                >
-                  <X size={10} />
+ >
+                  <X className="size-2.5" />
                 </button>
               )}
             </div>
@@ -214,14 +210,14 @@ function BankAccountsIndex() {
             <PageError message={(error as any)?.message || 'Failed to load'} onRetry={() => refetch()} />
           ) : filteredAccounts.length === 0 ? (
             <PageEmpty
-              icon={<Landmark size={24} className="text-muted-foreground" />}
+              icon={<Landmark className="size-6 text-muted-foreground" />}
               title={hasFilters ? 'No bank accounts match your filters' : 'No bank accounts yet'}
               description={hasFilters ? 'No bank accounts match your search or filter parameters.' : 'Get started by adding your first company bank account.'}
               actionLabel="Add Bank Account"
               onAction={() => navigate({ to: '/bank-accounts/form' })}
               hasFilters={hasFilters}
               onClearFilters={() => { setSearchTerm(''); setStatusFilter('ALL') }}
-            />
+ />
           ) : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {filteredAccounts.map((account) => {
@@ -229,18 +225,18 @@ function BankAccountsIndex() {
                 return (
                   <Card
                     key={account.id}
-                    className="card-hover border-border/60 hover:border-primary/40 bg-card/80 transition-all flex flex-col justify-between overflow-hidden group"
-                  >
+                    className="card-hover border-border/60 hover:border-primary/40 bg-card/80 transition-all flex flex-col justify-between overflow-hidden group duration-250 ease-luxe"
+ >
                     <CardContent className="p-5 flex-1 flex flex-col justify-between">
                       <div>
                         {/* Header: Bank Name & Badges */}
                         <div className="flex items-start justify-between gap-2 mb-3">
                           <div className="flex items-center gap-2.5">
-                            <div className="h-10 w-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-                              <Building2 className="w-5 h-5 text-primary" />
+                            <div className="size-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+                              <Building2 className="size-5 text-primary" />
                             </div>
                             <div>
-                              <h3 className="font-bold text-foreground text-base tracking-tight leading-snug">
+                              <h3 className="font-semibold text-foreground text-base tracking-tight leading-snug">
                                 {account.bankName}
                               </h3>
                               {account.branchName && (
@@ -250,8 +246,8 @@ function BankAccountsIndex() {
                           </div>
                           <div className="flex items-center gap-1.5 shrink-0">
                             {account.isDefault && (
-                              <Badge className="bg-amber-500/15 text-amber-400 border-amber-500/30 gap-1 text-[11px] py-0.5 px-2">
-                                <Star className="w-3 h-3 fill-amber-400" /> Default
+                              <Badge className="bg-warning/15 text-warning border-warning/30 gap-1 text-[11px] py-0.5 px-2">
+                                <Star className="size-3 fill-warning" /> Default
                               </Badge>
                             )}
                             {getStatusBadge(account.status)}
@@ -261,24 +257,24 @@ function BankAccountsIndex() {
                         {/* Account Number Box */}
                         <div className="bg-muted/40 border border-border/50 rounded-lg p-3 my-3 flex items-center justify-between">
                           <div>
-                            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                               Account Number ({account.currency})
                             </p>
-                            <p className="text-lg font-mono font-bold tracking-wider text-foreground">
+                            <p className="text-lg font-mono font-semibold text-foreground">
                               {account.accountNumber}
                             </p>
                           </div>
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-muted-foreground hover:text-foreground shrink-0"
+                            className="size-8 text-muted-foreground hover:text-foreground shrink-0"
                             onClick={() => handleCopyAccount(account.accountNumber, account.id)}
                             title="Copy Account Number"
-                          >
+ >
                             {copiedId === account.id ? (
-                              <Check className="w-4 h-4 text-emerald-400" />
+                              <Check className="size-4 text-accent" />
                             ) : (
-                              <Copy className="w-4 h-4" />
+                              <Copy className="size-4" />
                             )}
                           </Button>
                         </div>
@@ -293,10 +289,10 @@ function BankAccountsIndex() {
                         <div className="mt-4 pt-3 border-t border-border/40">
                           <div className="flex items-center justify-between text-xs mb-2">
                             <span className="text-muted-foreground font-medium flex items-center gap-1.5">
-                              <Warehouse className="w-3.5 h-3.5 text-primary" /> Linked Depots ({assignedDepots.length})
+                              <Warehouse className="size-3.5 text-primary" /> Linked Depots ({assignedDepots.length})
                             </span>
                             {assignedDepots.length > 1 && (
-                              <span className="text-[10px] text-amber-400 font-semibold bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">
+                              <span className="text-[10px] text-warning font-semibold bg-warning/10 px-1.5 py-0.5 rounded border border-warning/20">
                                 Shared Account
                               </span>
                             )}
@@ -304,7 +300,7 @@ function BankAccountsIndex() {
 
                           <div className="flex flex-wrap gap-1.5 max-h-20 overflow-y-auto pr-1">
                             {assignedDepots.length === 0 ? (
-                              <span className="text-xs italic text-muted-foreground">
+                              <span className="text-xs text-muted-foreground">
                                 No depots assigned (Company-wide / Unassigned)
                               </span>
                             ) : (
@@ -313,7 +309,7 @@ function BankAccountsIndex() {
                                   key={depot.id}
                                   variant="secondary"
                                   className="text-xs bg-primary/10 text-primary border border-primary/20 font-medium py-0.5"
-                                >
+ >
                                   {depot.name} ({depot.code})
                                 </Badge>
                               ))
@@ -334,8 +330,8 @@ function BankAccountsIndex() {
                               state: { bankAccount: account } as any,
                             })
                           }
-                        >
-                          <Eye className="w-3.5 h-3.5 mr-1" /> View Details
+ >
+                          <Eye className="size-3.5 mr-1" /> View Details
                         </Button>
                         <Button
                           variant="outline"
@@ -347,20 +343,20 @@ function BankAccountsIndex() {
                               state: { bankAccount: account, isEdit: true } as any,
                             })
                           }
-                        >
-                          <Edit className="w-3.5 h-3.5 mr-1" /> Edit
+ >
+                          <Edit className="size-3.5 mr-1" /> Edit
                         </Button>
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-8 text-xs font-medium text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                          className="h-8 text-xs font-medium text-destructive hover:text-destructive/80 hover:bg-destructive/10"
                           disabled={deletingId === account.id}
                           onClick={() => handleDelete(account.id, account.bankName)}
-                        >
+ >
                           {deletingId === account.id ? (
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            <Loader2 className="size-3.5 animate-spin" />
                           ) : (
-                            <Trash2 className="w-3.5 h-3.5" />
+                            <Trash2 className="size-3.5" />
                           )}
                         </Button>
                       </div>

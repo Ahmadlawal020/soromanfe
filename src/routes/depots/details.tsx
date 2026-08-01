@@ -28,22 +28,22 @@ function getStatusBadge(status: string) {
   switch (status) {
     case 'Active':
       return (
-        <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 gap-1.5 font-medium">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+        <Badge className="bg-accent/15 text-accent border-accent/30 gap-1.5 font-medium">
+          <span className="size-1.5 rounded-full bg-accent animate-pulse" />
           {status}
         </Badge>
       )
     case 'High Capacity':
       return (
-        <Badge className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30 gap-1.5 font-medium">
-          <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
+        <Badge className="bg-warning/15 text-warning border-warning/30 gap-1.5 font-medium">
+          <span className="size-1.5 rounded-full bg-warning animate-pulse" />
           {status}
         </Badge>
       )
     case 'Maintenance':
       return (
         <Badge variant="destructive" className="gap-1.5 font-medium">
-          <span className="h-1.5 w-1.5 rounded-full bg-destructive-foreground animate-pulse" />
+          <span className="size-1.5 rounded-full bg-destructive-foreground animate-pulse" />
           {status}
         </Badge>
       )
@@ -79,7 +79,7 @@ function OrderDepositBreakdown({ order }: { order: any }) {
   if (isLoading) {
     return (
       <div className="flex items-center gap-2 p-4 text-xs text-muted-foreground bg-muted/20 border-t">
-        <Loader2 size={14} className="animate-spin text-primary" /> Loading deposit details for this order...
+        <Loader2 className="size-3.5 animate-spin text-primary" /> Loading deposit details for this order...
       </div>
     )
   }
@@ -87,13 +87,13 @@ function OrderDepositBreakdown({ order }: { order: any }) {
   return (
     <div className="p-4 bg-muted/20 border-t space-y-3">
       <div className="flex items-center justify-between flex-wrap gap-2">
-        <div className="flex items-center gap-2 text-xs font-semibold text-foreground uppercase tracking-wider">
-          <Receipt size={14} className="text-emerald-500" />
+        <div className="flex items-center gap-2 text-xs font-semibold text-foreground uppercase tracking-[0.22em]">
+          <Receipt className="size-3.5 text-accent" />
           <span>Order Funding Deposits ({creditDeposits.length})</span>
         </div>
         {order.virtualAccountNumber && (
           <div className="text-xs text-muted-foreground flex items-center gap-1.5 font-mono bg-background px-2.5 py-1 rounded border">
-            <CreditCard size={12} className="text-primary" />
+            <CreditCard className="size-3 text-primary" />
             <span>Paid via DVA: <strong>{order.virtualAccountBank || 'Bank'}</strong> &bull; <strong className="text-foreground">{order.virtualAccountNumber}</strong></span>
           </div>
         )}
@@ -115,15 +115,15 @@ function OrderDepositBreakdown({ order }: { order: any }) {
             const amount = Number(dep.amount || 0)
 
             return (
-              <div key={dep.id || dep._id || ref} className="flex flex-wrap items-center justify-between p-3 rounded-md bg-card border text-xs gap-2 shadow-sm">
+              <div key={dep.id || dep._id || ref} className="flex flex-wrap items-center justify-between p-3 rounded-md bg-card border text-xs gap-2">
                 <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
-                    <DollarSign size={16} />
+                  <div className="size-8 rounded-full bg-accent/10 flex items-center justify-center text-accent shrink-0">
+                    <DollarSign className="size-4" />
                   </div>
                   <div>
                     <div className="font-semibold text-foreground flex items-center gap-2">
                       <span>₦{amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                      <Badge variant="outline" className="text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 font-normal">Credit Deposit</Badge>
+                      <Badge variant="outline" className="text-[10px] bg-accent/10 text-accent border-accent/20 font-normal">Credit Deposit</Badge>
                     </div>
                     <div className="text-[11px] text-muted-foreground font-mono mt-0.5">
                       Ref: <span className="text-foreground font-medium">{ref}</span> &bull; {bankName} {depositor ? `(${depositor})` : ''}
@@ -279,7 +279,7 @@ function DepotDetailPage() {
           description: `Set product price to ₦${Number(h.price || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
           date: isNaN(hObj.getTime()) ? new Date() : hObj,
           type: 'price',
-          badgeColor: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
+          badgeColor: 'bg-accent/10 text-accent border-accent/20',
           icon: DollarSign,
         })
       })
@@ -297,7 +297,7 @@ function DepotDetailPage() {
             description: `${ordCust} ordered ${Number(order.quantity || 0).toLocaleString()} ${order.productUnit || 'L'} (${ordProd})`,
             date: ordDate,
             type: 'order',
-            badgeColor: order.status === 'Completed' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' : 'bg-amber-500/10 text-amber-600 border-amber-500/20',
+            badgeColor: order.status === 'Completed' ? 'bg-accent/10 text-accent border-accent/20' : 'bg-warning/10 text-warning border-warning/20',
             icon: ShoppingBag,
           })
         }
@@ -336,7 +336,7 @@ function DepotDetailPage() {
   if (isLoadingDepot && !depot) {
     return (
       <div className="flex flex-col items-center justify-center py-28 gap-4 text-center">
-        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+        <Loader2 className="size-10 animate-spin text-primary" />
         <p className="text-sm font-medium text-muted-foreground">Loading depot details and operational data...</p>
       </div>
     )
@@ -345,12 +345,12 @@ function DepotDetailPage() {
   if (!depot) {
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-5 text-center">
-        <div className="h-16 w-16 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-400 border border-amber-500/20">
-          <AlertCircle size={32} />
+        <div className="size-16 rounded-full bg-warning/10 flex items-center justify-center text-warning border border-warning/20">
+          <AlertCircle className="size-8" />
         </div>
-        <h2 className="text-2xl font-bold text-foreground">No Depot Selected</h2>
+        <h2 className="text-lg md:text-xl font-semibold text-foreground tracking-tight">No Depot Selected</h2>
         <p className="text-muted-foreground max-w-sm text-sm">Please select a depot from the depot directory to view details.</p>
-        <Button onClick={() => navigate({ to: '/depots/' as any })}><ArrowLeft size={16} /> Back to Depots</Button>
+        <Button onClick={() => navigate({ to: '/depots/' as any })}><ArrowLeft className="size-4" /> Back to Depots</Button>
       </div>
     )
   }
@@ -366,10 +366,10 @@ function DepotDetailPage() {
       <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b pb-4">
         <div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="icon" className="h-8 w-8" onClick={handleBack}>
-              <ArrowLeft size={16} />
+            <Button variant="outline" size="icon" className="size-8" onClick={handleBack}>
+              <ArrowLeft className="size-4" />
             </Button>
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">{depot.name}</h1>
+            <h1 className="text-2xl md:text-xl md:text-2xl font-semibold tracking-tight text-foreground text-balance">{depot.name}</h1>
             <div className="hidden sm:block">{getStatusBadge(depot.status)}</div>
           </div>
         </div>
@@ -378,10 +378,10 @@ function DepotDetailPage() {
         <div className="flex items-center gap-2 flex-wrap">
           <Button
             size="sm"
-            className="gap-1.5 shadow-sm font-semibold text-xs"
+            className="gap-1.5 font-semibold text-xs"
             onClick={() => navigate({ to: '/pfi/form' as any, search: { depotId: activeDepotId } as any })}
           >
-            <Plus size={15} /> Assign PFI
+            <Plus className="size-4" /> Assign PFI
           </Button>
           <Button
             variant="outline"
@@ -389,7 +389,7 @@ function DepotDetailPage() {
             className="gap-1.5 text-xs font-medium"
             onClick={() => navigate({ to: '/depots/form' as any, search: { id: activeDepotId } as any, state: { depot, isEdit: true } as any })}
           >
-            <Edit size={15} /> Edit Depot
+            <Edit className="size-4" /> Edit Depot
           </Button>
           <Button
             variant="destructive"
@@ -398,18 +398,18 @@ function DepotDetailPage() {
             onClick={handleDelete}
             disabled={deleteDepot.isPending}
           >
-            <Trash2 size={15} /> {deleteDepot.isPending ? 'Deleting...' : 'Delete'}
+            <Trash2 className="size-4" /> {deleteDepot.isPending ? 'Deleting...' : 'Delete'}
           </Button>
         </div>
       </header>
 
       {/* Hero Depot Card Banner */}
-      <Card className="overflow-hidden border shadow-sm bg-card">
-        <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-6 md:p-8">
+      <Card className="overflow-hidden border bg-card">
+        <div className="bg-primary/10 p-6 md:p-8">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div className="flex items-start gap-4">
-              <div className="w-16 h-16 rounded-2xl bg-primary/15 border border-primary/20 flex items-center justify-center text-primary shadow-sm shrink-0">
-                <Warehouse size={32} />
+              <div className="size-16 rounded-xl bg-primary/15 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+                <Warehouse className="size-8" />
               </div>
               <div className="space-y-1">
                 <div className="flex items-center gap-2 flex-wrap">
@@ -423,9 +423,9 @@ function DepotDetailPage() {
                     </Badge>
                   )}
                 </div>
-                <h2 className="text-xl md:text-2xl font-bold text-foreground">{depot.name}</h2>
+                <h2 className="text-xl md:text-lg md:text-xl font-semibold text-foreground tracking-tight">{depot.name}</h2>
                 <p className="text-xs md:text-sm text-muted-foreground flex items-center gap-1.5 pt-0.5">
-                  <MapPin size={14} className="shrink-0 text-primary" />
+                  <MapPin className="size-3.5 shrink-0 text-primary" />
                   <span>{[depot.address, depot.city, depot.state, depot.postcode, depot.country].filter(Boolean).join(', ') || 'Address N/A'}</span>
                 </p>
               </div>
@@ -434,15 +434,15 @@ function DepotDetailPage() {
             {/* Quick Metrics Badges in Hero */}
             <div className="flex flex-wrap md:flex-col items-start md:items-end gap-2 text-xs border-t md:border-t-0 pt-4 md:pt-0 w-full md:w-auto">
               <div className="flex items-center gap-2 bg-background/80 backdrop-blur px-3 py-1.5 rounded-lg border text-muted-foreground">
-                <FileText size={14} className="text-primary" />
+                <FileText className="size-3.5 text-primary" />
                 <span><strong className="text-foreground">{pfis.length}</strong> Assigned PFI(s)</span>
               </div>
               <div className="flex items-center gap-2 bg-background/80 backdrop-blur px-3 py-1.5 rounded-lg border text-muted-foreground">
-                <Landmark size={14} className="text-emerald-500" />
+                <Landmark className="size-3.5 text-accent" />
                 <span><strong className="text-foreground">{displayBankAccounts.length}</strong> Bank Account(s)</span>
               </div>
               <div className="flex items-center gap-2 bg-background/80 backdrop-blur px-3 py-1.5 rounded-lg border text-muted-foreground">
-                <ShoppingBag size={14} className="text-amber-500" />
+                <ShoppingBag className="size-3.5 text-warning" />
                 <span><strong className="text-foreground">{ordersList.length}</strong> Orders Total</span>
               </div>
             </div>
@@ -453,77 +453,77 @@ function DepotDetailPage() {
       {/* Depot Key Metrics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Stock Allocated */}
-        <Card className="border-l-4 border-l-primary shadow-sm hover:shadow transition-shadow">
+        <Card className="border-l-4 border-l-primary hover:shadow transition-shadow duration-250 ease-luxe">
           <CardContent className="p-5 flex items-center justify-between">
             <div className="space-y-1">
-              <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Total Allocated Stock</p>
-              <h3 className="text-2xl font-bold text-foreground">
+              <p className="text-xs text-muted-foreground font-semibold uppercase tracking-[0.22em]">Total Allocated Stock</p>
+              <h3 className="text-2xl font-semibold text-foreground">
                 {totalPfiStartingQty.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">L</span>
               </h3>
               <p className="text-xs text-muted-foreground flex items-center gap-1">
-                <FileText size={12} className="text-primary" />
+                <FileText className="size-3 text-primary" />
                 <span>Across {pfis.length} registered PFI(s)</span>
               </p>
             </div>
-            <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
-              <PackageCheck size={24} />
+            <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+              <PackageCheck className="size-6" />
             </div>
           </CardContent>
         </Card>
 
         {/* Total Volume Sold */}
-        <Card className="border-l-4 border-l-emerald-500 shadow-sm hover:shadow transition-shadow">
+        <Card className="border-l-4 border-l-emerald-500 hover:shadow transition-shadow duration-250 ease-luxe">
           <CardContent className="p-5 flex items-center justify-between">
             <div className="space-y-1">
-              <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Total Volume Sold</p>
-              <h3 className="text-2xl font-bold text-foreground">
+              <p className="text-xs text-muted-foreground font-semibold uppercase tracking-[0.22em]">Total Volume Sold</p>
+              <h3 className="text-2xl font-semibold text-foreground">
                 {totalPfiSoldQty.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">L</span>
               </h3>
-              <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
-                <TrendingUp size={12} />
+              <p className="text-xs text-accent font-medium flex items-center gap-1">
+                <TrendingUp className="size-3" />
                 <span>{Math.round(fulfillmentPct)}% of total stock sold</span>
               </p>
             </div>
-            <div className="h-12 w-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
-              <CheckCircle2 size={24} />
+            <div className="size-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent shrink-0">
+              <CheckCircle2 className="size-6" />
             </div>
           </CardContent>
         </Card>
 
         {/* Stock Remaining */}
-        <Card className={`border-l-4 shadow-sm hover:shadow transition-shadow ${isStockLow ? 'border-l-destructive' : 'border-l-amber-500'}`}>
+        <Card className={`border-l-4 hover:shadow transition-shadow ${isStockLow ? 'border-l-destructive' : 'border-l-amber-500'}`}>
           <CardContent className="p-5 flex items-center justify-between">
             <div className="space-y-1">
-              <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Stock Remaining</p>
-              <h3 className="text-2xl font-bold text-foreground">
+              <p className="text-xs text-muted-foreground font-semibold uppercase tracking-[0.22em]">Stock Remaining</p>
+              <h3 className="text-2xl font-semibold text-foreground">
                 {totalPfiRemainingQty.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">L</span>
               </h3>
-              <p className={`text-xs font-medium flex items-center gap-1 ${isStockLow ? 'text-destructive font-bold' : 'text-amber-600 dark:text-amber-400'}`}>
-                <Droplets size={12} />
+              <p className={`text-xs font-medium flex items-center gap-1 ${isStockLow ? 'text-destructive font-semibold' : 'text-warning'}`}>
+                <Droplets className="size-3" />
                 <span>{Math.round(remainingStockPct)}% stock available</span>
               </p>
             </div>
-            <div className={`h-12 w-12 rounded-xl flex items-center justify-center shrink-0 ${isStockLow ? 'bg-destructive/10 text-destructive' : 'bg-amber-500/10 text-amber-600 dark:text-amber-400'}`}>
-              <Droplets size={24} />
+            <div className={`size-12 rounded-xl flex items-center justify-center shrink-0 ${isStockLow ? 'bg-destructive/10 text-destructive' : 'bg-warning/10 text-warning'}`}>
+              <Droplets className="size-6" />
             </div>
           </CardContent>
         </Card>
 
         {/* Total Depot Sales Revenue */}
-        <Card className="border-l-4 border-l-blue-500 shadow-sm hover:shadow transition-shadow">
+        <Card className="border-l-4 border-l-blue-500 hover:shadow transition-shadow duration-250 ease-luxe">
           <CardContent className="p-5 flex items-center justify-between">
             <div className="space-y-1">
-              <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Depot Order Sales</p>
-              <h3 className="text-2xl font-bold text-foreground">
+              <p className="text-xs text-muted-foreground font-semibold uppercase tracking-[0.22em]">Depot Order Sales</p>
+              <h3 className="text-2xl font-semibold text-foreground">
                 ₦{totalOrderRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </h3>
               <p className="text-xs text-muted-foreground flex items-center gap-1">
-                <ShoppingBag size={12} className="text-blue-500" />
+                <ShoppingBag className="size-3 text-muted-foreground" />
                 <span>{ordersList.length} Order(s) &bull; {totalCompletedOrders} Done</span>
               </p>
             </div>
-            <div className="h-12 w-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 shrink-0">
-              <DollarSign size={24} />
+            <div className="size-12 rounded-xl bg-muted/10 flex items-center justify-center text-muted-foreground shrink-0">
+              <DollarSign className="size-6" />
             </div>
           </CardContent>
         </Card>
@@ -531,16 +531,16 @@ function DepotDetailPage() {
 
       {/* Low Stock Warning Alert Banner */}
       {isStockLow && (
-        <Card className="border-amber-500/50 bg-amber-500/10 text-amber-900 dark:text-amber-200 shadow-sm">
+        <Card className="border-warning/50 bg-warning/10 text-warning">
           <CardContent className="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0">
-                <AlertTriangle size={22} />
+              <div className="size-10 rounded-full bg-warning/20 flex items-center justify-center text-warning shrink-0">
+                <AlertTriangle className="size-5" />
               </div>
               <div>
-                <h4 className="font-bold text-foreground text-sm flex items-center gap-2">
+                <h4 className="font-semibold text-foreground text-sm flex items-center gap-2">
                   <span>Low Stock Warning &bull; Available Stock at {Math.round(remainingStockPct)}%</span>
-                  <Badge variant="destructive" className="text-[10px] uppercase font-bold">Action Required</Badge>
+                  <Badge variant="destructive" className="text-[10px] uppercase font-semibold">Action Required</Badge>
                 </h4>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   Active PFI stock at {depot.name} is down to <strong>{totalPfiRemainingQty.toLocaleString()} Litres</strong> (out of {totalPfiStartingQty.toLocaleString()} L total allocated). Consider assigning a new PFI or updating capacity.
@@ -549,10 +549,10 @@ function DepotDetailPage() {
             </div>
             <Button
               size="sm"
-              className="bg-amber-600 text-white hover:bg-amber-700 shrink-0 text-xs font-semibold gap-1.5 shadow-sm"
+              className="bg-warning text-warning-foreground hover:bg-warning shrink-0 text-xs font-semibold gap-1.5"
               onClick={() => navigate({ to: '/pfi/form' as any, search: { depotId: activeDepotId } as any })}
             >
-              <Plus size={14} /> Assign New PFI
+              <Plus className="size-3.5" /> Assign New PFI
             </Button>
           </CardContent>
         </Card>
@@ -564,33 +564,33 @@ function DepotDetailPage() {
           <button
             onClick={() => setActiveTab('overview')}
             className={`px-4 py-2.5 text-xs font-semibold border-b-2 transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${activeTab === 'overview'
-              ? 'border-primary text-primary bg-primary/5 rounded-t-md'
-              : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
-              }`}
+ ? 'border-primary text-primary bg-primary/5 rounded-t-md'
+ : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
+ }`}
           >
-            <BarChart3 size={15} />
+            <BarChart3 className="size-4" />
             <span>Overview</span>
           </button>
 
           <button
             onClick={() => setActiveTab('inventory')}
             className={`px-4 py-2.5 text-xs font-semibold border-b-2 transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${activeTab === 'inventory'
-              ? 'border-primary text-primary bg-primary/5 rounded-t-md'
-              : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
-              }`}
+ ? 'border-primary text-primary bg-primary/5 rounded-t-md'
+ : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
+ }`}
           >
-            <Layers size={15} />
+            <Layers className="size-4" />
             <span>Inventory & Pricing</span>
           </button>
 
           <button
             onClick={() => setActiveTab('pfis')}
             className={`px-4 py-2.5 text-xs font-semibold border-b-2 transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${activeTab === 'pfis'
-              ? 'border-primary text-primary bg-primary/5 rounded-t-md'
-              : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
-              }`}
+ ? 'border-primary text-primary bg-primary/5 rounded-t-md'
+ : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
+ }`}
           >
-            <FileText size={15} />
+            <FileText className="size-4" />
             <span>PFIs & Allocation</span>
             <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${activeTab === 'pfis' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
               {pfis.length}
@@ -600,11 +600,11 @@ function DepotDetailPage() {
           <button
             onClick={() => setActiveTab('orders')}
             className={`px-4 py-2.5 text-xs font-semibold border-b-2 transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${activeTab === 'orders'
-              ? 'border-primary text-primary bg-primary/5 rounded-t-md'
-              : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
-              }`}
+ ? 'border-primary text-primary bg-primary/5 rounded-t-md'
+ : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
+ }`}
           >
-            <ShoppingBag size={15} />
+            <ShoppingBag className="size-4" />
             <span>Orders & Sales</span>
             <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${activeTab === 'orders' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
               {ordersList.length}
@@ -614,11 +614,11 @@ function DepotDetailPage() {
           <button
             onClick={() => setActiveTab('activity')}
             className={`px-4 py-2.5 text-xs font-semibold border-b-2 transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${activeTab === 'activity'
-              ? 'border-primary text-primary bg-primary/5 rounded-t-md'
-              : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
-              }`}
+ ? 'border-primary text-primary bg-primary/5 rounded-t-md'
+ : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
+ }`}
           >
-            <Activity size={15} />
+            <Activity className="size-4" />
             <span>Audit & Activity Log</span>
             <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${activeTab === 'activity' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
               {activityEvents.length}
@@ -631,11 +631,11 @@ function DepotDetailPage() {
       {activeTab === 'overview' && (
         <div className="grid gap-6 md:grid-cols-2">
           {/* Location & Coordinates */}
-          <Card className="shadow-sm">
+          <Card className="">
             <CardHeader className="border-b border-border/50 pb-3">
               <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-                  <MapPin size={16} />
+                <div className="size-8 rounded-lg bg-accent/10 flex items-center justify-center text-accent">
+                  <MapPin className="size-4" />
                 </div>
                 <div>
                   <CardTitle className="text-sm font-semibold">Location & Geographic Details</CardTitle>
@@ -645,42 +645,42 @@ function DepotDetailPage() {
             </CardHeader>
             <CardContent className="space-y-4 pt-4">
               <div>
-                <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider">Street Address</p>
+                <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-[0.14em]">Street Address</p>
                 <p className="text-sm text-foreground font-medium mt-0.5">{depot.address || 'N/A'}</p>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider">LGA / City</p>
+                  <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-[0.14em]">LGA / City</p>
                   <p className="text-sm text-foreground font-medium mt-0.5">{depot.city || 'N/A'}</p>
                 </div>
                 <div>
-                  <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider">State</p>
+                  <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-[0.14em]">State</p>
                   <p className="text-sm text-foreground font-medium mt-0.5">{depot.state || 'N/A'}</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider">Country</p>
+                  <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-[0.14em]">Country</p>
                   <p className="text-sm text-foreground font-medium mt-0.5">{depot.country || 'Nigeria'}</p>
                 </div>
                 <div>
-                  <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider">Postcode</p>
+                  <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-[0.14em]">Postcode</p>
                   <p className="text-sm text-foreground font-mono mt-0.5">{depot.postcode || 'N/A'}</p>
                 </div>
               </div>
               <div className="pt-2 border-t">
-                <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider">System Database ID</p>
+                <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-[0.14em]">System Database ID</p>
                 <p className="text-xs font-mono text-muted-foreground mt-0.5 truncate select-all">{activeDepotId}</p>
               </div>
             </CardContent>
           </Card>
 
           {/* Personnel & Operations */}
-          <Card className="shadow-sm">
+          <Card className="">
             <CardHeader className="border-b border-border/50 pb-3">
               <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500">
-                  <User size={16} />
+                <div className="size-8 rounded-lg bg-muted/10 flex items-center justify-center text-muted-foreground">
+                  <User className="size-4" />
                 </div>
                 <div>
                   <CardTitle className="text-sm font-semibold">Assigned Staff & Operations</CardTitle>
@@ -690,20 +690,20 @@ function DepotDetailPage() {
             </CardHeader>
             <CardContent className="space-y-4 pt-4">
               <div>
-                <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider">Operating Schedule</p>
+                <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-[0.14em]">Operating Schedule</p>
                 <p className="text-sm text-foreground font-medium mt-0.5 flex items-center gap-1.5">
-                  <Activity size={14} className="text-emerald-500" />
+                  <Activity className="size-3.5 text-accent" />
                   <span>24 Hours / 7 Days a week</span>
                 </p>
               </div>
 
               <div>
-                <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider">Hub Status</p>
+                <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-[0.14em]">Hub Status</p>
                 <div className="mt-1">{getStatusBadge(depot.status)}</div>
               </div>
 
               <div>
-                <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider">Assigned Staff Members ({staffList.length})</p>
+                <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-[0.14em]">Assigned Staff Members ({staffList.length})</p>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {staffList.length > 0 ? (
                     staffList.map((s) => {
@@ -714,7 +714,7 @@ function DepotDetailPage() {
                       const fullName = typeof s === 'object' ? (`${fn} ${sn}`.trim() || s.full_name || s.email || 'Staff') : String(s)
                       return (
                         <div key={sId} className="flex items-center gap-2 bg-secondary px-3 py-1.5 rounded-full text-xs font-medium">
-                          <div className="h-5 w-5 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-bold text-primary">
+                          <div className="size-5 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-semibold text-primary">
                             {initials || '?'}
                           </div>
                           <span className="text-foreground">{fullName}</span>
@@ -722,7 +722,7 @@ function DepotDetailPage() {
                       )
                     })
                   ) : (
-                    <span className="text-xs text-muted-foreground italic">No specific staff assigned to this hub.</span>
+                    <span className="text-xs text-muted-foreground">No specific staff assigned to this hub.</span>
                   )}
                 </div>
               </div>
@@ -730,12 +730,12 @@ function DepotDetailPage() {
           </Card>
 
           {/* Configured Bank Accounts */}
-          <Card className="md:col-span-2 shadow-sm">
+          <Card className="md:col-span-2">
             <CardHeader className="border-b border-border/50 pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-                    <Landmark size={16} />
+                  <div className="size-8 rounded-lg bg-accent/10 flex items-center justify-center text-accent">
+                    <Landmark className="size-4" />
                   </div>
                   <div>
                     <CardTitle className="text-sm font-semibold">Depot Bank Accounts</CardTitle>
@@ -750,7 +750,7 @@ function DepotDetailPage() {
             <CardContent className="pt-6">
               {isLoadingBankAccounts ? (
                 <div className="flex justify-center py-6">
-                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  <Loader2 className="size-6 animate-spin text-muted-foreground" />
                 </div>
               ) : displayBankAccounts.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-4">No bank accounts have been configured for this depot hub.</p>
@@ -760,23 +760,23 @@ function DepotDetailPage() {
                     const accId = acc.id || acc._id
                     const isCopied = copiedAccount === acc.accountNumber
                     return (
-                      <div key={accId} className="flex flex-col justify-between p-4 border rounded-xl bg-card hover:border-primary/50 transition-colors shadow-sm">
+                      <div key={accId} className="flex flex-col justify-between p-4 border rounded-xl bg-card hover:border-primary/50 transition-colors duration-250 ease-luxe">
                         <div className="flex items-start justify-between gap-2">
                           <div>
                             <Badge variant="outline" className="text-[10px] font-mono mb-1.5 bg-primary/5 text-primary border-primary/20">
                               {acc.bankCode ? `${acc.bankName} (${acc.bankCode})` : acc.bankName}
                             </Badge>
-                            <h4 className="text-sm font-bold text-foreground">{acc.accountName}</h4>
+                            <h4 className="text-sm font-semibold text-foreground">{acc.accountName}</h4>
                           </div>
-                          <Badge className={acc.status === 'Active' ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30' : 'bg-muted text-muted-foreground'}>
+                          <Badge className={acc.status === 'Active' ? 'bg-accent/15 text-accent border-accent/30' : 'bg-muted text-muted-foreground'}>
                             {acc.status}
                           </Badge>
                         </div>
 
                         <div className="mt-4 pt-3 border-t flex items-center justify-between">
                           <div>
-                            <p className="text-[10px] text-muted-foreground uppercase font-semibold tracking-wider">Account Number</p>
-                            <p className="text-lg font-mono font-bold text-primary tracking-wide">{acc.accountNumber}</p>
+                            <p className="text-[10px] text-muted-foreground uppercase font-semibold tracking-[0.14em]">Account Number</p>
+                            <p className="text-lg font-mono font-semibold text-primary">{acc.accountNumber}</p>
                           </div>
                           <Button
                             variant="outline"
@@ -784,7 +784,7 @@ function DepotDetailPage() {
                             className="h-8 gap-1.5 font-mono text-xs cursor-pointer hover:bg-primary/5"
                             onClick={() => handleCopyAccount(acc.accountNumber)}
                           >
-                            {isCopied ? <CheckCircle2 size={14} className="text-emerald-500" /> : <Copy size={14} />}
+                            {isCopied ? <CheckCircle2 className="size-3.5 text-accent" /> : <Copy className="size-3.5" />}
                             <span>{isCopied ? 'Copied' : 'Copy'}</span>
                           </Button>
                         </div>
@@ -802,11 +802,11 @@ function DepotDetailPage() {
       {activeTab === 'inventory' && (
         <div className="grid gap-6 md:grid-cols-2">
           {/* Storage Capacities */}
-          <Card className="md:col-span-2 shadow-sm">
+          <Card className="md:col-span-2">
             <CardHeader className="border-b border-border/50 pb-3">
               <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                  <Warehouse size={16} />
+                <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                  <Warehouse className="size-4" />
                 </div>
                 <div>
                   <CardTitle className="text-sm font-semibold">Storage Capacities by Product</CardTitle>
@@ -825,12 +825,12 @@ function DepotDetailPage() {
                     const prodCat = pc.product?.category || pc.productCategory || 'N/A'
                     const prodId = pc.product?._id || pc.product?.id || pc.productId || String(pc.product || Math.random())
                     return (
-                      <div key={prodId} className="flex items-center justify-between p-4 border rounded-xl bg-card shadow-sm hover:border-primary/40 transition-colors">
+                      <div key={prodId} className="flex items-center justify-between p-4 border rounded-xl bg-card hover:border-primary/40 transition-colors duration-250 ease-luxe">
                         <div>
-                          <p className="text-sm font-bold text-foreground">{prodName}</p>
+                          <p className="text-sm font-semibold text-foreground">{prodName}</p>
                           <p className="text-xs text-muted-foreground font-mono mt-0.5">{prodSku} &bull; {prodCat}</p>
                         </div>
-                        <Badge variant="outline" className="font-mono text-sm font-bold bg-secondary px-3 py-1">
+                        <Badge variant="outline" className="font-mono text-sm font-semibold bg-secondary px-3 py-1">
                           {(pc.capacity || 0).toLocaleString()} Units
                         </Badge>
                       </div>
@@ -842,12 +842,12 @@ function DepotDetailPage() {
           </Card>
 
           {/* Product Pricing & Price History Editor */}
-          <Card className="md:col-span-2 shadow-sm">
+          <Card className="md:col-span-2">
             <CardHeader className="border-b border-border/50 pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-                    <DollarSign size={16} />
+                  <div className="size-8 rounded-lg bg-accent/10 flex items-center justify-center text-accent">
+                    <DollarSign className="size-4" />
                   </div>
                   <div>
                     <CardTitle className="text-sm font-semibold">Product Pricing at Depot</CardTitle>
@@ -886,10 +886,10 @@ function DepotDetailPage() {
                         : null
 
                       return (
-                        <div key={productId} className="border rounded-xl bg-card overflow-hidden shadow-sm hover:border-border transition-colors">
+                        <div key={productId} className="border rounded-xl bg-card overflow-hidden hover:border-border transition-colors duration-250 ease-luxe">
                           <div className="flex items-center justify-between p-4 flex-wrap gap-3">
                             <div className="flex-1 min-w-[200px]">
-                              <p className="text-sm font-bold text-foreground">{productName}</p>
+                              <p className="text-sm font-semibold text-foreground">{productName}</p>
                               <p className="text-xs text-muted-foreground font-mono mt-0.5">{productSku} &bull; {pc.product?.category || 'N/A'}</p>
                             </div>
 
@@ -936,7 +936,7 @@ function DepotDetailPage() {
                                   <Button
                                     size="icon"
                                     variant="ghost"
-                                    className="h-8 w-8 text-emerald-600 hover:bg-emerald-500/10 cursor-pointer"
+                                    className="size-8 text-accent hover:bg-accent/10 cursor-pointer"
                                     disabled={updatePrice.isPending}
                                     onClick={() => {
                                       const val = parseFloat(editPrice)
@@ -958,24 +958,24 @@ function DepotDetailPage() {
                                       }
                                     }}
                                   >
-                                    {updatePrice.isPending ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+                                    {updatePrice.isPending ? <Loader2 className="size-3.5 animate-spin" /> : <Check className="size-3.5" />}
                                   </Button>
                                   <Button
                                     size="icon"
                                     variant="ghost"
-                                    className="h-8 w-8 text-destructive hover:bg-destructive/10 cursor-pointer"
+                                    className="size-8 text-destructive hover:bg-destructive/10 cursor-pointer"
                                     onClick={() => { setEditingProductId(null); setEditPrice('') }}
                                   >
-                                    <X size={14} />
+                                    <X className="size-3.5" />
                                   </Button>
                                 </div>
                               ) : (
                                 <div className="flex items-center gap-2">
                                   {currentPrice !== undefined ? (
                                     <div className="flex items-center gap-1.5">
-                                      {priceTrend === 'up' && <TrendingUp size={14} className="text-emerald-500" />}
-                                      {priceTrend === 'down' && <TrendingDown size={14} className="text-destructive" />}
-                                      <Badge variant="outline" className="font-mono text-sm font-bold bg-secondary px-3 py-1">
+                                      {priceTrend === 'up' && <TrendingUp className="size-3.5 text-accent" />}
+                                      {priceTrend === 'down' && <TrendingDown className="size-3.5 text-destructive" />}
+                                      <Badge variant="outline" className="font-mono text-sm font-semibold bg-secondary px-3 py-1">
                                         ₦{currentPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                       </Badge>
                                     </div>
@@ -991,7 +991,7 @@ function DepotDetailPage() {
                                       setEditPrice(currentPrice !== undefined ? String(currentPrice) : '')
                                     }}
                                   >
-                                    <Edit size={13} />
+                                    <Edit className="size-3.5" />
                                     <span>Edit</span>
                                   </Button>
                                   {history.length > 0 && (
@@ -1001,9 +1001,9 @@ function DepotDetailPage() {
                                       className="h-8 text-xs gap-1 text-muted-foreground hover:text-foreground cursor-pointer"
                                       onClick={() => setExpandedHistory(isHistoryOpen ? null : productId)}
                                     >
-                                      <History size={13} />
+                                      <History className="size-3.5" />
                                       <span>History</span>
-                                      {isHistoryOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                                      {isHistoryOpen ? <ChevronUp className="size-3" /> : <ChevronDown className="size-3" />}
                                     </Button>
                                   )}
                                 </div>
@@ -1013,8 +1013,8 @@ function DepotDetailPage() {
 
                           {isHistoryOpen && history.length > 0 && (
                             <div className="border-t border-border/50 bg-muted/30 px-4 py-3">
-                              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                                <Clock size={12} /> Price Modification History
+                              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em] mb-2 flex items-center gap-1.5">
+                                <Clock className="size-3" /> Price Modification History
                               </p>
                               <div className="space-y-1.5 max-h-48 overflow-y-auto">
                                 {[...history].reverse().map((h, idx) => {
@@ -1029,10 +1029,10 @@ function DepotDetailPage() {
                                   return (
                                     <div key={idx} className="flex items-center justify-between py-1.5 px-3 rounded-lg text-xs bg-background/60 border border-border/40">
                                       <div className="flex items-center gap-2">
-                                        {isIncrease && <TrendingUp size={12} className="text-emerald-500" />}
-                                        {isDecrease && <TrendingDown size={12} className="text-destructive" />}
+                                        {isIncrease && <TrendingUp className="size-3 text-accent" />}
+                                        {isDecrease && <TrendingDown className="size-3 text-destructive" />}
                                         {!isIncrease && !isDecrease && <div className="w-3" />}
-                                        <span className="font-mono font-bold text-foreground">₦{h.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                        <span className="font-mono font-semibold text-foreground">₦{h.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                       </div>
                                       <span className="text-muted-foreground font-mono">{hDateStr}</span>
                                     </div>
@@ -1054,12 +1054,12 @@ function DepotDetailPage() {
 
       {/* Tab 3: PFIs & Stock Allocation */}
       {activeTab === 'pfis' && (
-        <Card className="shadow-sm">
+        <Card className="">
           <CardHeader className="border-b border-border/50 pb-3">
             <div className="flex items-center justify-between flex-wrap gap-4">
               <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                  <FileText size={16} />
+                <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                  <FileText className="size-4" />
                 </div>
                 <div>
                   <CardTitle className="text-sm font-semibold">Assigned PFIs ({pfis.length})</CardTitle>
@@ -1072,18 +1072,18 @@ function DepotDetailPage() {
                 className="gap-1.5 text-xs font-semibold"
                 onClick={() => navigate({ to: '/pfi/form' as any, search: { depotId: activeDepotId } as any })}
               >
-                <Plus size={14} /> Register New PFI
+                <Plus className="size-3.5" /> Register New PFI
               </Button>
             </div>
           </CardHeader>
           <CardContent className="pt-6">
             {isLoadingPfis ? (
               <div className="flex justify-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                <Loader2 className="size-6 animate-spin text-muted-foreground" />
               </div>
             ) : pfis.length === 0 ? (
               <div className="text-center py-10 space-y-3">
-                <FileText size={36} className="mx-auto text-muted-foreground/40" />
+                <FileText className="size-9 mx-auto text-muted-foreground/40" />
                 <p className="text-sm font-medium text-foreground">No PFIs currently assigned</p>
                 <p className="text-xs text-muted-foreground max-w-sm mx-auto">There are no Proforma Invoices associated with this depot. Register a PFI to allocate stock capacity.</p>
                 <Button
@@ -1091,7 +1091,7 @@ function DepotDetailPage() {
                   variant="outline"
                   onClick={() => navigate({ to: '/pfi/form' as any, search: { depotId: activeDepotId } as any })}
                 >
-                  <Plus size={14} /> Assign PFI
+                  <Plus className="size-3.5" /> Assign PFI
                 </Button>
               </div>
             ) : (
@@ -1110,13 +1110,13 @@ function DepotDetailPage() {
                     <div
                       key={pfiId}
                       onClick={() => navigate({ to: '/pfi/details' as any, search: { id: pfiId } as any })}
-                      className="flex flex-col p-4 border rounded-xl bg-card hover:bg-muted/30 transition-all cursor-pointer hover:border-primary/50 group shadow-sm justify-between"
+                      className="flex flex-col p-4 border rounded-xl bg-card hover:bg-muted/30 transition-all cursor-pointer hover:border-primary/50 group justify-between duration-250 ease-luxe"
                     >
                       <div>
                         <div className="flex items-start justify-between gap-2">
                           <div>
                             <div className="flex items-center gap-2">
-                              <span className="text-xs font-bold text-foreground px-2.5 py-0.5 rounded-md bg-primary/10 border border-primary/20 group-hover:bg-primary group-hover:text-primary-foreground transition-all">
+                              <span className="text-xs font-semibold text-foreground px-2.5 py-0.5 rounded-md bg-primary/10 border border-primary/20 group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-250 ease-luxe">
                                 {pfi.pfiNumber || pfi.pfi_number}
                               </span>
                               {pfiDateStr && (
@@ -1125,12 +1125,12 @@ function DepotDetailPage() {
                                 </span>
                               )}
                             </div>
-                            <p className="text-sm font-bold text-foreground mt-2">{pfi.productName || pfi.product_name || 'Unknown Product'}</p>
+                            <p className="text-sm font-semibold text-foreground mt-2">{pfi.productName || pfi.product_name || 'Unknown Product'}</p>
                             {pfi.description && (
                               <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{pfi.description}</p>
                             )}
                           </div>
-                          <Badge className={pfi.status === 'active' ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30' : 'bg-secondary text-secondary-foreground'}>
+                          <Badge className={pfi.status === 'active' ? 'bg-accent/15 text-accent border-accent/30' : 'bg-secondary text-secondary-foreground'}>
                             {pfi.status || 'Active'}
                           </Badge>
                         </div>
@@ -1138,11 +1138,11 @@ function DepotDetailPage() {
                         <div className="mt-4 space-y-1.5">
                           <div className="flex justify-between text-xs text-muted-foreground font-medium">
                             <span>Sold: <strong>{stats.sold.toLocaleString()}</strong> / {stats.starting.toLocaleString()} {unit}</span>
-                            <span className="font-mono font-bold text-foreground">{Math.round(progressPct)}%</span>
+                            <span className="font-mono font-semibold text-foreground">{Math.round(progressPct)}%</span>
                           </div>
                           <div className="h-2 bg-muted rounded-full overflow-hidden w-full">
                             <div
-                              className="h-full rounded-full transition-all duration-700 bg-primary"
+                              className="h-full rounded-full transition-all duration-700 bg-primary ease-luxe"
                               style={{ width: `${progressPct}%` }}
                             />
                           </div>
@@ -1168,12 +1168,12 @@ function DepotDetailPage() {
 
       {/* Tab 4: Orders & Revenue */}
       {activeTab === 'orders' && (
-        <Card className="shadow-sm">
+        <Card className="">
           <CardHeader className="border-b border-border/50 pb-3">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-400">
-                  <ShoppingBag size={16} />
+                <div className="size-8 rounded-lg bg-warning/10 flex items-center justify-center text-warning">
+                  <ShoppingBag className="size-4" />
                 </div>
                 <div>
                   <CardTitle className="text-sm font-semibold">Depot Orders ({filteredOrders.length})</CardTitle>
@@ -1195,13 +1195,13 @@ function DepotDetailPage() {
                       key={st}
                       onClick={() => setStatusFilter(st)}
                       className={`px-3 py-1 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer ${isActive
-                        ? 'bg-primary text-primary-foreground shadow-sm font-semibold'
-                        : 'bg-secondary text-secondary-foreground hover:bg-muted'
-                        }`}
+ ? 'bg-primary text-primary-foreground font-semibold'
+ : 'bg-secondary text-secondary-foreground hover:bg-muted'
+ }`}
                     >
                       <span>{st}</span>
                       <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${isActive ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-muted text-muted-foreground'
-                        }`}>
+ }`}>
                         {count}
                       </span>
                     </button>
@@ -1214,11 +1214,11 @@ function DepotDetailPage() {
           <CardContent className="pt-6">
             {isLoadingOrders ? (
               <div className="flex justify-center py-10">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <Loader2 className="size-8 animate-spin text-primary" />
               </div>
             ) : filteredOrders.length === 0 ? (
               <div className="text-center py-12 space-y-2">
-                <ShoppingBag size={36} className="mx-auto text-muted-foreground/40" />
+                <ShoppingBag className="size-9 mx-auto text-muted-foreground/40" />
                 <p className="text-sm font-medium text-foreground">No orders found</p>
                 <p className="text-xs text-muted-foreground">There are currently no orders under {depot.name} matching status "{statusFilter}".</p>
               </div>
@@ -1238,26 +1238,26 @@ function DepotDetailPage() {
                   return (
                     <div
                       key={ordId}
-                      className="border rounded-xl bg-card overflow-hidden transition-all hover:border-primary/40 shadow-sm"
+                      className="border rounded-xl bg-card overflow-hidden transition-all hover:border-primary/40 duration-250 ease-luxe"
                     >
                       <div className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div className="flex-1 space-y-1">
                           <div className="flex items-center gap-2 flex-wrap">
                             <span
                               onClick={() => navigate({ to: '/orders/details' as any, search: { id: ordId } as any })}
-                              className="font-mono font-bold text-sm text-primary hover:underline cursor-pointer"
+                              className="font-mono font-semibold text-sm text-primary hover:underline cursor-pointer"
                             >
                               {order.orderNumber || order.order_number}
                             </span>
                             <Badge
                               className={
                                 order.status === 'Completed'
-                                  ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
+                                  ? 'bg-accent/15 text-accent border-accent/30'
                                   : order.status === 'Cancelled'
                                     ? 'bg-destructive/15 text-destructive border-destructive/30'
                                     : order.status === 'Paid' || order.status === 'Released'
-                                      ? 'bg-blue-500/15 text-blue-500 border-blue-500/30'
-                                      : 'bg-amber-500/15 text-amber-600 border-amber-500/30'
+                                      ? 'bg-muted/15 text-muted-foreground border-border/30'
+                                      : 'bg-warning/15 text-warning border-warning/30'
                               }
                             >
                               {order.status}
@@ -1278,7 +1278,7 @@ function DepotDetailPage() {
 
                         <div className="flex items-center gap-4 justify-between md:justify-end border-t md:border-t-0 pt-3 md:pt-0">
                           <div className="text-left md:text-right">
-                            <div className="text-sm font-bold text-foreground">
+                            <div className="text-sm font-semibold text-foreground">
                               ₦{Number(order.totalAmount ?? order.total_amount ?? order.amount ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </div>
                             <div className="text-[10px] text-muted-foreground font-mono">
@@ -1293,9 +1293,9 @@ function DepotDetailPage() {
                               className="gap-1 text-xs cursor-pointer"
                               onClick={() => setExpandedOrder(isExpanded ? null : ordId)}
                             >
-                              <Receipt size={14} className="text-emerald-500" />
+                              <Receipt className="size-3.5 text-accent" />
                               <span>{isExpanded ? 'Hide Deposits' : 'View Deposits'}</span>
-                              <ChevronDown size={14} className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                              <ChevronDown className={`size-3.5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
                             </Button>
                           ) : (
                             <Button
@@ -1325,12 +1325,12 @@ function DepotDetailPage() {
 
       {/* Tab 5: Audit & Activity Log */}
       {activeTab === 'activity' && (
-        <Card className="shadow-sm">
+        <Card className="">
           <CardHeader className="border-b border-border/50 pb-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500">
-                  <Activity size={16} />
+                <div className="size-8 rounded-lg bg-muted/10 flex items-center justify-center text-muted-foreground">
+                  <Activity className="size-4" />
                 </div>
                 <div>
                   <CardTitle className="text-sm font-semibold">Depot Activity Timeline ({activityEvents.length})</CardTitle>
@@ -1338,7 +1338,7 @@ function DepotDetailPage() {
                 </div>
               </div>
               <Badge variant="outline" className="font-mono text-xs gap-1">
-                <ShieldCheck size={12} className="text-emerald-500" /> Verified Audit Feed
+                <ShieldCheck className="size-3 text-accent" /> Verified Audit Feed
               </Badge>
             </div>
           </CardHeader>
@@ -1351,12 +1351,12 @@ function DepotDetailPage() {
                   const IconComp = evt.icon
                   return (
                     <div key={evt.id} className="relative flex items-start justify-between gap-4 group">
-                      <div className="absolute -left-6 top-1 h-5 w-5 rounded-full bg-background border-2 border-primary flex items-center justify-center text-primary text-[10px]">
-                        <IconComp size={10} />
+                      <div className="absolute -left-6 top-1 size-5 rounded-full bg-background border-2 border-primary flex items-center justify-center text-primary text-[10px]">
+                        <IconComp className="size-2.5" />
                       </div>
                       <div className="space-y-0.5">
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-bold text-foreground">{evt.title}</span>
+                          <span className="text-sm font-semibold text-foreground">{evt.title}</span>
                           <Badge variant="outline" className={`text-[10px] ${evt.badgeColor}`}>
                             {evt.type.toUpperCase()}
                           </Badge>

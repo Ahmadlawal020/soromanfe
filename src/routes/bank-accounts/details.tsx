@@ -33,7 +33,7 @@ export const Route = createFileRoute('/bank-accounts/details')({
 function getStatusBadge(status: string) {
   switch (status) {
     case 'Active':
-      return <Badge className="bg-emerald-500/15 text-emerald-400 border-emerald-500/30 font-medium px-3 py-1">{status}</Badge>
+      return <Badge className="bg-accent/15 text-accent border-accent/30 font-medium px-3 py-1">{status}</Badge>
     case 'Inactive':
       return <Badge variant="outline" className="text-muted-foreground px-3 py-1">{status}</Badge>
     case 'Suspended':
@@ -89,7 +89,7 @@ function BankAccountDetails() {
   if (isLoading && !account) {
     return (
       <div className="flex flex-col items-center justify-center py-24">
-        <Loader2 size={32} className="animate-spin text-primary" />
+        <Loader2 className="size-8 animate-spin text-primary" />
         <p className="text-sm text-muted-foreground mt-3">Loading bank account details...</p>
       </div>
     )
@@ -100,14 +100,14 @@ function BankAccountDetails() {
       <div className="space-y-6 animate-fade-in">
         <div className="flex items-center gap-4">
           <Button variant="outline" size="icon" onClick={() => navigate({ to: '/bank-accounts' })}>
-            <ArrowLeft size={16} />
+            <ArrowLeft className="size-4" />
           </Button>
         </div>
         <Card className="p-12 text-center border-dashed">
-          <AlertCircle className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+          <AlertCircle className="size-12 text-muted-foreground mx-auto mb-3" />
           <h2 className="text-lg font-semibold">Bank Account Not Found</h2>
           <p className="text-sm text-muted-foreground mt-1">The requested bank account could not be found or has been removed.</p>
-          <Button className="gradient-primary text-white border-0 mt-4" onClick={() => navigate({ to: '/bank-accounts' })}>
+          <Button className="mt-4" onClick={() => navigate({ to: '/bank-accounts' })}>
             Return to List
           </Button>
         </Card>
@@ -125,10 +125,10 @@ function BankAccountDetails() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <Button variant="outline" size="icon" onClick={() => navigate({ to: '/bank-accounts' })}>
-            <ArrowLeft size={16} />
+            <ArrowLeft className="size-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Bank Account Details</h1>
+            <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">Bank Account Details</h1>
             <p className="text-muted-foreground">View account information and linked depots</p>
           </div>
         </div>
@@ -142,35 +142,35 @@ function BankAccountDetails() {
                 state: { bankAccount: account, isEdit: true } as any,
               })
             }
-          >
-            <Edit className="w-4 h-4 mr-2" /> Edit Account
+ >
+            <Edit className="size-4 mr-2" /> Edit Account
           </Button>
           <Button
             variant="destructive"
             size="sm"
             disabled={isDeleting}
             onClick={handleDelete}
-          >
-            {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4 mr-2" />}
+ >
+            {isDeleting ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4 mr-2" />}
             Delete
           </Button>
         </div>
       </div>
 
       {/* Account Overview Header Card */}
-      <Card className="border-border/60 bg-gradient-to-br from-card to-card/70 shadow-md overflow-hidden">
+      <Card className="bg-card border-border/60 overflow-hidden">
         <CardContent className="p-6 md:p-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="flex items-start gap-4">
-              <div className="h-16 w-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-                <Building2 className="w-8 h-8 text-primary" />
+              <div className="size-16 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+                <Building2 className="size-8 text-primary" />
               </div>
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h1 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">{account.bankName}</h1>
+                  <h1 className="text-2xl md:text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">{account.bankName}</h1>
                   {account.isDefault && (
-                    <Badge className="bg-amber-500/15 text-amber-400 border-amber-500/30 gap-1 px-2.5 py-0.5 text-xs font-semibold">
-                      <Star className="w-3.5 h-3.5 fill-amber-400" /> Default Account
+                    <Badge className="bg-warning/15 text-warning border-warning/30 gap-1 px-2.5 py-0.5 text-xs font-semibold">
+                      <Star className="size-3.5 fill-warning" /> Default Account
                     </Badge>
                   )}
                   {getStatusBadge(account.status)}
@@ -178,7 +178,7 @@ function BankAccountDetails() {
                 <p className="text-base font-semibold text-muted-foreground mt-1">{account.accountName}</p>
                 {account.branchName && (
                   <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
-                    <MapPin className="w-3.5 h-3.5 text-primary" /> Branch: {account.branchName}
+                    <MapPin className="size-3.5 text-primary" /> Branch: {account.branchName}
                   </p>
                 )}
               </div>
@@ -187,21 +187,21 @@ function BankAccountDetails() {
             {/* Large Account Number Card */}
             <div className="bg-muted/40 border border-border/60 rounded-xl p-4 md:px-6 md:py-4 flex items-center justify-between gap-6 shrink-0">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                   Account Number ({account.currency})
                 </p>
-                <p className="text-2xl md:text-3xl font-mono font-extrabold tracking-wider text-foreground mt-0.5">
+                <p className="text-2xl md:text-3xl font-mono font-semibold text-foreground mt-0.5 tabular-nums">
                   {account.accountNumber}
                 </p>
               </div>
               <Button
                 variant="outline"
                 size="icon"
-                className="h-10 w-10 shrink-0 border-border/60 hover:bg-primary/10"
+                className="size-10 shrink-0 border-border/60 hover:bg-primary/10"
                 onClick={() => handleCopyAccount(account.accountNumber)}
                 title="Copy Account Number"
-              >
-                {copied ? <Check className="w-5 h-5 text-emerald-400" /> : <Copy className="w-5 h-5" />}
+ >
+                {copied ? <Check className="size-5 text-accent" /> : <Copy className="size-5" />}
               </Button>
             </div>
           </div>
@@ -214,46 +214,46 @@ function BankAccountDetails() {
         <Card className="md:col-span-1 border-border/60">
           <CardHeader className="border-b border-border/40 pb-3">
             <CardTitle className="text-base font-semibold flex items-center gap-2">
-              <Landmark className="w-4 h-4 text-primary" /> Account Metadata
+              <Landmark className="size-4 text-primary" /> Account Metadata
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-4 space-y-4 text-sm">
             <div>
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Bank Name</p>
+              <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Bank Name</p>
               <p className="text-foreground font-semibold mt-0.5">{account.bankName}</p>
             </div>
 
             <div>
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Account Name</p>
+              <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Account Name</p>
               <p className="text-foreground font-semibold mt-0.5">{account.accountName}</p>
             </div>
 
             <div>
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Account Number</p>
-              <p className="text-foreground font-mono font-bold mt-0.5">{account.accountNumber}</p>
+              <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Account Number</p>
+              <p className="text-foreground font-mono font-semibold mt-0.5">{account.accountNumber}</p>
             </div>
 
             {account.bankCode && (
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Bank Code / Sort Code</p>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Bank Code / Sort Code</p>
                 <p className="text-foreground font-mono font-medium mt-0.5">{account.bankCode}</p>
               </div>
             )}
 
             <div>
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Currency</p>
+              <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Currency</p>
               <p className="text-foreground font-medium mt-0.5">{account.currency}</p>
             </div>
 
             <div>
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Operational Status</p>
+              <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Operational Status</p>
               <div className="mt-1">{getStatusBadge(account.status)}</div>
             </div>
 
             {account.createdAt && (
               <div className="pt-3 border-t border-border/40">
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider flex items-center gap-1">
-                  <Calendar className="w-3.5 h-3.5" /> Date Added
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em] flex items-center gap-1">
+                  <Calendar className="size-3.5" /> Date Added
                 </p>
                 <p className="text-xs text-foreground mt-0.5">
                   {new Date(account.createdAt).toLocaleDateString(undefined, {
@@ -267,8 +267,8 @@ function BankAccountDetails() {
 
             {account.notes && (
               <div className="pt-3 border-t border-border/40">
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider flex items-center gap-1">
-                  <FileText className="w-3.5 h-3.5" /> Notes / Remarks
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em] flex items-center gap-1">
+                  <FileText className="size-3.5" /> Notes / Remarks
                 </p>
                 <p className="text-xs text-foreground/90 mt-1 whitespace-pre-wrap rounded-lg bg-muted/30 p-2.5 border border-border/40">
                   {account.notes}
@@ -283,14 +283,14 @@ function BankAccountDetails() {
           <CardHeader className="border-b border-border/40 pb-3 flex flex-row items-center justify-between">
             <div>
               <CardTitle className="text-base font-semibold flex items-center gap-2">
-                <Warehouse className="w-4 h-4 text-primary" /> Assigned Depots & Hubs ({assignedDepots.length})
+                <Warehouse className="size-4 text-primary" /> Assigned Depots & Hubs ({assignedDepots.length})
               </CardTitle>
               <CardDescription className="mt-0.5 text-xs">
                 Depots collecting or remitting payments through this bank account
               </CardDescription>
             </div>
             {isShared && (
-              <Badge className="bg-amber-500/10 text-amber-400 border-amber-500/20 font-medium text-xs px-2.5 py-1">
+              <Badge className="bg-warning/10 text-warning border-warning/20 font-medium text-xs px-2.5 py-1">
                 Shared by {assignedDepots.length} Depots
               </Badge>
             )}
@@ -298,7 +298,7 @@ function BankAccountDetails() {
           <CardContent className="pt-4">
             {assignedDepots.length === 0 ? (
               <div className="p-8 text-center rounded-xl border border-dashed border-border/50 bg-muted/20">
-                <Warehouse className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
+                <Warehouse className="size-10 text-muted-foreground mx-auto mb-2" />
                 <p className="text-sm font-medium text-foreground">No Depots Currently Linked</p>
                 <p className="text-xs text-muted-foreground mt-1 max-w-md mx-auto">
                   This bank account is configured as a general company account and is not assigned to specific depots.
@@ -313,17 +313,17 @@ function BankAccountDetails() {
                       state: { bankAccount: account, isEdit: true } as any,
                     })
                   }
-                >
-                  <Edit className="w-3.5 h-3.5 mr-1" /> Assign Depots Now
+ >
+                  <Edit className="size-3.5 mr-1" /> Assign Depots Now
                 </Button>
               </div>
             ) : (
               <div className="space-y-4">
                 {isShared && (
-                  <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3.5 flex items-start gap-3 text-xs text-amber-300">
-                    <Layers className="w-4 h-4 shrink-0 mt-0.5 text-amber-400" />
+                  <div className="bg-warning/10 border border-warning/20 rounded-xl p-3.5 flex items-start gap-3 text-xs text-warning">
+                    <Layers className="size-4 shrink-0 mt-0.5 text-warning" />
                     <div>
-                      <span className="font-semibold text-amber-200">Shared Bank Account Notice:</span> Multiple operational depots deposit into or share this exact bank account. Transactions made to this account should reference the respective depot code.
+                      <span className="font-semibold text-warning">Shared Bank Account Notice:</span> Multiple operational depots deposit into or share this exact bank account. Transactions made to this account should reference the respective depot code.
                     </div>
                   </div>
                 )}
@@ -332,12 +332,12 @@ function BankAccountDetails() {
                   {assignedDepots.map((depot) => (
                     <div
                       key={depot.id}
-                      className="p-4 rounded-xl border border-border/50 bg-muted/20 hover:bg-muted/40 transition-all flex flex-col justify-between"
-                    >
+                      className="p-4 rounded-xl border border-border/50 bg-muted/20 hover:bg-muted/40 transition-all flex flex-col justify-between duration-250 ease-luxe"
+ >
                       <div>
                         <div className="flex items-center justify-between gap-2 mb-1.5">
-                          <h4 className="font-bold text-foreground text-sm flex items-center gap-1.5">
-                            <Warehouse className="w-4 h-4 text-primary shrink-0" />
+                          <h4 className="font-semibold text-foreground text-sm flex items-center gap-1.5">
+                            <Warehouse className="size-4 text-primary shrink-0" />
                             {depot.name}
                           </h4>
                           <Badge variant="outline" className="text-[10px] font-mono">
@@ -346,7 +346,7 @@ function BankAccountDetails() {
                         </div>
                         {depot.city && (
                           <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                            <MapPin className="w-3 h-3 text-muted-foreground" />
+                            <MapPin className="size-3 text-muted-foreground" />
                             {depot.city}{depot.state ? `, ${depot.state}` : ''}
                           </p>
                         )}
@@ -357,10 +357,10 @@ function BankAccountDetails() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-7 text-xs text-primary hover:text-primary hover:bg-primary/10 p-1 px-2"
+                          className="h-7 text-xs text-primary hover:text-primary/80 hover:bg-primary/10 p-1 px-2"
                           onClick={() => navigate({ to: '/depots/details' as any, state: { depot } as any })}
-                        >
-                          View Depot <ExternalLink className="w-3 h-3 ml-1" />
+ >
+                          View Depot <ExternalLink className="size-3 ml-1" />
                         </Button>
                       </div>
                     </div>
@@ -381,7 +381,7 @@ function BankAccountDetails() {
         variant="destructive"
         onConfirm={confirmDelete}
         loading={isDeleting}
-      />
+ />
     </div>
   )
 }

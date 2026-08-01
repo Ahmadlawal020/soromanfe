@@ -20,21 +20,12 @@ export function DangoteQuantityStep({ wizard }: DangoteQuantityStepProps) {
 
   return (
     <div key="dangote-step-3" className="space-y-6 animate-fade-in">
-      <div className="flex items-center gap-3 border-b border-border pb-4">
-        <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-          <CircleDollarSign size={18} />
-        </div>
-        <div>
-          <h2 className="text-lg font-bold">Quantity & Amount</h2>
-          <p className="text-sm text-muted-foreground">Set the quantity for your Dangote delivery order.</p>
-        </div>
-      </div>
 
       {/* Selected Product Summary */}
       <div className="p-4 border rounded-xl bg-muted/30 space-y-2">
         <div className="flex items-center gap-2 border-b border-border pb-2">
-          <Package className="text-primary w-4 h-4" />
-          <span className="font-bold text-sm">Selected Product</span>
+          <Package className="text-primary size-4" />
+          <span className="font-semibold text-sm">Selected Product</span>
         </div>
         <div className="flex items-center gap-3">
           <div>
@@ -45,13 +36,13 @@ export function DangoteQuantityStep({ wizard }: DangoteQuantityStepProps) {
       </div>
 
       {/* Quantity Input */}
-      <div className="p-5 border-2 border-primary/25 rounded-xl bg-primary/5 space-y-4 shadow-sm">
+      <div className="p-5 border-2 border-primary/25 rounded-xl bg-primary/5 space-y-4">
         <div className="flex items-center gap-3 pb-3 border-b border-primary/20">
-          <div className="h-9 w-9 rounded-lg bg-primary/15 flex items-center justify-center text-primary">
-            <CircleDollarSign className="w-5 h-5" />
+          <div className="size-9 rounded-lg bg-primary/15 flex items-center justify-center text-primary">
+            <CircleDollarSign className="size-5" />
           </div>
           <div>
-            <span className="font-bold text-base text-foreground">Order Details</span>
+            <span className="font-semibold text-base text-foreground">Order Details</span>
             <p className="text-xs text-muted-foreground">Enter the quantity for your Dangote delivery order.</p>
           </div>
         </div>
@@ -78,7 +69,7 @@ export function DangoteQuantityStep({ wizard }: DangoteQuantityStepProps) {
           <div className="p-3 rounded-lg bg-card border border-border">
             <div className="flex justify-between items-center text-sm">
               <span className="text-muted-foreground">Order Quantity</span>
-              <span className="font-bold text-foreground">{Number(orderQuantity).toLocaleString()} {quantityUnit}</span>
+              <span className="font-semibold text-foreground">{Number(orderQuantity).toLocaleString()} {quantityUnit}</span>
             </div>
             <p className="text-xs text-muted-foreground mt-2">
               Pricing will be set during admin review. You will receive a confirmation email with the final price.

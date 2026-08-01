@@ -46,7 +46,7 @@ function getStatusBadge(status: string) {
     case 'approved':
       return <Badge className="bg-success text-success-foreground text-xs">Approved</Badge>
     case 'rejected':
-      return <Badge className="bg-destructive text-destructive-foreground text-xs">Rejected</Badge>
+      return <Badge variant="destructive" className="text-xs">Rejected</Badge>
     case 'pending':
     default:
       return <Badge className="bg-warning text-warning-foreground text-xs">Pending</Badge>
@@ -183,23 +183,23 @@ export function CustomerLicenses({ customerId }: CustomerLicensesProps) {
     <div className="space-y-4 border rounded-lg p-5 bg-card">
       <div className="flex items-center justify-between border-b pb-2">
         <div className="flex items-center space-x-2">
-          <ShieldPlus className="h-5 w-5 text-primary" />
+          <ShieldPlus className="size-5 text-primary" />
           <h2 className="text-lg font-semibold">DPR / NUPRC License</h2>
         </div>
         <Button size="sm" onClick={openAddDialog}>
-          <ShieldPlus className="h-4 w-4 mr-1.5" />
+          <ShieldPlus className="size-4 mr-1.5" />
           Add License
         </Button>
       </div>
 
       {isLoading ? (
         <div className="flex items-center gap-2 text-muted-foreground py-4">
-          <Loader2 className="h-4 w-4 animate-spin" />
+          <Loader2 className="size-4 animate-spin" />
           Loading licenses...
         </div>
       ) : licenses.length === 0 ? (
         <div className="text-center py-8 text-muted-foreground">
-          <ShieldPlus className="h-10 w-10 mx-auto mb-2 opacity-30" />
+          <ShieldPlus className="size-10 mx-auto mb-2 opacity-30" />
           <p>No licenses added yet</p>
           <p className="text-sm">
             Click &quot;Add License&quot; to attach a DPR/NUPRC license
@@ -214,8 +214,8 @@ export function CustomerLicenses({ customerId }: CustomerLicensesProps) {
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="h-10 w-10 rounded bg-primary/10 flex items-center justify-center shrink-0">
-                    <FileText className="h-5 w-5 text-primary" />
+                  <div className="size-10 rounded bg-primary/10 flex items-center justify-center shrink-0">
+                    <FileText className="size-5 text-primary" />
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
@@ -224,7 +224,7 @@ export function CustomerLicenses({ customerId }: CustomerLicensesProps) {
                     </div>
                     {license.expiryDate && (
                       <p className="text-sm text-muted-foreground flex items-center gap-1.5 mt-0.5">
-                        <Calendar className="h-3.5 w-3.5" />
+                        <Calendar className="size-3.5" />
                         Expires:{' '}
                         {new Date(license.expiryDate).toLocaleDateString()}
                       </p>
@@ -237,27 +237,27 @@ export function CustomerLicenses({ customerId }: CustomerLicensesProps) {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 text-muted-foreground hover:text-foreground shrink-0"
+                      className="size-8 text-muted-foreground hover:text-foreground shrink-0"
                     >
-                      <MoreVertical className="h-4 w-4" />
+                      <MoreVertical className="size-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-36">
                     {license.licenseUrl && (
                       <DropdownMenuItem onClick={() => setPreviewLicense(license)}>
-                        <Eye className="mr-2 h-4 w-4 text-muted-foreground" />
+                        <Eye className="mr-2 size-4 text-muted-foreground" />
                         Preview
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuItem onClick={() => openEditDialog(license)}>
-                      <Pencil className="mr-2 h-4 w-4 text-muted-foreground" />
+                      <Pencil className="mr-2 size-4 text-muted-foreground" />
                       Edit
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       className="text-destructive focus:text-destructive focus:bg-destructive/10"
                       onClick={() => handleDelete(license)}
                     >
-                      <Trash2 className="mr-2 h-4 w-4 text-destructive" />
+                      <Trash2 className="mr-2 size-4 text-destructive" />
                       Delete
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -270,7 +270,7 @@ export function CustomerLicenses({ customerId }: CustomerLicensesProps) {
                   <img
                     src={license.licenseUrl}
                     alt={license.companyName}
-                    className="w-full max-h-96 object-contain cursor-pointer hover:opacity-95 transition-opacity"
+                    className="w-full max-h-96 object-contain cursor-pointer hover:opacity-95 transition-opacity duration-250 ease-luxe"
                     onClick={() => setPreviewLicense(license)}
                   />
                 </div>
@@ -278,7 +278,7 @@ export function CustomerLicenses({ customerId }: CustomerLicensesProps) {
               {license.licenseUrl && isPdf(license.licenseUrl) && (
                 <div className="p-3 border rounded-lg bg-background flex items-center justify-between text-sm mt-1">
                   <div className="flex items-center gap-2">
-                    <FileText className="h-5 w-5 text-primary" />
+                    <FileText className="size-5 text-primary" />
                     <span className="font-medium text-muted-foreground">PDF Document</span>
                   </div>
                   <Button
@@ -308,7 +308,7 @@ export function CustomerLicenses({ customerId }: CustomerLicensesProps) {
           <div className="space-y-4">
             {willResetStatus && (
               <div className="flex items-start gap-2 p-3 rounded-lg border border-warning/50 bg-warning/10 text-warning-foreground">
-                <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+                <AlertTriangle className="size-4 mt-0.5 shrink-0" />
                 <p className="text-sm">
                   Editing this license will reset its verification status from{' '}
                   <span className="font-semibold">{editingLicense.status}</span> back to{' '}
@@ -353,12 +353,12 @@ export function CustomerLicenses({ customerId }: CustomerLicensesProps) {
                       />
                     ) : isPdf(licenseUrl) ? (
                       <div className="flex items-center gap-2 p-3 border rounded bg-muted/50">
-                        <FileText className="h-5 w-5 text-primary" />
+                        <FileText className="size-5 text-primary" />
                         <span className="text-sm">PDF file attached</span>
                       </div>
                     ) : (
                       <div className="flex items-center gap-2 p-3 border rounded bg-muted/50">
-                        <FileText className="h-5 w-5 text-primary" />
+                        <FileText className="size-5 text-primary" />
                         <span className="text-sm">File attached</span>
                       </div>
                     )}
@@ -371,12 +371,12 @@ export function CustomerLicenses({ customerId }: CustomerLicensesProps) {
                     >
                       {isUploading ? (
                         <>
-                          <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
+                          <Loader2 className="size-4 animate-spin mr-1.5" />
                           Uploading...
                         </>
                       ) : (
                         <>
-                          <Upload className="h-4 w-4 mr-1.5" />
+                          <Upload className="size-4 mr-1.5" />
                           Replace File
                         </>
                       )}
@@ -395,14 +395,14 @@ export function CustomerLicenses({ customerId }: CustomerLicensesProps) {
                   >
                     {isUploading ? (
                       <>
-                        <Loader2 className="h-8 w-8 mx-auto mb-2 text-primary animate-spin" />
+                        <Loader2 className="size-8 mx-auto mb-2 text-primary animate-spin" />
                         <p className="text-sm text-muted-foreground">
                           Uploading to Cloudinary...
                         </p>
                       </>
                     ) : (
                       <>
-                        <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                        <Upload className="size-8 mx-auto mb-2 text-muted-foreground" />
                         <p className="text-sm text-muted-foreground">
                           Click to upload license file
                         </p>
@@ -449,7 +449,7 @@ export function CustomerLicenses({ customerId }: CustomerLicensesProps) {
             <Button onClick={handleSubmit} disabled={isSubmitting || isUploading}>
               {isSubmitting ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
+                  <Loader2 className="size-4 animate-spin mr-1.5" />
                   Saving...
                 </>
               ) : editingLicense ? (
@@ -480,17 +480,17 @@ export function CustomerLicenses({ customerId }: CustomerLicensesProps) {
               <img
                 src={previewLicense.licenseUrl}
                 alt="License"
-                className="max-h-[70vh] rounded object-contain mx-auto"
+                className="max-h-[70svh] rounded object-contain mx-auto"
               />
             ) : isPdf(previewLicense.licenseUrl) ? (
               <iframe
                 src={previewLicense.licenseUrl}
-                className="w-full h-[70vh] rounded border"
+                className="w-full h-[70svh] rounded border"
                 title="License PDF"
               />
             ) : (
               <div className="flex items-center gap-2 p-4 border rounded">
-                <FileText className="h-5 w-5" />
+                <FileText className="size-5" />
                 <span>Unsupported file format</span>
               </div>
             ))}

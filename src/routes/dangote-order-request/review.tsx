@@ -43,11 +43,11 @@ function formatDate(dateString: string) {
 function statusBadge(status: string) {
   switch (status) {
     case 'Pending Review':
-      return <Badge className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/20 gap-1"><Clock size={12} /> Pending Review</Badge>
+      return <Badge className="bg-warning/15 text-warning border-warning/20 gap-1"><Clock className="size-3" /> Pending Review</Badge>
     case 'Approved':
-      return <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 gap-1"><CheckCircle size={12} /> Approved</Badge>
+      return <Badge className="bg-accent/15 text-accent border-accent/20 gap-1"><CheckCircle className="size-3" /> Approved</Badge>
     case 'Rejected':
-      return <Badge variant="destructive" className="gap-1"><XCircle size={12} /> Rejected</Badge>
+      return <Badge variant="destructive" className="gap-1"><XCircle className="size-3" /> Rejected</Badge>
     default:
       return <Badge variant="outline">{status}</Badge>
   }
@@ -56,11 +56,11 @@ function statusBadge(status: string) {
 function licenseStatusBadge(status: string) {
   switch (status) {
     case 'approved':
-      return <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 gap-1"><CheckCircle size={12} /> Approved</Badge>
+      return <Badge className="bg-accent/15 text-accent border-accent/20 gap-1"><CheckCircle className="size-3" /> Approved</Badge>
     case 'pending':
-      return <Badge className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/20 gap-1"><Clock size={12} /> Pending</Badge>
+      return <Badge className="bg-warning/15 text-warning border-warning/20 gap-1"><Clock className="size-3" /> Pending</Badge>
     case 'rejected':
-      return <Badge variant="destructive" className="gap-1"><XCircle size={12} /> Rejected</Badge>
+      return <Badge variant="destructive" className="gap-1"><XCircle className="size-3" /> Rejected</Badge>
     default:
       return <Badge variant="outline">{status || 'No Licence'}</Badge>
   }
@@ -145,10 +145,10 @@ function ReviewPage() {
       {/* Header */}
       <div className="flex items-center gap-4">
         <Button variant="outline" size="icon" onClick={() => navigate({ to: '/dangote-order-request' })}>
-          <ArrowLeft size={16} />
+          <ArrowLeft className="size-4" />
         </Button>
         <div className="flex-1">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+          <h1 className="text-2xl sm:text-xl md:text-2xl font-semibold tracking-tight text-foreground text-balance">
             Review Delivery Order Request
           </h1>
           <p className="text-muted-foreground text-sm">{request.requestNumber}</p>
@@ -161,8 +161,8 @@ function ReviewPage() {
         <Card>
           <CardHeader className="border-b border-border">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                <FileText size={16} />
+              <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                <FileText className="size-4" />
               </div>
               <div>
                 <CardTitle className="text-sm">Request Details</CardTitle>
@@ -172,7 +172,7 @@ function ReviewPage() {
           </CardHeader>
           <CardContent className="space-y-4 pt-4">
             <div className="flex items-center gap-3">
-              <User size={16} className="text-muted-foreground shrink-0" />
+              <User className="size-4 text-muted-foreground shrink-0" />
               <div>
                 <p className="text-xs text-muted-foreground">Customer</p>
                 <p className="text-sm font-semibold text-foreground">{request.customerName}</p>
@@ -182,35 +182,35 @@ function ReviewPage() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Mail size={16} className="text-muted-foreground shrink-0" />
+              <Mail className="size-4 text-muted-foreground shrink-0" />
               <div>
                 <p className="text-xs text-muted-foreground">Email</p>
                 <p className="text-sm font-medium text-foreground">{request.customerEmail || 'N/A'}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Phone size={16} className="text-muted-foreground shrink-0" />
+              <Phone className="size-4 text-muted-foreground shrink-0" />
               <div>
                 <p className="text-xs text-muted-foreground">Phone</p>
                 <p className="text-sm font-medium text-foreground">{request.customerPhone || 'N/A'}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Package size={16} className="text-muted-foreground shrink-0" />
+              <Package className="size-4 text-muted-foreground shrink-0" />
               <div>
                 <p className="text-xs text-muted-foreground">Product</p>
                 <p className="text-sm font-semibold text-foreground">{request.product}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Truck size={16} className="text-muted-foreground shrink-0" />
+              <Truck className="size-4 text-muted-foreground shrink-0" />
               <div>
                 <p className="text-xs text-muted-foreground">Quantity</p>
                 <p className="text-sm font-semibold text-foreground">{Number(request.quantity).toLocaleString()} {request.quantityUnit}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <MapPin size={16} className="text-muted-foreground shrink-0" />
+              <MapPin className="size-4 text-muted-foreground shrink-0" />
               <div>
                 <p className="text-xs text-muted-foreground">Delivery Address</p>
                 <p className="text-sm font-medium text-foreground">{request.deliveryAddress}</p>
@@ -220,7 +220,7 @@ function ReviewPage() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Calendar size={16} className="text-muted-foreground shrink-0" />
+              <Calendar className="size-4 text-muted-foreground shrink-0" />
               <div>
                 <p className="text-xs text-muted-foreground">Submitted</p>
                 <p className="text-sm font-medium text-foreground">{formatDate(request.createdAt)}</p>
@@ -231,7 +231,7 @@ function ReviewPage() {
             {(request.licenseId || request.licenseCompanyName) && (
               <div className="space-y-3 pt-3 border-t border-border">
                 <div className="flex items-center gap-3">
-                  <ShieldPlus size={16} className="text-muted-foreground shrink-0" />
+                  <ShieldPlus className="size-4 text-muted-foreground shrink-0" />
                   <div className="flex-1">
                     <p className="text-xs text-muted-foreground">Company Licence</p>
                     <p className="text-sm font-semibold text-foreground">{request.licenseCompanyName || '—'}</p>
@@ -242,7 +242,7 @@ function ReviewPage() {
                   <div className="rounded-lg border bg-background overflow-hidden">
                     {/\.(pdf)/i.test(request.licenseUrl) ? (
                       <div className="p-4 flex items-center gap-3">
-                        <FileText className="h-8 w-8 text-primary shrink-0" />
+                        <FileText className="size-8 text-primary shrink-0" />
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-foreground">PDF Document</p>
                           <p className="text-xs text-muted-foreground truncate">{request.licenseUrl}</p>
@@ -261,7 +261,7 @@ function ReviewPage() {
                         <img
                           src={request.licenseUrl}
                           alt={`${request.licenseCompanyName} licence`}
-                          className="w-full max-h-[500px] object-contain cursor-pointer hover:opacity-95 transition-opacity"
+                          className="w-full max-h-[500px] object-contain cursor-pointer hover:opacity-95 transition-opacity duration-250 ease-luxe"
                         />
                       </a>
                     )}
@@ -276,8 +276,8 @@ function ReviewPage() {
         <Card>
           <CardHeader className="border-b border-border">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600">
-                <DollarSign size={16} />
+              <div className="size-8 rounded-lg bg-accent/10 flex items-center justify-center text-accent">
+                <DollarSign className="size-4" />
               </div>
               <div>
                 <CardTitle className="text-sm">Pricing & Approval</CardTitle>
@@ -336,7 +336,7 @@ function ReviewPage() {
                   </div>
                   <div className="border-t border-border pt-2 flex justify-between">
                     <span className="font-semibold text-foreground">Total Amount</span>
-                    <span className="font-mono font-bold text-lg text-foreground">
+                    <span className="font-mono font-semibold text-lg text-foreground">
                       {pricePerUnit ? formatCurrency(computedTotal) : '—'}
                     </span>
                   </div>
@@ -344,11 +344,11 @@ function ReviewPage() {
 
                 {/* Licence Warning */}
                 {hasLicense && !licenseApproved && (
-                  <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-start gap-2">
-                    <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                  <div className="p-3 rounded-lg bg-warning/10 border border-warning/20 flex items-start gap-2">
+                    <AlertTriangle className="size-4 text-warning shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-sm font-semibold text-amber-600 dark:text-amber-400">Licence Not Approved</p>
-                      <p className="text-xs text-amber-600/80 dark:text-amber-400/80">
+                      <p className="text-sm font-semibold text-warning">Licence Not Approved</p>
+                      <p className="text-xs text-warning/80">
                         The associated licence ({request.licenseCompanyName}) is {request.licenseStatus || 'not approved'}. Approve the licence first before approving this order.
                       </p>
                     </div>
@@ -362,7 +362,7 @@ function ReviewPage() {
                     onClick={() => setShowRejectConfirm(true)}
                     disabled={reviewMutation.isPending}
                   >
-                    <XCircle className="h-4 w-4" />
+                    <XCircle className="size-4" />
                     Reject
                   </Button>
                   <Button
@@ -370,7 +370,7 @@ function ReviewPage() {
                     onClick={() => setShowApproveConfirm(true)}
                     disabled={!pricePerUnit || !licenseApproved || reviewMutation.isPending}
                   >
-                    <CheckCircle className="h-4 w-4" />
+                    <CheckCircle className="size-4" />
                     Approve Request
                   </Button>
                 </div>
@@ -393,7 +393,7 @@ function ReviewPage() {
                   )}
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Total Amount</span>
-                    <span className="font-mono font-bold text-lg">{formatCurrency(Number(request.totalAmount))}</span>
+                    <span className="font-mono font-semibold text-lg">{formatCurrency(Number(request.totalAmount))}</span>
                   </div>
                   {request.expectedArrivalDate && (
                     <div className="flex justify-between text-sm">
@@ -415,7 +415,7 @@ function ReviewPage() {
 
                 <div className="pt-4">
                   <Button variant="outline" className="w-full" onClick={() => navigate({ to: '/dangote-order-request' })}>
-                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    <ArrowLeft className="size-4 mr-2" />
                     Back to Requests
                   </Button>
                 </div>

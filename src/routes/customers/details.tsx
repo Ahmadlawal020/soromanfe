@@ -101,7 +101,7 @@ function CustomerDetailPage() {
   if (!customer && isLoading) {
     return (
       <div className="flex items-center justify-center py-32">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+        <div className="animate-spin rounded-full size-8 border-b-2 border-primary" />
       </div>
     )
   }
@@ -109,12 +109,12 @@ function CustomerDetailPage() {
   if (!customer) {
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-5 text-center">
-        <div className="h-16 w-16 rounded-full bg-warning/10 flex items-center justify-center text-warning border border-warning/20">
-          <AlertCircle size={32} />
+        <div className="size-16 rounded-full bg-warning/10 flex items-center justify-center text-warning border border-warning/20">
+          <AlertCircle className="size-8" />
         </div>
-        <h2 className="text-2xl font-bold text-foreground">No Customer Selected</h2>
+        <h2 className="text-lg md:text-xl font-semibold text-foreground tracking-tight">No Customer Selected</h2>
         <p className="text-muted-foreground max-w-sm">Please select a customer from the directory to view details.</p>
-        <Button onClick={() => navigate({ to: '/customers/' as any })}><ArrowLeft size={16} /> Back to Customers</Button>
+        <Button onClick={() => navigate({ to: '/customers/' as any })}><ArrowLeft className="size-4" /> Back to Customers</Button>
       </div>
     )
   }
@@ -147,43 +147,43 @@ function CustomerDetailPage() {
       <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center gap-4">
           <Button variant="outline" size="icon" onClick={handleBack}>
-            <ArrowLeft size={16} />
+            <ArrowLeft className="size-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Customer Profile</h1>
+            <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">Customer Profile</h1>
             <p className="text-muted-foreground">Account details, deposits, and contact information</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={handleEdit}>
-            <Edit size={16} /> Edit Profile
+            <Edit className="size-4" /> Edit Profile
           </Button>
           <Button variant="destructive" onClick={handleDelete} disabled={deleteCustomer.isPending}>
-            <Trash2 size={16} /> {deleteCustomer.isPending ? 'Removing...' : 'Remove Customer'}
+            <Trash2 className="size-4" /> {deleteCustomer.isPending ? 'Removing...' : 'Remove Customer'}
           </Button>
         </div>
       </header>
 
       {/* Hero Badge Panel */}
       <Card className="card-hover">
-        <CardContent className="p-6 md:p-8 bg-gradient-to-r from-primary/5 to-info/5">
+        <CardContent className="bg-primary/5 p-6 md:p-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-            <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center text-primary-foreground text-2xl font-bold shadow-lg shrink-0">
+            <div className="size-20 bg-primary rounded-full flex items-center justify-center text-primary-foreground text-2xl font-semibold shrink-0 tabular-nums">
               {getInitials(customer.name)}
             </div>
             <div className="flex-1">
               <div className="flex flex-wrap items-center gap-2">
-                {customer.companyName && <Badge variant="outline" className="text-xs"><Building2 size={10} className="mr-1" />{customer.companyName}</Badge>}
+                {customer.companyName && <Badge variant="outline" className="text-xs"><Building2 className="size-2.5 mr-1" />{customer.companyName}</Badge>}
                 {getStatusBadge(customer.status)}
               </div>
-              <h2 className="text-3xl font-bold text-foreground mt-2">{customer.name}</h2>
+              <h2 className="text-lg md:text-xl font-semibold text-foreground mt-2 tracking-tight">{customer.name}</h2>
               <p className="text-muted-foreground mt-1.5 text-sm flex items-center gap-1.5">
                 {customer.address ? customer.address : 'No address provided'}
               </p>
             </div>
             <div className="sm:text-right">
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Account Balance</p>
-              <p className="text-2xl font-bold text-foreground mt-1">{formatCurrency(toNum(customer.balance))}</p>
+              <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Account Balance</p>
+              <p className="text-2xl font-semibold text-foreground mt-1 tabular-nums">{formatCurrency(toNum(customer.balance))}</p>
             </div>
           </div>
         </CardContent>
@@ -196,8 +196,8 @@ function CustomerDetailPage() {
         <Card>
           <CardHeader className="border-b border-border">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-info/10 flex items-center justify-center text-info">
-                <User size={16} />
+              <div className="size-8 rounded-lg bg-info/10 flex items-center justify-center text-info">
+                <User className="size-4" />
               </div>
               <div>
                 <CardTitle className="text-sm">Contact Information</CardTitle>
@@ -208,21 +208,21 @@ function CustomerDetailPage() {
           <CardContent className="space-y-4 pt-4">
             <div className="space-y-3">
               <div className="flex items-center gap-3">
-                <Mail size={16} className="text-muted-foreground shrink-0" />
+                <Mail className="size-4 text-muted-foreground shrink-0" />
                 <div>
                   <p className="text-xs text-muted-foreground">Email</p>
                   <p className="text-sm font-medium text-foreground">{customer.email || 'Not provided'}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <Phone size={16} className="text-muted-foreground shrink-0" />
+                <Phone className="size-4 text-muted-foreground shrink-0" />
                 <div>
                   <p className="text-xs text-muted-foreground">Phone</p>
                   <p className="text-sm font-medium text-foreground">{customer.phone}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <MapPin size={16} className="text-muted-foreground shrink-0" />
+                <MapPin className="size-4 text-muted-foreground shrink-0" />
                 <div>
                   <p className="text-xs text-muted-foreground">Address</p>
                   <p className="text-sm font-medium text-foreground">{customer.address || 'Not provided'}</p>
@@ -232,7 +232,7 @@ function CustomerDetailPage() {
 
             <div className="border-t pt-4">
               <div className="flex items-center gap-3">
-                <Building2 size={16} className="text-muted-foreground shrink-0" />
+                <Building2 className="size-4 text-muted-foreground shrink-0" />
                 <div>
                   <p className="text-xs text-muted-foreground">Company</p>
                   <p className="text-sm font-semibold text-foreground">{customer.companyName || 'Not provided'}</p>
@@ -246,8 +246,8 @@ function CustomerDetailPage() {
         <Card>
           <CardHeader className="border-b border-border">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-success/10 flex items-center justify-center text-success">
-                <Wallet size={16} />
+              <div className="size-8 rounded-lg bg-success/10 flex items-center justify-center text-success">
+                <Wallet className="size-4" />
               </div>
               <div>
                 <CardTitle className="text-sm">Financial Summary</CardTitle>
@@ -259,24 +259,24 @@ function CustomerDetailPage() {
             <div className="grid grid-cols-1 gap-4">
               <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border border-border">
                 <div className="flex items-center gap-2">
-                  <Wallet size={16} className="text-primary" />
+                  <Wallet className="size-4 text-primary" />
                   <span className="text-sm text-muted-foreground">Balance</span>
                 </div>
-                <span className="text-lg font-bold text-foreground">{formatCurrency(toNum(customer.balance))}</span>
+                <span className="text-lg font-semibold text-foreground">{formatCurrency(toNum(customer.balance))}</span>
               </div>
               <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border border-border">
                 <div className="flex items-center gap-2">
-                  <Banknote size={16} className="text-success" />
+                  <Banknote className="size-4 text-success" />
                   <span className="text-sm text-muted-foreground">Current Deposit</span>
                 </div>
-                <span className="text-lg font-bold text-success">{formatCurrency(toNum(customer.deposit))}</span>
+                <span className="text-lg font-semibold text-success">{formatCurrency(toNum(customer.deposit))}</span>
               </div>
               <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border border-border">
                 <div className="flex items-center gap-2">
-                  <TrendingUp size={16} className="text-info" />
+                  <TrendingUp className="size-4 text-info" />
                   <span className="text-sm text-muted-foreground">Previous Deposit</span>
                 </div>
-                <span className="text-lg font-bold text-info">{formatCurrency(toNum(customer.previousDeposit))}</span>
+                <span className="text-lg font-semibold text-info">{formatCurrency(toNum(customer.previousDeposit))}</span>
               </div>
             </div>
           </CardContent>
@@ -286,8 +286,8 @@ function CustomerDetailPage() {
         <Card>
           <CardHeader className="border-b border-border">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                <CreditCard size={16} />
+              <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                <CreditCard className="size-4" />
               </div>
               <div>
                 <CardTitle className="text-sm">Virtual Account Details</CardTitle>
@@ -300,30 +300,30 @@ function CustomerDetailPage() {
               <div className="space-y-4">
                 <div className="p-4 rounded-xl border-2 border-primary/20 bg-primary/5 space-y-3">
                   <div>
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Account Number</p>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-[0.14em] font-medium">Account Number</p>
                     <div className="flex items-center gap-2 mt-1">
-                      <p className="text-xl font-bold font-mono text-foreground tracking-wider">{customer.virtualAccountNumber}</p>
+                      <p className="text-xl font-semibold font-mono text-foreground tabular-nums">{customer.virtualAccountNumber}</p>
                       <button
                         onClick={() => copyToClipboard(customer.virtualAccountNumber, 'accountNumber')}
-                        className="h-7 w-7 rounded-md border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                        className="size-7 rounded-md border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors duration-250 ease-luxe"
                         title="Copy account number"
                       >
-                        {copiedField === 'accountNumber' ? <CheckCircle size={14} className="text-success" /> : <Copy size={14} />}
+                        {copiedField === 'accountNumber' ? <CheckCircle className="size-3.5 text-success" /> : <Copy className="size-3.5" />}
                       </button>
                     </div>
                   </div>
                   <div>
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Bank Name</p>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-[0.14em] font-medium">Bank Name</p>
                     <p className="text-sm font-semibold text-foreground mt-0.5">{customer.virtualAccountBank || '—'}</p>
                   </div>
                   <div>
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Account Name</p>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-[0.14em] font-medium">Account Name</p>
                     <p className="text-sm font-semibold text-foreground mt-0.5">{customer.virtualAccountName || customer.name}</p>
                   </div>
                 </div>
                 {customer.paystackCustomerId && (
                   <div className="flex items-center gap-3 px-1">
-                    <Hash size={14} className="text-muted-foreground shrink-0" />
+                    <Hash className="size-3.5 text-muted-foreground shrink-0" />
                     <div>
                       <p className="text-xs text-muted-foreground">Paystack Customer ID</p>
                       <p className="text-sm font-mono font-medium text-foreground">{customer.paystackCustomerId}</p>
@@ -333,8 +333,8 @@ function CustomerDetailPage() {
               </div>
             ) : (
               <div className="p-8 text-center border border-dashed rounded-xl">
-                <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-muted border border-border mb-3">
-                  <CreditCard size={20} className="text-muted-foreground" />
+                <div className="inline-flex size-12 items-center justify-center rounded-xl bg-muted border border-border mb-3">
+                  <CreditCard className="size-5 text-muted-foreground" />
                 </div>
                 <p className="text-sm font-medium text-foreground">No Virtual Account</p>
                 <p className="text-xs text-muted-foreground mt-1">A virtual account will be generated when the customer places their first order.</p>
@@ -350,8 +350,8 @@ function CustomerDetailPage() {
         <Card className="md:col-span-2">
           <CardHeader className="border-b border-border">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-warning/10 flex items-center justify-center text-warning">
-                <Calendar size={16} />
+              <div className="size-8 rounded-lg bg-warning/10 flex items-center justify-center text-warning">
+                <Calendar className="size-4" />
               </div>
               <div>
                 <CardTitle className="text-sm">Status & Activity</CardTitle>
@@ -362,19 +362,19 @@ function CustomerDetailPage() {
           <CardContent className="pt-4">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Account Status</p>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Account Status</p>
                 <div className="mt-2">
                   {getStatusBadge(customer.status)}
                 </div>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Record Created</p>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Record Created</p>
                 <p className="text-sm font-medium text-foreground mt-2">
                   {customer.createdAt ? new Date(customer.createdAt).toLocaleDateString() : 'N/A'}
                 </p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Last Updated</p>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Last Updated</p>
                 <p className="text-sm font-medium text-foreground mt-2">
                   {customer.updatedAt ? new Date(customer.updatedAt).toLocaleDateString() : 'N/A'}
                 </p>
@@ -390,8 +390,8 @@ function CustomerDetailPage() {
         <CardHeader className="border-b border-border">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                <Package size={16} />
+              <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                <Package className="size-4" />
               </div>
               <div>
                 <CardTitle className="text-sm">Order History</CardTitle>
@@ -404,12 +404,12 @@ function CustomerDetailPage() {
         <CardContent className="pt-6">
           {ordersLoading ? (
             <div className="flex items-center justify-center py-16">
-              <Loader2 size={24} className="animate-spin text-muted-foreground" />
+              <Loader2 className="size-6 animate-spin text-muted-foreground" />
             </div>
           ) : orders.length === 0 ? (
             <div className="p-16 text-center">
-              <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-muted border border-border mb-4">
-                <SearchX size={24} className="text-muted-foreground" />
+              <div className="inline-flex size-14 items-center justify-center rounded-xl bg-muted border border-border mb-4">
+                <SearchX className="size-6 text-muted-foreground" />
               </div>
               <p className="text-sm font-medium text-foreground">No orders found</p>
               <p className="text-xs text-muted-foreground mt-1">This customer hasn&apos;t placed any orders yet.</p>
@@ -419,31 +419,31 @@ function CustomerDetailPage() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                 <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border border-border">
                   <div className="flex items-center gap-2">
-                    <Package size={14} className="text-primary" />
+                    <Package className="size-3.5 text-primary" />
                     <span className="text-xs text-muted-foreground">Total</span>
                   </div>
-                  <span className="text-sm font-bold">{totalOrders}</span>
+                  <span className="text-sm font-semibold">{totalOrders}</span>
                 </div>
                 <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border border-border">
                   <div className="flex items-center gap-2">
-                    <Clock size={14} className="text-warning" />
+                    <Clock className="size-3.5 text-warning" />
                     <span className="text-xs text-muted-foreground">Pending</span>
                   </div>
-                  <span className="text-sm font-bold text-warning">{pendingOrders}</span>
+                  <span className="text-sm font-semibold text-warning">{pendingOrders}</span>
                 </div>
                 <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border border-border">
                   <div className="flex items-center gap-2">
-                    <Calendar size={14} className="text-success" />
+                    <Calendar className="size-3.5 text-success" />
                     <span className="text-xs text-muted-foreground">Completed</span>
                   </div>
-                  <span className="text-sm font-bold text-success">{completedOrders}</span>
+                  <span className="text-sm font-semibold text-success">{completedOrders}</span>
                 </div>
                 <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border border-border">
                   <div className="flex items-center gap-2">
-                    <DollarSign size={14} className="text-info" />
+                    <DollarSign className="size-3.5 text-info" />
                     <span className="text-xs text-muted-foreground">Total Value</span>
                   </div>
-                  <span className="text-sm font-bold">{formatCurrency(totalValue)}</span>
+                  <span className="text-sm font-semibold">{formatCurrency(totalValue)}</span>
                 </div>
               </div>
 
@@ -473,13 +473,13 @@ function CustomerDetailPage() {
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-1.5 text-sm font-medium">
-                            <Package size={14} className="text-muted-foreground" />
+                            <Package className="size-3.5 text-muted-foreground" />
                             {order.productName || order.product?.name || 'Unknown'}
                           </div>
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-1.5 text-xs">
-                            <Warehouse size={12} className="text-muted-foreground" />
+                            <Warehouse className="size-3 text-muted-foreground" />
                             <span>{order.depotName || order.depot?.name || 'Unknown'}</span>
                           </div>
                         </TableCell>
@@ -513,8 +513,8 @@ function CustomerDetailPage() {
         <CardHeader className="border-b border-border">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-success/10 flex items-center justify-center text-success">
-                <Banknote size={16} />
+              <div className="size-8 rounded-lg bg-success/10 flex items-center justify-center text-success">
+                <Banknote className="size-4" />
               </div>
               <div>
                 <CardTitle className="text-sm">Deposit History</CardTitle>
@@ -527,12 +527,12 @@ function CustomerDetailPage() {
         <CardContent className="pt-6">
           {depositsLoading ? (
             <div className="flex items-center justify-center py-16">
-              <Loader2 size={24} className="animate-spin text-muted-foreground" />
+              <Loader2 className="size-6 animate-spin text-muted-foreground" />
             </div>
           ) : deposits.length === 0 ? (
             <div className="p-16 text-center">
-              <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-muted border border-border mb-4">
-                <SearchX size={24} className="text-muted-foreground" />
+              <div className="inline-flex size-14 items-center justify-center rounded-xl bg-muted border border-border mb-4">
+                <SearchX className="size-6 text-muted-foreground" />
               </div>
               <p className="text-sm font-medium text-foreground">No deposit records found</p>
               <p className="text-xs text-muted-foreground mt-1">Deposit transactions will appear here once recorded.</p>
@@ -542,24 +542,24 @@ function CustomerDetailPage() {
               <div className="grid grid-cols-3 gap-4 mb-6">
                 <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border border-border">
                   <div className="flex items-center gap-2">
-                    <Banknote size={14} className="text-primary" />
+                    <Banknote className="size-3.5 text-primary" />
                     <span className="text-xs text-muted-foreground">Transactions</span>
                   </div>
-                  <span className="text-sm font-bold">{totalDeposits}</span>
+                  <span className="text-sm font-semibold">{totalDeposits}</span>
                 </div>
                 <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border border-border">
                   <div className="flex items-center gap-2">
-                    <ArrowDownLeft size={14} className="text-success" />
+                    <ArrowDownLeft className="size-3.5 text-success" />
                     <span className="text-xs text-muted-foreground">Total Credits</span>
                   </div>
-                  <span className="text-sm font-bold text-success">{formatCurrency(totalCredits)}</span>
+                  <span className="text-sm font-semibold text-success">{formatCurrency(totalCredits)}</span>
                 </div>
                 <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border border-border">
                   <div className="flex items-center gap-2">
-                    <ArrowUpRight size={14} className="text-destructive" />
+                    <ArrowUpRight className="size-3.5 text-destructive" />
                     <span className="text-xs text-muted-foreground">Total Debits</span>
                   </div>
-                  <span className="text-sm font-bold text-destructive">{formatCurrency(totalDebits)}</span>
+                  <span className="text-sm font-semibold text-destructive">{formatCurrency(totalDebits)}</span>
                 </div>
               </div>
 
@@ -592,12 +592,12 @@ function CustomerDetailPage() {
                         <TableCell>
                           {deposit.type === 'credit' ? (
                             <Badge className="bg-success text-success-foreground text-xs gap-1">
-                              <ArrowDownLeft size={12} />
+                              <ArrowDownLeft className="size-3" />
                               Credit
                             </Badge>
                           ) : (
                             <Badge variant="destructive" className="text-xs gap-1">
-                              <ArrowUpRight size={12} />
+                              <ArrowUpRight className="size-3" />
                               Debit
                             </Badge>
                           )}
@@ -636,8 +636,8 @@ function CustomerDetailPage() {
         <CardHeader className="border-b border-border">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-600">
-                <DollarSign size={16} />
+              <div className="size-8 rounded-lg bg-warning/10 flex items-center justify-center text-warning">
+                <DollarSign className="size-4" />
               </div>
               <div>
                 <CardTitle className="text-sm">Commission History</CardTitle>
@@ -650,12 +650,12 @@ function CustomerDetailPage() {
         <CardContent className="pt-6">
           {commissionsLoading ? (
             <div className="flex items-center justify-center py-16">
-              <Loader2 size={24} className="animate-spin text-muted-foreground" />
+              <Loader2 className="size-6 animate-spin text-muted-foreground" />
             </div>
           ) : customerCommissions.length === 0 ? (
             <div className="p-16 text-center">
-              <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-muted border border-border mb-4">
-                <SearchX size={24} className="text-muted-foreground" />
+              <div className="inline-flex size-14 items-center justify-center rounded-xl bg-muted border border-border mb-4">
+                <SearchX className="size-6 text-muted-foreground" />
               </div>
               <p className="text-sm font-medium text-foreground">No commissions found</p>
               <p className="text-xs text-muted-foreground mt-1">Commissions will appear here once orders are paid and commission rates are set.</p>
@@ -665,24 +665,24 @@ function CustomerDetailPage() {
               <div className="grid grid-cols-3 gap-4 mb-6">
                 <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border border-border">
                   <div className="flex items-center gap-2">
-                    <DollarSign size={14} className="text-primary" />
+                    <DollarSign className="size-3.5 text-primary" />
                     <span className="text-xs text-muted-foreground">Commissions</span>
                   </div>
-                  <span className="text-sm font-bold">{totalCommissions}</span>
+                  <span className="text-sm font-semibold">{totalCommissions}</span>
                 </div>
                 <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border border-border">
                   <div className="flex items-center gap-2">
-                    <Fuel size={14} className="text-info" />
+                    <Fuel className="size-3.5 text-info" />
                     <span className="text-xs text-muted-foreground">Total Quantity</span>
                   </div>
-                  <span className="text-sm font-bold">{totalCommissionQuantity.toLocaleString()} L</span>
+                  <span className="text-sm font-semibold">{totalCommissionQuantity.toLocaleString()} L</span>
                 </div>
                 <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border border-border">
                   <div className="flex items-center gap-2">
-                    <Banknote size={14} className="text-success" />
+                    <Banknote className="size-3.5 text-success" />
                     <span className="text-xs text-muted-foreground">Total Earned</span>
                   </div>
-                  <span className="text-sm font-bold text-success">{formatCurrency(totalCommissionAmount)}</span>
+                  <span className="text-sm font-semibold text-success">{formatCurrency(totalCommissionAmount)}</span>
                 </div>
               </div>
 
@@ -720,7 +720,7 @@ function CustomerDetailPage() {
                           {c.status === 'paid' ? (
                             <Badge className="bg-success text-success-foreground text-xs">Credited</Badge>
                           ) : (
-                            <Badge className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/20 text-xs">Pending</Badge>
+                            <Badge className="bg-warning/15 text-warning border-warning/20 text-xs">Pending</Badge>
                           )}
                         </TableCell>
                       </TableRow>

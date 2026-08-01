@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { StatCard } from '#/components/ui/stat-card'
 import { createFileRoute } from '@tanstack/react-router'
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
@@ -54,9 +55,9 @@ interface ProductItem {
 function getStatusBadge(status: string) {
   switch (status) {
     case 'Active':
-      return <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20">Active</Badge>
+      return <Badge className="bg-accent/15 text-accent border-accent/20">Active</Badge>
     case 'High Capacity':
-      return <Badge className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/20">High Capacity</Badge>
+      return <Badge className="bg-warning/15 text-warning border-warning/20">High Capacity</Badge>
     case 'Maintenance':
     case 'Suspended':
       return <Badge variant="destructive">Suspended</Badge>
@@ -190,8 +191,8 @@ function ProductPricingPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
-            <Fuel className="h-7 w-7 text-primary" />
+          <h1 className="text-2xl sm:text-xl md:text-2xl font-semibold tracking-tight text-foreground flex items-center gap-2 text-balance">
+            <Fuel className="size-7 text-primary" />
             Depot Product Pricing
           </h1>
           <p className="text-muted-foreground text-sm">
@@ -199,7 +200,7 @@ function ProductPricingPage() {
           </p>
         </div>
         <Button variant="outline" size="sm" onClick={() => refetch()} className="gap-2 self-start sm:self-auto">
-          <RefreshCw className="h-4 w-4" />
+          <RefreshCw className="size-4" />
           Refresh Data
         </Button>
       </div>
@@ -207,46 +208,11 @@ function ProductPricingPage() {
       {/* Stats Cards */}
       {!isLoading && !isError && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Card className="stats-card">
-            <CardContent className="p-4 flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Total Depots</p>
-                <p className="text-2xl font-bold mt-1 text-foreground">{depots.length}</p>
-                <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5">{activeCount} Active Hubs</p>
-              </div>
-              <div className="p-3 rounded-xl bg-primary/10 text-primary">
-                <Warehouse className="h-6 w-6" />
-              </div>
-            </CardContent>
-          </Card>
+          <StatCard icon={<Warehouse />} label="Total Depots" value={depots.length} description={`${activeCount} Active Hubs`} />
 
-          <Card className="stats-card">
-            <CardContent className="p-4 flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Products Priced</p>
-                <p className="text-2xl font-bold mt-1 text-foreground">{allProducts.length}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Configured Products</p>
-              </div>
-              <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                <Tag className="h-6 w-6" />
-              </div>
-            </CardContent>
-          </Card>
+          <StatCard icon={<Tag />} label="Products Priced" value={allProducts.length} description="Configured Products" />
 
-          <Card className="stats-card">
-            <CardContent className="p-4 flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Priced Depot Entries</p>
-                <p className="text-2xl font-bold mt-1 text-foreground">
-                  {depots.reduce((acc: number, d: any) => acc + (d.productPrices?.length || 0), 0)}
-                </p>
-                <p className="text-xs text-muted-foreground mt-0.5">Active Depot Prices</p>
-              </div>
-              <div className="p-3 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                <Fuel className="h-6 w-6" />
-              </div>
-            </CardContent>
-          </Card>
+          <StatCard icon={<Fuel />} label="Priced Depot Entries" value={depots.reduce((acc: number, d: any) => acc + (d.productPrices?.length || 0), 0)} description="Active Depot Prices" />
         </div>
       )}
 
@@ -261,7 +227,7 @@ function ProductPricingPage() {
 
             {/* Search Input */}
             <div className="relative w-full sm:w-80">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
               <Input
                 placeholder="Search depot or location…"
                 className="pl-9 pr-9"
@@ -273,7 +239,7 @@ function ProductPricingPage() {
                   onClick={() => setSearchQuery('')}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
-                  <X className="h-4 w-4" />
+                  <X className="size-4" />
                 </button>
               )}
             </div>
@@ -292,7 +258,7 @@ function ProductPricingPage() {
           ) : filteredDepots.length === 0 ? (
             <div className="p-8">
               <PageEmpty
-                icon={<Fuel size={32} className="text-muted-foreground" />}
+                icon={<Fuel className="size-8 text-muted-foreground" />}
                 title={searchQuery ? 'No depots found' : 'No depots configured'}
                 description={searchQuery ? 'Try adjusting your search criteria.' : 'Create depots in the Depots module first.'}
                 hasFilters={!!searchQuery}
@@ -334,7 +300,7 @@ function ProductPricingPage() {
                     })
 
                     return (
-                      <TableRow key={depot.id} className="hover:bg-muted/40 transition-colors">
+                      <TableRow key={depot.id} className="hover:bg-muted/40 transition-colors duration-250 ease-luxe">
                         <TableCell className="text-center text-xs text-muted-foreground font-mono">
                           {idx + 1}
                         </TableCell>
@@ -386,10 +352,10 @@ function ProductPricingPage() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-8 px-2 text-primary hover:text-primary hover:bg-primary/10 gap-1 text-xs"
+                                className="h-8 px-2 text-primary hover:text-primary/80 hover:bg-primary/10 gap-1 text-xs"
                                 onClick={() => openEdit(depot)}
                               >
-                                <Pencil className="h-3.5 w-3.5" /> Edit
+                                <Pencil className="size-3.5" /> Edit
                               </Button>
                             )}
 
@@ -399,12 +365,12 @@ function ProductPricingPage() {
                                 size="sm"
                                 className={`h-8 px-2 gap-1 text-xs ${
                                   depot.status === 'Active'
-                                    ? 'text-destructive hover:text-destructive hover:bg-destructive/10'
-                                    : 'text-emerald-600 hover:text-emerald-700 hover:bg-emerald-500/10'
+                                    ? 'text-destructive hover:text-destructive/80 hover:bg-destructive/10'
+                                    : 'text-accent hover:text-accent/80 hover:bg-accent/10'
                                 }`}
                                 onClick={() => handleToggleStatus(depot)}
                               >
-                                <Power className="h-3.5 w-3.5" />
+                                <Power className="size-3.5" />
                                 {depot.status === 'Active' ? 'Suspend' : 'Activate'}
                               </Button>
                             )}
@@ -433,7 +399,7 @@ function ProductPricingPage() {
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-lg">
-              <Fuel className="h-5 w-5 text-primary" />
+              <Fuel className="size-5 text-primary" />
               Edit Depot Prices — {editingDepot?.name}
             </DialogTitle>
             <DialogDescription>
@@ -442,7 +408,7 @@ function ProductPricingPage() {
           </DialogHeader>
 
           {editingDepot && (
-            <div className="space-y-4 py-3 max-h-[60vh] overflow-y-auto pr-1">
+            <div className="space-y-4 py-3 max-h-[60svh] overflow-y-auto pr-1">
               {allProducts.map((product) => (
                 <div key={product.id} className="flex items-center justify-between gap-4 p-3 rounded-lg border border-border bg-muted/20">
                   <div>
@@ -484,7 +450,7 @@ function ProductPricingPage() {
               Cancel
             </Button>
             <Button onClick={handleSave} disabled={saving} className="gap-2">
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
+              {saving ? <Loader2 className="size-4 animate-spin" /> : <CheckCircle className="size-4" />}
               {saving ? 'Saving…' : 'Save Prices'}
             </Button>
           </DialogFooter>

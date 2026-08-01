@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
+import { StatCard, StatCardGrid } from '#/components/ui/stat-card'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Button } from '#/components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '#/components/ui/card'
@@ -13,7 +14,7 @@ import { PageEmpty } from '#/components/PageEmpty'
 import { Pagination } from '#/components/Pagination'
 import { useDepositList } from '#/lib/hooks/useDeposits'
 import type { Deposit } from '#/lib/hooks/useDeposits'
-import { toNum } from '#/lib/utils'
+import { cn, toNum } from '#/lib/utils'
 
 export const Route = createFileRoute('/deposits/')({
   component: DepositsDashboard,
@@ -113,9 +114,9 @@ function DepositsDashboard() {
   }, [filteredDeposits, currentPage, pageSize])
 
   const statsCards = [
-    { title: 'Total Deposits', value: formatCurrency(totalCredits), subtitle: `${deposits.length} transactions`, icon: ArrowDownLeft, color: 'text-success' },
-    { title: 'Manual Transfers', value: formatCurrency(manualCredits), subtitle: `${manualDeposits.length} transactions`, icon: Landmark, color: 'text-amber-500' },
-    { title: 'Paystack Automated', value: formatCurrency(paystackCredits), subtitle: `${paystackDeposits.length} transactions`, icon: ArrowRightLeft, color: 'text-sky-500' },
+    { title: 'Total deposits', value: formatCurrency(totalCredits), subtitle: `${deposits.length} transactions`, icon: ArrowDownLeft, tone: 'green' as const },
+    { title: 'Manual transfers', value: formatCurrency(manualCredits), subtitle: `${manualDeposits.length} transactions`, icon: Landmark, tone: 'amber' as const },
+    { title: 'Paystack automated', value: formatCurrency(paystackCredits), subtitle: `${paystackDeposits.length} transactions`, icon: ArrowRightLeft, tone: 'green' as const },
   ]
 
   const handleClearFilters = () => {
@@ -128,33 +129,29 @@ function DepositsDashboard() {
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Deposits Management</h1>
+          <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">Deposits Management</h1>
           <p className="text-muted-foreground">View and record customer deposit transactions.</p>
         </div>
         <Button
-          className="gradient-primary text-white gap-2 shadow-md hover:shadow-lg transition-all"
+          className="gap-2"
           onClick={() => navigate({ to: '/deposits/manual-deposit' as any })}
-        >
-          <Plus size={16} /> Record Manual Deposit
+ >
+          <Plus className="size-4" /> Record Manual Deposit
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {!isLoading && !isError && statsCards.map((card, idx) => (
-          <Card key={idx} className="stats-card">
-            <CardContent className="p-4 flex justify-between items-center">
-              <div>
-                <p className="text-xs text-muted-foreground font-medium">{card.title}</p>
-                <p className={`text-xl sm:text-2xl font-bold mt-1 ${card.color || ''}`}>{card.value}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">{card.subtitle}</p>
-              </div>
-              <div className="p-2.5 rounded-xl bg-muted/60">
-                <card.icon className={`w-6 h-6 ${card.color || 'text-primary'}`} />
-              </div>
-            </CardContent>
-          </Card>
+      <StatCardGrid count={statsCards.length}>
+        {!isLoading && !isError && statsCards.map((card) => (
+          <StatCard
+            key={card.title}
+            tone={card.tone}
+            icon={<card.icon />}
+            label={card.title}
+            value={card.value}
+            description={card.subtitle}
+          />
         ))}
-      </div>
+      </StatCardGrid>
 
       <Card>
         <CardHeader className="border-b border-border pb-4">
@@ -169,21 +166,21 @@ function DepositsDashboard() {
           {/* Top Search & Time Filter Controls */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
             <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
               <Input
                 type="text"
                 placeholder="Search description, reference, or customer..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 pr-8"
-              />
+ />
               {searchTerm && (
                 <button
                   onClick={() => setSearchTerm('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground flex items-center justify-center cursor-pointer transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 size-5 rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground flex items-center justify-center cursor-pointer transition-colors duration-250 ease-luxe"
                   aria-label="Clear search"
-                >
-                  <X size={10} />
+ >
+                  <X className="size-2.5" />
                 </button>
               )}
             </div>
@@ -191,7 +188,7 @@ function DepositsDashboard() {
             {/* Time Filter Buttons */}
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
               <span className="text-xs font-medium text-muted-foreground flex items-center gap-1 mr-1 shrink-0">
-                <Filter size={12} /> Range:
+                <Filter className="size-3" /> Range:
               </span>
               {(['all', 'today', 'week', 'month'] as const).map((t) => (
                 <Button
@@ -200,7 +197,7 @@ function DepositsDashboard() {
                   size="sm"
                   className="h-8 text-xs capitalize whitespace-nowrap"
                   onClick={() => setTimeFilter(t)}
-                >
+ >
                   {t === 'all' ? 'All Time' : t === 'week' ? 'This Week' : t === 'month' ? 'This Month' : 'Today'}
                 </Button>
               ))}
@@ -215,7 +212,7 @@ function DepositsDashboard() {
                 size="sm"
                 className="h-8 gap-2 text-xs font-medium"
                 onClick={() => setFilterType('all')}
-              >
+ >
                 All Deposits
                 <Badge variant={filterType === 'all' ? 'secondary' : 'outline'} className="text-[10px] px-1.5 py-0 h-4">
                   {deposits.length}
@@ -225,10 +222,10 @@ function DepositsDashboard() {
               <Button
                 variant={filterType === 'manual' ? 'default' : 'ghost'}
                 size="sm"
-                className={`h-8 gap-2 text-xs font-medium ${filterType === 'manual' ? '' : 'hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400'}`}
+                className={`h-8 gap-2 text-xs font-medium ${filterType === 'manual' ? '' : 'hover:bg-warning/10 hover:text-warning'}`}
                 onClick={() => setFilterType('manual')}
-              >
-                <Landmark size={13} className={filterType === 'manual' ? 'text-white' : 'text-amber-500'} />
+ >
+                <Landmark className={cn('size-3.5', filterType === 'manual' ? 'text-primary-foreground' : 'text-warning')} />
                 Manual Transfers
                 <Badge variant={filterType === 'manual' ? 'secondary' : 'outline'} className="text-[10px] px-1.5 py-0 h-4">
                   {manualDeposits.length}
@@ -238,10 +235,10 @@ function DepositsDashboard() {
               <Button
                 variant={filterType === 'paystack' ? 'default' : 'ghost'}
                 size="sm"
-                className={`h-8 gap-2 text-xs font-medium ${filterType === 'paystack' ? '' : 'hover:bg-sky-500/10 hover:text-sky-600 dark:hover:text-sky-400'}`}
+                className={`h-8 gap-2 text-xs font-medium ${filterType === 'paystack' ? '' : 'hover:bg-muted/10 hover:text-muted-foreground'}`}
                 onClick={() => setFilterType('paystack')}
-              >
-                <ArrowRightLeft size={13} className={filterType === 'paystack' ? 'text-white' : 'text-sky-500'} />
+ >
+                <ArrowRightLeft className={cn('size-3.5', filterType === 'paystack' ? 'text-primary-foreground' : 'text-muted-foreground')} />
                 Paystack
                 <Badge variant={filterType === 'paystack' ? 'secondary' : 'outline'} className="text-[10px] px-1.5 py-0 h-4">
                   {paystackDeposits.length}
@@ -255,8 +252,8 @@ function DepositsDashboard() {
                 size="sm"
                 className="h-8 text-xs text-muted-foreground hover:text-foreground gap-1"
                 onClick={handleClearFilters}
-              >
-                <X size={12} /> Clear Filters
+ >
+                <X className="size-3" /> Clear Filters
               </Button>
             )}
           </div>
@@ -267,14 +264,14 @@ function DepositsDashboard() {
             <PageError message={(error as any)?.message || 'Failed to load'} onRetry={() => refetch()} />
           ) : filteredDeposits.length === 0 ? (
             <PageEmpty
-              icon={<Banknote size={24} className="text-muted-foreground" />}
+              icon={<Banknote className="size-6 text-muted-foreground" />}
               title={hasFilters ? 'No deposits match your filter criteria' : 'No deposits yet'}
               description={hasFilters ? 'Try clearing or adjusting your search and filter buttons.' : 'Deposit transactions will appear here once recorded.'}
               actionLabel={hasFilters ? 'Clear Filters' : 'Record Deposit'}
               onAction={hasFilters ? handleClearFilters : () => navigate({ to: '/deposits/manual-deposit' as any })}
               hasFilters={hasFilters}
               onClearFilters={handleClearFilters}
-            />
+ />
           ) : (
             <>
               <div className="overflow-x-auto">
@@ -299,7 +296,7 @@ function DepositsDashboard() {
                           key={deposit._id}
                           className="hover:bg-muted/50 transition cursor-pointer"
                           onClick={() => navigate({ to: '/deposits/details' as any, state: { deposit } } as any)}
-                        >
+ >
                           <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
                             {deposit.createdAt
                               ? new Date(deposit.createdAt).toLocaleDateString('en-GB', {
@@ -314,11 +311,11 @@ function DepositsDashboard() {
                           </TableCell>
                           <TableCell className="whitespace-nowrap">
                             {isPs ? (
-                              <Badge variant="outline" className="bg-sky-500/10 text-sky-700 dark:text-sky-300 border-sky-500/20 text-xs font-normal">
+                              <Badge variant="outline" className="bg-muted/10 text-foreground dark:text-muted-foreground border-border/20 text-xs font-normal">
                                 Paystack
                               </Badge>
                             ) : (
-                              <Badge variant="outline" className="bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20 text-xs font-normal">
+                              <Badge variant="outline" className="bg-warning/10 text-warning border-warning/20 text-xs font-normal">
                                 Manual Transfer
                               </Badge>
                             )}
@@ -341,13 +338,13 @@ function DepositsDashboard() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8"
+                              className="size-8"
                               onClick={(e) => {
                                 e.stopPropagation()
                                 navigate({ to: '/deposits/details' as any, state: { deposit } } as any)
                               }}
-                            >
-                              <Eye size={14} />
+ >
+                              <Eye className="size-3.5" />
                             </Button>
                           </TableCell>
                         </TableRow>
@@ -364,7 +361,7 @@ function DepositsDashboard() {
                 totalItems={totalItems}
                 onPageChange={setCurrentPage}
                 onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1) }}
-              />
+ />
             </>
           )}
         </CardContent>

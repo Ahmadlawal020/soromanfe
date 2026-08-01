@@ -98,7 +98,7 @@ function TruckDetailPage() {
   if (!truck && isLoading) {
     return (
       <div className="flex items-center justify-center py-32">
-        <Loader2 size={24} className="animate-spin text-muted-foreground" />
+        <Loader2 className="size-6 animate-spin text-muted-foreground" />
       </div>
     )
   }
@@ -106,12 +106,12 @@ function TruckDetailPage() {
   if (!truck) {
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-5 text-center">
-        <div className="h-16 w-16 rounded-full bg-warning/10 flex items-center justify-center text-warning border border-warning/20">
-          <AlertCircle size={32} />
+        <div className="size-16 rounded-full bg-warning/10 flex items-center justify-center text-warning border border-warning/20">
+          <AlertCircle className="size-8" />
         </div>
-        <h2 className="text-2xl font-bold text-foreground">No Truck Selected</h2>
+        <h2 className="text-lg md:text-xl font-semibold text-foreground tracking-tight">No Truck Selected</h2>
         <p className="text-muted-foreground max-w-sm">Please select a truck from the fleet directory to inspect details.</p>
-        <Button onClick={() => navigate({ to: '/trucks/' as any })}><ArrowLeft size={16} /> Back to Trucks</Button>
+        <Button onClick={() => navigate({ to: '/trucks/' as any })}><ArrowLeft className="size-4" /> Back to Trucks</Button>
       </div>
     )
   }
@@ -128,36 +128,36 @@ function TruckDetailPage() {
       <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center gap-4">
           <Button variant="outline" size="icon" onClick={handleBack}>
-            <ArrowLeft size={16} />
+            <ArrowLeft className="size-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Truck Profile Details</h1>
+            <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">Truck Profile Details</h1>
             <p className="text-muted-foreground">Fleet status, active operator, and compliance schedules</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={() => navigate({ to: '/trucks/form', state: { truck, isEdit: true } as any })}>
-            <Edit size={16} /> Edit Profile
+            <Edit className="size-4" /> Edit Profile
           </Button>
           <Button variant="destructive" onClick={handleDelete} disabled={deleteTruck.isPending}>
-            <Trash2 size={16} /> {deleteTruck.isPending ? 'Decommissioning...' : 'Decommission'}
+            <Trash2 className="size-4" /> {deleteTruck.isPending ? 'Decommissioning...' : 'Decommission'}
           </Button>
         </div>
       </header>
 
       {/* Hero Badge Panel */}
       <Card className="card-hover">
-        <CardContent className="p-6 md:p-8 bg-gradient-to-r from-primary/5 to-info/5">
+        <CardContent className="bg-primary/5 p-6 md:p-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-            <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center text-primary-foreground shadow-lg shrink-0">
-              <Truck size={36} />
+            <div className="size-20 bg-primary rounded-full flex items-center justify-center text-primary-foreground shrink-0">
+              <Truck className="size-9" />
             </div>
             <div className="flex-1">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant="outline" className="font-mono text-xs">VIN: {truck.vin || 'Not Provided'}</Badge>
                 {getStatusBadge(truck.status)}
               </div>
-              <h2 className="text-3xl font-bold text-foreground mt-2">{truck.plateNumber}</h2>
+              <h2 className="text-lg md:text-xl font-semibold text-foreground mt-2 tracking-tight">{truck.plateNumber}</h2>
               <p className="text-muted-foreground mt-1.5 text-sm flex items-center gap-1.5">
                 {truck.year ? `${truck.year} ` : ''}{truck.make || 'Generic'} {truck.model} &bull; {truck.type || 'Standard'} Heavy Vehicle
               </p>
@@ -173,8 +173,8 @@ function TruckDetailPage() {
         <Card>
           <CardHeader className="border-b border-border">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                <Gauge size={16} />
+              <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                <Gauge className="size-4" />
               </div>
               <div>
                 <CardTitle className="text-sm">Telemetry & Maintenance</CardTitle>
@@ -185,13 +185,13 @@ function TruckDetailPage() {
           <CardContent className="space-y-5 pt-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Current Mileage</p>
-                <p className="text-2xl font-bold text-foreground mt-1">{truck.mileage}</p>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Current Mileage</p>
+                <p className="text-2xl font-semibold text-foreground mt-1 tabular-nums">{truck.mileage}</p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Fuel Capacity Status</p>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Fuel Capacity Status</p>
                 <div className={`inline-flex items-center gap-1.5 mt-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${getFuelColor(truck.fuelLevel)}`}>
-                  <Fuel size={12} /> {truck.fuelLevel}%
+                  <Fuel className="size-3" /> {truck.fuelLevel}%
                 </div>
               </div>
             </div>
@@ -207,16 +207,16 @@ function TruckDetailPage() {
             <div className="border-t pt-4">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Maintenance Service Threshold</p>
+                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Maintenance Service Threshold</p>
                   <p className="text-sm font-semibold text-foreground mt-1">Due at: {truck.nextServiceMileage?.toLocaleString() || '15,000'} km</p>
                 </div>
                 {isServiceDue ? (
                   <div className="flex items-center gap-1 text-destructive font-semibold text-xs bg-destructive/10 border border-destructive/20 px-2 py-1 rounded">
-                    <Wrench size={12} /> Service Overdue
+                    <Wrench className="size-3" /> Service Overdue
                   </div>
                 ) : (
                   <div className="flex items-center gap-1 text-success font-semibold text-xs bg-success/10 border border-success/20 px-2 py-1 rounded">
-                    <Wrench size={12} /> Service Good
+                    <Wrench className="size-3" /> Service Good
                   </div>
                 )}
               </div>
@@ -233,8 +233,8 @@ function TruckDetailPage() {
         <Card>
           <CardHeader className="border-b border-border">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-info/10 flex items-center justify-center text-info">
-                <User size={16} />
+              <div className="size-8 rounded-lg bg-info/10 flex items-center justify-center text-info">
+                <User className="size-4" />
               </div>
               <div>
                 <CardTitle className="text-sm">Assigned Operator (Driver)</CardTitle>
@@ -246,13 +246,13 @@ function TruckDetailPage() {
             {truck.currentDriverId ? (
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold text-primary">
+                  <div className="size-10 rounded-full bg-primary/20 flex items-center justify-center text-sm font-semibold text-primary">
                     {truck.driverName?.charAt(0) || '?'}
                   </div>
                   <div>
                     <button
                       onClick={() => navigate({ to: '/drivers/details' as any, search: { id: truck.currentDriverId } as any, state: { id: truck.currentDriverId } } as any)}
-                      className="font-semibold text-foreground hover:text-primary transition-colors text-left block"
+                      className="font-semibold text-foreground hover:text-primary transition-colors text-left block duration-250 ease-luxe"
                     >
                       {truck.driverName}
                     </button>
@@ -265,7 +265,7 @@ function TruckDetailPage() {
             ) : (
               <div className="space-y-2">
                 <p className="text-sm text-foreground flex items-center gap-2">
-                  <User size={16} className="text-muted-foreground" /> {truck.driverName || 'Unassigned'}
+                  <User className="size-4 text-muted-foreground" /> {truck.driverName || 'Unassigned'}
                 </p>
                 <p className="text-xs text-muted-foreground">No linked profile available. Assign a registered driver to track telemetry and routes.</p>
               </div>
@@ -277,8 +277,8 @@ function TruckDetailPage() {
         <Card>
           <CardHeader className="border-b border-border">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-warning/10 flex items-center justify-center text-warning">
-                <Calendar size={16} />
+              <div className="size-8 rounded-lg bg-warning/10 flex items-center justify-center text-warning">
+                <Calendar className="size-4" />
               </div>
               <div>
                 <CardTitle className="text-sm">Compliance & Expiry Monitoring</CardTitle>
@@ -314,7 +314,7 @@ function TruckDetailPage() {
 
               {(insuranceStatus.alert || registrationStatus.alert) && (
                 <div className="mt-2 p-3 bg-destructive/5 border border-destructive/10 rounded flex items-start gap-2">
-                  <ShieldAlert className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+                  <ShieldAlert className="size-4 text-destructive shrink-0 mt-0.5" />
                   <p className="text-xs text-destructive-foreground font-medium">
                     Attention: Vehicle is not in full compliance. Please update credentials immediately.
                   </p>
@@ -328,8 +328,8 @@ function TruckDetailPage() {
         <Card>
           <CardHeader className="border-b border-border">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-secondary flex items-center justify-center text-muted-foreground">
-                <User size={16} />
+              <div className="size-8 rounded-lg bg-secondary flex items-center justify-center text-muted-foreground">
+                <User className="size-4" />
               </div>
               <div>
                 <CardTitle className="text-sm">Previous Drivers History</CardTitle>
@@ -343,16 +343,16 @@ function TruckDetailPage() {
             ) : (
               <div className="divide-y divide-border">
                 {truck.previousDrivers.map((record: any, idx: number) => (
-                  <div key={idx} className="flex items-center justify-between py-3 hover:bg-muted/10 px-2 rounded-lg transition-colors">
+                  <div key={idx} className="flex items-center justify-between py-3 hover:bg-muted/10 px-2 rounded-lg transition-colors duration-250 ease-luxe">
                     <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center text-xs font-bold text-muted-foreground">
+                      <div className="size-8 rounded-full bg-secondary flex items-center justify-center text-xs font-semibold text-muted-foreground">
                         {record.driverName?.charAt(0) || '?'}
                       </div>
                       <div>
                         {record.driverRef ? (
                           <button
                             onClick={() => navigate({ to: '/drivers/details' as any, search: { id: record.driverRef._id || record.driverRef } as any, state: { id: record.driverRef._id || record.driverRef } } as any)}
-                            className="font-medium text-sm text-foreground hover:text-primary transition-colors text-left block"
+                            className="font-medium text-sm text-foreground hover:text-primary transition-colors text-left block duration-250 ease-luxe"
                           >
                             {record.driverName}
                           </button>

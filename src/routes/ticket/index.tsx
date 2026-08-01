@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { StatCard, StatCardGrid } from '#/components/ui/stat-card'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
@@ -132,23 +133,23 @@ function TicketsDashboard() {
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
-            <Ticket className="w-8 h-8 text-primary" /> Tickets
+          <h1 className="text-xl md:text-2xl font-semibold text-foreground flex items-center gap-2 tracking-tight text-balance">
+            <Ticket className="size-8 text-primary" /> Tickets
           </h1>
           <p className="text-muted-foreground">Manage automatic receipts, scan QR codes, and redeem customer orders.</p>
         </div>
         <Button
           size="lg"
-          className="gradient-primary text-white border-0 shadow-lg cursor-pointer"
+          className="cursor-pointer"
           onClick={() => setScanning(!scanning)}
-        >
+ >
           {scanning ? (
             <>
-              <X className="w-5 h-5 mr-2" /> Stop Scanner
+              <X className="size-5 mr-2" /> Stop Scanner
             </>
           ) : (
             <>
-              <Camera className="w-5 h-5 mr-2" /> Scan QR Code
+              <Camera className="size-5 mr-2" /> Scan QR Code
             </>
           )}
         </Button>
@@ -156,83 +157,47 @@ function TicketsDashboard() {
 
       {/* Statistics Cards */}
       {!isLoading && !isError && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="relative overflow-hidden transition-all duration-200 hover:shadow-md border-border/60 bg-gradient-to-br from-card to-card/50">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-muted-foreground">Total Tickets</p>
-                  <p className="text-3xl font-bold tracking-tight text-foreground">{totalTickets}</p>
-                </div>
-                <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-                  <Ticket className="w-6 h-6" />
-                </div>
-              </div>
-              <div className="mt-4 flex items-center text-xs text-muted-foreground">
-                <span>All generated tickets</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="relative overflow-hidden transition-all duration-200 hover:shadow-md border-border/60 bg-gradient-to-br from-card to-card/50">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-muted-foreground">Active Tickets</p>
-                  <p className="text-3xl font-bold tracking-tight text-foreground">{activeTickets}</p>
-                </div>
-                <div className="h-12 w-12 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
-                  <AlertCircle className="w-6 h-6" />
-                </div>
-              </div>
-              <div className="mt-4 flex items-center text-xs text-muted-foreground">
-                <span>Pending pickup/redemption</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="relative overflow-hidden transition-all duration-200 hover:shadow-md border-border/60 bg-gradient-to-br from-card to-card/50">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-muted-foreground">Redeemed</p>
-                  <p className="text-3xl font-bold tracking-tight text-foreground">{redeemedTickets}</p>
-                </div>
-                <div className="h-12 w-12 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
-                  <CheckCircle2 className="w-6 h-6" />
-                </div>
-              </div>
-              <div className="mt-4 flex items-center text-xs text-muted-foreground">
-                <span>Successfully claimed orders</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="relative overflow-hidden transition-all duration-200 hover:shadow-md border-border/60 bg-gradient-to-br from-card to-card/50">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-muted-foreground">Redemption Rate</p>
-                  <p className="text-3xl font-bold tracking-tight text-foreground">{`${redemptionRate}%`}</p>
-                </div>
-                <div className="h-12 w-12 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center">
-                  <ShieldCheck className="w-6 h-6" />
-                </div>
-              </div>
-              <div className="mt-4 w-full bg-muted rounded-full h-1.5 overflow-hidden">
-                <div
-                  className="bg-blue-500 h-1.5 rounded-full transition-all duration-500"
-                  style={{ width: `${redemptionRate}%` }}
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <StatCardGrid count={4}>
+          <StatCard
+            icon={<Ticket />}
+            label="Total tickets"
+            value={totalTickets}
+            description="All generated tickets"
+          />
+          <StatCard
+            tone="amber"
+            icon={<AlertCircle />}
+            label="Active tickets"
+            value={activeTickets}
+            description="Pending pickup / redemption"
+          />
+          <StatCard
+            icon={<CheckCircle2 />}
+            label="Redeemed"
+            value={redeemedTickets}
+            description="Successfully claimed orders"
+          />
+          <StatCard
+            icon={<ShieldCheck />}
+            label="Redemption rate"
+            value={`${redemptionRate}%`}
+            description={
+              <span className="block">
+                <span className="mt-1 block h-1 w-full overflow-hidden rounded-full bg-muted">
+                  <span
+                    className="block h-full rounded-full bg-accent transition-[width] duration-500 ease-luxe"
+                    style={{ width: `${redemptionRate}%` }}
+                  />
+                </span>
+              </span>
+            }
+          />
+        </StatCardGrid>
       )}
 
       {/* QR Code Scanner Interface */}
       {scanning && (
-        <Card className="border-2 border-primary/30 overflow-hidden shadow-2xl transition-all duration-300">
+        <Card className="border-2 border-primary/30 overflow-hidden transition-all duration-300 ease-luxe">
           <CardHeader className="bg-primary/5 border-b border-primary/10">
             <CardTitle className="text-primary flex items-center gap-2">
               <QrCode className="animate-pulse" /> Live QR Code Reader
@@ -242,13 +207,13 @@ function TicketsDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent className="p-6 flex flex-col items-center justify-center bg-black/5">
-            <div className="w-full max-w-md bg-background rounded-2xl overflow-hidden shadow-inner border border-border p-4 relative">
+            <div className="w-full max-w-md bg-background rounded-xl overflow-hidden border border-border p-4 relative">
               <div id="reader" className="w-full overflow-hidden rounded-xl"></div>
               {/* Scanning visual overlay */}
               <div className="absolute top-8 left-8 right-8 h-0.5 bg-primary/70 animate-bounce pointer-events-none" />
             </div>
             <div className="mt-4 text-xs text-muted-foreground flex items-center gap-1.5">
-              <ShieldCheck className="text-success" size={14} />
+              <ShieldCheck className="size-3.5 text-success" />
               <span>Scanning is performed locally. Ensure camera access is enabled.</span>
             </div>
           </CardContent>
@@ -265,20 +230,20 @@ function TicketsDashboard() {
             </div>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               <div className="relative flex-1 sm:w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground size-4" />
                 <Input
                   type="text"
                   placeholder="Search Ticket, Order, Customer..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
-                />
+ />
                 {searchTerm && (
                   <button
                     onClick={() => setSearchTerm('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground flex items-center justify-center cursor-pointer transition-colors"
-                  >
-                    <X size={10} />
+                    className="absolute right-3 top-1/2 -translate-y-1/2 size-5 rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground flex items-center justify-center cursor-pointer transition-colors duration-250 ease-luxe"
+ >
+                    <X className="size-2.5" />
                   </button>
                 )}
               </div>
@@ -300,12 +265,12 @@ function TicketsDashboard() {
             <PageError message={(error as any)?.message || 'Failed to load'} onRetry={() => refetch()} />
           ) : filteredTickets.length === 0 ? (
             <PageEmpty
-              icon={<Ticket size={24} className="text-muted-foreground" />}
+              icon={<Ticket className="size-6 text-muted-foreground" />}
               title={hasFilters ? 'No tickets match your filters' : 'No tickets yet'}
               description="Paid or completed orders will automatically generate tickets here."
               hasFilters={hasFilters}
               onClearFilters={() => { setSearchTerm(''); setSelectedStatus('all') }}
-            />
+ />
           ) : (
             <>
               <div className="overflow-x-auto">
@@ -326,7 +291,7 @@ function TicketsDashboard() {
                         key={tkt._id || tkt.id}
                         className="hover:bg-muted/50 transition cursor-pointer"
                         onClick={() => navigate({ to: '/ticket/details' as any, search: { id: tkt._id || tkt.id } as any })}
-                      >
+ >
                         <TableCell className="font-mono font-semibold text-primary">
                           {tkt.ticketNumber}
                         </TableCell>
@@ -351,7 +316,7 @@ function TicketsDashboard() {
                         </TableCell>
                         <TableCell className="text-sm">
                           <div className="flex items-center gap-1 text-muted-foreground">
-                            <CalendarDays size={14} />
+                            <CalendarDays className="size-3.5" />
                             <span>{tkt.createdAt ? new Date(tkt.createdAt).toLocaleDateString() : 'N/A'}</span>
                           </div>
                         </TableCell>
@@ -369,7 +334,7 @@ function TicketsDashboard() {
                 totalItems={totalItems}
                 onPageChange={setCurrentPage}
                 onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1) }}
-              />
+ />
             </>
           )}
         </CardContent>

@@ -15,6 +15,60 @@ export function useOrderList(params?: { page?: number; limit?: number; search?: 
   })
 }
 
+/** The backend clamps `limit` to 100 in every repository, so one request can
+ *  never return more than a page. */
+const PAGE_SIZE = 100
+/** Safety ceiling: 50 pages = 5,000 orders. Beyond this the caller is told. */
+const MAX_PAGES = 50
+const CONCURRENCY = 6
+
+/**
+ * Fetches every order by walking the paginated endpoint.
+ *
+ * The Orders page filters client-side and recalculates its summary cards
+ * against the filtered set, which needs the whole book — a single request
+ * would silently give it the 100 most recent rows and every total would be
+ * wrong. Pages after the first are fetched a few at a time.
+ *
+ * This is the thing to move server-side first: at 2,200 orders it is 22
+ * requests, and it grows linearly.
+ */
+export function useAllOrders(params?: Record<string, unknown> & { refetchInterval?: number }) {
+  const { refetchInterval, ...queryParams } = params || {}
+  return useQuery({
+    queryKey: ['orders', 'all', queryParams],
+    queryFn: async () => {
+      const first = await api.get('/orders', {
+        params: { ...queryParams, page: 1, limit: PAGE_SIZE },
+      })
+      const { orders = [], pagination } = first.data.data
+      const totalPages: number = pagination?.pages ?? 1
+      const pagesToFetch = Math.min(totalPages, MAX_PAGES)
+
+      const all = [...orders]
+      for (let start = 2; start <= pagesToFetch; start += CONCURRENCY) {
+        const batch = []
+        for (let p = start; p < start + CONCURRENCY && p <= pagesToFetch; p++) {
+          batch.push(
+            api.get('/orders', { params: { ...queryParams, page: p, limit: PAGE_SIZE } }),
+          )
+        }
+        const results = await Promise.all(batch)
+        for (const r of results) all.push(...(r.data.data.orders ?? []))
+      }
+
+      return {
+        orders: all,
+        pagination,
+        /** True when MAX_PAGES cut the fetch short. */
+        truncated: totalPages > pagesToFetch,
+        totalAvailable: pagination?.total ?? all.length,
+      }
+    },
+    refetchInterval: refetchInterval ?? false,
+  })
+}
+
 export function useOrderDetails(id: string) {
   return useQuery({
     queryKey: ['orders', id],

@@ -119,10 +119,10 @@ function DriverForm() {
   if (submitted) {
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-5 text-center">
-        <div className="h-16 w-16 rounded-full bg-success/10 flex items-center justify-center text-success border border-success/20">
-          <CheckCircle size={32} />
+        <div className="size-16 rounded-full bg-success/10 flex items-center justify-center text-success border border-success/20">
+          <CheckCircle className="size-8" />
         </div>
-        <h2 className="text-2xl font-bold text-foreground">Driver {isEdit ? 'Updated' : 'Registered'} Successfully!</h2>
+        <h2 className="text-lg md:text-xl font-semibold text-foreground tracking-tight">Driver {isEdit ? 'Updated' : 'Registered'} Successfully!</h2>
         <p className="text-muted-foreground max-w-sm">Driver {formData.name} has been saved to the drivers directory.</p>
         <div className="flex gap-3 mt-2">
           {!isEdit && (
@@ -149,11 +149,11 @@ function DriverForm() {
       <header className="flex items-center justify-between">
         <div>
           <Button variant="ghost" size="sm" onClick={() => navigate({ to: '/drivers/' as any })} className="mb-2">
-            <ArrowLeft className="h-4 w-4 mr-2" />Back to Drivers
+            <ArrowLeft className="size-4 mr-2" />Back to Drivers
           </Button>
-          <h1 className="text-3xl font-bold tracking-tight">{isEdit ? 'Edit Driver' : 'Register New Driver'}</h1>
+          <h1 className="text-xl md:text-2xl font-semibold tracking-tight text-balance">{isEdit ? 'Edit Driver' : 'Register New Driver'}</h1>
           <p className="text-muted-foreground">{isEdit ? 'Modify driver credentials, license details, and truck assignment' : 'Add a new driver to your fleet workforce'}</p>
-          {errors.form && <p className="text-sm text-destructive mt-1 flex items-center gap-1.5"><AlertCircle size={14} />{errors.form}</p>}
+          {errors.form && <p className="text-sm text-destructive mt-1 flex items-center gap-1.5"><AlertCircle className="size-3.5" />{errors.form}</p>}
         </div>
       </header>
 
@@ -163,7 +163,7 @@ function DriverForm() {
           {/* Section 1: Personal & Contact Info */}
           <div className="space-y-4 border rounded-lg p-5 bg-card">
             <div className="flex items-center space-x-2 border-b pb-2">
-              <Contact className="h-5 w-5 text-primary" />
+              <Contact className="size-5 text-primary" />
               <h2 className="text-lg font-semibold">Personal & Contact</h2>
             </div>
             <div className="space-y-3">
@@ -174,7 +174,7 @@ function DriverForm() {
                   onChange={(e) => handleInputChange('name', e.target.value)}
                   placeholder="e.g. Musa Abdullahi"
                   className={errors.name ? 'border-destructive' : ''}
-                />
+ />
                 {errors.name && <p className="text-sm text-destructive mt-1">{errors.name}</p>}
               </div>
 
@@ -185,7 +185,7 @@ function DriverForm() {
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
                   placeholder="e.g. musa@example.com"
-                />
+ />
               </div>
 
               <div>
@@ -195,7 +195,7 @@ function DriverForm() {
                   onChange={(e) => handleInputChange('phone', e.target.value)}
                   placeholder="e.g. 08012345678"
                   className={errors.phone ? 'border-destructive' : ''}
-                />
+ />
                 {errors.phone && <p className="text-sm text-destructive mt-1">{errors.phone}</p>}
               </div>
             </div>
@@ -204,7 +204,7 @@ function DriverForm() {
           {/* Section 2: License & Credentials */}
           <div className="space-y-4 border rounded-lg p-5 bg-card">
             <div className="flex items-center space-x-2 border-b pb-2">
-              <FileText className="h-5 w-5 text-primary" />
+              <FileText className="size-5 text-primary" />
               <h2 className="text-lg font-semibold">License & Credentials</h2>
             </div>
             <div className="space-y-3">
@@ -215,7 +215,7 @@ function DriverForm() {
                   onChange={(e) => handleInputChange('licenseNumber', e.target.value.toUpperCase())}
                   placeholder="e.g. ABD-12345678"
                   className={`font-mono uppercase ${errors.licenseNumber ? 'border-destructive' : ''}`}
-                />
+ />
                 {errors.licenseNumber && <p className="text-sm text-destructive mt-1">{errors.licenseNumber}</p>}
               </div>
 
@@ -238,7 +238,7 @@ function DriverForm() {
                   type="date"
                   value={formData.licenseExpiry}
                   onChange={(e) => handleInputChange('licenseExpiry', e.target.value)}
-                />
+ />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -252,7 +252,7 @@ function DriverForm() {
                     value={formData.rating}
                     onChange={(e) => handleInputChange('rating', Number(e.target.value))}
                     className={errors.rating ? 'border-destructive' : ''}
-                  />
+ />
                   {errors.rating && <p className="text-sm text-destructive mt-1">{errors.rating}</p>}
                 </div>
                 <div>
@@ -264,7 +264,7 @@ function DriverForm() {
                     value={formData.safetyScore}
                     onChange={(e) => handleInputChange('safetyScore', Number(e.target.value))}
                     className={errors.safetyScore ? 'border-destructive' : ''}
-                  />
+ />
                   {errors.safetyScore && <p className="text-sm text-destructive mt-1">{errors.safetyScore}</p>}
                 </div>
               </div>
@@ -274,7 +274,7 @@ function DriverForm() {
           {/* Section 3: Status & Assignment */}
           <div className="space-y-4 border rounded-lg p-5 bg-card">
             <div className="flex items-center space-x-2 border-b pb-2">
-              <Truck className="h-5 w-5 text-primary" />
+              <Truck className="size-5 text-primary" />
               <h2 className="text-lg font-semibold">Status & Assignment</h2>
             </div>
             <div className="space-y-3">
@@ -294,8 +294,8 @@ function DriverForm() {
 
         <div className="flex justify-end gap-3 border-t pt-4">
           <Button type="button" variant="outline" onClick={() => navigate({ to: '/drivers/' as any })}>Cancel</Button>
-          <Button type="submit" disabled={isSubmitting} className="gradient-primary text-white border-0 min-w-[150px]">
-            {isSubmitting ? <><Loader2 size={16} className="animate-spin mr-2" />Saving...</> : isEdit ? 'Update Driver' : 'Register Driver'}
+          <Button type="submit" disabled={isSubmitting} className="min-w-[150px]">
+            {isSubmitting ? <><Loader2 className="size-4 animate-spin mr-2" />Saving...</> : isEdit ? 'Update Driver' : 'Register Driver'}
           </Button>
         </div>
       </form>

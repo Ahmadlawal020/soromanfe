@@ -408,8 +408,8 @@ function AssignCustomerPage() {
   if (inventoryLoading || customersLoading || salesLoading) {
     return (
       <div className="p-8 text-center max-w-md mx-auto my-12">
-        <Loader2 className="mx-auto h-8 w-8 animate-spin text-amber-600 mb-3" />
-        <p className="text-sm text-slate-500 font-medium">Loading details...</p>
+        <Loader2 className="mx-auto size-8 animate-spin text-warning mb-3" />
+        <p className="text-sm text-muted-foreground font-medium">Loading details...</p>
       </div>
     )
   }
@@ -418,26 +418,26 @@ function AssignCustomerPage() {
     <div className="space-y-6">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-1.5 text-sm">
-        <button onClick={() => navigate({ to: '/sales-ledger' })} className="text-slate-500 hover:text-slate-800 font-medium transition-colors">
+        <button onClick={() => navigate({ to: '/sales-ledger' })} className="text-muted-foreground hover:text-foreground font-medium transition-colors duration-250 ease-luxe">
           Sales Ledger
         </button>
-        <ChevronRight size={14} className="text-slate-300" />
-        <button onClick={goBack} className="text-slate-500 hover:text-slate-800 font-medium transition-colors">
+        <ChevronRight className="size-3.5 text-muted-foreground" />
+        <button onClick={goBack} className="text-muted-foreground hover:text-foreground font-medium transition-colors duration-250 ease-luxe">
           {truckNumber || 'Details'}
         </button>
-        <ChevronRight size={14} className="text-slate-300" />
-        <span className="text-slate-900 font-semibold">Assign Customer</span>
+        <ChevronRight className="size-3.5 text-muted-foreground" />
+        <span className="text-foreground font-semibold">Assign Customer</span>
       </nav>
 
       {/* Header */}
       <div className="flex items-center justify-between border-b border-border pb-4">
         <div className="flex items-center gap-3">
           <Button variant="outline" size="sm" className="gap-1.5 text-foreground" onClick={goBack}>
-            <ArrowLeft size={16} /> Back
+            <ArrowLeft className="size-4" /> Back
           </Button>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
-              <UserPlus size={22} className="text-amber-600 dark:text-amber-400" />
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground flex items-center gap-2">
+              <UserPlus className="size-5 text-warning" />
               Assign New Customer
             </h1>
             <p className="text-xs text-muted-foreground mt-0.5">
@@ -448,59 +448,59 @@ function AssignCustomerPage() {
       </div>
 
       {/* Truck Context Card */}
-      <Card className="bg-amber-500/10 border-amber-500/20 shadow-sm">
-        <CardHeader className="pb-3 border-b border-amber-500/20">
-          <CardTitle className="text-sm font-bold text-amber-900 dark:text-amber-200 flex items-center gap-2">
-            <Truck size={16} className="text-amber-600 dark:text-amber-400" />
+      <Card className="bg-warning/10 border-warning/20">
+        <CardHeader className="pb-3 border-b border-warning/20">
+          <CardTitle className="text-sm font-semibold text-warning flex items-center gap-2">
+            <Truck className="size-4 text-warning" />
             Truck Context
           </CardTitle>
-          <CardDescription className="text-xs text-amber-700 dark:text-amber-300">
+          <CardDescription className="text-xs text-warning">
             This assignment is bound to the currently viewed truck cycle.
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-4">
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-sm">
-            <div className="p-3 bg-card rounded-xl border border-amber-500/20">
+            <div className="p-3 bg-card rounded-xl border border-warning/20">
               <div className="text-xs text-muted-foreground font-medium flex items-center gap-1">
-                <Truck size={12} className="text-amber-600 dark:text-amber-400" /> Truck Number
+                <Truck className="size-3 text-warning" /> Truck Number
               </div>
-              <div className="font-extrabold text-base font-mono text-foreground mt-0.5">
+              <div className="font-semibold text-base font-mono text-foreground mt-0.5">
                 {truckNumber || '—'}
               </div>
             </div>
-            <div className="p-3 bg-card rounded-xl border border-amber-500/20">
+            <div className="p-3 bg-card rounded-xl border border-warning/20">
               <div className="text-xs text-muted-foreground font-medium flex items-center gap-1">
-                <Calendar size={12} className="text-indigo-500" /> Date Loaded
+                <Calendar className="size-3 text-muted-foreground" /> Date Loaded
               </div>
-              <div className="font-bold text-foreground mt-0.5">
+              <div className="font-semibold text-foreground mt-0.5">
                 {safeFormatDate(dateLoaded)}
               </div>
             </div>
-            <div className="p-3 bg-card rounded-xl border border-amber-500/20">
+            <div className="p-3 bg-card rounded-xl border border-warning/20">
               <div className="text-xs text-muted-foreground font-medium flex items-center gap-1">
-                <Building2 size={12} className="text-amber-500" /> Depot
+                <Building2 className="size-3 text-warning" /> Depot
               </div>
-              <div className="font-bold text-foreground mt-0.5">
+              <div className="font-semibold text-foreground mt-0.5">
                 {depot || '—'}
               </div>
             </div>
-            <div className="p-3 bg-card rounded-xl border border-amber-500/20">
+            <div className="p-3 bg-card rounded-xl border border-warning/20">
               <div className="text-xs text-muted-foreground font-medium flex items-center gap-1">
-                <Tag size={12} className="text-purple-500" /> PFI Code
+                <Tag className="size-3 text-muted-foreground" /> PFI Code
               </div>
-              <div className="font-bold text-foreground mt-0.5">
+              <div className="font-semibold text-foreground mt-0.5">
                 {code ? (
-                  <Badge variant="outline" className="font-mono text-xs uppercase bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/20">
+                  <Badge variant="outline" className="font-mono text-xs uppercase bg-muted/10 text-foreground dark:text-muted-foreground border-border/20">
                     {code}
                   </Badge>
                 ) : 'None'}
               </div>
             </div>
-            <div className="p-3 bg-card rounded-xl border border-amber-500/20">
+            <div className="p-3 bg-card rounded-xl border border-warning/20">
               <div className="text-xs text-muted-foreground font-medium flex items-center gap-1">
-                <Fuel size={12} className="text-emerald-600 dark:text-emerald-400" /> Capacity
+                <Fuel className="size-3 text-accent" /> Capacity
               </div>
-              <div className="font-extrabold text-foreground mt-0.5">
+              <div className="font-semibold text-foreground mt-0.5">
                 {totalTruckCapacity > 0 ? (
                   <>
                     {totalTruckCapacity.toLocaleString()} L
@@ -519,10 +519,10 @@ function AssignCustomerPage() {
 
       {/* Existing Assignments */}
       {existingAssignments.length > 0 && (
-        <Card className="bg-card shadow-sm border-border">
+        <Card className="bg-card border-border">
           <CardHeader className="border-b border-border pb-3">
-            <CardTitle className="text-base font-bold text-foreground flex items-center gap-2">
-              <Users size={16} className="text-indigo-500" />
+            <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
+              <Users className="size-4 text-muted-foreground" />
               Already Assigned Customers ({existingAssignments.length})
             </CardTitle>
             <CardDescription className="text-xs">
@@ -538,12 +538,12 @@ function AssignCustomerPage() {
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     {a.isFillingStation ? (
-                      <div className="p-1.5 rounded-lg bg-amber-500/20">
-                        <Fuel size={14} className="text-amber-600 dark:text-amber-400" />
+                      <div className="p-1.5 rounded-lg bg-warning/20">
+                        <Fuel className="size-3.5 text-warning" />
                       </div>
                     ) : (
-                      <div className="p-1.5 rounded-lg bg-indigo-500/20">
-                        <Users size={14} className="text-indigo-600 dark:text-indigo-400" />
+                      <div className="p-1.5 rounded-lg bg-muted/20">
+                        <Users className="size-3.5 text-muted-foreground" />
                       </div>
                     )}
                     <div className="min-w-0">
@@ -551,11 +551,11 @@ function AssignCustomerPage() {
                       <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
                         {a.location && (
                           <span className="flex items-center gap-0.5">
-                            <MapPin size={10} /> {a.location}
+                            <MapPin className="size-2.5" /> {a.location}
                           </span>
                         )}
                         {a.isFillingStation && (
-                          <Badge className="text-[10px] bg-amber-500/20 text-amber-800 dark:text-amber-200 border-amber-500/30 px-1 py-0">
+                          <Badge className="text-[10px] bg-warning/20 text-warning border-warning/30 px-1 py-0">
                             FS
                           </Badge>
                         )}
@@ -563,9 +563,9 @@ function AssignCustomerPage() {
                     </div>
                   </div>
                   <div className="text-right shrink-0 ml-3">
-                    <p className="font-bold text-foreground text-sm">{a.quantity > 0 ? `${a.quantity.toLocaleString()} L` : '—'}</p>
+                    <p className="font-semibold text-foreground text-sm">{a.quantity > 0 ? `${a.quantity.toLocaleString()} L` : '—'}</p>
                     {a.paymentCount > 0 && (
-                      <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
+                      <p className="text-[11px] text-accent font-medium">
                         {a.paymentCount} payment{a.paymentCount !== 1 ? 's' : ''} · {a.totalPaid.toLocaleString()} paid
                       </p>
                     )}
@@ -579,7 +579,7 @@ function AssignCustomerPage() {
                   Total already allocated: <strong className="text-foreground">{alreadyAllocatedQty.toLocaleString()} L</strong>
                 </span>
                 {totalTruckCapacity > 0 && (
-                  <span className={`font-bold ${remainingCapacity > 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                  <span className={`font-semibold ${remainingCapacity > 0 ? 'text-accent' : 'text-destructive'}`}>
                     {remainingCapacity > 0
                       ? `${remainingCapacity.toLocaleString()} L remaining`
                       : 'Fully allocated'}
@@ -593,16 +593,16 @@ function AssignCustomerPage() {
 
       {/* No existing assignments - info banner */}
       {existingAssignments.length === 0 && (
-        <div className="flex items-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-700">
-          <Users size={14} className="shrink-0" />
+        <div className="flex items-center gap-2 p-3 bg-muted border border-border rounded-xl text-xs text-foreground">
+          <Users className="size-3.5 shrink-0" />
           <span>No customers are currently assigned to this truck cycle. Use the form below to assign the first customer.</span>
         </div>
       )}
 
       {/* Capacity fully allocated warning */}
       {remainingCapacity <= 0 && totalTruckCapacity > 0 && (
-        <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700">
-          <AlertTriangle size={14} className="shrink-0" />
+        <div className="flex items-center gap-2 p-3 bg-destructive/10 border border-destructive/40 rounded-xl text-xs text-destructive">
+          <AlertTriangle className="size-3.5 shrink-0" />
           <span>
             <strong>Fully allocated.</strong> This truck's capacity ({totalTruckCapacity.toLocaleString()} L) is fully used by existing assignments.
             Adding more customers will exceed capacity.
@@ -611,11 +611,11 @@ function AssignCustomerPage() {
       )}
 
       {/* Customer Assignment Form */}
-      <Card className="bg-card shadow-sm border-border">
+      <Card className="bg-card border-border">
         <CardHeader className="border-b border-border pb-3 flex flex-row items-center justify-between">
           <div>
-            <CardTitle className="text-base font-bold text-foreground flex items-center gap-2">
-              <UserPlus size={18} className="text-muted-foreground" />
+            <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
+              <UserPlus className="size-4 text-muted-foreground" />
               New Customer Assignment ({saleRows.length})
             </CardTitle>
             <CardDescription className="text-xs">
@@ -625,7 +625,7 @@ function AssignCustomerPage() {
             </CardDescription>
           </div>
           <Button type="button" variant="outline" size="sm" className="gap-1.5 text-xs h-8" onClick={addSaleRow}>
-            <Plus size={13} /> Add Customer
+            <Plus className="size-3.5" /> Add Customer
           </Button>
         </CardHeader>
         <CardContent className="pt-5 space-y-4">
@@ -637,15 +637,15 @@ function AssignCustomerPage() {
             return (
               <div
                 key={row.uid}
-                className={`border rounded-xl p-4 space-y-4 relative transition-all ${hasError ? 'border-red-400 bg-red-500/10' : isFS ? 'border-amber-500/30 bg-amber-500/10' : 'border-border bg-muted/40'
-                  }`}
+                className={`border rounded-xl p-4 space-y-4 relative transition-all ${hasError ? 'border-destructive bg-destructive/10' : isFS ? 'border-warning/30 bg-warning/10' : 'border-border bg-muted/40'
+ }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                    {isFS && <Fuel size={14} className="text-amber-600 dark:text-amber-400" />}
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em] flex items-center gap-1.5">
+                    {isFS && <Fuel className="size-3.5 text-warning" />}
                     Customer #{idx + 1}
                     {isFS && (
-                      <Badge className="ml-1 text-[10px] font-semibold bg-amber-500/20 text-amber-800 dark:text-amber-200 border-amber-500/30 px-1.5 py-0 normal-case tracking-normal">
+                      <Badge className="ml-1 text-[10px] font-semibold bg-warning/20 text-warning border-warning/30 px-1.5 py-0 normal-case tracking-normal">
                         Filling Station
                       </Badge>
                     )}
@@ -654,10 +654,10 @@ function AssignCustomerPage() {
                     <button
                       type="button"
                       onClick={() => removeSaleRow(row.uid)}
-                      className="text-muted-foreground hover:text-red-500 transition-colors p-1 rounded-md"
+                      className="text-muted-foreground hover:text-destructive transition-colors p-1 rounded-md duration-250 ease-luxe"
                       title="Remove customer row"
                     >
-                      <X size={16} />
+                      <X className="size-4" />
                     </button>
                   )}
                 </div>
@@ -665,14 +665,14 @@ function AssignCustomerPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="space-y-1.5">
                     <Label className="text-xs font-semibold text-foreground">
-                      Select Customer <span className="text-red-500">*</span>
+                      Select Customer <span className="text-destructive">*</span>
                     </Label>
                     <select
                       aria-label={`Customer for row ${idx + 1}`}
                       value={row.customer}
                       onChange={e => updateSaleRow(row.uid, 'customer', e.target.value)}
-                      className={`h-10 w-full rounded-lg border bg-background text-foreground px-3 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring ${rowErrors[row.uid]?.customer ? 'border-red-500' : 'border-input'
-                        }`}
+                      className={`h-10 w-full rounded-lg border bg-background text-foreground px-3 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring ${rowErrors[row.uid]?.customer ? 'border-destructive' : 'border-input'
+ }`}
                     >
                       <option value="">Select customer...</option>
                       {availableCustomers.map(c => {
@@ -686,39 +686,39 @@ function AssignCustomerPage() {
                       })}
                     </select>
                     {rowErrors[row.uid]?.customer && (
-                      <p className="text-[11px] text-red-500 font-medium">{rowErrors[row.uid].customer}</p>
+                      <p className="text-[11px] text-destructive font-medium">{rowErrors[row.uid].customer}</p>
                     )}
                   </div>
 
                   <div className="space-y-1.5">
                     <Label className="text-xs font-semibold text-foreground">
-                      Destination <span className="text-red-500">*</span>
+                      Destination <span className="text-destructive">*</span>
                     </Label>
                     <Input
                       placeholder="e.g. Kano, Abuja, Station Name..."
-                      className={`h-10 text-sm ${rowErrors[row.uid]?.location ? 'border-red-500' : ''}`}
+                      className={`h-10 text-sm ${rowErrors[row.uid]?.location ? 'border-destructive' : ''}`}
                       value={row.location}
                       onChange={e => updateSaleRow(row.uid, 'location', e.target.value)}
                     />
                     {rowErrors[row.uid]?.location && (
-                      <p className="text-[11px] text-red-500 font-medium">{rowErrors[row.uid].location}</p>
+                      <p className="text-[11px] text-destructive font-medium">{rowErrors[row.uid].location}</p>
                     )}
                   </div>
 
                   <div className="space-y-1.5">
                     <Label className="text-xs font-semibold text-foreground">
-                      Quantity (Litres) <span className="text-red-500">*</span>
+                      Quantity (Litres) <span className="text-destructive">*</span>
                     </Label>
                     <Input
                       type="text"
                       inputMode="decimal"
                       placeholder={remainingCapacity > 0 ? `max ${remainingCapacity.toLocaleString()}` : 'e.g. 33,000'}
-                      className={`h-10 text-sm font-medium ${rowErrors[row.uid]?.quantity ? 'border-red-500' : ''}`}
+                      className={`h-10 text-sm font-medium ${rowErrors[row.uid]?.quantity ? 'border-destructive' : ''}`}
                       value={row.quantity}
                       onChange={e => updateSaleRow(row.uid, 'quantity', e.target.value)}
                     />
                     {rowErrors[row.uid]?.quantity && (
-                      <p className="text-[11px] text-red-500 font-medium">{rowErrors[row.uid].quantity}</p>
+                      <p className="text-[11px] text-destructive font-medium">{rowErrors[row.uid].quantity}</p>
                     )}
                   </div>
                 </div>
@@ -749,10 +749,10 @@ function AssignCustomerPage() {
 
           {/* Combined Capacity Bar (existing + new) */}
           {totalTruckCapacity > 0 && (
-            <div className={`p-4 rounded-xl border ${isOverCapacity ? 'bg-red-500/10 border-red-500/30' : combinedPct > 80 ? 'bg-amber-500/10 border-amber-500/30' : 'bg-emerald-500/10 border-emerald-500/30'}`}>
+            <div className={`p-4 rounded-xl border ${isOverCapacity ? 'bg-destructive/10 border-destructive/30' : combinedPct > 80 ? 'bg-warning/10 border-warning/30' : 'bg-accent/10 border-accent/30'}`}>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-semibold text-muted-foreground">Total Truck Capacity Usage</span>
-                <span className={`text-xs font-bold ${isOverCapacity ? 'text-red-600' : combinedPct > 80 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                <span className={`text-xs font-semibold ${isOverCapacity ? 'text-destructive' : combinedPct > 80 ? 'text-warning' : 'text-accent'}`}>
                   {combinedTotal.toLocaleString()} / {totalTruckCapacity.toLocaleString()} L ({combinedPct}%)
                 </span>
               </div>
@@ -760,7 +760,7 @@ function AssignCustomerPage() {
                 {/* Existing allocations segment */}
                 {alreadyAllocatedQty > 0 && (
                   <div
-                    className="h-full bg-indigo-400 transition-all"
+                    className="h-full bg-muted transition-all duration-250 ease-luxe"
                     style={{ width: `${Math.min(100, Math.round((alreadyAllocatedQty / totalTruckCapacity) * 100))}%` }}
                     title={`Already assigned: ${alreadyAllocatedQty.toLocaleString()} L`}
                   />
@@ -768,7 +768,7 @@ function AssignCustomerPage() {
                 {/* New allocations segment */}
                 {newEntriesQty > 0 && (
                   <div
-                    className={`h-full transition-all ${isOverCapacity ? 'bg-red-500' : combinedPct > 80 ? 'bg-amber-500' : 'bg-emerald-500'}`}
+                    className={`h-full transition-all ${isOverCapacity ? 'bg-destructive' : combinedPct > 80 ? 'bg-warning' : 'bg-accent'}`}
                     style={{ width: `${Math.min(100 - Math.round((alreadyAllocatedQty / totalTruckCapacity) * 100), Math.round((newEntriesQty / totalTruckCapacity) * 100))}%` }}
                     title={`New entries: ${newEntriesQty.toLocaleString()} L`}
                   />
@@ -777,18 +777,18 @@ function AssignCustomerPage() {
               <div className="flex items-center gap-4 mt-2 text-[11px]">
                 {alreadyAllocatedQty > 0 && (
                   <span className="flex items-center gap-1.5">
-                    <span className="h-2 w-2 rounded-full bg-indigo-400" />
-                    <span className="text-slate-500">Already assigned: <strong className="text-slate-700">{alreadyAllocatedQty.toLocaleString()} L</strong></span>
+                    <span className="size-2 rounded-full bg-muted" />
+                    <span className="text-muted-foreground">Already assigned: <strong className="text-foreground">{alreadyAllocatedQty.toLocaleString()} L</strong></span>
                   </span>
                 )}
                 {newEntriesQty > 0 && (
                   <span className="flex items-center gap-1.5">
-                    <span className={`h-2 w-2 rounded-full ${isOverCapacity ? 'bg-red-500' : 'bg-emerald-500'}`} />
-                    <span className="text-slate-500">New entries: <strong className="text-slate-700">{newEntriesQty.toLocaleString()} L</strong></span>
+                    <span className={`size-2 rounded-full ${isOverCapacity ? 'bg-destructive' : 'bg-accent'}`} />
+                    <span className="text-muted-foreground">New entries: <strong className="text-foreground">{newEntriesQty.toLocaleString()} L</strong></span>
                   </span>
                 )}
                 {remainingCapacity > 0 && newEntriesQty === 0 && (
-                  <span className="text-slate-400">
+                  <span className="text-muted-foreground">
                     {remainingCapacity.toLocaleString()} L available for new assignments
                   </span>
                 )}
@@ -797,16 +797,16 @@ function AssignCustomerPage() {
           )}
 
           {/* Footer */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-border">
             <Button variant="outline" onClick={goBack} disabled={saving}>
               Cancel
             </Button>
             <Button
               onClick={handleSave}
               disabled={saving}
-              className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
+              className="gap-2 bg-accent hover:bg-accent/80 text-accent-foreground font-semibold"
             >
-              {saving ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
+              {saving ? <Loader2 className="size-4 animate-spin" /> : <CheckCircle2 className="size-4" />}
               {saving ? 'Assigning...' : `Confirm & Assign to ${truckNumber}`}
             </Button>
           </div>

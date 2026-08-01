@@ -39,15 +39,6 @@ export function CustomerStep({ wizard }: CustomerStepProps) {
 
   return (
     <div key="step-1" className="space-y-6 animate-fade-in">
-      <div className="flex items-center gap-3 border-b border-border pb-4">
-        <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-          <User size={18} />
-        </div>
-        <div>
-          <h2 className="text-lg font-bold">Customer Identification</h2>
-          <p className="text-sm text-muted-foreground">Search for an existing customer or register a new profile.</p>
-        </div>
-      </div>
 
       {!isRegisteringCustomer ? (
         <div className="space-y-4">
@@ -55,16 +46,16 @@ export function CustomerStep({ wizard }: CustomerStepProps) {
             <>
               <div className="p-4 border rounded-xl bg-muted/30 space-y-3">
                 <div className="flex items-center gap-2 border-b border-border pb-2">
-                  <div className="h-6 w-6 rounded bg-primary/10 flex items-center justify-center">
-                    <User className="text-primary w-3.5 h-3.5" />
+                  <div className="size-6 rounded bg-primary/10 flex items-center justify-center">
+                    <User className="text-primary size-3.5" />
                   </div>
-                  <span className="font-bold text-sm">Selected Customer</span>
+                  <span className="font-semibold text-sm">Selected Customer</span>
                   <Badge variant="outline" className={`ml-auto ${selectedCustomer.status === 'Active' ? 'bg-success/10 text-success border-success/20' : ''}`}>
                     {selectedCustomer.status}
                   </Badge>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-lime-700 to-lime-500 flex items-center justify-center text-white text-sm font-bold shrink-0">
+                  <div className="bg-accent size-10 rounded-full flex items-center justify-center text-white text-sm font-semibold shrink-0">
                     {selectedCustomer.name?.charAt(0)?.toUpperCase() || '?'}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -101,57 +92,57 @@ export function CustomerStep({ wizard }: CustomerStepProps) {
             <>
               <div className="flex flex-col sm:flex-row gap-2">
                 <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground size-4" />
                   <Input
                     placeholder="Search by name, email, phone, or company..."
                     value={customerSearch}
                     onChange={(e) => { setCustomerSearch(e.target.value); setSelectedCustomer(null); setIsSearchOpen(true); }}
                     className="pl-10"
                     autoFocus
-                  />
+ />
                   {customerSearch && (
                     <button
                       onClick={() => { setCustomerSearch(''); setSelectedCustomer(null); setIsSearchOpen(false); }}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                    >
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors duration-250 ease-luxe"
+ >
                       &times;
                     </button>
                   )}
                 </div>
                 <Button variant="outline" onClick={() => setIsRegisteringCustomer(true)} className="shrink-0">
-                  <Plus className="w-4 h-4 mr-2" /> Register New
+                  <Plus className="size-4 mr-2" /> Register New
                 </Button>
               </div>
 
               {!customerSearch.trim() ? (
                 <div className="p-10 text-center border border-dashed rounded-xl bg-muted/20">
-                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-muted border border-border mb-3">
-                    <Search size={20} className="text-muted-foreground" />
+                  <div className="inline-flex size-12 items-center justify-center rounded-xl bg-muted border border-border mb-3">
+                    <Search className="size-5 text-muted-foreground" />
                   </div>
                   <p className="text-sm font-medium text-foreground">Search for a customer</p>
                   <p className="text-xs text-muted-foreground mt-1">Type at least 2 characters to search by name, email, phone, or company.</p>
                 </div>
               ) : customerSearch.trim().length < 2 ? (
                 <div className="p-10 text-center border border-dashed rounded-xl bg-muted/20">
-                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-muted border border-border mb-3">
-                    <Search size={20} className="text-muted-foreground" />
+                  <div className="inline-flex size-12 items-center justify-center rounded-xl bg-muted border border-border mb-3">
+                    <Search className="size-5 text-muted-foreground" />
                   </div>
                   <p className="text-sm font-medium text-foreground">Keep typing...</p>
                   <p className="text-xs text-muted-foreground mt-1">Enter at least 2 characters to start searching.</p>
                 </div>
               ) : isSearchingCustomers && searchPage === 1 ? (
                 <div className="flex items-center justify-center py-16">
-                  <Loader2 size={24} className="animate-spin text-muted-foreground" />
+                  <Loader2 className="size-6 animate-spin text-muted-foreground" />
                 </div>
               ) : customers.length === 0 ? (
                 <div className="p-10 text-center border border-dashed rounded-xl">
-                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-muted border border-border mb-3">
-                    <User size={20} className="text-muted-foreground" />
+                  <div className="inline-flex size-12 items-center justify-center rounded-xl bg-muted border border-border mb-3">
+                    <User className="size-5 text-muted-foreground" />
                   </div>
                   <p className="text-sm font-medium text-foreground">No customer matches found</p>
                   <p className="text-xs text-muted-foreground mt-1">Try a different search or register a new customer.</p>
                   <Button variant="ghost" size="sm" onClick={() => setIsRegisteringCustomer(true)} className="mt-3 text-primary">
-                    <Plus size={14} className="mr-1" /> Register "{customerSearch}"
+                    <Plus className="size-3.5 mr-1" /> Register "{customerSearch}"
                   </Button>
                 </div>
               ) : (
@@ -161,9 +152,9 @@ export function CustomerStep({ wizard }: CustomerStepProps) {
                       <div
                         key={c._id}
                         onClick={() => { setSelectedCustomer(c); setIsSearchOpen(false); setCustomerSearch(''); }}
-                        className="p-3 sm:p-4 rounded-xl border cursor-pointer transition-all duration-200 flex items-center gap-3 hover:bg-muted/50 hover:border-muted-foreground/20 border-border"
-                      >
-                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-lime-700 to-lime-500 flex items-center justify-center text-white text-sm font-bold shrink-0">
+                        className="p-3 sm:p-4 rounded-xl border cursor-pointer transition-all duration-200 flex items-center gap-3 hover:bg-muted/50 hover:border-muted-foreground/20 border-border ease-luxe"
+ >
+                        <div className="bg-accent size-10 rounded-full flex items-center justify-center text-white text-sm font-semibold shrink-0">
                           {c.name?.charAt(0)?.toUpperCase() || '?'}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -174,7 +165,7 @@ export function CustomerStep({ wizard }: CustomerStepProps) {
                         </div>
                         <div className="text-right shrink-0">
                           <span className="text-[10px] text-muted-foreground block">Balance</span>
-                          <span className={`font-bold text-sm ${(c.balance || 0) < 0 ? 'text-destructive' : 'text-foreground'}`}>
+                          <span className={`font-semibold text-sm ${(c.balance || 0) < 0 ? 'text-destructive' : 'text-foreground'}`}>
                             {formatCurrency(c.balance || 0)}
                           </span>
                         </div>
@@ -192,9 +183,9 @@ export function CustomerStep({ wizard }: CustomerStepProps) {
                         className="text-xs text-primary"
                         onClick={() => setSearchPage(prev => prev + 1)}
                         disabled={isSearchingCustomers}
-                      >
+ >
                         {isSearchingCustomers ? (
-                          <><Loader2 size={12} className="animate-spin mr-1" /> Loading...</>
+                          <><Loader2 className="size-3 animate-spin mr-1" /> Loading...</>
                         ) : (
                           'Load More'
                         )}
@@ -207,13 +198,13 @@ export function CustomerStep({ wizard }: CustomerStepProps) {
           )}
         </div>
       ) : (
-        <div className="space-y-4 border p-5 rounded-xl bg-card shadow-sm">
+        <div className="space-y-4 border p-5 rounded-xl bg-card">
           <div className="flex justify-between items-center border-b border-border pb-2">
             <div className="flex items-center gap-2">
-              <div className="h-6 w-6 rounded bg-primary/10 flex items-center justify-center">
-                <Plus className="text-primary w-3.5 h-3.5" />
+              <div className="size-6 rounded bg-primary/10 flex items-center justify-center">
+                <Plus className="text-primary size-3.5" />
               </div>
-              <span className="font-bold text-sm">New Customer Registration</span>
+              <span className="font-semibold text-sm">New Customer Registration</span>
             </div>
             <Button variant="ghost" size="sm" onClick={() => setIsRegisteringCustomer(false)}>Cancel</Button>
           </div>
@@ -225,7 +216,7 @@ export function CustomerStep({ wizard }: CustomerStepProps) {
                 placeholder="e.g. Ahmad Oluwafemi"
                 value={newCustomerForm.name}
                 onChange={(e) => setNewCustomerForm({ ...newCustomerForm, name: e.target.value })}
-              />
+ />
             </div>
             <div className="space-y-1.5">
               <Label>Phone Number *</Label>
@@ -236,7 +227,7 @@ export function CustomerStep({ wizard }: CustomerStepProps) {
                 placeholder="e.g. 08012345678"
                 value={newCustomerForm.phone}
                 onChange={(e) => setNewCustomerForm({ ...newCustomerForm, phone: e.target.value })}
-              />
+ />
             </div>
             <div className="space-y-1.5">
               <Label>Email Address</Label>
@@ -245,7 +236,7 @@ export function CustomerStep({ wizard }: CustomerStepProps) {
                 placeholder="e.g. customer@example.com"
                 value={newCustomerForm.email}
                 onChange={(e) => setNewCustomerForm({ ...newCustomerForm, email: e.target.value })}
-              />
+ />
             </div>
             <div className="space-y-1.5">
               <Label>Company Name</Label>
@@ -253,7 +244,7 @@ export function CustomerStep({ wizard }: CustomerStepProps) {
                 placeholder="e.g. Ahmad Logistics Ltd"
                 value={newCustomerForm.companyName}
                 onChange={(e) => setNewCustomerForm({ ...newCustomerForm, companyName: e.target.value })}
-              />
+ />
             </div>
             <div className="space-y-1.5 sm:col-span-2">
               <Label>Address</Label>
@@ -261,18 +252,18 @@ export function CustomerStep({ wizard }: CustomerStepProps) {
                 placeholder="e.g. 12 Link Road, Ikeja, Lagos"
                 value={newCustomerForm.address}
                 onChange={(e) => setNewCustomerForm({ ...newCustomerForm, address: e.target.value })}
-              />
+ />
             </div>
           </div>
 
           <div className="flex justify-end gap-2 border-t border-border pt-3">
             <Button variant="outline" onClick={() => setIsRegisteringCustomer(false)}>Cancel</Button>
             <Button
-              className="gradient-primary text-white border-0"
+              
               onClick={handleRegisterCustomer}
               disabled={createCustomerMutation.isPending}
-            >
-              {createCustomerMutation.isPending ? <Loader2 size={16} className="animate-spin mr-2" /> : null}
+ >
+              {createCustomerMutation.isPending ? <Loader2 className="size-4 animate-spin mr-2" /> : null}
               Register & Proceed
             </Button>
           </div>

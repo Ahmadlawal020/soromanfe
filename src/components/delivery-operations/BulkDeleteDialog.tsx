@@ -17,8 +17,8 @@ export function BulkDeleteDialog({ open, count, onClose, onConfirm, loading }: B
     <Dialog open={open} onOpenChange={open => { if (!open) onClose() }}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-red-600">
-            <AlertTriangle size={20} />
+          <DialogTitle className="flex items-center gap-2 text-destructive">
+            <AlertTriangle className="size-5" />
             Bulk Delete
           </DialogTitle>
           <DialogDescription>
@@ -37,7 +37,7 @@ export function BulkDeleteDialog({ open, count, onClose, onConfirm, loading }: B
             disabled={loading}
             className="gap-2"
           >
-            {loading ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
+            {loading ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
             {loading ? 'Deleting...' : `Delete ${count} Record${count !== 1 ? 's' : ''}`}
           </Button>
         </DialogFooter>

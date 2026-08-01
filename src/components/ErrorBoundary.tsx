@@ -38,11 +38,11 @@ export class ErrorBoundary extends Component<Props, State> {
 
       return (
         <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
-          <div className="h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center text-destructive border border-destructive/20">
-            <AlertTriangle size={32} />
+          <div className="size-16 rounded-full bg-destructive/10 flex items-center justify-center text-destructive border border-destructive/20">
+            <AlertTriangle className="size-8" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-foreground">Something went wrong</h2>
+            <h2 className="text-xl font-semibold text-foreground">Something went wrong</h2>
             <p className="text-sm text-muted-foreground mt-1 max-w-md">
               An unexpected error occurred. Please try refreshing the page.
             </p>
@@ -54,7 +54,7 @@ export class ErrorBoundary extends Component<Props, State> {
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={this.handleReset}>
-              <RefreshCw size={14} className="mr-2" />
+              <RefreshCw className="size-3.5 mr-2" />
               Try Again
             </Button>
             <Button onClick={() => window.location.reload()}>

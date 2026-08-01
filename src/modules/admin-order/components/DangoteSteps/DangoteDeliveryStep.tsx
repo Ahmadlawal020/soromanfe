@@ -43,21 +43,12 @@ export function DangoteDeliveryStep({ wizard }: DangoteDeliveryStepProps) {
 
   return (
     <div key="dangote-step-4" className="space-y-6 animate-fade-in">
-      <div className="flex items-center gap-3 border-b border-border pb-4">
-        <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-          <MapPin size={18} />
-        </div>
-        <div>
-          <h2 className="text-lg font-bold">Delivery Location</h2>
-          <p className="text-sm text-muted-foreground">Enter the delivery address where the product will be delivered.</p>
-        </div>
-      </div>
 
       <div className="space-y-4">
         {/* Delivery Address */}
         <div className="space-y-1.5">
           <Label className="flex items-center gap-1.5">
-            <Navigation className="w-3.5 h-3.5 text-muted-foreground" />
+            <Navigation className="size-3.5 text-muted-foreground" />
             Delivery Address *
           </Label>
           <textarea
@@ -65,7 +56,7 @@ export function DangoteDeliveryStep({ wizard }: DangoteDeliveryStepProps) {
             value={deliveryAddress}
             onChange={(e) => setDeliveryAddress(e.target.value)}
             rows={2}
-            className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/30 transition-all resize-none"
+            className="w-full rounded-lg border border-input bg-background px-2.5 py-1.5 text-base md:text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 transition-all resize-none duration-250 ease-luxe"
           />
         </div>
 
@@ -73,13 +64,13 @@ export function DangoteDeliveryStep({ wizard }: DangoteDeliveryStepProps) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <Label className="flex items-center gap-1.5">
-              <Building2 className="w-3.5 h-3.5 text-muted-foreground" />
+              <Building2 className="size-3.5 text-muted-foreground" />
               State
             </Label>
             <select
               value={deliveryState}
               onChange={(e) => handleStateChange(e.target.value)}
-              className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm focus-visible:ring-2 focus-visible:ring-ring/30 outline-none transition-all"
+              className="w-full h-8 px-2.5 rounded-lg border border-input bg-background text-base md:text-sm focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 outline-none transition-all duration-250 ease-luxe"
             >
               <option value="">Select State</option>
               {nigeriaStates.map((state) => (
@@ -89,14 +80,14 @@ export function DangoteDeliveryStep({ wizard }: DangoteDeliveryStepProps) {
           </div>
           <div className="space-y-1.5">
             <Label className="flex items-center gap-1.5">
-              <MapPin className="w-3.5 h-3.5 text-muted-foreground" />
+              <MapPin className="size-3.5 text-muted-foreground" />
               LGA
             </Label>
             <select
               value={deliveryLga}
               onChange={(e) => setDeliveryLga(e.target.value)}
               disabled={!deliveryState || availableLgas.length === 0}
-              className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm focus-visible:ring-2 focus-visible:ring-ring/30 outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full h-8 px-2.5 rounded-lg border border-input bg-background text-base md:text-sm focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed duration-250 ease-luxe"
             >
               <option value="">{deliveryState ? 'Select LGA' : 'Select a state first'}</option>
               {availableLgas.map((lga) => (
@@ -110,8 +101,8 @@ export function DangoteDeliveryStep({ wizard }: DangoteDeliveryStepProps) {
         {deliveryAddress && (
           <div className="p-4 border rounded-xl bg-muted/30">
             <div className="flex items-center gap-2 mb-2">
-              <MapPin className="text-primary w-4 h-4" />
-              <span className="font-bold text-sm">Delivery Summary</span>
+              <MapPin className="text-primary size-4" />
+              <span className="font-semibold text-sm">Delivery Summary</span>
             </div>
             <p className="text-sm text-foreground">{deliveryAddress}</p>
             {(deliveryState || deliveryLga) && (

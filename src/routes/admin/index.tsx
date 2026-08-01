@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react'
+import { StatCard } from '#/components/ui/stat-card'
+import { StatusChip } from '#/components/ui/status-chip'
 import { useAdminList, useDeleteAdmin } from '#/lib/hooks/useAdmin'
 import { useToast } from '#/lib/hooks/useToast'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
@@ -25,6 +27,7 @@ import {
   Users,
   Plus,
   Search,
+  UserCheck,
   UserX,
   Mail,
   Phone,
@@ -66,14 +69,14 @@ function getStatusBadge(suspended: boolean) {
   if (suspended) {
     return (
       <Badge variant="destructive" className="flex items-center gap-1 w-fit font-normal">
-        <AlertCircle className="w-3 h-3" />
+        <AlertCircle className="size-3" />
         Suspended
       </Badge>
     )
   }
   return (
-    <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 flex items-center gap-1 w-fit font-normal">
-      <CheckCircle2 className="w-3 h-3" />
+    <Badge variant="outline" className="bg-accent/10 text-accent border-accent/20 flex items-center gap-1 w-fit font-normal">
+      <CheckCircle2 className="size-3" />
       Active
     </Badge>
   )
@@ -162,17 +165,17 @@ function StaffManagement() {
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Staff Management</h1>
+          <h1 className="text-xl md:text-2xl font-semibold tracking-tight text-foreground text-balance">Staff Management</h1>
           <p className="text-sm text-muted-foreground mt-1">
             Create, edit, and manage staff access across the dashboard.
           </p>
         </div>
         <Button
           size="sm"
-          className="gradient-primary text-white border-0 shadow-sm hover:shadow transition-all"
+          
           onClick={() => navigate({ to: '/admin/form' })}
-        >
-          <Plus className="w-4 h-4 mr-2" />
+ >
+          <Plus className="size-4 mr-2" />
           Add Staff
         </Button>
       </div>
@@ -180,58 +183,37 @@ function StaffManagement() {
       {/* Metrics Grid */}
       {!isLoading && !isError && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="stats-card transition-all hover:border-primary/20">
-            <CardContent className="p-4 flex justify-between items-center">
-              <div className="space-y-1">
-                <p className="text-xs font-medium text-muted-foreground">Total Staff</p>
-                <p className="text-2xl font-bold tracking-tight">{stats.total}</p>
-              </div>
-              <div className="p-2.5 bg-primary/10 rounded-xl text-primary">
-                <Users className="w-5 h-5" />
-              </div>
-            </CardContent>
-          </Card>
+          <StatCard icon={<Users />} label="Total staff" value={stats.total} />
 
-          <Card className="stats-card transition-all hover:border-emerald-500/20">
-            <CardContent className="p-4 flex justify-between items-center">
-              <div className="space-y-1">
-                <p className="text-xs font-medium text-muted-foreground">Active</p>
-                <p className="text-2xl font-bold tracking-tight text-emerald-600">{stats.active}</p>
-              </div>
-              <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
+          <StatCard
+            icon={<UserCheck />}
+            label="Active"
+            value={stats.active}
+            action={
+              <StatusChip tone="accent">
                 {Math.round((stats.active / (stats.total || 1)) * 100)}%
-              </Badge>
-            </CardContent>
-          </Card>
+              </StatusChip>
+            }
+          />
 
-          <Card className="stats-card transition-all hover:border-destructive/20">
-            <CardContent className="p-4 flex justify-between items-center">
-              <div className="space-y-1">
-                <p className="text-xs font-medium text-muted-foreground">Suspended</p>
-                <p className="text-2xl font-bold tracking-tight text-destructive">{stats.suspended}</p>
-              </div>
-              <div className="p-2.5 bg-destructive/10 rounded-xl text-destructive">
-                <UserX className="w-5 h-5" />
-              </div>
-            </CardContent>
-          </Card>
+          <StatCard
+            tone="red"
+            icon={<UserX />}
+            label="Suspended"
+            value={stats.suspended}
+          />
 
-          <Card className="stats-card transition-all hover:border-amber-500/20">
-            <CardContent className="p-4 flex justify-between items-center">
-              <div className="space-y-1">
-                <p className="text-xs font-medium text-muted-foreground">New This Month</p>
-                <p className="text-2xl font-bold tracking-tight text-amber-600">{stats.newThisMonth}</p>
-              </div>
-              <div className="p-2.5 bg-amber-500/10 rounded-xl text-amber-600">
-                <Plus className="w-5 h-5" />
-              </div>
-            </CardContent>
-          </Card>
+          <StatCard
+            tone="amber"
+            icon={<Plus />}
+            label="New this month"
+            value={stats.newThisMonth}
+          />
         </div>
       )}
 
       {/* Main Table Card */}
-      <Card className="border border-border/60 shadow-sm">
+      <Card className="border border-border/60">
         <CardHeader className="border-b border-border/60 bg-muted/20">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
@@ -240,21 +222,21 @@ function StaffManagement() {
             </div>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               <div className="relative flex-1 sm:w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground size-4" />
                 <Input
                   type="text"
                   placeholder="Search users..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-9 pr-8 text-xs h-9"
-                />
+ />
                 {searchTerm && (
                   <button
                     onClick={() => setSearchTerm('')}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground flex items-center justify-center transition-colors"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 size-4 rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground flex items-center justify-center transition-colors duration-250 ease-luxe"
                     aria-label="Clear search"
-                  >
-                    <X size={10} />
+ >
+                    <X className="size-2.5" />
                   </button>
                 )}
               </div>
@@ -293,14 +275,14 @@ function StaffManagement() {
             <PageError message={(error as any)?.message || 'Failed to load staff'} onRetry={() => refetch()} />
           ) : filteredStaff.length === 0 ? (
             <PageEmpty
-              icon={<Users size={24} className="text-muted-foreground" />}
+              icon={<Users className="size-6 text-muted-foreground" />}
               title={hasFilters ? 'No staff match your filters' : 'No staff yet'}
               description={hasFilters ? 'Try adjusting your search or filter criteria.' : 'Get started by adding your first staff member.'}
               actionLabel={hasFilters ? undefined : 'Add Staff'}
               onAction={hasFilters ? undefined : () => navigate({ to: '/admin/form' })}
               hasFilters={hasFilters}
               onClearFilters={() => { setSearchTerm(''); setSelectedLocation('all'); setRoleFilter('all') }}
-            />
+ />
           ) : (
             <>
               <div className="overflow-x-auto">
@@ -322,15 +304,15 @@ function StaffManagement() {
                       return (
                         <TableRow
                           key={staff.id}
-                          className="cursor-pointer hover:bg-muted/50 transition-colors"
+                          className="cursor-pointer hover:bg-muted/50 transition-colors duration-250 ease-luxe"
                           onClick={() => navigate({ to: '/admin/details' as any, state: { staff } as any })}
-                        >
+ >
                           <TableCell className="text-muted-foreground text-center text-xs font-mono">
                             {((currentPage - 1) * pageSize) + idx + 1}
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-3">
-                              <div className="w-9 h-9 rounded-full bg-primary/10 text-primary font-medium flex items-center justify-center text-xs shrink-0 ring-2 ring-primary/5">
+                              <div className="size-9 rounded-full bg-primary/10 text-primary font-medium flex items-center justify-center text-xs shrink-0 ring-2 ring-primary/5">
                                 {getInitials(staff.full_name)}
                               </div>
                               <div className="min-w-0">
@@ -342,19 +324,19 @@ function StaffManagement() {
                           <TableCell className="hidden md:table-cell">
                             <a
                               href={`mailto:${staff.email}`}
-                              className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
+                              className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors duration-250 ease-luxe"
                               onClick={(e) => e.stopPropagation()}
-                            >
-                              <Mail size={12} className="shrink-0" />
+ >
+                              <Mail className="size-3 shrink-0" />
                               <span className="truncate max-w-[160px]">{staff.email}</span>
                             </a>
                             {staff.phone_number && (
                               <a
                                 href={`tel:${staff.phone_number}`}
-                                className="flex items-center gap-1.5 text-[11px] text-muted-foreground hover:text-primary transition-colors mt-0.5"
+                                className="flex items-center gap-1.5 text-[11px] text-muted-foreground hover:text-primary transition-colors mt-0.5 duration-250 ease-luxe"
                                 onClick={(e) => e.stopPropagation()}
-                              >
-                                <Phone size={11} className="shrink-0" />
+ >
+                                <Phone className="size-3 shrink-0" />
                                 {staff.phone_number}
                               </a>
                             )}
@@ -362,7 +344,7 @@ function StaffManagement() {
                           <TableCell className="hidden lg:table-cell text-xs text-foreground">
                             {staff.location_names?.length
                               ? staff.location_names.join(', ')
-                              : <span className="text-muted-foreground inline-flex items-center gap-1 text-xs"><Globe size={11} /> Full Access</span>
+                              : <span className="text-muted-foreground inline-flex items-center gap-1 text-xs"><Globe className="size-3" /> Full Access</span>
                             }
                           </TableCell>
                           <TableCell>
@@ -374,7 +356,7 @@ function StaffManagement() {
                                     key={r}
                                     variant="outline"
                                     className={`text-[10px] px-2 py-0.5 font-normal ${customStyle || ''}`}
-                                  >
+ >
                                     {ROLE_LABELS[r]}
                                   </Badge>
                                 )
@@ -393,10 +375,10 @@ function StaffManagement() {
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                                  className="size-8 text-muted-foreground hover:text-foreground"
                                   onClick={(e) => e.stopPropagation()}
-                                >
-                                  <MoreHorizontal className="h-4 w-4" />
+ >
+                                  <MoreHorizontal className="size-4" />
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="w-36">
@@ -404,14 +386,14 @@ function StaffManagement() {
                                   e.stopPropagation()
                                   navigate({ to: '/admin/form', state: { staff, isEdit: true } as any })
                                 }}>
-                                  <Edit className="mr-2 h-3.5 w-3.5 text-muted-foreground" />
+                                  <Edit className="mr-2 size-3.5 text-muted-foreground" />
                                   Edit
                                 </DropdownMenuItem>
                                 <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={(e) => {
                                   e.stopPropagation()
                                   setDeleteTarget(String(staff.id))
                                 }}>
-                                  <Trash2 className="mr-2 h-3.5 w-3.5" />
+                                  <Trash2 className="mr-2 size-3.5" />
                                   Remove
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
@@ -431,7 +413,7 @@ function StaffManagement() {
                 totalItems={totalItems}
                 onPageChange={setCurrentPage}
                 onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1) }}
-              />
+ />
             </>
           )}
         </CardContent>
@@ -445,7 +427,7 @@ function StaffManagement() {
         variant="destructive"
         onConfirm={confirmDelete}
         loading={deleteAdmin.isPending}
-      />
+ />
     </div>
   )
 }

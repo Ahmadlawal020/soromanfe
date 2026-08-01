@@ -17,11 +17,11 @@ export function Breadcrumbs({ items }: BreadcrumbsProps) {
     <nav aria-label="Breadcrumb" className="flex items-center gap-1 text-sm text-muted-foreground">
       {items.map((item, idx) => (
         <span key={idx} className="flex items-center gap-1">
-          {idx > 0 && <ChevronRight size={14} className="shrink-0" aria-hidden="true" />}
+          {idx > 0 && <ChevronRight className="size-3.5 shrink-0" aria-hidden="true" />}
           {item.href ? (
             <button
               onClick={() => navigate({ to: item.href as any })}
-              className="hover:text-foreground transition-colors cursor-pointer"
+              className="hover:text-foreground transition-colors cursor-pointer duration-250 ease-luxe"
             >
               {item.label}
             </button>

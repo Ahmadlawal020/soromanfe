@@ -117,44 +117,45 @@ export function useOrderWizard() {
     }
   }
 
-  const handleNextStep = () => {
-    setError('')
-    if (step === 1) {
-      if (!selectedCustomer) {
-        setError('Please select an existing customer or register a new one')
-        return
-      }
-      setStep(2)
-    } else if (step === 2) {
-      if (!selectedState) {
-        setError('Please select the destination state')
-        return
-      }
-      if (!selectedDepot) {
-        setError('Please select a depot')
-        return
-      }
-      setStep(3)
-    } else if (step === 3) {
-      if (!selectedProduct) {
-        setError('Please select a product')
-        return
-      }
-      if (!orderQuantity || Number(orderQuantity) <= 0) {
-        setError('Please enter a valid quantity')
-        return
-      }
-      const capacityEntry = selectedDepot.productCapacities?.find(
+  /**
+   * Validation for a single step, independent of where the user currently is.
+   *
+   * Kept separate from navigation so the UI can group several steps onto one
+   * screen and validate the whole group before advancing. Returns the error
+   * message, or null when the step is satisfied.
+   */
+  const validateStep = (target: number): string | null => {
+    if (target === 1) {
+      if (!selectedCustomer) return 'Please select an existing customer or register a new one'
+      return null
+    }
+    if (target === 2) {
+      if (!selectedState) return 'Please select the destination state'
+      if (!selectedDepot) return 'Please select a depot'
+      return null
+    }
+    if (target === 3) {
+      if (!selectedProduct) return 'Please select a product'
+      if (!orderQuantity || Number(orderQuantity) <= 0) return 'Please enter a valid quantity'
+      const capacityEntry = selectedDepot?.productCapacities?.find(
         (pc: any) => (pc.product?._id || pc.product?.id) === (selectedProduct.product?._id || selectedProduct.product?.id)
       )
       if (capacityEntry && capacityEntry.capacity < Number(orderQuantity)) {
-        setError(`Insufficient capacity. Available: ${capacityEntry.capacity.toLocaleString()} ${selectedProduct.product?.unit || 'Liters'}`)
-        return
+        return `Insufficient capacity. Available: ${capacityEntry.capacity.toLocaleString()} ${selectedProduct.product?.unit || 'Liters'}`
       }
-      setStep(4)
-    } else if (step === 4) {
-      setStep(5)
+      return null
     }
+    return null
+  }
+
+  const handleNextStep = () => {
+    const message = validateStep(step)
+    if (message) {
+      setError(message)
+      return
+    }
+    setError('')
+    if (step < 5) setStep(step + 1)
   }
 
   const handlePrevStep = () => {
@@ -187,7 +188,10 @@ export function useOrderWizard() {
   return {
     // Step state
     step,
+    setStep,
     error,
+    setError,
+    validateStep,
     copied,
     setCopied,
 
