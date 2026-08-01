@@ -89,10 +89,10 @@ export function ManageCodesDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-lg max-h-[80svh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Settings size={18} className="text-purple-600" />
+            <Settings className="size-4 text-muted-foreground" />
             Manage Allocation Codes
           </DialogTitle>
           <DialogDescription>
@@ -111,13 +111,13 @@ export function ManageCodesDialog({
               className="h-9 text-sm flex-1"
             />
             <Button size="sm" className="h-9 px-3 gap-1.5" onClick={handleAddCode}>
-              <Plus size={14} /> Add
+              <Plus className="size-3.5" /> Add
             </Button>
           </div>
 
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={14} />
+            <Search className="size-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Search codes..."
               value={codeSearch}
@@ -154,24 +154,24 @@ export function ManageCodesDialog({
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="h-8 w-8 p-0 text-emerald-600"
+                          className="size-8 p-0 text-accent"
                           onClick={handleSaveRename}
                           disabled={renamingCode}
                         >
-                          <Check size={14} />
+                          <Check className="size-3.5" />
                         </Button>
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="h-8 w-8 p-0"
+                          className="size-8 p-0"
                           onClick={() => setEditingCode(null)}
                         >
-                          <X size={14} />
+                          <X className="size-3.5" />
                         </Button>
                       </>
                     ) : (
                       <>
-                        <Tag size={12} className="text-purple-500 shrink-0" />
+                        <Tag className="size-3 text-muted-foreground shrink-0" />
                         <span className="flex-1 font-semibold text-sm">{code}</span>
                         <span className="text-[11px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
                           {usage} record{usage !== 1 ? 's' : ''}
@@ -179,20 +179,20 @@ export function ManageCodesDialog({
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
+                          className="size-7 p-0 text-muted-foreground hover:text-foreground"
                           onClick={() => handleStartRename(code)}
                           title="Rename"
                         >
-                          <Pencil size={12} />
+                          <Pencil className="size-3" />
                         </Button>
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="h-7 w-7 p-0 text-muted-foreground hover:text-red-500"
+                          className="size-7 p-0 text-muted-foreground hover:text-destructive"
                           onClick={() => handleDeleteCode(code)}
                           title="Delete"
                         >
-                          <Trash2 size={12} />
+                          <Trash2 className="size-3" />
                         </Button>
                       </>
                     )}

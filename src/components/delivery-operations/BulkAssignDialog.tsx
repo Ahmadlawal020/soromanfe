@@ -32,7 +32,7 @@ export function BulkAssignDialog({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Tag size={18} className="text-blue-600" />
+            <Tag className="size-4 text-muted-foreground" />
             Bulk Assign
           </DialogTitle>
           <DialogDescription>
@@ -42,14 +42,14 @@ export function BulkAssignDialog({
 
         <div className="space-y-4 py-2">
           <div className="space-y-1.5">
-            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em]">
               Allocation Code
             </Label>
             <select
               aria-label="Bulk allocation code"
               value={bulkAssignCode}
               onChange={e => setBulkAssignCode(e.target.value)}
-              className="h-9 w-full rounded-lg border border-border bg-white px-3 text-sm"
+              className="h-8 w-full rounded-lg border border-border bg-white px-2.5 text-base md:text-sm"
             >
               <option value="">Keep existing code</option>
               <option value="__CLEAR__">Remove code (no code)</option>
@@ -60,14 +60,14 @@ export function BulkAssignDialog({
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em]">
               PFI
             </Label>
             <select
               aria-label="Bulk PFI"
               value={bulkAssignPfi}
               onChange={e => setBulkAssignPfi(e.target.value)}
-              className="h-9 w-full rounded-lg border border-border bg-white px-3 text-sm"
+              className="h-8 w-full rounded-lg border border-border bg-white px-2.5 text-base md:text-sm"
             >
               <option value="">Keep existing PFI</option>
               {allPfiOptions.map(p => (
@@ -86,7 +86,7 @@ export function BulkAssignDialog({
             disabled={loading || (!bulkAssignCode && !bulkAssignPfi)}
             className="gap-2"
           >
-            {loading ? <Loader2 size={16} className="animate-spin" /> : <Tag size={16} />}
+            {loading ? <Loader2 className="size-4 animate-spin" /> : <Tag className="size-4" />}
             {loading ? 'Applying...' : `Apply to ${count} Record${count !== 1 ? 's' : ''}`}
           </Button>
         </DialogFooter>

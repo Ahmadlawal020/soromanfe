@@ -173,39 +173,45 @@ export function useDangoteOrderWizard() {
     }
   }
 
-  const handleNextStep = () => {
-    setError('')
-    if (step === 1) {
-      if (!selectedCustomer) {
-        setError('Please select an existing customer or register a new one')
-        return
-      }
-      setStep(2)
-    } else if (step === 2) {
-      if (!selectedLicense) {
-        setError('Please select a company & licence or add a new one')
-        return
-      }
-      setStep(3)
-    } else if (step === 3) {
-      if (!selectedProduct) {
-        setError('Please select a Dangote product')
-        return
-      }
-      setStep(4)
-    } else if (step === 4) {
-      if (!orderQuantity || Number(orderQuantity) <= 0) {
-        setError('Please enter a valid quantity')
-        return
-      }
-      setStep(5)
-    } else if (step === 5) {
-      if (!deliveryAddress.trim()) {
-        setError('Please enter the delivery address')
-        return
-      }
-      setStep(6)
+  /**
+   * Validation for a single step, independent of where the user currently is.
+   *
+   * Kept separate from navigation so the UI can group several steps onto one
+   * screen and validate the whole group before advancing. Returns the error
+   * message, or null when the step is satisfied.
+   */
+  const validateStep = (target: number): string | null => {
+    if (target === 1) {
+      if (!selectedCustomer) return 'Please select an existing customer or register a new one'
+      return null
     }
+    if (target === 2) {
+      if (!selectedLicense) return 'Please select a company & licence or add a new one'
+      return null
+    }
+    if (target === 3) {
+      if (!selectedProduct) return 'Please select a Dangote product'
+      return null
+    }
+    if (target === 4) {
+      if (!orderQuantity || Number(orderQuantity) <= 0) return 'Please enter a valid quantity'
+      return null
+    }
+    if (target === 5) {
+      if (!deliveryAddress.trim()) return 'Please enter the delivery address'
+      return null
+    }
+    return null
+  }
+
+  const handleNextStep = () => {
+    const message = validateStep(step)
+    if (message) {
+      setError(message)
+      return
+    }
+    setError('')
+    if (step < 6) setStep(step + 1)
   }
 
   const handlePrevStep = () => {
@@ -236,7 +242,10 @@ export function useDangoteOrderWizard() {
 
   return {
     step,
+    setStep,
     error,
+    setError,
+    validateStep,
 
     // Customer state
     customerSearch,

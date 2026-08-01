@@ -181,7 +181,7 @@ function BankAccountForm() {
   if (isEdit && isLoadingAccount && !editingAccount) {
     return (
       <div className="flex flex-col items-center justify-center py-24">
-        <Loader2 size={32} className="animate-spin text-primary" />
+        <Loader2 className="size-8 animate-spin text-primary" />
         <p className="text-sm text-muted-foreground mt-3">Loading bank account details...</p>
       </div>
     )
@@ -192,16 +192,16 @@ function BankAccountForm() {
       {/* Top Header */}
       <div className="flex items-center justify-between gap-4">
         <Button variant="ghost" size="sm" onClick={() => navigate({ to: '/bank-accounts' })}>
-          <ArrowLeft className="w-4 h-4 mr-2" /> Back to Bank Accounts
+          <ArrowLeft className="size-4 mr-2" /> Back to Bank Accounts
         </Button>
       </div>
 
       <div className="flex items-center gap-3">
-        <div className="h-12 w-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-          <Building2 className="w-6 h-6 text-primary" />
+        <div className="size-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+          <Building2 className="size-6 text-primary" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">
+          <h1 className="text-2xl font-semibold text-foreground tracking-tight">
             {isEdit ? 'Edit Bank Account' : 'Add New Bank Account'}
           </h1>
           <p className="text-xs text-muted-foreground">
@@ -217,7 +217,7 @@ function BankAccountForm() {
         <Card className="border-border/60">
           <CardHeader className="border-b border-border/40 pb-3">
             <CardTitle className="text-base font-semibold flex items-center gap-2">
-              <Landmark className="w-4 h-4 text-primary" /> Account Information
+              <Landmark className="size-4 text-primary" /> Account Information
             </CardTitle>
             <CardDescription className="text-xs">Provide official bank and account details</CardDescription>
           </CardHeader>
@@ -226,7 +226,7 @@ function BankAccountForm() {
               {/* Bank Name Preset */}
               <div className="space-y-1.5">
                 <Label htmlFor="bankPreset" className="text-xs font-semibold">
-                  Bank Name <span className="text-red-400">*</span>
+                  Bank Name <span className="text-destructive">*</span>
                 </Label>
                 <Select value={selectedBankPreset} onValueChange={setSelectedBankPreset}>
                   <SelectTrigger id="bankPreset" className="bg-background/50">
@@ -246,7 +246,7 @@ function BankAccountForm() {
               {selectedBankPreset === 'Other (Custom Bank)' ? (
                 <div className="space-y-1.5">
                   <Label htmlFor="customBank" className="text-xs font-semibold">
-                    Custom Bank Name <span className="text-red-400">*</span>
+                    Custom Bank Name <span className="text-destructive">*</span>
                   </Label>
                   <Input
                     id="customBank"
@@ -254,7 +254,7 @@ function BankAccountForm() {
                     value={customBankName}
                     onChange={(e) => setCustomBankName(e.target.value)}
                     className="bg-background/50"
-                  />
+ />
                 </div>
               ) : (
                 /* Bank Code / Sort Code */
@@ -268,14 +268,14 @@ function BankAccountForm() {
                     value={bankCode}
                     onChange={(e) => setBankCode(e.target.value)}
                     className="bg-background/50 font-mono"
-                  />
+ />
                 </div>
               )}
 
               {/* Account Number */}
               <div className="space-y-1.5">
                 <Label htmlFor="accountNumber" className="text-xs font-semibold">
-                  Account Number <span className="text-red-400">*</span>
+                  Account Number <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="accountNumber"
@@ -283,13 +283,13 @@ function BankAccountForm() {
                   value={accountNumber}
                   onChange={(e) => setAccountNumber(e.target.value)}
                   className="bg-background/50 font-mono text-base font-semibold"
-                />
+ />
               </div>
 
               {/* Account Name */}
               <div className="space-y-1.5">
                 <Label htmlFor="accountName" className="text-xs font-semibold">
-                  Account Name <span className="text-red-400">*</span>
+                  Account Name <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="accountName"
@@ -297,7 +297,7 @@ function BankAccountForm() {
                   value={accountName}
                   onChange={(e) => setAccountName(e.target.value)}
                   className="bg-background/50"
-                />
+ />
               </div>
 
               {/* Branch Name */}
@@ -311,7 +311,7 @@ function BankAccountForm() {
                   value={branchName}
                   onChange={(e) => setBranchName(e.target.value)}
                   className="bg-background/50"
-                />
+ />
               </div>
 
               {/* Currency */}
@@ -357,11 +357,11 @@ function BankAccountForm() {
                   type="checkbox"
                   checked={isDefault}
                   onChange={(e) => setIsDefault(e.target.checked)}
-                  className="h-4 w-4 rounded border-border text-primary focus:ring-primary accent-primary"
-                />
+                  className="size-4 rounded border-border text-primary focus:ring-primary accent-primary"
+ />
                 <div>
                   <span className="text-sm font-semibold text-foreground flex items-center gap-1.5">
-                    <Star className="w-4 h-4 text-amber-400 fill-amber-400" /> Set as Primary / Default Company Account
+                    <Star className="size-4 text-warning fill-warning" /> Set as Primary / Default Company Account
                   </span>
                   <p className="text-xs text-muted-foreground">
                     When checked, this account will be highlighted as the primary operating collection account.
@@ -377,7 +377,7 @@ function BankAccountForm() {
           <CardHeader className="border-b border-border/40 pb-3 flex flex-row items-center justify-between">
             <div>
               <CardTitle className="text-base font-semibold flex items-center gap-2">
-                <Warehouse className="w-4 h-4 text-primary" /> Assign Depots & Hubs
+                <Warehouse className="size-4 text-primary" /> Assign Depots & Hubs
               </CardTitle>
               <CardDescription className="text-xs mt-0.5">
                 Select which depot(s) use this bank account. Each depot can have its own account or share one.
@@ -391,21 +391,21 @@ function BankAccountForm() {
             {/* Search and Quick Selection Tools */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
                 <Input
                   type="text"
                   placeholder="Filter depots..."
                   value={depotSearchTerm}
                   onChange={(e) => setDepotSearchTerm(e.target.value)}
                   className="pl-9 text-xs h-9 bg-background/50"
-                />
+ />
                 {depotSearchTerm && (
                   <button
                     type="button"
                     onClick={() => setDepotSearchTerm('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground hover:text-foreground"
-                  >
-                    <X size={12} />
+                    className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground hover:text-foreground"
+ >
+                    <X className="size-3" />
                   </button>
                 )}
               </div>
@@ -416,7 +416,7 @@ function BankAccountForm() {
                   size="sm"
                   onClick={handleSelectAllDepots}
                   className="h-9 text-xs"
-                >
+ >
                   Select All
                 </Button>
                 <Button
@@ -425,7 +425,7 @@ function BankAccountForm() {
                   size="sm"
                   onClick={handleClearDepotSelection}
                   className="h-9 text-xs text-muted-foreground"
-                >
+ >
                   Deselect All
                 </Button>
               </div>
@@ -434,7 +434,7 @@ function BankAccountForm() {
             {/* Selected Depot Chips */}
             {selectedDepotIds.length > 0 && (
               <div className="p-3 bg-muted/30 border border-border/40 rounded-xl">
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground mb-2">
                   Currently Assigned ({selectedDepotIds.length}):
                 </p>
                 <div className="flex flex-wrap gap-1.5">
@@ -445,15 +445,15 @@ function BankAccountForm() {
                         key={id}
                         variant="secondary"
                         className="bg-primary/15 text-primary border-primary/30 text-xs font-medium py-1 px-2.5 flex items-center gap-1.5"
-                      >
-                        <Warehouse className="w-3 h-3" />
+ >
+                        <Warehouse className="size-3" />
                         {depot ? `${depot.name} (${depot.code})` : `Depot #${id}`}
                         <button
                           type="button"
                           onClick={() => toggleDepotSelection(id)}
-                          className="hover:text-red-400 transition-colors ml-1"
-                        >
-                          <X size={12} />
+                          className="hover:text-destructive transition-colors ml-1 duration-250 ease-luxe"
+ >
+                          <X className="size-3" />
                         </button>
                       </Badge>
                     )
@@ -465,7 +465,7 @@ function BankAccountForm() {
             {/* Depots Checkbox List */}
             {isLoadingDepots ? (
               <div className="flex items-center justify-center py-8">
-                <Loader2 className="w-5 h-5 animate-spin text-primary mr-2" />
+                <Loader2 className="size-5 animate-spin text-primary mr-2" />
                 <span className="text-xs text-muted-foreground">Loading depots list...</span>
               </div>
             ) : filteredDepots.length === 0 ? (
@@ -482,10 +482,10 @@ function BankAccountForm() {
                       key={depot.id}
                       onClick={() => toggleDepotSelection(numericId)}
                       className={`p-3 rounded-lg border cursor-pointer transition-all flex items-center justify-between select-none ${isChecked
-                          ? 'border-primary/50 bg-primary/10 text-foreground shadow-sm'
-                          : 'border-border/40 hover:bg-muted/30 text-muted-foreground'
-                        }`}
-                    >
+ ? 'border-primary/50 bg-primary/10 text-foreground '
+ : 'border-border/40 hover:bg-muted/30 text-muted-foreground'
+ }`}
+ >
                       <div className="min-w-0 flex-1 pr-2">
                         <div className="flex items-center gap-2">
                           <span className={`font-semibold text-xs ${isChecked ? 'text-primary' : 'text-foreground'}`}>
@@ -499,10 +499,10 @@ function BankAccountForm() {
                       </div>
 
                       <div
-                        className={`h-5 w-5 rounded-md border flex items-center justify-center transition-colors shrink-0 ${isChecked ? 'bg-primary border-primary text-white' : 'border-border bg-background'
-                          }`}
-                      >
-                        {isChecked && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                        className={`size-5 rounded-md border flex items-center justify-center transition-colors shrink-0 ${isChecked ? 'bg-primary border-primary text-primary-foreground' : 'border-border bg-background'
+ }`}
+ >
+                        {isChecked && <Check className="size-3.5 stroke-[3]" />}
                       </div>
                     </div>
                   )
@@ -525,7 +525,7 @@ function BankAccountForm() {
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               className="w-full rounded-md border border-border/60 bg-background/50 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
-            />
+ />
           </CardContent>
         </Card>
 
@@ -534,10 +534,10 @@ function BankAccountForm() {
           <Button type="button" variant="outline" onClick={() => navigate({ to: '/bank-accounts' })}>
             Cancel
           </Button>
-          <Button type="submit" disabled={isSubmitting} className="gradient-primary text-white border-0 px-6">
+          <Button type="submit" disabled={isSubmitting} className="px-6">
             {isSubmitting ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                <Loader2 className="size-4 animate-spin mr-2" />
                 Saving...
               </>
             ) : isEdit ? (

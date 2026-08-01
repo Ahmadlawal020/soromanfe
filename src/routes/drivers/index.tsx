@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { StatCard } from '#/components/ui/stat-card'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
@@ -60,17 +61,17 @@ function DriversDashboard() {
     <div className="space-y-6 animate-fade-in">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Drivers Directory</h1>
+          <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">Drivers Directory</h1>
           <p className="text-muted-foreground">Manage driver profiles, license records, safety scores, and schedule status.</p>
         </div>
-        <Button size="sm" className="gradient-primary text-white border-0" onClick={() => navigate({ to: '/drivers/form' })}><Plus className="w-4 h-4 mr-2" />Register New Driver</Button>
+        <Button size="sm"  onClick={() => navigate({ to: '/drivers/form' })}><Plus className="size-4 mr-2" />Register New Driver</Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="stats-card"><CardContent className="p-4 flex justify-between items-center"><div><p className="text-sm text-muted-foreground">Total Drivers</p><p className="text-2xl font-bold">{stats.total}</p></div><Contact className="w-8 h-8 text-primary" /></CardContent></Card>
-        <Card className="stats-card"><CardContent className="p-4 flex justify-between items-center"><div><p className="text-sm text-muted-foreground">On Active Trip</p><p className="text-2xl font-bold text-success">{stats.onTrip}</p></div><Truck className="w-8 h-8 text-success" /></CardContent></Card>
-        <Card className="stats-card"><CardContent className="p-4 flex justify-between items-center"><div><p className="text-sm text-muted-foreground">Available (Standby)</p><p className="text-2xl font-bold text-info">{stats.active}</p></div><UserCheck className="w-8 h-8 text-info" /></CardContent></Card>
-        <Card className="stats-card"><CardContent className="p-4 flex justify-between items-center"><div><p className="text-sm text-muted-foreground">Off Duty</p><p className="text-2xl font-bold text-warning">{stats.offDuty}</p></div><UserX className="w-8 h-8 text-warning" /></CardContent></Card>
+        <StatCard icon={<Contact />} label="Total Drivers" value={stats.total} />
+        <StatCard icon={<Truck />} label="On Active Trip" value={stats.onTrip} />
+        <StatCard icon={<UserCheck />} label="Available (Standby)" value={stats.active} />
+        <StatCard tone="amber" icon={<UserX />} label="Off Duty" value={stats.offDuty} />
       </div>
 
       <Card>
@@ -79,9 +80,9 @@ function DriversDashboard() {
             <div><CardTitle>Drivers Profiles</CardTitle><CardDescription>Monitor active driving logs, safety points, and contact info</CardDescription></div>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               <div className="relative flex-1 sm:w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground size-4" />
                 <Input type="text" placeholder="Search driver by name, DL..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
-                {searchTerm && <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground flex items-center justify-center cursor-pointer transition-colors" aria-label="Clear search"><X size={10} /></button>}
+                {searchTerm && <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 size-5 rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground flex items-center justify-center cursor-pointer transition-colors duration-250 ease-luxe" aria-label="Clear search"><X className="size-2.5" /></button>}
               </div>
               <Select value={selectedStatus} onValueChange={setSelectedStatus}>
                 <SelectTrigger className="w-full sm:w-[180px]"><SelectValue placeholder="All Statuses" /></SelectTrigger>
@@ -97,13 +98,13 @@ function DriversDashboard() {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="flex items-center justify-center py-16"><Loader2 size={24} className="animate-spin text-muted-foreground" /></div>
+            <div className="flex items-center justify-center py-16"><Loader2 className="size-6 animate-spin text-muted-foreground" /></div>
           ) : drivers.length === 0 ? (
             <div className="p-16 text-center">
-              <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-muted border border-border mb-4"><SearchX size={24} className="text-muted-foreground" /></div>
+              <div className="inline-flex size-14 items-center justify-center rounded-xl bg-muted border border-border mb-4"><SearchX className="size-6 text-muted-foreground" /></div>
               <p className="text-sm font-medium text-foreground">No drivers found</p>
               <p className="text-xs text-muted-foreground mt-1">Try adjusting your search or filter criteria.</p>
-              <Button variant="ghost" size="sm" onClick={() => { setSearchTerm(''); setSelectedStatus('all') }} className="mt-4 text-primary"><X size={14} /> Clear filters</Button>
+              <Button variant="ghost" size="sm" onClick={() => { setSearchTerm(''); setSelectedStatus('all') }} className="mt-4 text-primary"><X className="size-3.5" /> Clear filters</Button>
             </div>
           ) : (
             <>
@@ -115,21 +116,21 @@ function DriversDashboard() {
                       <TableRow key={driver._id} className="cursor-pointer hover:bg-muted transition" onClick={() => navigate({ to: '/drivers/details' as any, search: { id: driver._id || driver.id } as any, state: { driver } } as any)}>
                         <TableCell>
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-medium">{getInitials(driver.name)}</div>
+                            <div className="size-10 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-medium">{getInitials(driver.name)}</div>
                             <p className="font-medium">{driver.name}</p>
                           </div>
                         </TableCell>
-                        <TableCell><div className="space-y-0.5"><div className="flex items-center gap-1 font-medium"><FileText size={12} className="text-muted-foreground" />{driver.licenseNumber}</div><div className="text-xs text-muted-foreground">{driver.licenseClass}</div></div></TableCell>
+                        <TableCell><div className="space-y-0.5"><div className="flex items-center gap-1 font-medium"><FileText className="size-3 text-muted-foreground" />{driver.licenseNumber}</div><div className="text-xs text-muted-foreground">{driver.licenseClass}</div></div></TableCell>
                         <TableCell className="hidden lg:table-cell">
                           <div className="flex items-center gap-1.5 font-semibold">
-                            <Truck size={14} className="text-muted-foreground shrink-0" />
+                            <Truck className="size-3.5 text-muted-foreground shrink-0" />
                             <span className={driver.assignedTruckPlate || driver.assignedTruck ? 'text-foreground' : 'text-muted-foreground font-normal'}>
                               {driver.assignedTruckPlate || driver.assignedTruck || 'Unassigned'}
                             </span>
                           </div>
                         </TableCell>
-                        <TableCell><div className="flex items-center gap-1.5"><Star size={14} className="text-warning fill-warning" /><span className="font-semibold">{driver.rating}</span><span className={`text-xs font-medium ${getSafetyColor(driver.safetyScore)}`}>{driver.safetyScore}%</span></div></TableCell>
-                        <TableCell className="text-xs text-muted-foreground hidden md:table-cell"><div className="flex items-center gap-1"><Mail size={12} /><span className="truncate max-w-[160px]">{driver.email || '—'}</span></div><div className="flex items-center gap-1 mt-0.5"><Phone size={12} />{driver.phone}</div></TableCell>
+                        <TableCell><div className="flex items-center gap-1.5"><Star className="size-3.5 text-warning fill-warning" /><span className="font-semibold">{driver.rating}</span><span className={`text-xs font-medium ${getSafetyColor(driver.safetyScore)}`}>{driver.safetyScore}%</span></div></TableCell>
+                        <TableCell className="text-xs text-muted-foreground hidden md:table-cell"><div className="flex items-center gap-1"><Mail className="size-3" /><span className="truncate max-w-[160px]">{driver.email || '—'}</span></div><div className="flex items-center gap-1 mt-0.5"><Phone className="size-3" />{driver.phone}</div></TableCell>
                         <TableCell>{getStatusBadge(driver.status)}</TableCell>
                       </TableRow>
                     ))}
@@ -147,7 +148,7 @@ function DriversDashboard() {
                       setPageSize(Number(val))
                       setCurrentPage(1)
                     }}
-                  >
+ >
                     <SelectTrigger className="h-8 w-[70px]">
                       <SelectValue placeholder={pageSize.toString()} />
                     </SelectTrigger>
@@ -172,7 +173,7 @@ function DriversDashboard() {
                       className="h-8"
                       disabled={currentPage <= 1}
                       onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                    >
+ >
                       Previous
                     </Button>
                     {Array.from({ length: totalPages }, (_, i) => i + 1)
@@ -181,12 +182,13 @@ function DriversDashboard() {
                         const showEllipsis = idx > 0 && p - arr[idx - 1] > 1
                         return (
                           <div key={p} className="flex items-center">
-                            {showEllipsis && <span className="px-2 text-xs text-muted-foreground">...</span>}
+                            {showEllipsis && <span className="px-2 text-xs text-muted-foreground">…</span>}
                             <Button
                               variant={currentPage === p ? 'default' : 'outline'}
-                              size="sm"
-                              className={`h-8 w-8 p-0 ${currentPage === p ? 'gradient-primary text-white border-0' : ''}`}
+                              size="icon-sm"
+                              className="tabular-nums"
                               onClick={() => setCurrentPage(p)}
+                              aria-current={currentPage === p ? 'page' : undefined}
                             >
                               {p}
                             </Button>
@@ -199,7 +201,7 @@ function DriversDashboard() {
                       className="h-8"
                       disabled={currentPage >= totalPages}
                       onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-                    >
+ >
                       Next
                     </Button>
                   </div>

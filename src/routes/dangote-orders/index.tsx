@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { StatCard } from '#/components/ui/stat-card'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
@@ -33,9 +34,9 @@ function formatDate(dateString: string) {
 function paymentStatusBadge(status: string) {
   switch (status) {
     case 'Paid':
-      return <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 gap-1"><CheckCircle size={12} /> Paid</Badge>
+      return <Badge className="bg-accent/15 text-accent border-accent/20 gap-1"><CheckCircle className="size-3" /> Paid</Badge>
     case 'Unpaid':
-      return <Badge className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/20 gap-1"><Clock size={12} /> Unpaid</Badge>
+      return <Badge className="bg-warning/15 text-warning border-warning/20 gap-1"><Clock className="size-3" /> Unpaid</Badge>
     default:
       return <Badge variant="outline">{status}</Badge>
   }
@@ -44,11 +45,11 @@ function paymentStatusBadge(status: string) {
 function collectionStatusBadge(status: string) {
   switch (status) {
     case 'Collected':
-      return <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 gap-1"><CheckCircle size={12} /> Collected</Badge>
+      return <Badge className="bg-accent/15 text-accent border-accent/20 gap-1"><CheckCircle className="size-3" /> Collected</Badge>
     case 'Dispatched':
-      return <Badge className="bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/20 gap-1"><Truck size={12} /> Dispatched</Badge>
+      return <Badge className="bg-muted/15 text-muted-foreground border-border/20 gap-1"><Truck className="size-3" /> Dispatched</Badge>
     case 'Pending':
-      return <Badge className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/20 gap-1"><Clock size={12} /> Pending</Badge>
+      return <Badge className="bg-warning/15 text-warning border-warning/20 gap-1"><Clock className="size-3" /> Pending</Badge>
     default:
       return <Badge variant="outline">{status}</Badge>
   }
@@ -114,52 +115,21 @@ function DangoteOrdersDashboard() {
     <div className="space-y-6 animate-fade-in">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Dangote Delivery Orders</h1>
+          <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">Dangote Delivery Orders</h1>
           <p className="text-muted-foreground">View and track all Dangote delivery orders, payment, and collection status.</p>
         </div>
-        <Button size="sm" className="bg-amber-500 hover:bg-amber-600 text-white border-0" onClick={() => navigate({ to: '/admin-order/dangote-request-form' as any })}>
-          <Plus className="w-4 h-4 mr-2" />Place Dangote Order
+        <Button size="sm" onClick={() => navigate({ to: '/admin-order' as any })}>
+          <Plus data-icon="inline-start" />
+          Place Dangote order
         </Button>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="stats-card">
-          <CardContent className="p-4 flex justify-between items-center">
-            <div>
-              <p className="text-sm text-muted-foreground">Total Orders</p>
-              <p className="text-2xl font-bold">{totalOrders}</p>
-            </div>
-            <FileText className="w-8 h-8 text-primary" />
-          </CardContent>
-        </Card>
-        <Card className="stats-card">
-          <CardContent className="p-4 flex justify-between items-center">
-            <div>
-              <p className="text-sm text-muted-foreground">Paid</p>
-              <p className="text-2xl font-bold text-emerald-600">{paidOrders}</p>
-            </div>
-            <CheckCircle className="w-8 h-8 text-emerald-600" />
-          </CardContent>
-        </Card>
-        <Card className="stats-card">
-          <CardContent className="p-4 flex justify-between items-center">
-            <div>
-              <p className="text-sm text-muted-foreground">Unpaid</p>
-              <p className="text-2xl font-bold text-amber-600">{unpaidOrders}</p>
-            </div>
-            <Clock className="w-8 h-8 text-amber-600" />
-          </CardContent>
-        </Card>
-        <Card className="stats-card">
-          <CardContent className="p-4 flex justify-between items-center">
-            <div>
-              <p className="text-sm text-muted-foreground">Total Value</p>
-              <p className="text-2xl font-bold text-info">{formatCurrency(totalValue)}</p>
-            </div>
-            <DollarSign className="w-8 h-8 text-info" />
-          </CardContent>
-        </Card>
+        <StatCard icon={<FileText />} label="Total Orders" value={totalOrders} />
+        <StatCard icon={<CheckCircle />} label="Paid" value={paidOrders} />
+        <StatCard tone="amber" icon={<Clock />} label="Unpaid" value={unpaidOrders} />
+        <StatCard icon={<DollarSign />} label="Total Value" value={formatCurrency(totalValue)} />
       </div>
 
       {/* Orders Table */}
@@ -172,7 +142,7 @@ function DangoteOrdersDashboard() {
             </div>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               <div className="relative flex-1 sm:w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground size-4" />
                 <Input
                   type="text"
                   placeholder="Search request ID, customer, product..."
@@ -183,10 +153,10 @@ function DangoteOrdersDashboard() {
                 {searchTerm && (
                   <button
                     onClick={() => setSearchTerm('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground flex items-center justify-center cursor-pointer transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 size-5 rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground flex items-center justify-center cursor-pointer transition-colors duration-250 ease-luxe"
                     aria-label="Clear search"
                   >
-                    <X size={10} />
+                    <X className="size-2.5" />
                   </button>
                 )}
               </div>
@@ -217,7 +187,7 @@ function DangoteOrdersDashboard() {
         <CardContent>
           {filteredRequests.length === 0 ? (
             <PageEmpty
-              icon={<FileText size={24} className="text-muted-foreground" />}
+              icon={<FileText className="size-6 text-muted-foreground" />}
               title={hasFilters ? 'No orders match your filters' : 'No approved Dangote delivery orders yet'}
               description={hasFilters ? 'Try adjusting your search or filter criteria.' : 'Approved Dangote delivery orders will appear here once order requests are reviewed and approved.'}
               actionLabel={hasFilters ? undefined : 'View Order Requests'}
@@ -257,7 +227,7 @@ function DangoteOrdersDashboard() {
                             <p className="font-medium text-foreground">{req.customerName}</p>
                             {req.deliveryState && (
                               <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                <MapPin size={12} />
+                                <MapPin className="size-3" />
                                 <span>{req.deliveryState}</span>
                               </div>
                             )}
@@ -265,7 +235,7 @@ function DangoteOrdersDashboard() {
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-1.5 text-sm font-medium">
-                            <Package size={14} className="text-muted-foreground" />
+                            <Package className="size-3.5 text-muted-foreground" />
                             <span>{req.product}</span>
                           </div>
                         </TableCell>
@@ -284,13 +254,13 @@ function DangoteOrdersDashboard() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-8 px-2 text-primary hover:text-primary hover:bg-primary/10 gap-1 text-xs"
+                            className="h-8 px-2 text-primary hover:text-primary/80 hover:bg-primary/10 gap-1 text-xs"
                             onClick={(e) => {
                               e.stopPropagation()
                               navigate({ to: '/dangote-orders/details' as any, search: { id: String(req.id) } as any })
                             }}
                           >
-                            <Eye className="h-3.5 w-3.5" />
+                            <Eye className="size-3.5" />
                             View
                           </Button>
                         </TableCell>

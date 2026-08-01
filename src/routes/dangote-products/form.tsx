@@ -133,7 +133,7 @@ function DangoteProductForm() {
   if (isEdit && isLoadingProduct) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 size={32} className="animate-spin text-muted-foreground" />
+        <Loader2 className="size-8 animate-spin text-muted-foreground" />
       </div>
     )
   }
@@ -148,10 +148,10 @@ function DangoteProductForm() {
             onClick={() => navigate({ to: '/dangote-products' })}
             className="mb-2"
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
+            <ArrowLeft className="size-4 mr-2" />
             Back to Dangote Products
           </Button>
-          <h1 className="text-3xl font-bold tracking-tight">
+          <h1 className="text-xl md:text-2xl font-semibold tracking-tight text-balance">
             {isEdit ? 'Edit Dangote Product' : 'Register New Dangote Product'}
           </h1>
           <p className="text-muted-foreground">
@@ -162,7 +162,7 @@ function DangoteProductForm() {
 
       {apiError && (
         <div className="bg-destructive/10 border border-destructive/30 text-destructive rounded-lg px-4 py-3 text-sm flex items-center gap-2">
-          <AlertTriangle className="h-4 w-4 shrink-0" />
+          <AlertTriangle className="size-4 shrink-0" />
           {apiError}
         </div>
       )}
@@ -172,7 +172,7 @@ function DangoteProductForm() {
           {/* Basic Product Details */}
           <div className="space-y-4 border rounded-lg p-4">
             <div className="flex items-center space-x-2">
-              <Package className="h-5 w-5 text-primary" />
+              <Package className="size-5 text-primary" />
               <h2 className="text-lg font-medium">Basic Product Details</h2>
             </div>
 
@@ -263,7 +263,7 @@ function DangoteProductForm() {
                   onChange={handleChange}
                   rows={3}
                   placeholder="Describe the product..."
-                  className="w-full rounded-lg border border-border bg-transparent px-3 py-2.5 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/30 transition-all resize-none"
+                  className="w-full rounded-lg border border-border bg-transparent px-3 py-2.5 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/30 transition-all resize-none duration-250 ease-luxe"
                 />
               </div>
             </div>
@@ -272,7 +272,7 @@ function DangoteProductForm() {
           {/* Technical & Safety Specifications */}
           <div className="space-y-4 border rounded-lg p-4">
             <div className="flex items-center space-x-2">
-              <Scale className="h-5 w-5 text-primary" />
+              <Scale className="size-5 text-primary" />
               <h2 className="text-lg font-medium">Technical Specifications</h2>
             </div>
 
@@ -326,7 +326,7 @@ function DangoteProductForm() {
           {/* Safety & Commercial */}
           <div className="space-y-4 border rounded-lg p-4">
             <div className="flex items-center space-x-2">
-              <AlertTriangle className="h-5 w-5 text-primary" />
+              <AlertTriangle className="size-5 text-primary" />
               <h2 className="text-lg font-medium">Safety & Commercial</h2>
             </div>
 
@@ -351,7 +351,7 @@ function DangoteProductForm() {
 
               <div className="pt-2">
                 <div className="bg-muted/50 rounded-lg p-3 text-sm text-muted-foreground">
-                  <FileText className="h-4 w-4 inline-block mr-2" />
+                  <FileText className="size-4 inline-block mr-2" />
                   Ensure all safety data sheets (SDS) are up to date for this product.
                 </div>
               </div>
@@ -368,7 +368,7 @@ function DangoteProductForm() {
             Cancel
           </Button>
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+            {isSubmitting ? <Loader2 className="size-4 mr-2 animate-spin" /> : <Save className="size-4 mr-2" />}
             {isSubmitting ? 'Saving...' : isEdit ? 'Update Product' : 'Save Product'}
           </Button>
         </div>

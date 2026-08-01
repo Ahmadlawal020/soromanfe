@@ -494,15 +494,15 @@ function FilingStationDetailsView() {
   if (!station && (isLoadingStations || isLoadingCustomers)) {
     return (
       <div className="flex justify-center py-16">
-        <Loader2 size={28} className="animate-spin text-muted-foreground" />
+        <Loader2 className="size-7 animate-spin text-muted-foreground" />
       </div>
     )
   }
 
   if (!station) {
     return (
-      <div className="p-8 text-center max-w-md mx-auto my-12 bg-card rounded-2xl border border-border">
-        <ShieldAlert size={40} className="mx-auto text-muted-foreground mb-4" />
+      <div className="p-8 text-center max-w-md mx-auto my-12 bg-card rounded-xl border border-border">
+        <ShieldAlert className="size-10 mx-auto text-muted-foreground mb-4" />
         <h3 className="font-semibold text-lg">Filing Station not selected</h3>
         <p className="text-sm text-muted-foreground mt-1">Please select a valid station from the directory.</p>
         <Button onClick={() => navigate({ to: '/filing-stations' })} className="mt-4">
@@ -520,18 +520,18 @@ function FilingStationDetailsView() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border pb-4">
         <div className="flex items-center gap-3">
           <Button variant="outline" size="sm" className="cursor-pointer" onClick={() => navigate({ to: '/filing-stations' })}>
-            <ArrowLeft size={16} />
+            <ArrowLeft className="size-4" />
           </Button>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">{station.name}</h1>
+              <h1 className="text-2xl font-semibold tracking-tight text-foreground">{station.name}</h1>
               {station.customerCode && (
                 <Badge variant="outline" className="font-mono text-xs uppercase">{station.customerCode}</Badge>
               )}
               <Badge className={cn(
-                station.status === 'active' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' :
-                  station.status === 'dormant' ? 'bg-amber-500/10 text-amber-600 border-amber-500/20' :
-                    'bg-red-500/10 text-red-600 border-red-500/20'
+                station.status === 'active' ? 'bg-accent/10 text-accent border-accent/20' :
+                  station.status === 'dormant' ? 'bg-warning/10 text-warning border-warning/20' :
+                    'bg-destructive/10 text-destructive border-destructive/20'
               )}>{station.status}</Badge>
             </div>
             <p className="text-muted-foreground text-sm mt-0.5">
@@ -542,11 +542,11 @@ function FilingStationDetailsView() {
         <div className="flex gap-2">
           <Button size="sm" variant="outline" className="cursor-pointer"
             onClick={() => navigate({ to: '/delivery-customer/details', search: { customerId: String(station._id || (station as any).id) } })}>
-            <User size={14} className="mr-1.5" /> Customer Profile
+            <User className="size-3.5 mr-1.5" /> Customer Profile
           </Button>
           <Button size="sm" variant="outline" className="cursor-pointer"
             onClick={() => navigate({ to: '/filing-stations/form', search: { customerId: String(station._id || (station as any).id) }, state: { station, isEdit: true } as any })}>
-            <Edit size={14} className="mr-1.5" /> Edit Station
+            <Edit className="size-3.5 mr-1.5" /> Edit Station
           </Button>
         </div>
       </div>
@@ -557,38 +557,38 @@ function FilingStationDetailsView() {
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <div className="text-xs text-muted-foreground">Tank Capacity</div>
-              <div className="text-xl font-bold text-foreground">{(station.tankCapacity || 0).toLocaleString()} L</div>
+              <div className="text-xl font-semibold text-foreground tabular-nums">{(station.tankCapacity || 0).toLocaleString()} L</div>
             </div>
-            <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-500"><Fuel size={20} /></div>
+            <div className="p-2.5 rounded-xl bg-muted/10 text-muted-foreground"><Fuel className="size-5" /></div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <div className="text-xs text-muted-foreground">Allocations</div>
-              <div className="text-xl font-bold text-foreground">{stationGroups.length}</div>
+              <div className="text-xl font-semibold text-foreground tabular-nums">{stationGroups.length}</div>
             </div>
-            <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-500"><Truck size={20} /></div>
+            <div className="p-2.5 rounded-xl bg-accent/10 text-accent"><Truck className="size-5" /></div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <div className="text-xs text-muted-foreground">Expected Revenue</div>
-              <div className="text-lg font-bold text-foreground">{fmt(stationTotals.expected)}</div>
+              <div className="text-lg font-semibold text-foreground">{fmt(stationTotals.expected)}</div>
             </div>
-            <div className="p-2.5 rounded-xl bg-violet-500/10 text-violet-500"><TrendingUp size={20} /></div>
+            <div className="p-2.5 rounded-xl bg-muted/10 text-muted-foreground"><TrendingUp className="size-5" /></div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <div className="text-xs text-muted-foreground">Outstanding</div>
-              <div className={cn('text-lg font-bold', stationTotals.balance > 0 ? 'text-red-600' : stationTotals.balance < 0 ? 'text-blue-600' : 'text-emerald-600')}>
+              <div className={cn('text-lg font-semibold', stationTotals.balance > 0 ? 'text-destructive' : stationTotals.balance < 0 ? 'text-muted-foreground' : 'text-accent')}>
                 {stationTotals.balance === 0 ? '✓ Settled' : stationTotals.balance > 0 ? fmt(stationTotals.balance) : `+${fmt(Math.abs(stationTotals.balance))}`}
               </div>
             </div>
-            <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-500"><Wallet size={20} /></div>
+            <div className="p-2.5 rounded-xl bg-warning/10 text-warning"><Wallet className="size-5" /></div>
           </CardContent>
         </Card>
       </div>
@@ -597,37 +597,37 @@ function FilingStationDetailsView() {
       <div className="space-y-4">
         {isLoading ? (
           <div className="flex items-center justify-center py-24">
-            <Loader2 size={24} className="animate-spin text-muted-foreground" />
+            <Loader2 className="size-6 animate-spin text-muted-foreground" />
           </div>
         ) : stationGroups.length === 0 ? (
-          <div className="bg-card rounded-xl shadow-sm border border-border p-16 text-center">
-            <Fuel className="mx-auto text-muted-foreground mb-3" size={40} />
+          <div className="bg-card rounded-xl border border-border p-16 text-center">
+            <Fuel className="size-10 mx-auto text-muted-foreground mb-3" />
             <p className="text-muted-foreground font-medium">No allocations found for this station</p>
             <p className="text-sm text-muted-foreground/70 mt-1">Allocations will appear here once trucks are assigned to this station.</p>
           </div>
         ) : (
           stationGroups.map((group) => (
-            <div key={group.key} className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
+            <div key={group.key} className="bg-card rounded-xl border border-border overflow-hidden">
               {/* Group Header */}
               <div className="p-4 sm:p-5">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="font-bold text-foreground text-sm uppercase tracking-tight">
+                      <h3 className="font-semibold text-foreground text-sm uppercase tracking-tight">
                         {group.truckNumber || 'Unassigned Truck'}
                       </h3>
                       {group.code && (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold border bg-sky-500/10 text-sky-700 dark:text-sky-300 border-sky-500/20">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-muted/10 text-foreground dark:text-muted-foreground border-border/20">
                           {group.code}
                         </span>
                       )}
                     </div>
                     <div className="flex items-center gap-2 mt-1 text-[11px] text-muted-foreground flex-wrap">
                       <span className="flex items-center gap-1">
-                        <CalendarIcon size={11} />
+                        <CalendarIcon className="size-3" />
                         {group.dateLoaded ? (() => { try { return format(parseISO(group.dateLoaded), 'dd MMM yyyy') } catch { return group.dateLoaded } })() : '—'}
                       </span>
-                      {group.location && <><span className="text-muted-foreground/40">·</span><span className="flex items-center gap-1"><MapPin size={11} />{group.location}</span></>}
+                      {group.location && <><span className="text-muted-foreground/40">·</span><span className="flex items-center gap-1"><MapPin className="size-3" />{group.location}</span></>}
                       {group.depot && <><span className="text-muted-foreground/40">·</span><span>{group.depot}</span></>}
                     </div>
                   </div>
@@ -635,19 +635,19 @@ function FilingStationDetailsView() {
                   <div className="flex items-center gap-1.5 shrink-0">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button size="sm" className="h-8 text-xs gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold cursor-pointer">
-                          <Plus size={13} /> Record <ChevronDown size={11} />
+                        <Button size="sm" className="h-8 text-xs gap-1.5 bg-accent hover:bg-accent/80 text-accent-foreground font-semibold cursor-pointer">
+                          <Plus className="size-3.5" /> Record <ChevronDown className="size-3" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-44">
                         <DropdownMenuItem onClick={() => openRecordDialog(group, 'sale')} className="gap-2 text-xs cursor-pointer">
-                          <Fuel size={13} className="text-emerald-600" /> Daily Sale
+                          <Fuel className="size-3.5 text-accent" /> Daily Sale
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => openRecordDialog(group, 'deposit')} className="gap-2 text-xs cursor-pointer">
-                          <Banknote size={13} className="text-blue-600" /> Bank Deposit
+                          <Banknote className="size-3.5 text-muted-foreground" /> Bank Deposit
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => openRecordDialog(group, 'expense')} className="gap-2 text-xs cursor-pointer">
-                          <Receipt size={13} className="text-amber-600" /> Expense
+                          <Receipt className="size-3.5 text-warning" /> Expense
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -657,20 +657,20 @@ function FilingStationDetailsView() {
                 {/* Summary */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 pt-4 border-t border-border">
                   <div className="space-y-0.5">
-                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Allocated</p>
-                    <p className="text-sm font-bold text-foreground">{group.quantity > 0 ? `${fmtQty(group.quantity)} L` : '—'}</p>
+                    <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-semibold">Allocated</p>
+                    <p className="text-sm font-semibold text-foreground">{group.quantity > 0 ? `${fmtQty(group.quantity)} L` : '—'}</p>
                   </div>
                   <div className="space-y-0.5">
-                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Sold</p>
-                    <p className="text-sm font-bold text-foreground">{group.totalQtySold > 0 ? `${fmtQty(group.totalQtySold)} L` : '—'}</p>
+                    <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-semibold">Sold</p>
+                    <p className="text-sm font-semibold text-foreground">{group.totalQtySold > 0 ? `${fmtQty(group.totalQtySold)} L` : '—'}</p>
                   </div>
                   <div className="space-y-0.5">
-                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Deposited</p>
-                    <p className="text-sm font-bold text-emerald-600">{group.totalPaid > 0 ? fmt(group.totalPaid) : '—'}</p>
+                    <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-semibold">Deposited</p>
+                    <p className="text-sm font-semibold text-accent">{group.totalPaid > 0 ? fmt(group.totalPaid) : '—'}</p>
                   </div>
                   <div className="space-y-0.5">
-                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Balance</p>
-                    <p className={cn('text-sm font-bold', group.balance === 0 ? 'text-emerald-600' : group.balance > 0 ? 'text-red-600' : 'text-blue-600')}>
+                    <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-semibold">Balance</p>
+                    <p className={cn('text-sm font-semibold', group.balance === 0 ? 'text-accent' : group.balance > 0 ? 'text-destructive' : 'text-muted-foreground')}>
                       {group.balance === 0 ? '✓ Settled' : group.balance > 0 ? fmt(group.balance) : `+${fmt(Math.abs(group.balance))}`}
                     </p>
                   </div>
@@ -721,7 +721,7 @@ function FilingStationDetailsView() {
                                 <TableCell className="text-right font-semibold text-foreground">{isSale ? `${fmtQty(saleQty)} L` : '—'}</TableCell>
                                 <TableCell className="text-right text-muted-foreground">{isSale ? `₦${saleRate.toLocaleString()}` : '—'}</TableCell>
                                 <TableCell className="text-right text-foreground font-medium">{isSale ? fmt(saleVal) : '—'}</TableCell>
-                                <TableCell className="text-right font-semibold text-emerald-600">{depositAmt > 0 ? fmt(depositAmt) : '—'}</TableCell>
+                                <TableCell className="text-right font-semibold text-accent">{depositAmt > 0 ? fmt(depositAmt) : '—'}</TableCell>
                                 <TableCell className="text-muted-foreground">{entry.payerName || '—'}</TableCell>
                                 <TableCell className="text-muted-foreground">{entry.bank ? entry.bank.split(' · ')[1] || entry.bank : '—'}</TableCell>
                                 <TableCell>
@@ -731,23 +731,23 @@ function FilingStationDetailsView() {
                                       disabled={updatingStatusId === entryId}
                                       onClick={() => handleToggleDepositStatus(entry)}
                                       title="Click to toggle status (Confirmed / Pending)"
-                                      className={cn('inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold border transition-all cursor-pointer hover:opacity-80', isConfirmed ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200')}
+                                      className={cn('inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold border transition-all cursor-pointer hover:opacity-80 duration-250 ease-luxe', isConfirmed ? 'bg-accent/10 text-accent border-accent/40' : 'bg-warning/10 text-warning border-warning/40')}
                                     >
-                                      {updatingStatusId === entryId && <Loader2 size={10} className="animate-spin" />}
+                                      {updatingStatusId === entryId && <Loader2 className="size-2.5 animate-spin" />}
                                       {isConfirmed ? 'Confirmed' : 'Pending'}
                                     </button>
                                   ) : '—'}
                                 </TableCell>
-                                <TableCell className="text-right text-amber-600">{expenseAmt > 0 ? fmt(expenseAmt) : '—'}</TableCell>
+                                <TableCell className="text-right text-warning">{expenseAmt > 0 ? fmt(expenseAmt) : '—'}</TableCell>
                                 <TableCell className="text-center">
                                   <div className="flex gap-0.5 items-center justify-center">
-                                    <Button type="button" size="sm" variant="ghost" className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground cursor-pointer" title="Edit"
+                                    <Button type="button" size="sm" variant="ghost" className="size-6 p-0 text-muted-foreground hover:text-foreground cursor-pointer" title="Edit"
                                       onClick={() => openEditDialog(entry, group)}>
-                                      <Pencil size={11} />
+                                      <Pencil className="size-3" />
                                     </Button>
-                                    <Button type="button" size="sm" variant="ghost" className="h-6 w-6 p-0 text-muted-foreground hover:text-red-600 cursor-pointer" title="Delete"
+                                    <Button type="button" size="sm" variant="ghost" className="size-6 p-0 text-muted-foreground hover:text-destructive cursor-pointer" title="Delete"
                                       onClick={() => setDeleteTarget({ ids: [entryId], label: `entry on ${entryDate}` })}>
-                                      <Trash2 size={11} />
+                                      <Trash2 className="size-3" />
                                     </Button>
                                   </div>
                                 </TableCell>
@@ -766,17 +766,17 @@ function FilingStationDetailsView() {
 
       {/* Station Totals Bar */}
       {stationGroups.length > 0 && (
-        <div className="bg-foreground text-background rounded-xl shadow-sm px-5 sm:px-6 py-4">
+        <div className="bg-foreground text-background rounded-xl px-5 sm:px-6 py-4">
           <div className="flex flex-wrap items-center justify-between gap-4">
-            <p className="text-xs uppercase tracking-wider text-background/60 font-semibold">
+            <p className="text-xs uppercase tracking-[0.22em] text-background/60 font-semibold">
               Station Total · {stationGroups.length} allocation{stationGroups.length === 1 ? '' : 's'} · {stationTotals.entries} entries
             </p>
             <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
-              <div><span className="text-background/50 text-[11px] uppercase tracking-wide mr-1.5">Expected</span><span className="font-bold">{fmt(stationTotals.expected)}</span></div>
-              <div><span className="text-background/50 text-[11px] uppercase tracking-wide mr-1.5">Deposited</span><span className="font-bold text-emerald-400">{fmt(stationTotals.paid)}</span></div>
-              <div><span className="text-background/50 text-[11px] uppercase tracking-wide mr-1.5">Expenses</span><span className="font-bold text-amber-400">{fmt(stationTotals.expenses)}</span></div>
-              <div><span className="text-background/50 text-[11px] uppercase tracking-wide mr-1.5">Balance</span>
-                <span className={cn('font-bold', stationTotals.balance > 0 ? 'text-red-400' : 'text-emerald-400')}>
+              <div><span className="text-background/50 text-[11px] uppercase tracking-[0.14em] mr-1.5">Expected</span><span className="font-semibold">{fmt(stationTotals.expected)}</span></div>
+              <div><span className="text-background/50 text-[11px] uppercase tracking-[0.14em] mr-1.5">Deposited</span><span className="font-semibold text-accent">{fmt(stationTotals.paid)}</span></div>
+              <div><span className="text-background/50 text-[11px] uppercase tracking-[0.14em] mr-1.5">Expenses</span><span className="font-semibold text-warning">{fmt(stationTotals.expenses)}</span></div>
+              <div><span className="text-background/50 text-[11px] uppercase tracking-[0.14em] mr-1.5">Balance</span>
+                <span className={cn('font-semibold', stationTotals.balance > 0 ? 'text-destructive' : 'text-accent')}>
                   {stationTotals.balance === 0 ? '₦0.00 ✓' : stationTotals.balance > 0 ? fmt(stationTotals.balance) : `+${fmt(Math.abs(stationTotals.balance))}`}
                 </span>
               </div>
@@ -790,13 +790,13 @@ function FilingStationDetailsView() {
         <DialogContent className="sm:max-w-[540px]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3">
-              <div className={cn('p-2 rounded-lg', activeEntryTab === 'sale' ? 'bg-sky-100' : activeEntryTab === 'deposit' ? 'bg-emerald-100' : 'bg-orange-100')}>
-                {activeEntryTab === 'sale' ? <Fuel className="w-5 h-5 text-sky-600" /> :
-                  activeEntryTab === 'deposit' ? <Banknote className="w-5 h-5 text-emerald-600" /> :
-                    <Receipt className="w-5 h-5 text-orange-600" />}
+              <div className={cn('p-2 rounded-lg', activeEntryTab === 'sale' ? 'bg-muted' : activeEntryTab === 'deposit' ? 'bg-accent/10' : 'bg-warning/10')}>
+                {activeEntryTab === 'sale' ? <Fuel className="size-5 text-muted-foreground" /> :
+                  activeEntryTab === 'deposit' ? <Banknote className="size-5 text-accent" /> :
+                    <Receipt className="size-5 text-warning" />}
               </div>
               <div>
-                <h2 className="text-lg font-bold">
+                <h2 className="text-lg font-semibold">
                   {activeEntryTab === 'sale' ? 'Record Daily Pump Sale' : activeEntryTab === 'deposit' ? 'Record Bank Deposit' : 'Record Daily Expense'}
                 </h2>
                 <p className="text-sm font-normal text-muted-foreground mt-0.5">
@@ -811,22 +811,22 @@ function FilingStationDetailsView() {
             {/* Tab Switcher */}
             <div className="flex p-1 bg-muted rounded-lg mb-2 gap-1">
               {([
-                { key: 'sale' as EntryTab, label: 'Daily Sale', icon: Fuel, color: 'text-sky-500' },
-                { key: 'deposit' as EntryTab, label: 'Bank Deposit', icon: Banknote, color: 'text-emerald-500' },
-                { key: 'expense' as EntryTab, label: 'Daily Expense', icon: Receipt, color: 'text-orange-500' },
+                { key: 'sale' as EntryTab, label: 'Daily Sale', icon: Fuel, color: 'text-muted-foreground' },
+                { key: 'deposit' as EntryTab, label: 'Bank Deposit', icon: Banknote, color: 'text-accent' },
+                { key: 'expense' as EntryTab, label: 'Daily Expense', icon: Receipt, color: 'text-warning' },
               ]).map(tab => (
                 <button
                   key={tab.key}
                   type="button"
                   className={cn(
-                    'flex-1 py-2 text-xs font-semibold rounded-md transition-all flex items-center justify-center gap-1.5 cursor-pointer',
+                    'flex-1 py-2 text-xs font-semibold rounded-md transition-all flex items-center justify-center gap-1.5 cursor-pointer duration-250 ease-luxe',
                     activeEntryTab === tab.key
-                      ? 'bg-card text-foreground shadow-sm border border-border/50'
+                      ? 'bg-card text-foreground border border-border/50'
                       : 'text-muted-foreground hover:text-foreground'
                   )}
                   onClick={() => setActiveEntryTab(tab.key)}
                 >
-                  <tab.icon size={14} className={activeEntryTab === tab.key ? tab.color : ''} />
+                  <tab.icon className={cn('size-3.5', activeEntryTab === tab.key && tab.color)} />
                   {tab.label}
                 </button>
               ))}
@@ -837,18 +837,18 @@ function FilingStationDetailsView() {
               <div className="space-y-4 pt-1">
                 <div className="grid grid-cols-3 gap-3">
                   <div className="space-y-1">
-                    <label className="text-xs text-muted-foreground">Rate (₦/L) <span className="text-red-500">*</span></label>
+                    <label className="text-xs text-muted-foreground">Rate (₦/L) <span className="text-destructive">*</span></label>
                     <Input type="text" inputMode="decimal" placeholder="e.g. 1,300" className="h-9 text-sm"
                       value={quickForm.rate} onChange={e => setQuickForm(p => ({ ...p, rate: formatWithCommas(e.target.value) }))} />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-xs text-muted-foreground">Volume Sold (Ltrs) <span className="text-red-500">*</span></label>
+                    <label className="text-xs text-muted-foreground">Volume Sold (Ltrs) <span className="text-destructive">*</span></label>
                     <Input type="text" inputMode="decimal" placeholder="e.g. 5,000" className="h-9 text-sm"
                       value={quickForm.quantity} onChange={e => setQuickForm(p => ({ ...p, quantity: formatWithCommas(e.target.value) }))} />
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs text-muted-foreground">Expected Value (₦)</label>
-                    <Input readOnly className="h-9 text-sm bg-muted font-bold text-foreground"
+                    <Input readOnly className="h-9 text-sm bg-muted font-semibold text-foreground"
                       value={(() => {
                         const r = Number(stripCommas(quickForm.rate)) || 0
                         const q = Number(stripCommas(quickForm.quantity)) || 0
@@ -876,7 +876,7 @@ function FilingStationDetailsView() {
               <div className="space-y-4 pt-1">
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <label className="text-xs text-muted-foreground">Amount Deposited (₦) <span className="text-red-500">*</span></label>
+                    <label className="text-xs text-muted-foreground">Amount Deposited (₦) <span className="text-destructive">*</span></label>
                     <Input type="text" inputMode="decimal" placeholder="e.g. 5,000,000" className="h-9 text-sm"
                       value={quickForm.payment_amount} onChange={e => setQuickForm(p => ({ ...p, payment_amount: formatWithCommas(e.target.value) }))} />
                   </div>
@@ -888,10 +888,10 @@ function FilingStationDetailsView() {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <label className="text-xs text-muted-foreground">Bank Account <span className="text-red-500">*</span></label>
+                    <label className="text-xs text-muted-foreground">Bank Account <span className="text-destructive">*</span></label>
                     <select aria-label="Bank account" value={quickForm.bank_account_id}
                       onChange={e => setQuickForm(p => ({ ...p, bank_account_id: e.target.value }))}
-                      className="h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                      className="h-8 w-full rounded-lg border border-input bg-background px-2.5 py-1 text-base md:text-sm">
                       <option value="">Select account…</option>
                       {BANK_ACCOUNTS.filter(b => b.is_active).map(b => (
                         <option key={b.id} value={String(b.id)}>{b.account_number} · {b.bank_name}</option>
@@ -902,7 +902,7 @@ function FilingStationDetailsView() {
                     <label className="text-xs text-muted-foreground">Status</label>
                     <select aria-label="Status" value={quickForm.deposit_status}
                       onChange={e => setQuickForm(p => ({ ...p, deposit_status: e.target.value as 'pending' | 'confirmed' }))}
-                      className="h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                      className="h-8 w-full rounded-lg border border-input bg-background px-2.5 py-1 text-base md:text-sm">
                       <option value="pending">Pending</option>
                       <option value="confirmed">Confirmed</option>
                     </select>
@@ -931,16 +931,16 @@ function FilingStationDetailsView() {
             {/* Daily Expense Tab */}
             {activeEntryTab === 'expense' && (
               <div className="space-y-4 pt-1">
-                <div className="bg-orange-50 border border-orange-200/75 rounded-lg p-3 flex gap-2">
-                  <Receipt size={16} className="text-orange-600 shrink-0 mt-0.5" />
+                <div className="bg-warning/10 border border-warning/75 rounded-lg p-3 flex gap-2">
+                  <Receipt className="size-4 text-warning shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-xs font-semibold text-orange-800">Record Daily Expense</p>
-                    <p className="text-[10px] text-orange-600 mt-0.5">Record expenses like supplies, paper, maintenance etc.</p>
+                    <p className="text-xs font-semibold text-warning">Record Daily Expense</p>
+                    <p className="text-[10px] text-warning mt-0.5">Record expenses like supplies, paper, maintenance etc.</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <label className="text-xs text-muted-foreground">Expense Amount (₦) <span className="text-red-500">*</span></label>
+                    <label className="text-xs text-muted-foreground">Expense Amount (₦) <span className="text-destructive">*</span></label>
                     <Input type="text" inputMode="decimal" placeholder="e.g. 50,000" className="h-9 text-sm"
                       value={quickForm.payment_amount} onChange={e => setQuickForm(p => ({ ...p, payment_amount: formatWithCommas(e.target.value) }))} />
                   </div>
@@ -951,7 +951,7 @@ function FilingStationDetailsView() {
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs text-muted-foreground">Expense Description <span className="text-red-500">*</span></label>
+                  <label className="text-xs text-muted-foreground">Expense Description <span className="text-destructive">*</span></label>
                   <Input placeholder="e.g. Printing paper, cleaning supplies" className="h-9 text-sm" value={quickForm.remarks}
                     onChange={e => setQuickForm(p => ({ ...p, remarks: e.target.value }))} />
                 </div>
@@ -962,14 +962,14 @@ function FilingStationDetailsView() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setRecordDialogOpen(false)} disabled={saving} className="cursor-pointer">Cancel</Button>
             <Button onClick={handleRecordSave} disabled={saving} className={cn('gap-2 cursor-pointer',
-              activeEntryTab === 'sale' ? 'bg-sky-600 hover:bg-sky-700' :
-                activeEntryTab === 'deposit' ? 'bg-emerald-600 hover:bg-emerald-700' :
-                  'bg-orange-600 hover:bg-orange-700'
+              activeEntryTab === 'sale' ? 'bg-foreground hover:bg-foreground' :
+                activeEntryTab === 'deposit' ? 'bg-accent hover:bg-accent/80' :
+                  'bg-warning hover:bg-warning/80'
             )}>
-              {saving ? <Loader2 size={16} className="animate-spin" /> :
-                activeEntryTab === 'sale' ? <Fuel size={16} /> :
-                  activeEntryTab === 'deposit' ? <Banknote size={16} /> :
-                    <Receipt size={16} />}
+              {saving ? <Loader2 className="size-4 animate-spin" /> :
+                activeEntryTab === 'sale' ? <Fuel className="size-4" /> :
+                  activeEntryTab === 'deposit' ? <Banknote className="size-4" /> :
+                    <Receipt className="size-4" />}
               {saving ? 'Saving…' : activeEntryTab === 'sale' ? 'Save Daily Sale' : activeEntryTab === 'deposit' ? 'Save Deposit' : 'Save Expense'}
             </Button>
           </DialogFooter>
@@ -983,9 +983,9 @@ function FilingStationDetailsView() {
             <>
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-muted"><Pencil className="w-5 h-5 text-muted-foreground" /></div>
+                  <div className="p-2 rounded-lg bg-muted"><Pencil className="size-5 text-muted-foreground" /></div>
                   <div>
-                    <h2 className="text-lg font-bold">Edit Entry</h2>
+                    <h2 className="text-lg font-semibold">Edit Entry</h2>
                     <p className="text-sm font-normal text-muted-foreground mt-0.5">
                       {selectedGroup?.truckNumber} · {selectedGroup?.stationName}
                     </p>
@@ -1002,9 +1002,9 @@ function FilingStationDetailsView() {
                 </div>
 
                 {/* Sale section */}
-                <div className="rounded-lg border border-sky-200/75 overflow-hidden">
-                  <div className="bg-sky-50 px-3 py-2 flex items-center gap-2">
-                    <Fuel size={14} className="text-sky-600" /><p className="text-xs font-semibold text-sky-800">Daily Sale</p>
+                <div className="rounded-lg border border-border/75 overflow-hidden">
+                  <div className="bg-muted px-3 py-2 flex items-center gap-2">
+                    <Fuel className="size-3.5 text-muted-foreground" /><p className="text-xs font-semibold text-foreground">Daily Sale</p>
                   </div>
                   <div className="p-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div className="space-y-1">
@@ -1022,7 +1022,7 @@ function FilingStationDetailsView() {
                     </div>
                     <div className="space-y-1">
                       <label className="text-xs text-muted-foreground">Sales Value</label>
-                      <Input readOnly className="h-9 text-sm bg-muted font-bold"
+                      <Input readOnly className="h-9 text-sm bg-muted font-semibold"
                         value={(() => {
                           const r = Number(stripCommas(editForm.rate)) || 0
                           const q = Number(stripCommas(editForm.quantity)) || 0
@@ -1033,9 +1033,9 @@ function FilingStationDetailsView() {
                 </div>
 
                 {/* Deposit section */}
-                <div className="rounded-lg border border-emerald-200/75 overflow-hidden">
-                  <div className="bg-emerald-50 px-3 py-2 flex items-center gap-2">
-                    <Banknote size={14} className="text-emerald-600" /><p className="text-xs font-semibold text-emerald-800">Bank Deposit</p>
+                <div className="rounded-lg border border-accent/75 overflow-hidden">
+                  <div className="bg-accent/10 px-3 py-2 flex items-center gap-2">
+                    <Banknote className="size-3.5 text-accent" /><p className="text-xs font-semibold text-accent">Bank Deposit</p>
                   </div>
                   <div className="p-3 space-y-3">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1048,7 +1048,7 @@ function FilingStationDetailsView() {
                         <label className="text-xs text-muted-foreground">Status</label>
                         <select aria-label="Status" value={editForm.deposit_status}
                           onChange={e => setEditForm(p => p ? { ...p, deposit_status: e.target.value as 'pending' | 'confirmed' } : null)}
-                          className="h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                          className="h-8 w-full rounded-lg border border-input bg-background px-2.5 py-1 text-base md:text-sm">
                           <option value="pending">Pending</option>
                           <option value="confirmed">Confirmed</option>
                         </select>
@@ -1058,7 +1058,7 @@ function FilingStationDetailsView() {
                       <label className="text-xs text-muted-foreground">Bank Account</label>
                       <select aria-label="Bank" value={editForm.bank_account_id}
                         onChange={e => setEditForm(p => p ? { ...p, bank_account_id: e.target.value } : null)}
-                        className="h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                        className="h-8 w-full rounded-lg border border-input bg-background px-2.5 py-1 text-base md:text-sm">
                         <option value="">Select account…</option>
                         {BANK_ACCOUNTS.filter(b => b.is_active).map(b => <option key={b.id} value={String(b.id)}>{b.account_number} · {b.bank_name}</option>)}
                       </select>
@@ -1079,9 +1079,9 @@ function FilingStationDetailsView() {
                 </div>
 
                 {/* Expense section */}
-                <div className="rounded-lg border border-amber-200/75 overflow-hidden">
-                  <div className="bg-amber-50 px-3 py-2 flex items-center gap-2">
-                    <Receipt size={14} className="text-amber-600" /><p className="text-xs font-semibold text-amber-800">Expense</p>
+                <div className="rounded-lg border border-warning/75 overflow-hidden">
+                  <div className="bg-warning/10 px-3 py-2 flex items-center gap-2">
+                    <Receipt className="size-3.5 text-warning" /><p className="text-xs font-semibold text-warning">Expense</p>
                   </div>
                   <div className="p-3">
                     <div className="space-y-1 sm:w-1/2">
@@ -1102,7 +1102,7 @@ function FilingStationDetailsView() {
               <DialogFooter>
                 <Button variant="outline" onClick={() => { setEditTarget(null); setEditForm(null) }} disabled={editSaving} className="cursor-pointer">Cancel</Button>
                 <Button onClick={handleEditSave} disabled={editSaving} className="gap-2 bg-foreground hover:bg-foreground/90 cursor-pointer">
-                  {editSaving ? <Loader2 size={14} className="animate-spin" /> : <Pencil size={14} />}
+                  {editSaving ? <Loader2 className="size-3.5 animate-spin" /> : <Pencil className="size-3.5" />}
                   {editSaving ? 'Saving…' : 'Save Changes'}
                 </Button>
               </DialogFooter>
@@ -1114,10 +1114,10 @@ function FilingStationDetailsView() {
       {/* ── Delete Confirmation Dialog ─────────────────────────────── */}
       {deleteTarget && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-card border border-border rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl">
-            <div className="flex items-center gap-3 text-red-500">
-              <Trash2 size={24} />
-              <h3 className="font-bold text-lg text-foreground">Confirm Delete</h3>
+          <div className="bg-card border border-border rounded-xl max-w-md w-full p-6 space-y-4">
+            <div className="flex items-center gap-3 text-destructive">
+              <Trash2 className="size-6" />
+              <h3 className="font-semibold text-lg text-foreground">Confirm Delete</h3>
             </div>
             <p className="text-sm text-muted-foreground">
               Are you sure you want to delete <strong>{deleteTarget.label}</strong>? This action cannot be undone.

@@ -10,6 +10,8 @@ import { ArrowLeft, Landmark, User, DollarSign, Loader2, CheckCircle2, ShieldChe
 import { useCustomerList } from '#/lib/hooks/useCustomers'
 import { useBankAccounts } from '#/lib/hooks/useBankAccounts'
 import { useCreateDeposit } from '#/lib/hooks/useDeposits'
+import { StatementLinePicker } from '#/components/StatementLinePicker'
+import { useMatchStatementLines, type StatementLine } from '#/lib/hooks/useBankStatements'
 import { toNum } from '#/lib/utils'
 import type { Customer, } from '#/lib/types'
 
@@ -26,6 +28,9 @@ function ManualDepositPage() {
     const { data: customerData, isLoading: isLoadingCustomers } = useCustomerList({ limit: 5000 })
     const { data: bankAccounts, isLoading: isLoadingBanks } = useBankAccounts({ status: 'Active' })
     const createDepositMutation = useCreateDeposit()
+    const matchLines = useMatchStatementLines()
+    // The statement row this payment is being confirmed against, if any.
+    const [statementLine, setStatementLine] = useState<StatementLine | null>(null)
 
     const customersList: Customer[] = useMemo(() => {
         if (!customerData) return []
@@ -102,6 +107,25 @@ function ManualDepositPage() {
         return Object.keys(errs).length === 0
     }
 
+    /** Picking a statement row fills the payment from the bank's own record. */
+    const applyStatementLine = (line: StatementLine) => {
+        // The date field is datetime-local, which needs YYYY-MM-DDTHH:mm in
+        // local time — an ISO string would be rejected as out of format.
+        const d = new Date(line.txn_date)
+        const pad = (n: number) => String(n).padStart(2, '0')
+        const localDateTime =
+            `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}` +
+            `T${pad(d.getHours())}:${pad(d.getMinutes())}`
+
+        setStatementLine(line)
+        setAmount(String(Number(line.amount)))
+        setDepositorName(line.depositor || '')
+        setPaymentDate(localDateTime)
+        setReference(line.bank_ref || '')
+        if (line.narration && !description.trim()) setDescription(line.narration)
+        setErrors({})
+    }
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         if (!validateForm()) return
@@ -122,6 +146,18 @@ function ManualDepositPage() {
             })
 
             if (res?.success) {
+                // Claim the statement row so no other payment can use it.
+                if (statementLine) {
+                    await matchLines
+                        .mutateAsync({
+                            lineIds: [statementLine.id],
+                            depositId: res?.data?.deposit?.id,
+                        })
+                        .catch(() => {
+                            // The deposit is already recorded; a failed claim
+                            // must not lose it. The row simply stays unmatched.
+                        })
+                }
                 navigate({ to: '/deposits/' as any })
             }
         } catch {
@@ -133,10 +169,10 @@ function ManualDepositPage() {
         <div className="max-w-4xl mx-auto space-y-6 animate-fade-in pb-12">
             <header className="flex items-center gap-4">
                 <Button variant="outline" size="icon" onClick={() => navigate({ to: '/deposits/' as any })}>
-                    <ArrowLeft size={16} />
+                    <ArrowLeft className="size-4" />
                 </Button>
                 <div>
-                    <h1 className="text-3xl font-bold text-foreground">Record Manual Deposit</h1>
+                    <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">Record Manual Deposit</h1>
                     <p className="text-muted-foreground">
                         Register direct bank transfer or teller deposit to customer account.
                     </p>
@@ -147,11 +183,11 @@ function ManualDepositPage() {
                 <div className="lg:col-span-2 space-y-6">
 
                     {/* 1. Customer Selection */}
-                    <Card className="border-border shadow-sm">
+                    <Card className="border-border">
                         <CardHeader className="border-b border-border pb-4">
                             <div className="flex items-center gap-2">
-                                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                                    <User size={18} />
+                                <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                                    <User className="size-4" />
                                 </div>
                                 <div>
                                     <CardTitle className="text-base">1. Select Customer</CardTitle>
@@ -174,14 +210,14 @@ function ManualDepositPage() {
                                         value={customerSearchTerm}
                                         onChange={(e) => setCustomerSearchTerm(e.target.value)}
                                         className="text-sm"
-                                    />
+ />
                                     <Select
                                         value={selectedCustomerId}
                                         onValueChange={(val) => {
                                             setSelectedCustomerId(val)
                                             setErrors((prev) => ({ ...prev, customer: '' }))
                                         }}
-                                    >
+ >
                                         <SelectTrigger className={`w-full ${errors.customer ? 'border-destructive' : ''}`}>
                                             <SelectValue placeholder={isLoadingCustomers ? 'Loading customers...' : 'Choose customer...'} />
                                         </SelectTrigger>
@@ -220,7 +256,7 @@ function ManualDepositPage() {
                                     </div>
                                     <div className="text-right">
                                         <p className="text-xs text-muted-foreground font-medium uppercase">Current Balance</p>
-                                        <p className="text-base font-bold text-foreground font-mono">
+                                        <p className="text-base font-semibold text-foreground font-mono">
                                             {formatCurrency(currentBalance)}
                                         </p>
                                     </div>
@@ -230,11 +266,11 @@ function ManualDepositPage() {
                     </Card>
 
                     {/* 2. Destination Bank Account */}
-                    <Card className="border-border shadow-sm">
+                    <Card className="border-border">
                         <CardHeader className="border-b border-border pb-4">
                             <div className="flex items-center gap-2">
-                                <div className="h-8 w-8 rounded-lg bg-info/10 flex items-center justify-center text-info">
-                                    <Landmark size={18} />
+                                <div className="size-8 rounded-lg bg-info/10 flex items-center justify-center text-info">
+                                    <Landmark className="size-4" />
                                 </div>
                                 <div>
                                     <CardTitle className="text-base">2. Receiving Bank Account</CardTitle>
@@ -253,9 +289,12 @@ function ManualDepositPage() {
                                     value={selectedBankId}
                                     onValueChange={(val) => {
                                         setSelectedBankId(val)
+                                        // The pool is per-account, so a different bank
+                                        // invalidates any row already picked.
+                                        setStatementLine(null)
                                         setErrors((prev) => ({ ...prev, bankAccount: '' }))
                                     }}
-                                >
+ >
                                     <SelectTrigger className={`w-full ${errors.bankAccount ? 'border-destructive' : ''}`}>
                                         <SelectValue placeholder={isLoadingBanks ? 'Loading bank accounts...' : 'Choose bank account...'} />
                                     </SelectTrigger>
@@ -274,6 +313,26 @@ function ManualDepositPage() {
                                         )}
                                     </SelectContent>
                                 </Select>
+                                {errors.bankAccount && (
+                                    <p className="text-sm text-destructive" role="alert">{errors.bankAccount}</p>
+                                )}
+                            </div>
+
+                            {/* Match against the bank's own record rather than retyping it. */}
+                            <div className="space-y-2 border-t border-foreground/10 pt-4">
+                                <Label className="text-xs font-semibold uppercase text-muted-foreground">
+                                    Match to a bank statement deposit
+                                </Label>
+                                <p className="text-xs text-muted-foreground">
+                                    Pick the actual deposit row and the amount, payer, date and
+                                    reference fill themselves.
+                                </p>
+                                <StatementLinePicker
+                                    bankAccountId={selectedBankId || undefined}
+                                    selected={statementLine}
+                                    onSelect={applyStatementLine}
+                                    onClear={() => setStatementLine(null)}
+                                />
                                 {errors.bankAccount && <p className="text-xs text-destructive mt-1">{errors.bankAccount}</p>}
                             </div>
 
@@ -281,7 +340,7 @@ function ManualDepositPage() {
                                 <div className="p-4 rounded-xl bg-primary/5 border border-primary/20 flex items-center justify-between">
                                     <div>
                                         <p className="text-xs text-primary font-semibold uppercase">Destination Account</p>
-                                        <p className="text-sm font-bold text-foreground">{selectedBank.bankName}</p>
+                                        <p className="text-sm font-semibold text-foreground">{selectedBank.bankName}</p>
                                         <p className="text-xs text-muted-foreground font-mono">
                                             {selectedBank.accountNumber} • {selectedBank.accountName}
                                         </p>
@@ -293,11 +352,11 @@ function ManualDepositPage() {
                     </Card>
 
                     {/* 3. Deposit Details */}
-                    <Card className="border-border shadow-sm">
+                    <Card className="border-border">
                         <CardHeader className="border-b border-border pb-4">
                             <div className="flex items-center gap-2">
-                                <div className="h-8 w-8 rounded-lg bg-success/10 flex items-center justify-center text-success">
-                                    <DollarSign size={18} />
+                                <div className="size-8 rounded-lg bg-success/10 flex items-center justify-center text-success">
+                                    <DollarSign className="size-4" />
                                 </div>
                                 <div>
                                     <CardTitle className="text-base">3. Deposit & Payment Details</CardTitle>
@@ -329,7 +388,7 @@ function ManualDepositPage() {
                                                 setErrors((prev) => ({ ...prev, amount: '' }))
                                             }}
                                             className={`pl-8 text-base font-semibold font-mono ${errors.amount ? 'border-destructive' : ''}`}
-                                        />
+ />
                                     </div>
                                     {errors.amount && <p className="text-xs text-destructive">{errors.amount}</p>}
                                 </div>
@@ -349,7 +408,7 @@ function ManualDepositPage() {
                                             setErrors((prev) => ({ ...prev, depositorName: '' }))
                                         }}
                                         className={errors.depositorName ? 'border-destructive' : ''}
-                                    />
+ />
                                     {errors.depositorName && <p className="text-xs text-destructive">{errors.depositorName}</p>}
                                 </div>
 
@@ -363,7 +422,7 @@ function ManualDepositPage() {
                                         type="datetime-local"
                                         value={paymentDate}
                                         onChange={(e) => setPaymentDate(e.target.value)}
-                                    />
+ />
                                 </div>
 
                                 {/* Reference */}
@@ -378,7 +437,7 @@ function ManualDepositPage() {
                                         value={reference}
                                         onChange={(e) => setReference(e.target.value)}
                                         className="font-mono text-sm"
-                                    />
+ />
                                 </div>
                             </div>
 
@@ -393,7 +452,7 @@ function ManualDepositPage() {
                                     placeholder="e.g. Direct bank deposit received for diesel order"
                                     value={description}
                                     onChange={(e) => setDescription(e.target.value)}
-                                />
+ />
                             </div>
                         </CardContent>
                     </Card>
@@ -402,10 +461,10 @@ function ManualDepositPage() {
 
                 {/* Right Side Summary Column */}
                 <div className="space-y-6">
-                    <Card className="border-border shadow-md sticky top-6">
+                    <Card className="border-border sticky top-6">
                         <CardHeader className="bg-muted/40 border-b border-border pb-4">
                             <div className="flex items-center gap-2">
-                                <ShieldCheck size={18} className="text-success" />
+                                <ShieldCheck className="size-4 text-success" />
                                 <CardTitle className="text-base">Transaction Summary</CardTitle>
                             </div>
                         </CardHeader>
@@ -442,14 +501,14 @@ function ManualDepositPage() {
 
                                 <div className="border-t border-border pt-3 flex justify-between items-center">
                                     <span className="font-semibold text-foreground">Updated Balance</span>
-                                    <span className="font-mono text-lg font-bold text-success">
+                                    <span className="font-mono text-lg font-semibold text-success">
                                         {formatCurrency(newBalance)}
                                     </span>
                                 </div>
                             </div>
 
                             <div className="p-3 rounded-lg bg-success/10 border border-success/20 text-xs text-success-foreground flex items-start gap-2">
-                                <ArrowDownLeft size={16} className="text-success shrink-0 mt-0.5" />
+                                <ArrowDownLeft className="size-4 text-success shrink-0 mt-0.5" />
                                 <p>
                                     Upon submission, the customer&apos;s account balance will be updated automatically and any pending orders will be processed.
                                 </p>
@@ -458,16 +517,16 @@ function ManualDepositPage() {
                         <CardFooter className="border-t border-border pt-4 bg-muted/20">
                             <Button
                                 type="submit"
-                                className="w-full gradient-primary text-white font-medium gap-2"
+                                className="w-full font-medium gap-2"
                                 disabled={createDepositMutation.isPending}
-                            >
+ >
                                 {createDepositMutation.isPending ? (
                                     <>
-                                        <Loader2 size={16} className="animate-spin" /> Recording Deposit...
+                                        <Loader2 className="size-4 animate-spin" /> Recording Deposit...
                                     </>
                                 ) : (
                                     <>
-                                        <CheckCircle2 size={16} /> Submit & Credit Balance
+                                        <CheckCircle2 className="size-4" /> Submit & Credit Balance
                                     </>
                                 )}
                             </Button>

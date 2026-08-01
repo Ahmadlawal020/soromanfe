@@ -91,15 +91,15 @@ function DeliveryCustomerDetailsView() {
   if (!customer && isLoading) {
     return (
       <div className="flex justify-center py-16">
-        <Loader2 size={28} className="animate-spin text-muted-foreground" />
+        <Loader2 className="size-7 animate-spin text-muted-foreground" />
       </div>
     )
   }
 
   if (!customer) {
     return (
-      <div className="p-8 text-center max-w-md mx-auto my-12 bg-card rounded-2xl border border-border shadow-sm">
-        <ShieldAlert size={40} className="mx-auto text-muted-foreground mb-4" />
+      <div className="p-8 text-center max-w-md mx-auto my-12 bg-card rounded-xl border border-border">
+        <ShieldAlert className="size-10 mx-auto text-muted-foreground mb-4" />
         <h3 className="font-semibold text-lg">Delivery Customer Not Found</h3>
         <p className="text-sm text-muted-foreground mt-1">Please select a valid customer from the directory list.</p>
         <Button onClick={() => navigate({ to: '/delivery-customer' })} className="mt-4">
@@ -125,30 +125,30 @@ function DeliveryCustomerDetailsView() {
             className="cursor-pointer"
             onClick={() => navigate({ to: '/delivery-customer' })}
           >
-            <ArrowLeft size={16} />
+            <ArrowLeft className="size-4" />
           </Button>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">{customer.name}</h1>
+              <h1 className="text-2xl font-semibold tracking-tight text-foreground">{customer.name}</h1>
               <Badge variant="outline" className="font-mono text-xs uppercase">
                 {customer.customerCode || (isStation ? 'STN-ENTRY' : 'CUST-ENTRY')}
               </Badge>
               <Badge
                 className={
                   isStation
-                    ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 flex items-center gap-1'
+                    ? 'bg-warning/10 text-warning border-warning/20 flex items-center gap-1'
                     : 'bg-primary/10 text-primary border-primary/20 flex items-center gap-1'
                 }
               >
-                {isStation ? <><Fuel size={12} /> Filling Station</> : <><User size={12} /> Individual Customer</>}
+                {isStation ? <><Fuel className="size-3" /> Filling Station</> : <><User className="size-3" /> Individual Customer</>}
               </Badge>
               <Badge
                 className={
                   customer.status === 'active'
-                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 capitalize'
+                    ? 'bg-accent/10 text-accent border-accent/20 capitalize'
                     : customer.status === 'suspended'
-                    ? 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20 capitalize'
-                    : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 capitalize'
+                    ? 'bg-destructive/10 text-destructive border-destructive/20 capitalize'
+                    : 'bg-warning/10 text-warning border-warning/20 capitalize'
                 }
               >
                 {customer.status}
@@ -166,7 +166,7 @@ function DeliveryCustomerDetailsView() {
             <Button
               size="sm"
               variant="outline"
-              className="cursor-pointer border-amber-500/30 text-amber-600 hover:bg-amber-500/10"
+              className="cursor-pointer border-warning/30 text-warning hover:bg-warning/10"
               onClick={() =>
                 navigate({
                   to: '/filing-stations/details',
@@ -174,7 +174,7 @@ function DeliveryCustomerDetailsView() {
                 })
               }
             >
-              <Fuel size={14} className="mr-1.5" /> Station Ledger
+              <Fuel className="size-3.5 mr-1.5" /> Station Ledger
             </Button>
           )}
           <Button
@@ -189,7 +189,7 @@ function DeliveryCustomerDetailsView() {
               })
             }
           >
-            <Pencil size={14} className="mr-1.5" /> Edit Profile
+            <Pencil className="size-3.5 mr-1.5" /> Edit Profile
           </Button>
           <Button
             size="sm"
@@ -197,7 +197,7 @@ function DeliveryCustomerDetailsView() {
             className="cursor-pointer"
             onClick={() => setShowDeleteConfirm(true)}
           >
-            <Trash2 size={14} className="mr-1.5" /> Delete
+            <Trash2 className="size-3.5 mr-1.5" /> Delete
           </Button>
         </div>
       </div>
@@ -209,23 +209,23 @@ function DeliveryCustomerDetailsView() {
             {/* Passport Photo Display */}
             <div className="shrink-0">
               {isStation ? (
-                <div className="w-24 h-24 rounded-2xl bg-amber-500/10 border-2 border-amber-500/20 flex items-center justify-center text-amber-500 shadow-sm">
-                  <Fuel size={44} />
+                <div className="size-24 rounded-xl bg-warning/10 border-2 border-warning/20 flex items-center justify-center text-warning">
+                  <Fuel className="size-11" />
                 </div>
               ) : customer.passportPhoto ? (
                 <div className="relative group">
                   <img
                     src={customer.passportPhoto}
                     alt={customer.name}
-                    className="w-24 h-24 rounded-2xl object-cover border-2 border-primary/20 shadow-md transition-transform group-hover:scale-105"
+                    className="size-24 rounded-xl object-cover border-2 border-primary/20 transition-transform group-hover:scale-105 duration-250 ease-luxe"
                   />
-                  <div className="absolute inset-0 bg-black/40 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-medium pointer-events-none">
+                  <div className="absolute inset-0 bg-black/40 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-medium pointer-events-none duration-250 ease-luxe">
                     Passport
                   </div>
                 </div>
               ) : (
-                <div className="w-24 h-24 rounded-2xl border-2 border-dashed border-border bg-muted/30 flex flex-col items-center justify-center text-muted-foreground">
-                  <Camera size={28} />
+                <div className="size-24 rounded-xl border-2 border-dashed border-border bg-muted/30 flex flex-col items-center justify-center text-muted-foreground">
+                  <Camera className="size-7" />
                   <span className="text-[10px] mt-1 font-medium">No Photo</span>
                 </div>
               )}
@@ -234,7 +234,7 @@ function DeliveryCustomerDetailsView() {
             {/* Profile Overview */}
             <div className="flex-1 space-y-3 min-w-0">
               <div>
-                <h2 className="text-xl font-bold text-foreground">{customer.name}</h2>
+                <h2 className="text-xl font-semibold text-foreground">{customer.name}</h2>
                 <p className="text-sm text-muted-foreground flex items-center gap-2 mt-0.5">
                   <span className="font-mono text-xs bg-muted px-2 py-0.5 rounded text-foreground font-semibold">
                     {customer.customerCode || 'N/A'}
@@ -278,12 +278,12 @@ function DeliveryCustomerDetailsView() {
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <div className="text-xs text-muted-foreground font-medium">Credit Limit</div>
-              <div className="text-xl font-bold text-foreground mt-0.5">
+              <div className="text-xl font-semibold text-foreground mt-0.5 tabular-nums">
                 {hasCreditLimit ? `₦${formatMoney(customer.creditLimit)}` : 'No Limit'}
               </div>
             </div>
-            <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-              <CreditCard size={22} />
+            <div className="p-3 rounded-xl bg-accent/10 text-accent">
+              <CreditCard className="size-5" />
             </div>
           </CardContent>
         </Card>
@@ -292,14 +292,14 @@ function DeliveryCustomerDetailsView() {
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <div className="text-xs text-muted-foreground font-medium">Outstanding Balance</div>
-              <div className={`text-xl font-bold mt-0.5 flex items-center gap-1 ${isOverLimit ? 'text-red-600' : isNearLimit ? 'text-amber-600' : 'text-foreground'}`}>
+              <div className={`text-xl font-semibold mt-0.5 flex items-center gap-1 ${isOverLimit ? 'text-destructive' : isNearLimit ? 'text-warning' : 'text-foreground'}`}>
                 ₦{formatMoney(customer.outstanding)}
-                {isOverLimit && <ShieldAlert size={16} className="text-red-500" />}
-                {isNearLimit && <AlertTriangle size={16} className="text-amber-500" />}
+                {isOverLimit && <ShieldAlert className="size-4 text-destructive" />}
+                {isNearLimit && <AlertTriangle className="size-4 text-warning" />}
               </div>
             </div>
-            <div className={`p-3 rounded-xl ${isOverLimit ? 'bg-red-500/10 text-red-500' : 'bg-primary/10 text-primary'}`}>
-              <Wallet size={22} />
+            <div className={`p-3 rounded-xl ${isOverLimit ? 'bg-destructive/10 text-destructive' : 'bg-primary/10 text-primary'}`}>
+              <Wallet className="size-5" />
             </div>
           </CardContent>
         </Card>
@@ -308,12 +308,12 @@ function DeliveryCustomerDetailsView() {
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <div className="text-xs text-muted-foreground font-medium">Total Quantity Sold</div>
-              <div className="text-xl font-bold text-foreground mt-0.5">
+              <div className="text-xl font-semibold text-foreground mt-0.5 tabular-nums">
                 {formatQty(customer.totalQty)} Litres
               </div>
             </div>
-            <div className="p-3 rounded-xl bg-blue-500/10 text-blue-500">
-              <Fuel size={22} />
+            <div className="p-3 rounded-xl bg-muted/10 text-muted-foreground">
+              <Fuel className="size-5" />
             </div>
           </CardContent>
         </Card>
@@ -328,8 +328,8 @@ function DeliveryCustomerDetailsView() {
                   : 'No transactions'}
               </div>
             </div>
-            <div className="p-3 rounded-xl bg-purple-500/10 text-purple-500">
-              <Clock size={22} />
+            <div className="p-3 rounded-xl bg-muted/10 text-muted-foreground">
+              <Clock className="size-5" />
             </div>
           </CardContent>
         </Card>
@@ -344,13 +344,13 @@ function DeliveryCustomerDetailsView() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
-                  <Fuel size={18} className="text-amber-500" /> Filling Station Details & Management
+                  <Fuel className="size-4 text-warning" /> Filling Station Details & Management
                 </CardTitle>
                 <CardDescription>Site management and fuel storage specs.</CardDescription>
               </CardHeader>
               <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                 <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl">
-                  <User className="h-5 w-5 text-amber-500 shrink-0" />
+                  <User className="size-5 text-warning shrink-0" />
                   <div>
                     <div className="text-xs text-muted-foreground font-medium">Manager's Name</div>
                     <div className="font-semibold text-foreground">{customer.contactPerson || 'N/A'}</div>
@@ -358,7 +358,7 @@ function DeliveryCustomerDetailsView() {
                 </div>
 
                 <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl">
-                  <Phone className="h-5 w-5 text-amber-500 shrink-0" />
+                  <Phone className="size-5 text-warning shrink-0" />
                   <div>
                     <div className="text-xs text-muted-foreground font-medium">Manager's Phone</div>
                     {customer.contactPersonPhone ? (
@@ -372,7 +372,7 @@ function DeliveryCustomerDetailsView() {
                 </div>
 
                 <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl">
-                  <Fuel className="h-5 w-5 text-amber-500 shrink-0" />
+                  <Fuel className="size-5 text-warning shrink-0" />
                   <div>
                     <div className="text-xs text-muted-foreground font-medium">Tank Storage Capacity</div>
                     <div className="font-semibold text-foreground">{formatQty(customer.tankCapacity)} Litres</div>
@@ -380,7 +380,7 @@ function DeliveryCustomerDetailsView() {
                 </div>
 
                 <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl">
-                  <Building2 className="h-5 w-5 text-amber-500 shrink-0" />
+                  <Building2 className="size-5 text-warning shrink-0" />
                   <div>
                     <div className="text-xs text-muted-foreground font-medium">Dispensing Pumps</div>
                     <div className="font-semibold text-foreground">{customer.pumpCount || 1} Pumps</div>
@@ -392,7 +392,7 @@ function DeliveryCustomerDetailsView() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
-                  <User size={18} className="text-primary" /> Customer Profile & Photo
+                  <User className="size-4 text-primary" /> Customer Profile & Photo
                 </CardTitle>
                 <CardDescription>Personal identification and uploaded passport photo.</CardDescription>
               </CardHeader>
@@ -402,11 +402,11 @@ function DeliveryCustomerDetailsView() {
                     <img
                       src={customer.passportPhoto}
                       alt={customer.name}
-                      className="w-20 h-20 rounded-xl object-cover border border-border shadow-sm"
+                      className="size-20 rounded-xl object-cover border border-border"
                     />
                   ) : (
-                    <div className="w-20 h-20 rounded-xl border-2 border-dashed border-border flex items-center justify-center text-muted-foreground bg-muted/40">
-                      <Camera size={24} />
+                    <div className="size-20 rounded-xl border-2 border-dashed border-border flex items-center justify-center text-muted-foreground bg-muted/40">
+                      <Camera className="size-6" />
                     </div>
                   )}
                   <div className="space-y-1 text-center sm:text-left">
@@ -424,14 +424,14 @@ function DeliveryCustomerDetailsView() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
-                <MapPin size={18} className="text-primary" /> Delivery & Site Addresses
+                <MapPin className="size-4 text-primary" /> Delivery & Site Addresses
               </CardTitle>
               <CardDescription>Primary dispatch and drop-off locations.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 text-sm">
               {isStation ? (
                 <div className="flex items-start gap-3 p-3 bg-muted/30 rounded-xl">
-                  <MapPin className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
+                  <MapPin className="size-5 text-warning shrink-0 mt-0.5" />
                   <div>
                     <div className="text-xs text-muted-foreground font-medium">Station Address</div>
                     <div className="font-semibold text-foreground">{customer.stationAddress || 'No station address specified'}</div>
@@ -440,7 +440,7 @@ function DeliveryCustomerDetailsView() {
               ) : (
                 <>
                   <div className="flex items-start gap-3 p-3 bg-muted/30 rounded-xl">
-                    <MapPin className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                    <MapPin className="size-5 text-primary shrink-0 mt-0.5" />
                     <div>
                       <div className="text-xs text-muted-foreground font-medium">Home Address</div>
                       <div className="font-semibold text-foreground">{customer.homeAddress || 'No home address specified'}</div>
@@ -448,7 +448,7 @@ function DeliveryCustomerDetailsView() {
                   </div>
 
                   <div className="flex items-start gap-3 p-3 bg-muted/30 rounded-xl">
-                    <Building2 className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
+                    <Building2 className="size-5 text-muted-foreground shrink-0 mt-0.5" />
                     <div>
                       <div className="text-xs text-muted-foreground font-medium">Office Address</div>
                       <div className="font-semibold text-foreground">{customer.officeAddress || 'No office address specified'}</div>
@@ -467,7 +467,7 @@ function DeliveryCustomerDetailsView() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
-                <Landmark size={18} className="text-primary" /> Bank & Settlement Account
+                <Landmark className="size-4 text-primary" /> Bank & Settlement Account
               </CardTitle>
               <CardDescription>Registered banking credentials.</CardDescription>
             </CardHeader>
@@ -493,7 +493,7 @@ function DeliveryCustomerDetailsView() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
-                <DollarSign size={18} className="text-primary" /> Sales & Payment Summary
+                <DollarSign className="size-4 text-primary" /> Sales & Payment Summary
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
@@ -503,11 +503,11 @@ function DeliveryCustomerDetailsView() {
               </div>
               <div className="flex justify-between items-center p-2.5 bg-muted/20 rounded-lg">
                 <span className="text-xs text-muted-foreground">Total Payments Received</span>
-                <span className="font-semibold text-emerald-600 dark:text-emerald-400">₦{formatMoney(customer.totalPayments)}</span>
+                <span className="font-semibold text-accent">₦{formatMoney(customer.totalPayments)}</span>
               </div>
               <div className="flex justify-between items-center p-2.5 bg-muted/20 rounded-lg">
                 <span className="text-xs text-muted-foreground">Net Outstanding</span>
-                <span className={`font-semibold ${isOverLimit ? 'text-red-600' : 'text-foreground'}`}>
+                <span className={`font-semibold ${isOverLimit ? 'text-destructive' : 'text-foreground'}`}>
                   ₦{formatMoney(customer.outstanding)}
                 </span>
               </div>
@@ -518,7 +518,7 @@ function DeliveryCustomerDetailsView() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
-                <FileText size={18} className="text-muted-foreground" /> Notes & Remarks
+                <FileText className="size-4 text-muted-foreground" /> Notes & Remarks
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -533,10 +533,10 @@ function DeliveryCustomerDetailsView() {
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-card border border-border rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl">
-            <div className="flex items-center gap-3 text-red-500">
-              <ShieldAlert size={28} />
-              <h3 className="font-bold text-lg text-foreground">Delete Customer Profile</h3>
+          <div className="bg-card border border-border rounded-xl max-w-md w-full p-6 space-y-4">
+            <div className="flex items-center gap-3 text-destructive">
+              <ShieldAlert className="size-7" />
+              <h3 className="font-semibold text-lg text-foreground">Delete Customer Profile</h3>
             </div>
             <p className="text-sm text-muted-foreground">
               Are you sure you want to delete <strong>{customer.name}</strong> ({customer.customerCode || 'N/A'})? This action cannot be undone.

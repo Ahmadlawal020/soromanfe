@@ -36,8 +36,8 @@ const fmtQty = (n: number) => n.toLocaleString(undefined, { maximumFractionDigit
 const fmtMoney = (n: number) => `₦${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 
 const statusBadge: Record<string, { label: string; cls: string; icon: typeof CheckCircle2 }> = {
-  loaded: { label: 'In Transit', cls: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20', icon: Truck },
-  offloaded: { label: 'Sold', cls: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20', icon: CheckCircle2 },
+  loaded: { label: 'In Transit', cls: 'bg-warning/10 text-warning border-warning/20', icon: Truck },
+  offloaded: { label: 'Sold', cls: 'bg-accent/10 text-accent border-accent/20', icon: CheckCircle2 },
 }
 
 function DeliveryOperationDetailsView() {
@@ -147,15 +147,15 @@ function DeliveryOperationDetailsView() {
   if (!inventoryItem && isLoading) {
     return (
       <div className="flex justify-center py-16">
-        <Loader2 size={28} className="animate-spin text-muted-foreground" />
+        <Loader2 className="size-7 animate-spin text-muted-foreground" />
       </div>
     )
   }
 
   if (!record) {
     return (
-      <div className="p-8 text-center max-w-md mx-auto my-12 bg-card rounded-2xl border border-border">
-        <ShieldAlert size={40} className="mx-auto text-muted-foreground mb-4" />
+      <div className="p-8 text-center max-w-md mx-auto my-12 bg-card rounded-xl border border-border">
+        <ShieldAlert className="size-10 mx-auto text-muted-foreground mb-4" />
         <h3 className="font-semibold text-lg">Record Not Found</h3>
         <p className="text-sm text-muted-foreground mt-1">Please select a valid inventory record from the list.</p>
         <Button onClick={() => navigate({ to: '/delivery-operations' })} className="mt-4 cursor-pointer">
@@ -179,11 +179,11 @@ function DeliveryOperationDetailsView() {
             className="cursor-pointer"
             onClick={() => navigate({ to: '/delivery-operations' })}
           >
-            <ArrowLeft size={16} />
+            <ArrowLeft className="size-4" />
           </Button>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">{record.truckPlate}</h1>
+              <h1 className="text-2xl font-semibold tracking-tight text-foreground">{record.truckPlate}</h1>
               {record.code && (
                 <Badge variant="outline" className="font-mono text-xs uppercase">
                   {record.code}
@@ -191,7 +191,7 @@ function DeliveryOperationDetailsView() {
               )}
               {badge && Icon && (
                 <Badge className={`text-xs border flex items-center gap-1 ${badge.cls}`}>
-                  <Icon size={12} /> {badge.label}
+                  <Icon className="size-3" /> {badge.label}
                 </Badge>
               )}
             </div>
@@ -208,7 +208,7 @@ function DeliveryOperationDetailsView() {
             className="cursor-pointer"
             onClick={() => setShowDeleteConfirm(true)}
           >
-            <Trash2 size={14} className="mr-1.5" /> Delete
+            <Trash2 className="size-3.5 mr-1.5" /> Delete
           </Button>
         </div>
       </div>
@@ -219,12 +219,12 @@ function DeliveryOperationDetailsView() {
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <div className="text-xs text-muted-foreground font-medium">Quantity Allocated</div>
-              <div className="text-xl font-bold text-foreground mt-0.5">
+              <div className="text-xl font-semibold text-foreground mt-0.5 tabular-nums">
                 {record.qty > 0 ? `${fmtQty(record.qty)} ${record.unitLabel}` : '—'}
               </div>
             </div>
-            <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-500">
-              <Package size={20} />
+            <div className="p-2.5 rounded-xl bg-muted/10 text-muted-foreground">
+              <Package className="size-5" />
             </div>
           </CardContent>
         </Card>
@@ -233,12 +233,12 @@ function DeliveryOperationDetailsView() {
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <div className="text-xs text-muted-foreground font-medium">PFI Number</div>
-              <div className="text-lg font-bold text-foreground mt-0.5 truncate max-w-[140px]">
+              <div className="text-lg font-semibold text-foreground mt-0.5 truncate max-w-[140px]">
                 {record.pfiLabel || '—'}
               </div>
             </div>
-            <div className="p-2.5 rounded-xl bg-violet-500/10 text-violet-500">
-              <FileText size={20} />
+            <div className="p-2.5 rounded-xl bg-muted/10 text-muted-foreground">
+              <FileText className="size-5" />
             </div>
           </CardContent>
         </Card>
@@ -247,12 +247,12 @@ function DeliveryOperationDetailsView() {
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <div className="text-xs text-muted-foreground font-medium">Rate (per litre)</div>
-              <div className="text-xl font-bold text-foreground mt-0.5">
+              <div className="text-xl font-semibold text-foreground mt-0.5 tabular-nums">
                 {toNum(record.rate) > 0 ? `₦${toNum(record.rate).toLocaleString()}` : '—'}
               </div>
             </div>
-            <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-500">
-              <DollarSign size={20} />
+            <div className="p-2.5 rounded-xl bg-accent/10 text-accent">
+              <DollarSign className="size-5" />
             </div>
           </CardContent>
         </Card>
@@ -261,12 +261,12 @@ function DeliveryOperationDetailsView() {
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <div className="text-xs text-muted-foreground font-medium">Date Loaded</div>
-              <div className="text-sm font-bold text-foreground mt-0.5">
+              <div className="text-sm font-semibold text-foreground mt-0.5">
                 {record.dateAllocated ? (() => { try { return format(parseISO(record.dateAllocated), 'dd MMM yyyy') } catch { return record.dateAllocated } })() : '—'}
               </div>
             </div>
             <div className="p-2.5 rounded-xl bg-muted text-muted-foreground">
-              <Calendar size={20} />
+              <Calendar className="size-5" />
             </div>
           </CardContent>
         </Card>
@@ -275,12 +275,12 @@ function DeliveryOperationDetailsView() {
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <div className="text-xs text-muted-foreground font-medium">Status</div>
-              <div className="text-sm font-bold text-foreground mt-0.5">
+              <div className="text-sm font-semibold text-foreground mt-0.5">
                 {badge?.label || '—'}
               </div>
             </div>
-            <div className={`p-2.5 rounded-xl ${record.status === 'loaded' ? 'bg-amber-500/10 text-amber-500' : 'bg-emerald-500/10 text-emerald-500'}`}>
-              {Icon ? <Icon size={20} /> : <Truck size={20} />}
+            <div className={`p-2.5 rounded-xl ${record.status === 'loaded' ? 'bg-warning/10 text-warning' : 'bg-accent/10 text-accent'}`}>
+              {Icon ? <Icon className="size-5" /> : <Truck className="size-5" />}
             </div>
           </CardContent>
         </Card>
@@ -297,28 +297,28 @@ function DeliveryOperationDetailsView() {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                 <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl">
-                  <Truck className="h-5 w-5 text-primary shrink-0" />
+                  <Truck className="size-5 text-primary shrink-0" />
                   <div>
                     <div className="text-xs text-muted-foreground font-medium">Truck Plate</div>
                     <div className="font-semibold">{record.truckPlate}</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl">
-                  <Package className="h-5 w-5 text-primary shrink-0" />
+                  <Package className="size-5 text-primary shrink-0" />
                   <div>
                     <div className="text-xs text-muted-foreground font-medium">Product</div>
                     <div className="font-semibold">{record.product || 'N/A'}</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl">
-                  <Building2 className="h-5 w-5 text-amber-500 shrink-0" />
+                  <Building2 className="size-5 text-warning shrink-0" />
                   <div>
                     <div className="text-xs text-muted-foreground font-medium">Depot</div>
                     <div className="font-semibold">{record.depotDisplay || 'N/A'}</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl">
-                  <MapPin className="h-5 w-5 text-muted-foreground shrink-0" />
+                  <MapPin className="size-5 text-muted-foreground shrink-0" />
                   <div>
                     <div className="text-xs text-muted-foreground font-medium">Destination</div>
                     <div className="font-semibold">{record.location || 'N/A'}</div>
@@ -328,8 +328,8 @@ function DeliveryOperationDetailsView() {
 
               {record.dateOffloaded && (
                 <div className="border-t border-border pt-4 mt-4">
-                  <div className="flex items-center gap-3 p-3 bg-emerald-50/60 rounded-xl">
-                    <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
+                  <div className="flex items-center gap-3 p-3 bg-accent/60 rounded-xl">
+                    <CheckCircle2 className="size-5 text-accent shrink-0" />
                     <div>
                       <div className="text-xs text-muted-foreground font-medium">Date Sold / Offloaded</div>
                       <div className="font-semibold">
@@ -386,7 +386,7 @@ function DeliveryOperationDetailsView() {
                             <TableCell className="text-right text-foreground font-medium">
                               {toNum(entry.salesValue) > 0 ? fmtMoney(toNum(entry.salesValue)) : '—'}
                             </TableCell>
-                            <TableCell className="text-right font-semibold text-emerald-600">
+                            <TableCell className="text-right font-semibold text-accent">
                               {toNum(entry.paymentAmount) > 0 ? fmtMoney(toNum(entry.paymentAmount)) : '—'}
                             </TableCell>
                             <TableCell className="text-muted-foreground">{entry.payerName || '—'}</TableCell>
@@ -408,7 +408,7 @@ function DeliveryOperationDetailsView() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
-                <FileText size={16} className="text-muted-foreground" /> Sales Summary
+                <FileText className="size-4 text-muted-foreground" /> Sales Summary
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
@@ -422,15 +422,15 @@ function DeliveryOperationDetailsView() {
               </div>
               <div className="flex justify-between py-1 border-b border-border">
                 <span className="text-muted-foreground">Total Deposits</span>
-                <span className="font-semibold text-emerald-600">{salesSummary.totalPaid > 0 ? fmtMoney(salesSummary.totalPaid) : '—'}</span>
+                <span className="font-semibold text-accent">{salesSummary.totalPaid > 0 ? fmtMoney(salesSummary.totalPaid) : '—'}</span>
               </div>
               <div className="flex justify-between py-1 border-b border-border">
                 <span className="text-muted-foreground">Expenses</span>
-                <span className="font-semibold text-amber-600">{salesSummary.totalExpenses > 0 ? fmtMoney(salesSummary.totalExpenses) : '—'}</span>
+                <span className="font-semibold text-warning">{salesSummary.totalExpenses > 0 ? fmtMoney(salesSummary.totalExpenses) : '—'}</span>
               </div>
               <div className="flex justify-between py-1">
                 <span className="text-muted-foreground font-medium">Balance</span>
-                <span className={`font-bold ${salesSummary.balance === 0 ? 'text-emerald-600' : salesSummary.balance > 0 ? 'text-red-600' : 'text-blue-600'}`}>
+                <span className={`font-semibold ${salesSummary.balance === 0 ? 'text-accent' : salesSummary.balance > 0 ? 'text-destructive' : 'text-muted-foreground'}`}>
                   {salesSummary.balance === 0 ? '✓ Settled' : salesSummary.balance > 0 ? fmtMoney(salesSummary.balance) : `+${fmtMoney(Math.abs(salesSummary.balance))}`}
                 </span>
               </div>
@@ -442,7 +442,7 @@ function DeliveryOperationDetailsView() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
-                  <FileText size={16} className="text-muted-foreground" /> Notes
+                  <FileText className="size-4 text-muted-foreground" /> Notes
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -458,10 +458,10 @@ function DeliveryOperationDetailsView() {
       {/* Delete Confirmation */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-card border border-border rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl">
-            <div className="flex items-center gap-3 text-red-500">
-              <ShieldAlert size={28} />
-              <h3 className="font-bold text-lg text-foreground">Delete Record</h3>
+          <div className="bg-card border border-border rounded-xl max-w-md w-full p-6 space-y-4">
+            <div className="flex items-center gap-3 text-destructive">
+              <ShieldAlert className="size-7" />
+              <h3 className="font-semibold text-lg text-foreground">Delete Record</h3>
             </div>
             <p className="text-sm text-muted-foreground">
               Are you sure you want to delete the record for <strong>{record.truckPlate}</strong>

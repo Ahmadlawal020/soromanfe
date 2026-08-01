@@ -52,9 +52,9 @@ function formatDate(dateString: string) {
 function paymentStatusBadge(status: string) {
   switch (status) {
     case 'Paid':
-      return <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 gap-1"><CheckCircle size={12} /> Paid</Badge>
+      return <Badge className="bg-accent/15 text-accent border-accent/20 gap-1"><CheckCircle className="size-3" /> Paid</Badge>
     case 'Unpaid':
-      return <Badge className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/20 gap-1"><Clock size={12} /> Unpaid</Badge>
+      return <Badge className="bg-warning/15 text-warning border-warning/20 gap-1"><Clock className="size-3" /> Unpaid</Badge>
     default:
       return <Badge variant="outline">{status}</Badge>
   }
@@ -63,11 +63,11 @@ function paymentStatusBadge(status: string) {
 function collectionStatusBadge(status: string) {
   switch (status) {
     case 'Collected':
-      return <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 gap-1"><CheckCircle size={12} /> Collected</Badge>
+      return <Badge className="bg-accent/15 text-accent border-accent/20 gap-1"><CheckCircle className="size-3" /> Collected</Badge>
     case 'Dispatched':
-      return <Badge className="bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/20 gap-1"><Truck size={12} /> Dispatched</Badge>
+      return <Badge className="bg-muted/15 text-muted-foreground border-border/20 gap-1"><Truck className="size-3" /> Dispatched</Badge>
     case 'Pending':
-      return <Badge className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/20 gap-1"><Clock size={12} /> Pending</Badge>
+      return <Badge className="bg-warning/15 text-warning border-warning/20 gap-1"><Clock className="size-3" /> Pending</Badge>
     default:
       return <Badge variant="outline">{status}</Badge>
   }
@@ -76,11 +76,11 @@ function collectionStatusBadge(status: string) {
 function requestStatusBadge(status: string) {
   switch (status) {
     case 'Pending Review':
-      return <Badge className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/20 gap-1"><Clock size={12} /> Pending Review</Badge>
+      return <Badge className="bg-warning/15 text-warning border-warning/20 gap-1"><Clock className="size-3" /> Pending Review</Badge>
     case 'Approved':
-      return <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 gap-1"><CheckCircle size={12} /> Approved</Badge>
+      return <Badge className="bg-accent/15 text-accent border-accent/20 gap-1"><CheckCircle className="size-3" /> Approved</Badge>
     case 'Rejected':
-      return <Badge variant="destructive" className="gap-1"><XCircle size={12} /> Rejected</Badge>
+      return <Badge variant="destructive" className="gap-1"><XCircle className="size-3" /> Rejected</Badge>
     default:
       return <Badge variant="outline">{status}</Badge>
   }
@@ -89,11 +89,11 @@ function requestStatusBadge(status: string) {
 function licenseStatusBadge(status: string) {
   switch (status) {
     case 'approved':
-      return <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 gap-1"><CheckCircle size={12} /> Approved</Badge>
+      return <Badge className="bg-accent/15 text-accent border-accent/20 gap-1"><CheckCircle className="size-3" /> Approved</Badge>
     case 'pending':
-      return <Badge className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/20 gap-1"><Clock size={12} /> Pending</Badge>
+      return <Badge className="bg-warning/15 text-warning border-warning/20 gap-1"><Clock className="size-3" /> Pending</Badge>
     case 'rejected':
-      return <Badge variant="destructive" className="gap-1"><XCircle size={12} /> Rejected</Badge>
+      return <Badge variant="destructive" className="gap-1"><XCircle className="size-3" /> Rejected</Badge>
     default:
       return <Badge variant="outline">{status || 'No Licence'}</Badge>
   }
@@ -148,12 +148,12 @@ function DangoteOrderDetails() {
   if (!request) {
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-5 text-center">
-        <div className="h-16 w-16 rounded-full bg-warning/10 flex items-center justify-center text-warning border border-warning/20">
-          <AlertCircle size={32} />
+        <div className="size-16 rounded-full bg-warning/10 flex items-center justify-center text-warning border border-warning/20">
+          <AlertCircle className="size-8" />
         </div>
-        <h2 className="text-2xl font-bold text-foreground">Order Not Found</h2>
+        <h2 className="text-lg md:text-xl font-semibold text-foreground tracking-tight">Order Not Found</h2>
         <p className="text-muted-foreground max-w-sm">The requested order details could not be found or loaded.</p>
-        <Button onClick={() => navigate({ to: '/dangote-orders/' as any })}><ArrowLeft size={16} /> Back to Orders</Button>
+        <Button onClick={() => navigate({ to: '/dangote-orders/' as any })}><ArrowLeft className="size-4" /> Back to Orders</Button>
       </div>
     )
   }
@@ -170,10 +170,10 @@ function DangoteOrderDetails() {
       <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center gap-4">
           <Button variant="outline" size="icon" onClick={() => navigate({ to: '/dangote-orders/' as any })}>
-            <ArrowLeft size={16} />
+            <ArrowLeft className="size-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Order Details</h1>
+            <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">Order Details</h1>
             <p className="text-muted-foreground">Detailed breakdown of the Dangote delivery order</p>
           </div>
         </div>
@@ -181,11 +181,11 @@ function DangoteOrderDetails() {
 
       {/* Main Order Card Header */}
       <Card className="card-hover">
-        <CardContent className="p-6 md:p-8 bg-gradient-to-r from-amber-500/5 to-amber-600/5">
+        <CardContent className="bg-warning/5 p-6 md:p-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
             <div className="flex items-start sm:items-center gap-5">
-              <div className="w-16 h-16 bg-amber-500 rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0">
-                <Package size={28} />
+              <div className="size-16 bg-warning rounded-xl flex items-center justify-center text-warning-foreground shrink-0">
+                <Package className="size-7" />
               </div>
               <div>
                 <div className="flex flex-wrap items-center gap-2">
@@ -194,9 +194,9 @@ function DangoteOrderDetails() {
                   {paymentStatusBadge(request.paymentStatus)}
                   {collectionStatusBadge(request.collectionStatus)}
                 </div>
-                <h2 className="text-2xl font-bold text-foreground mt-2">{request.requestNumber}</h2>
+                <h2 className="text-lg md:text-xl font-semibold text-foreground mt-2 tracking-tight">{request.requestNumber}</h2>
                 <p className="text-muted-foreground mt-1 text-sm flex items-center gap-1.5">
-                  <Calendar size={14} className="shrink-0" />
+                  <Calendar className="size-3.5 shrink-0" />
                   {formatDate(request.createdAt)}
                 </p>
               </div>
@@ -210,8 +210,8 @@ function DangoteOrderDetails() {
         <Card>
           <CardHeader className="border-b border-border">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                <CircleDollarSign size={16} />
+              <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                <CircleDollarSign className="size-4" />
               </div>
               <div>
                 <CardTitle className="text-sm">Summary & Pricing</CardTitle>
@@ -244,7 +244,7 @@ function DangoteOrderDetails() {
             )}
             <div className="flex justify-between items-center pt-2">
               <span className="text-base font-semibold text-foreground">Total Amount</span>
-              <span className="font-mono text-lg font-bold text-primary">
+              <span className="font-mono text-lg font-semibold text-primary">
                 {formatCurrency(Number(request.totalAmount) || 0)}
               </span>
             </div>
@@ -255,8 +255,8 @@ function DangoteOrderDetails() {
         <Card>
           <CardHeader className="border-b border-border">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-success/10 flex items-center justify-center text-success">
-                <User size={16} />
+              <div className="size-8 rounded-lg bg-success/10 flex items-center justify-center text-success">
+                <User className="size-4" />
               </div>
               <div>
                 <CardTitle className="text-sm">Customer Profile</CardTitle>
@@ -266,30 +266,30 @@ function DangoteOrderDetails() {
           </CardHeader>
           <CardContent className="space-y-4 pt-6">
             <div>
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Client Name</p>
+              <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Client Name</p>
               <p className="text-sm font-semibold text-foreground mt-0.5">{request.customerName || 'N/A'}</p>
             </div>
             {request.companyName && (
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Company</p>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Company</p>
                 <p className="text-sm text-foreground mt-0.5 flex items-center gap-1.5">
-                  <Building2 size={14} className="text-muted-foreground" />
+                  <Building2 className="size-3.5 text-muted-foreground" />
                   {request.companyName}
                 </p>
               </div>
             )}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Email Address</p>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Email Address</p>
                 <p className="text-sm text-foreground mt-0.5 flex items-center gap-1.5 truncate">
-                  <Mail size={14} className="text-muted-foreground shrink-0" />
+                  <Mail className="size-3.5 text-muted-foreground shrink-0" />
                   {request.customerEmail || 'N/A'}
                 </p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Phone Line</p>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Phone Line</p>
                 <p className="text-sm text-foreground mt-0.5 flex items-center gap-1.5">
-                  <Phone size={14} className="text-muted-foreground shrink-0" />
+                  <Phone className="size-3.5 text-muted-foreground shrink-0" />
                   {request.customerPhone || 'N/A'}
                 </p>
               </div>
@@ -302,8 +302,8 @@ function DangoteOrderDetails() {
           <Card>
             <CardHeader className="border-b border-border">
               <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                  <ShieldPlus size={16} />
+                <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                  <ShieldPlus className="size-4" />
                 </div>
                 <div>
                   <CardTitle className="text-sm">Company Licence</CardTitle>
@@ -313,20 +313,20 @@ function DangoteOrderDetails() {
             </CardHeader>
             <CardContent className="space-y-4 pt-6">
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Company Name</p>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Company Name</p>
                 <p className="text-sm font-semibold text-foreground mt-0.5">{request.licenseCompanyName || '—'}</p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Licence Status</p>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Licence Status</p>
                 <div className="mt-1">{licenseStatusBadge(request.licenseStatus)}</div>
               </div>
               {request.licenseUrl && (
                 <div>
-                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider mb-2">Licence Document</p>
+                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em] mb-2">Licence Document</p>
                   <div className="rounded-lg border bg-background overflow-hidden">
                     {/\.(pdf)/i.test(request.licenseUrl) ? (
                       <div className="p-4 flex items-center gap-3">
-                        <FileText className="h-8 w-8 text-primary shrink-0" />
+                        <FileText className="size-8 text-primary shrink-0" />
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-foreground">PDF Document</p>
                           <p className="text-xs text-muted-foreground truncate">{request.licenseUrl}</p>
@@ -345,7 +345,7 @@ function DangoteOrderDetails() {
                         <img
                           src={request.licenseUrl}
                           alt={`${request.licenseCompanyName} licence`}
-                          className="w-full max-h-[500px] object-contain cursor-pointer hover:opacity-95 transition-opacity"
+                          className="w-full max-h-[500px] object-contain cursor-pointer hover:opacity-95 transition-opacity duration-250 ease-luxe"
                         />
                       </a>
                     )}
@@ -360,8 +360,8 @@ function DangoteOrderDetails() {
         <Card>
           <CardHeader className="border-b border-border">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-info/10 flex items-center justify-center text-info">
-                <MapPin size={16} />
+              <div className="size-8 rounded-lg bg-info/10 flex items-center justify-center text-info">
+                <MapPin className="size-4" />
               </div>
               <div>
                 <CardTitle className="text-sm">Delivery Information</CardTitle>
@@ -371,27 +371,27 @@ function DangoteOrderDetails() {
           </CardHeader>
           <CardContent className="space-y-4 pt-6">
             <div>
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Delivery Address</p>
+              <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Delivery Address</p>
               <p className="text-sm font-semibold text-foreground mt-0.5">{request.deliveryAddress || 'N/A'}</p>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">State</p>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">State</p>
                 <p className="text-sm text-foreground mt-0.5 flex items-center gap-1">
-                  <MapPin size={12} className="text-primary shrink-0" />
+                  <MapPin className="size-3 text-primary shrink-0" />
                   {request.deliveryState || 'N/A'}
                 </p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">LGA</p>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">LGA</p>
                 <p className="text-sm text-foreground mt-0.5">{request.deliveryLga || 'N/A'}</p>
               </div>
             </div>
             {request.expectedArrivalDate && (
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Expected Arrival</p>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Expected Arrival</p>
                 <p className="text-sm font-semibold text-foreground mt-0.5 flex items-center gap-1.5">
-                  <Calendar size={14} className="text-muted-foreground" />
+                  <Calendar className="size-3.5 text-muted-foreground" />
                   {request.expectedArrivalDate}
                 </p>
               </div>
@@ -403,8 +403,8 @@ function DangoteOrderDetails() {
         <Card>
           <CardHeader className="border-b border-border">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-violet-500/10 flex items-center justify-center text-violet-600">
-                <FileCheck size={16} />
+              <div className="size-8 rounded-lg bg-muted/10 flex items-center justify-center text-muted-foreground">
+                <FileCheck className="size-4" />
               </div>
               <div>
                 <CardTitle className="text-sm">Review Information</CardTitle>
@@ -418,12 +418,12 @@ function DangoteOrderDetails() {
               {requestStatusBadge(request.status)}
             </div>
             <div>
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Reviewed By</p>
+              <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Reviewed By</p>
               <p className="text-sm font-semibold text-foreground mt-0.5">{reviewerName}</p>
             </div>
             {request.reviewedAt && (
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Reviewed At</p>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Reviewed At</p>
                 <p className="text-sm text-foreground mt-0.5">{formatDate(request.reviewedAt)}</p>
               </div>
             )}
@@ -435,8 +435,8 @@ function DangoteOrderDetails() {
       <Card className="card-hover">
         <CardHeader className="border-b border-border">
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-success/10 flex items-center justify-center text-success">
-              <Banknote size={16} />
+            <div className="size-8 rounded-lg bg-success/10 flex items-center justify-center text-success">
+              <Banknote className="size-4" />
             </div>
             <div>
               <CardTitle className="text-sm">Payment Information</CardTitle>
@@ -452,28 +452,28 @@ function DangoteOrderDetails() {
           {request.virtualAccountNumber && (
             <>
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Bank</p>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Bank</p>
                 <p className="text-sm font-semibold text-foreground mt-0.5">{request.virtualAccountBank || 'N/A'}</p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Account Number</p>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Account Number</p>
                 <div className="flex items-center gap-2 mt-0.5">
-                  <p className="text-lg font-bold font-mono text-foreground tracking-wider">{request.virtualAccountNumber}</p>
+                  <p className="text-lg font-semibold font-mono text-foreground">{request.virtualAccountNumber}</p>
                   <button
                     onClick={() => {
                       navigator.clipboard.writeText(request.virtualAccountNumber)
                       setCopied(true)
                       setTimeout(() => setCopied(false), 2000)
                     }}
-                    className="h-7 w-7 rounded-md border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                    className="size-7 rounded-md border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors duration-250 ease-luxe"
                     title="Copy account number"
                   >
-                    {copied ? <CheckCircle size={14} className="text-success" /> : <Copy size={14} />}
+                    {copied ? <CheckCircle className="size-3.5 text-success" /> : <Copy className="size-3.5" />}
                   </button>
                 </div>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Account Name</p>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Account Name</p>
                 <p className="text-sm font-semibold text-foreground mt-0.5">{request.virtualAccountName || formatAccountName(request.customerName)}</p>
               </div>
             </>
@@ -485,8 +485,8 @@ function DangoteOrderDetails() {
       <Card className="card-hover">
         <CardHeader className="border-b border-border">
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-600">
-              <Truck size={16} />
+            <div className="size-8 rounded-lg bg-muted/10 flex items-center justify-center text-muted-foreground">
+              <Truck className="size-4" />
             </div>
             <div>
               <CardTitle className="text-sm">Collection Status</CardTitle>
@@ -500,24 +500,24 @@ function DangoteOrderDetails() {
             {collectionStatusBadge(request.collectionStatus)}
           </div>
           <div className="flex items-center gap-4 pt-4">
-            <div className={`flex-1 p-3 rounded-lg border text-center transition-colors ${request.collectionStatus === 'Pending' ? 'bg-amber-500/10 border-amber-500/30' : 'bg-muted/50 border-border'}`}>
-              <Clock size={20} className={`mx-auto mb-1 ${request.collectionStatus === 'Pending' ? 'text-amber-600' : 'text-muted-foreground'}`} />
-              <p className={`text-xs font-medium ${request.collectionStatus === 'Pending' ? 'text-amber-600' : 'text-muted-foreground'}`}>Pending</p>
+            <div className={`flex-1 p-3 rounded-lg border text-center transition-colors ${request.collectionStatus === 'Pending' ? 'bg-warning/10 border-warning/30' : 'bg-muted/50 border-border'}`}>
+              <Clock className={`size-5 mx-auto mb-1 ${request.collectionStatus === 'Pending' ? 'text-warning' : 'text-muted-foreground'}`} />
+              <p className={`text-xs font-medium ${request.collectionStatus === 'Pending' ? 'text-warning' : 'text-muted-foreground'}`}>Pending</p>
             </div>
-            <div className={`flex-1 p-3 rounded-lg border text-center transition-colors ${request.collectionStatus === 'Dispatched' ? 'bg-blue-500/10 border-blue-500/30' : 'bg-muted/50 border-border'}`}>
-              <Truck size={20} className={`mx-auto mb-1 ${request.collectionStatus === 'Dispatched' ? 'text-blue-600' : 'text-muted-foreground'}`} />
-              <p className={`text-xs font-medium ${request.collectionStatus === 'Dispatched' ? 'text-blue-600' : 'text-muted-foreground'}`}>Dispatched</p>
+            <div className={`flex-1 p-3 rounded-lg border text-center transition-colors ${request.collectionStatus === 'Dispatched' ? 'bg-muted/10 border-border/30' : 'bg-muted/50 border-border'}`}>
+              <Truck className={`size-5 mx-auto mb-1 ${request.collectionStatus === 'Dispatched' ? 'text-muted-foreground' : 'text-muted-foreground'}`} />
+              <p className={`text-xs font-medium ${request.collectionStatus === 'Dispatched' ? 'text-muted-foreground' : 'text-muted-foreground'}`}>Dispatched</p>
             </div>
-            <div className={`flex-1 p-3 rounded-lg border text-center transition-colors ${request.collectionStatus === 'Collected' ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-muted/50 border-border'}`}>
-              <CheckCircle size={20} className={`mx-auto mb-1 ${request.collectionStatus === 'Collected' ? 'text-emerald-600' : 'text-muted-foreground'}`} />
-              <p className={`text-xs font-medium ${request.collectionStatus === 'Collected' ? 'text-emerald-600' : 'text-muted-foreground'}`}>Collected</p>
+            <div className={`flex-1 p-3 rounded-lg border text-center transition-colors ${request.collectionStatus === 'Collected' ? 'bg-accent/10 border-accent/30' : 'bg-muted/50 border-border'}`}>
+              <CheckCircle className={`size-5 mx-auto mb-1 ${request.collectionStatus === 'Collected' ? 'text-accent' : 'text-muted-foreground'}`} />
+              <p className={`text-xs font-medium ${request.collectionStatus === 'Collected' ? 'text-accent' : 'text-muted-foreground'}`}>Collected</p>
             </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Admin Actions */}
-      <Card className="border-2 border-primary/20 shadow-md">
+      <Card className="border-2 border-primary/20">
         <CardHeader className="bg-primary/5 border-b border-primary/10">
           <CardTitle className="text-sm font-semibold text-primary">Order Actions</CardTitle>
           <CardDescription className="text-xs">Update payment and collection status</CardDescription>
@@ -529,43 +529,43 @@ function DangoteOrderDetails() {
               onClick={() => handleUpdatePayment('Paid')}
               disabled={updatePaymentMutation.isPending}
             >
-              <CheckCircle className="w-4 h-4 mr-2" /> Mark as Paid
+              <CheckCircle className="size-4 mr-2" /> Mark as Paid
             </Button>
           )}
 
           {request.paymentStatus === 'Paid' && request.collectionStatus === 'Pending' && (
             <Button
-              className="bg-blue-600 text-white hover:bg-blue-700 cursor-pointer"
+              className="bg-foreground text-background hover:bg-foreground cursor-pointer"
               onClick={() => handleUpdateCollection('Dispatched')}
               disabled={updateCollectionMutation.isPending}
             >
-              <Truck className="w-4 h-4 mr-2" /> Mark as Dispatched
+              <Truck className="size-4 mr-2" /> Mark as Dispatched
             </Button>
           )}
 
           {request.collectionStatus === 'Dispatched' && (
             <Button
-              className="bg-emerald-600 text-white hover:bg-emerald-700 cursor-pointer"
+              className="bg-accent text-accent-foreground hover:bg-accent cursor-pointer"
               onClick={() => handleUpdateCollection('Collected')}
               disabled={updateCollectionMutation.isPending}
             >
-              <CheckCircle className="w-4 h-4 mr-2" /> Mark as Collected
+              <CheckCircle className="size-4 mr-2" /> Mark as Collected
             </Button>
           )}
 
           {request.paymentStatus === 'Paid' && request.collectionStatus === 'Collected' && (
-            <span className="text-sm text-emerald-600 font-medium flex items-center gap-2">
-              <CheckCircle size={16} /> Order completed
+            <span className="text-sm text-accent font-medium flex items-center gap-2">
+              <CheckCircle className="size-4" /> Order completed
             </span>
           )}
 
           {request.status === 'Pending Review' && (
             <Button
               variant="outline"
-              className="border-amber-500 text-amber-600 hover:bg-amber-500/10 cursor-pointer"
+              className="border-warning text-warning hover:bg-warning/10 cursor-pointer"
               onClick={() => navigate({ to: '/dangote-order-request/review' as any, search: { id: String(request.id) } as any })}
             >
-              <FileCheck className="w-4 h-4 mr-2" /> Review Request
+              <FileCheck className="size-4 mr-2" /> Review Request
             </Button>
           )}
         </CardContent>

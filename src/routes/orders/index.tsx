@@ -1,239 +1,482 @@
-import { useState, useEffect } from 'react'
+import { Fragment, useMemo, useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Badge } from '#/components/ui/badge'
+import { format, isWithinInterval } from 'date-fns'
+import {
+  Package, CheckCircle2, Clock, DollarSign, Droplets, Truck,
+  Search, Plus, X, RefreshCw, FileSpreadsheet, FileText, Eye, Pencil,
+} from 'lucide-react'
+
 import { Button } from '#/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '#/components/ui/card'
 import { Input } from '#/components/ui/input'
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '#/components/ui/select'
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '#/components/ui/table'
-import { Building2, MapPin, Warehouse, Package, CheckCircle2, Clock, DollarSign, Search, Plus, X } from 'lucide-react'
-import { useOrderList } from '#/lib/hooks/useOrders'
+import { StatCard, StatCardGrid } from '#/components/ui/stat-card'
+import {
+  Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
+} from '#/components/ui/select'
+import {
+  Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
+} from '#/components/ui/table'
 import { PageLoader } from '#/components/PageLoader'
 import { PageError } from '#/components/PageError'
 import { PageEmpty } from '#/components/PageEmpty'
 import { Pagination } from '#/components/Pagination'
+import { PANEL, MICRO, PANEL_RAIL } from '#/lib/panel'
+import { cn } from '#/lib/utils'
+import { useAllOrders } from '#/lib/hooks/useOrders'
 
+import {
+  DATE_PRESETS, resolveRange, toNumber, formatNaira, formatQty, isPaid, groupByDay,
+  type DatePreset,
+} from './-orders-utils'
+import { OrderStatusBadge } from './-order-status'
+import { OrderDetailsDialog, OrderEditDialog } from './-order-dialogs'
+import { exportOrdersExcel, exportOrdersPdf } from './-order-exports'
 
 export const Route = createFileRoute('/orders/')({
   component: OrdersDashboard,
 })
 
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 0 }).format(value)
-}
+const ALL = 'all'
 
-function getStatusBadge(status: string) {
-  switch (status) {
-    case 'Completed':
-      return <Badge className="bg-success text-success-foreground">Completed</Badge>
-    case 'Pending':
-      return <Badge className="bg-warning text-warning-foreground">Pending</Badge>
-    case 'Cancelled':
-      return <Badge className="bg-destructive text-destructive-foreground">Cancelled</Badge>
-    default:
-      return <Badge variant="outline">{status}</Badge>
-  }
+/** A removable active-filter chip. */
+function FilterChip({ label, onClear }: { label: string; onClear: () => void }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-foreground/15 bg-muted/40 py-0.5 pr-1 pl-2.5 text-[0.65rem] tracking-[0.12em] uppercase">
+      {label}
+      <button
+        type="button"
+        onClick={onClear}
+        className="flex size-4 items-center justify-center rounded-full text-muted-foreground transition-colors duration-250 ease-luxe outline-none hover:bg-foreground/10 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50"
+      >
+        <X className="size-2.5" />
+        <span className="sr-only">Remove {label} filter</span>
+      </button>
+    </span>
+  )
 }
 
 function OrdersDashboard() {
   const navigate = useNavigate()
+
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedStatus, setSelectedStatus] = useState('all')
+  const [datePreset, setDatePreset] = useState<DatePreset>('today')
+  const [customFrom, setCustomFrom] = useState('')
+  const [customTo, setCustomTo] = useState('')
+  const [statusFilter, setStatusFilter] = useState(ALL)
+  const [locationFilter, setLocationFilter] = useState(ALL)
+  const [productFilter, setProductFilter] = useState(ALL)
+  const [pfiFilter, setPfiFilter] = useState(ALL)
+
   const [currentPage, setCurrentPage] = useState(1)
-  const [pageSize, setPageSize] = useState(10)
+  const [pageSize, setPageSize] = useState(25)
+  const [detailsOrder, setDetailsOrder] = useState<any | null>(null)
+  const [editOrder, setEditOrder] = useState<any | null>(null)
+  const [exporting, setExporting] = useState<'excel' | 'pdf' | null>(null)
 
-  const POLL_INTERVAL = 30_000
-  const { data, isLoading, isError, error, refetch } = useOrderList({ refetchInterval: POLL_INTERVAL })
-  const orders = data?.orders || []
+  // Filtering and the summary totals run client-side so the cards can
+  // recalculate against the filtered set, which needs the whole result.
+  const { data, isLoading, isError, error, refetch, isFetching } = useAllOrders()
+  const orders: any[] = data?.orders || []
 
-  useEffect(() => {
-    setCurrentPage(1)
-  }, [searchTerm, selectedStatus])
+  // Dropdowns are populated from the data actually present.
+  const options = useMemo(() => {
+    const uniq = (vals: (string | undefined | null)[]) =>
+      [...new Set(vals.filter((v): v is string => Boolean(v)))].sort()
+    return {
+      statuses: uniq(orders.map((o) => o.status)),
+      locations: uniq(orders.map((o) => o.depotName || o.state)),
+      products: uniq(orders.map((o) => o.productName)),
+      pfis: uniq(orders.map((o) => o.pfiNumber)),
+    }
+  }, [orders])
 
-  const filteredOrders = orders.filter((order: any) => {
-    const matchesSearch =
-      !searchTerm ||
-      (order.orderNumber || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (order.customerName || order.customer?.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (order.customerCompanyName || order.customer?.companyName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (order.productName || order.product?.name || '').toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus =
-      selectedStatus === 'all' || order.status === selectedStatus
-    return matchesSearch && matchesStatus
-  })
-
-  const totalItems = filteredOrders.length
-  const totalPages = Math.ceil(totalItems / pageSize)
-  const paginatedOrders = filteredOrders.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
+  const range = useMemo(
+    () =>
+      resolveRange(datePreset, {
+        from: customFrom ? new Date(customFrom) : undefined,
+        to: customTo ? new Date(customTo) : undefined,
+      }),
+    [datePreset, customFrom, customTo],
   )
 
-  const hasFilters = Boolean(searchTerm || selectedStatus !== 'all')
+  const filtered = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase()
+    return orders.filter((o) => {
+      if (range) {
+        if (!o.createdAt) return false
+        if (!isWithinInterval(new Date(o.createdAt), { start: range.from, end: range.to })) return false
+      }
+      if (statusFilter !== ALL && o.status !== statusFilter) return false
+      if (locationFilter !== ALL && (o.depotName || o.state) !== locationFilter) return false
+      if (productFilter !== ALL && o.productName !== productFilter) return false
+      if (pfiFilter !== ALL && o.pfiNumber !== pfiFilter) return false
+      if (!q) return true
+      return [
+        o.orderNumber, o.customerName, o.customerCompanyName, o.customerPhone,
+        o.depotName, o.state, o.productName, o.pfiNumber, o.id, o._id,
+      ].some((f) => String(f ?? '').toLowerCase().includes(q))
+    })
+  }, [orders, range, statusFilter, locationFilter, productFilter, pfiFilter, searchTerm])
 
-  const totalOrders = filteredOrders.length
-  const completedOrders = filteredOrders.filter((o: any) => o.status === 'Completed').length
-  const pendingOrders = filteredOrders.filter((o: any) => o.status === 'Pending').length
-  const totalValue = filteredOrders.reduce((sum: number, o: any) => sum + (Number(o.totalAmount) || 0), 0)
+  // Every figure below recalculates against the filtered set.
+  const totals = useMemo(() => {
+    const paid = filtered.filter(isPaid)
+    // Released and everything past it counts as released — once stock leaves
+    // the depot it does not come back to Paid.
+    const released = filtered.filter((o) =>
+      ['Released', 'Loading', 'Completed'].includes(String(o.status)),
+    )
+    const loading = filtered.filter((o) => String(o.status) === 'Loading')
+    return {
+      count: filtered.length,
+      paidCount: paid.length,
+      unpaidCount: filtered.length - paid.length,
+      qty: filtered.reduce((s, o) => s + toNumber(o.quantity), 0),
+      amount: filtered.reduce((s, o) => s + toNumber(o.totalAmount), 0),
+      amountPaid: paid.reduce((s, o) => s + toNumber(o.totalAmount), 0),
+      releasedCount: released.length,
+      releasedQty: released.reduce((s, o) => s + toNumber(o.quantity), 0),
+      releasedValue: released.reduce((s, o) => s + toNumber(o.totalAmount), 0),
+      loadingCount: loading.length,
+      loadingQty: loading.reduce((s, o) => s + toNumber(o.quantity), 0),
+    }
+  }, [filtered])
+
+  const activeChips = [
+    searchTerm && { label: `Search: ${searchTerm}`, clear: () => setSearchTerm('') },
+    datePreset !== 'all' && {
+      label: DATE_PRESETS.find((p) => p.value === datePreset)?.label ?? 'Custom range',
+      clear: () => setDatePreset('all'),
+    },
+    statusFilter !== ALL && { label: statusFilter, clear: () => setStatusFilter(ALL) },
+    locationFilter !== ALL && { label: locationFilter, clear: () => setLocationFilter(ALL) },
+    productFilter !== ALL && { label: productFilter, clear: () => setProductFilter(ALL) },
+    pfiFilter !== ALL && { label: `PFI ${pfiFilter}`, clear: () => setPfiFilter(ALL) },
+  ].filter(Boolean) as { label: string; clear: () => void }[]
+
+  const clearAll = () => {
+    setSearchTerm(''); setDatePreset('all'); setStatusFilter(ALL)
+    setLocationFilter(ALL); setProductFilter(ALL); setPfiFilter(ALL)
+    setCustomFrom(''); setCustomTo(''); setCurrentPage(1)
+  }
+
+  const totalPages = Math.max(Math.ceil(filtered.length / pageSize), 1)
+  const page = Math.min(currentPage, totalPages)
+  const paginated = filtered.slice((page - 1) * pageSize, page * pageSize)
+
+  // Subtotal rows only earn their place when more than one day is on screen —
+  // with a single day they would just restate the summary cards.
+  const dayGroups = useMemo(() => groupByDay(paginated), [paginated])
+  const showSubtotals = dayGroups.size > 1
+
+  const runExport = async (kind: 'excel' | 'pdf') => {
+    setExporting(kind)
+    try {
+      const filters = { pfi: pfiFilter, location: locationFilter }
+      if (kind === 'excel') await exportOrdersExcel(filtered, filters)
+      else await exportOrdersPdf(filtered, filters)
+    } finally {
+      setExporting(null)
+    }
+  }
+
+  let serial = (page - 1) * pageSize
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex justify-between items-center">
+    <div className="animate-fade-in space-y-6">
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Orders</h1>
-          <p className="text-muted-foreground">View and track all customer product orders, delivery types, and status.</p>
+          <p className={cn(MICRO, 'mb-1.5 text-muted-foreground')}>Orders</p>
+          <h1 className="text-xl font-semibold tracking-tight text-balance md:text-2xl">
+            Order register
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Every customer product order, its payment state and fulfilment status.
+          </p>
         </div>
-        <Button size="sm" className="gradient-primary text-white border-0" onClick={() => navigate({ to: '/admin-order' as any })}>
-          <Plus className="w-4 h-4 mr-2" />Place New Order
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
+            <RefreshCw className={cn(isFetching && 'animate-spin')} />
+            Refresh
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => runExport('excel')} disabled={exporting !== null}>
+            <FileSpreadsheet />
+            {exporting === 'excel' ? 'Exporting…' : 'Excel'}
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => runExport('pdf')} disabled={exporting !== null}>
+            <FileText />
+            {exporting === 'pdf' ? 'Exporting…' : 'PDF'}
+          </Button>
+          <Button size="sm" onClick={() => navigate({ to: '/admin-order' as any })}>
+            <Plus data-icon="inline-start" />
+            Place new order
+          </Button>
+        </div>
       </div>
 
-      {!isLoading && !isError && (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="stats-card"><CardContent className="p-4 flex justify-between items-center"><div><p className="text-sm text-muted-foreground">Total Orders</p><p className="text-2xl font-bold">{totalOrders}</p></div><Package className="w-8 h-8 text-primary" /></CardContent></Card>
-        <Card className="stats-card"><CardContent className="p-4 flex justify-between items-center"><div><p className="text-sm text-muted-foreground">Completed</p><p className="text-2xl font-bold text-success">{completedOrders}</p></div><CheckCircle2 className="w-8 h-8 text-success" /></CardContent></Card>
-        <Card className="stats-card"><CardContent className="p-4 flex justify-between items-center"><div><p className="text-sm text-muted-foreground">Pending</p><p className="text-2xl font-bold text-warning">{pendingOrders}</p></div><Clock className="w-8 h-8 text-warning" /></CardContent></Card>
-        <Card className="stats-card"><CardContent className="p-4 flex justify-between items-center"><div><p className="text-sm text-muted-foreground">Total Value</p><p className="text-2xl font-bold text-info">{formatCurrency(totalValue)}</p></div><DollarSign className="w-8 h-8 text-info" /></CardContent></Card>
-      </div>
-      )}
-
-      <Card>
-        <CardHeader className="border-b border-border">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div><CardTitle>Order Register</CardTitle><CardDescription>A complete log of all product orders processed by the administration</CardDescription></div>
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-              <div className="relative flex-1 sm:w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                <Input type="text" placeholder="Search order no, customer, product..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
-                {searchTerm && <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground flex items-center justify-center cursor-pointer transition-colors" aria-label="Clear search"><X size={10} /></button>}
-              </div>
-              <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                <SelectTrigger className="w-full sm:w-[180px]"><SelectValue placeholder="All Statuses" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="Completed">Completed</SelectItem>
-                  <SelectItem value="Pending">Pending</SelectItem>
-                  <SelectItem value="Cancelled">Cancelled</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <PageLoader message="Loading orders..." />
-          ) : isError ? (
-            <PageError message={(error as any)?.message || 'Failed to load orders'} onRetry={() => refetch()} />
-          ) : filteredOrders.length === 0 ? (
-            <PageEmpty
-              icon={<Package size={24} className="text-muted-foreground" />}
-              title={hasFilters ? 'No orders match your filters' : 'No orders yet'}
-              description={hasFilters ? 'Try adjusting your search or filter criteria.' : 'Orders placed via the Admin Order page will appear here.'}
-              actionLabel={hasFilters ? undefined : 'Place Order'}
-              onAction={hasFilters ? undefined : () => navigate({ to: '/admin-order' as any })}
-              hasFilters={hasFilters}
-              onClearFilters={() => { setSearchTerm(''); setSelectedStatus('all') }}
+      {isLoading ? (
+        <PageLoader message="Loading orders…" />
+      ) : isError ? (
+        <PageError message={(error as any)?.message || 'Could not load orders.'} onRetry={() => refetch()} />
+      ) : (
+        <>
+          <StatCardGrid count={6}>
+            <StatCard
+              icon={<Package />} label="Total orders" value={formatQty(totals.count)}
+              description={`${formatQty(totals.paidCount)} paid & ${formatQty(totals.releasedCount)} released`}
             />
-          ) : (
-            <>
-              <div className="overflow-x-auto">
+            <StatCard
+              // Goes amber the moment anything is unconfirmed.
+              tone={totals.unpaidCount > 0 ? 'amber' : 'green'}
+              icon={<Clock />} label="Payment not confirmed" value={formatQty(totals.unpaidCount)}
+              description={totals.unpaidCount > 0 ? 'Awaiting confirmation' : 'All confirmed'}
+            />
+            <StatCard
+              icon={<Droplets />} label="Total qty ordered"
+              value={
+                <>
+                  {formatQty(totals.qty)}
+                  <span className="ml-1 text-base font-normal text-muted-foreground">L</span>
+                </>
+              }
+            />
+            <StatCard
+              icon={<DollarSign />} label="Total amount" value={formatNaira(totals.amount)}
+              description={`${formatNaira(totals.amountPaid)} paid`}
+            />
+            {/* Loading is a status, not a truck-ticket count — see the note in
+                -orders-utils. It is the closest honest figure available. */}
+            <StatCard
+              icon={<Truck />} label="Loading" value={formatQty(totals.loadingCount)}
+              description={`${formatQty(totals.loadingQty)} L on trucks`}
+            />
+            <StatCard
+              icon={<CheckCircle2 />} label="Released qty"
+              value={
+                <>
+                  {formatQty(totals.releasedQty)}
+                  <span className="ml-1 text-base font-normal text-muted-foreground">L</span>
+                </>
+              }
+              description={`${formatNaira(totals.releasedValue)} released`}
+            />
+          </StatCardGrid>
+
+          <section className={PANEL}>
+            <div className={PANEL_RAIL}>
+              <span className={MICRO}>Filters</span>
+              {activeChips.length > 0 && (
+                <button
+                  type="button"
+                  onClick={clearAll}
+                  className="text-xs text-accent underline-offset-4 outline-none hover:underline focus-visible:underline"
+                >
+                  Clear all
+                </button>
+              )}
+            </div>
+
+            <div className="space-y-4 px-6 pt-5 pb-6">
+              <div className="relative">
+                <Search className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={searchTerm}
+                  onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1) }}
+                  placeholder="Search reference, customer, location, product, PFI or order ID…"
+                  className="pl-9"
+                />
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                {DATE_PRESETS.map((p) => (
+                  <button
+                    key={p.value}
+                    type="button"
+                    onClick={() => { setDatePreset(p.value); setCurrentPage(1) }}
+                    className={cn(
+                      'rounded-full border px-3 py-1 text-xs transition-colors duration-250 ease-luxe outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
+                      datePreset === p.value
+                        ? 'border-accent/40 bg-accent/10 text-accent'
+                        : 'border-border text-muted-foreground hover:bg-muted hover:text-foreground',
+                    )}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+                <div className="flex items-center gap-1.5">
+                  <Input
+                    type="date" value={customFrom} aria-label="Custom range start"
+                    onChange={(e) => { setCustomFrom(e.target.value); setDatePreset('custom'); setCurrentPage(1) }}
+                    className="h-7 w-[9.5rem] text-xs"
+                  />
+                  <span className="text-xs text-muted-foreground">to</span>
+                  <Input
+                    type="date" value={customTo} aria-label="Custom range end"
+                    onChange={(e) => { setCustomTo(e.target.value); setDatePreset('custom'); setCurrentPage(1) }}
+                    className="h-7 w-[9.5rem] text-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                {([
+                  ['All statuses', statusFilter, setStatusFilter, options.statuses],
+                  ['All locations', locationFilter, setLocationFilter, options.locations],
+                  ['All products', productFilter, setProductFilter, options.products],
+                  ['All PFIs', pfiFilter, setPfiFilter, options.pfis],
+                ] as const).map(([label, value, setter, list]) => (
+                  <Select
+                    key={label}
+                    value={value}
+                    onValueChange={(v) => { (setter as (s: string) => void)(v); setCurrentPage(1) }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={label} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={ALL}>{label}</SelectItem>
+                      {list.map((v) => (
+                        <SelectItem key={v} value={v}>{v}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ))}
+              </div>
+
+              {activeChips.length > 0 && (
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  {activeChips.map((c) => (
+                    <FilterChip key={c.label} label={c.label} onClear={c.clear} />
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+
+          <section className={PANEL}>
+            <div className={PANEL_RAIL}>
+              <span className={MICRO}>
+                {formatQty(filtered.length)} order{filtered.length === 1 ? '' : 's'}
+              </span>
+              <span className="text-xs text-muted-foreground tabular-nums">
+                {formatNaira(totals.amount)}
+              </span>
+            </div>
+
+            {filtered.length === 0 ? (
+              <PageEmpty
+                title="No orders match these filters"
+                description="Widen the date range or clear a filter to see more."
+                hasFilters={activeChips.length > 0}
+                onClearFilters={clearAll}
+              />
+            ) : (
+              <div className="px-2 pb-2">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Order No.</TableHead>
-                      <TableHead>Customer / Company</TableHead>
-                      <TableHead>State & Depot</TableHead>
-                      <TableHead>Product Details</TableHead>
-                      <TableHead>Quantity</TableHead>
-                      <TableHead>Total Amount</TableHead>
-                      <TableHead>Delivery Type</TableHead>
-                      <TableHead>Payment</TableHead>
+                      <TableHead className="w-10">S/N</TableHead>
+                      <TableHead>Reference</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Customer</TableHead>
+                      <TableHead>Phone</TableHead>
+                      <TableHead>Location</TableHead>
+                      <TableHead className="text-right">Qty (L)</TableHead>
+                      <TableHead className="text-right">Unit price</TableHead>
+                      <TableHead className="text-right">Total</TableHead>
                       <TableHead>Status</TableHead>
+                      <TableHead>PFI</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {paginatedOrders.map((order: any) => {
-                      const custName = order.customerName || order.customer?.name || 'Unknown'
-                      const compName = order.customerCompanyName || order.customer?.companyName
-                      const dName = order.depotName || order.depot?.name || 'Unknown'
-                      const pName = order.productName || order.product?.name || 'Unknown'
-                      const pUnit = order.productUnit || order.product?.unit || 'Liters'
-                      const isPaid = order.paymentStatus === 'Paid'
-
-                      return (
-                        <TableRow
-                          key={order._id || order.id}
-                          className="hover:bg-muted/50 transition cursor-pointer"
-                          onClick={() => navigate({ to: '/orders/details' as any, search: { id: order._id || order.id } as any })}
-                        >
-                          <TableCell className="font-mono font-semibold text-primary">
-                            {order.orderNumber}
-                          </TableCell>
-                          <TableCell>
-                            <div className="space-y-0.5">
-                              <p className="font-medium text-foreground">{custName}</p>
-                              {compName && (
-                                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                  <Building2 size={12} />
-                                  <span>{compName}</span>
+                    {[...dayGroups.entries()].map(([day, rows]) => (
+                      <Fragment key={day}>
+                        {rows.map((o: any) => {
+                          serial += 1
+                          return (
+                            <TableRow key={o.id ?? o._id}>
+                              <TableCell className="text-muted-foreground tabular-nums">{serial}</TableCell>
+                              <TableCell className="font-medium text-accent">{o.orderNumber}</TableCell>
+                              <TableCell className="text-muted-foreground tabular-nums">
+                                {o.createdAt ? format(new Date(o.createdAt), 'd MMM yyyy') : '—'}
+                              </TableCell>
+                              <TableCell>
+                                <span className="block max-w-[14rem] truncate">{o.customerName || '—'}</span>
+                                {o.customerCompanyName && (
+                                  <span className="block max-w-[14rem] truncate text-xs text-muted-foreground">
+                                    {o.customerCompanyName}
+                                  </span>
+                                )}
+                              </TableCell>
+                              <TableCell className="text-muted-foreground tabular-nums">{o.customerPhone || '—'}</TableCell>
+                              <TableCell>{o.depotName || o.state || '—'}</TableCell>
+                              <TableCell className="text-right tabular-nums">{formatQty(toNumber(o.quantity))}</TableCell>
+                              <TableCell className="text-right tabular-nums">{formatNaira(toNumber(o.price))}</TableCell>
+                              <TableCell className="text-right font-semibold tabular-nums">{formatNaira(toNumber(o.totalAmount))}</TableCell>
+                              <TableCell><OrderStatusBadge status={o.status} /></TableCell>
+                              <TableCell className="text-muted-foreground">{o.pfiNumber || '—'}</TableCell>
+                              <TableCell>
+                                <div className="flex items-center justify-end gap-1">
+                                  <Button variant="ghost" size="icon-sm" onClick={() => setDetailsOrder(o)}>
+                                    <Eye />
+                                    <span className="sr-only">View {o.orderNumber}</span>
+                                  </Button>
+                                  <Button variant="ghost" size="icon-sm" onClick={() => setEditOrder(o)}>
+                                    <Pencil />
+                                    <span className="sr-only">Edit {o.orderNumber}</span>
+                                  </Button>
                                 </div>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="space-y-0.5 text-xs">
-                              <div className="flex items-center gap-1 text-muted-foreground">
-                                <MapPin size={12} className="text-primary" />
-                                <span>{order.state}</span>
-                              </div>
-                              <div className="flex items-center gap-1 text-muted-foreground">
-                                <Warehouse size={12} />
-                                <span>{dName}</span>
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-1 text-sm font-medium">
-                              <Package size={14} className="text-muted-foreground" />
-                              <span>{pName}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="font-medium">
-                            {Number(order.quantity)?.toLocaleString()} {pUnit}
-                          </TableCell>
-                          <TableCell className="font-semibold text-foreground">
-                            {formatCurrency(Number(order.totalAmount) || 0)}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className="capitalize">
-                              {order.deliveryType}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Badge className={isPaid ? 'bg-success text-success-foreground' : 'bg-warning text-warning-foreground'}>
-                              {isPaid ? 'Paid' : 'Unpaid'}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>{getStatusBadge(order.status)}</TableCell>
-                        </TableRow>
-                      )
-                    })}
+                              </TableCell>
+                            </TableRow>
+                          )
+                        })}
+
+                        {showSubtotals && (
+                          <TableRow className="bg-muted/40 hover:bg-muted/40">
+                            <TableCell colSpan={6} className={cn(MICRO, 'text-[0.6rem] text-muted-foreground')}>
+                              {day} · {rows.length} order{rows.length === 1 ? '' : 's'}
+                            </TableCell>
+                            <TableCell className="text-right font-semibold tabular-nums">
+                              {formatQty(rows.reduce((s: number, r: any) => s + toNumber(r.quantity), 0))}
+                            </TableCell>
+                            <TableCell />
+                            <TableCell className="text-right font-semibold tabular-nums">
+                              {formatNaira(rows.reduce((s: number, r: any) => s + toNumber(r.totalAmount), 0))}
+                            </TableCell>
+                            <TableCell colSpan={3} />
+                          </TableRow>
+                        )}
+                      </Fragment>
+                    ))}
                   </TableBody>
                 </Table>
-              </div>
 
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                pageSize={pageSize}
-                totalItems={totalItems}
-                onPageChange={setCurrentPage}
-                onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1) }}
-              />
-            </>
-          )}
-        </CardContent>
-      </Card>
+                <div className="px-4">
+                  <Pagination
+                    currentPage={page}
+                    totalPages={totalPages}
+                    pageSize={pageSize}
+                    totalItems={filtered.length}
+                    onPageChange={setCurrentPage}
+                    onPageSizeChange={(s) => { setPageSize(s); setCurrentPage(1) }}
+                  />
+                </div>
+              </div>
+            )}
+          </section>
+        </>
+      )}
+
+      <OrderDetailsDialog
+        order={detailsOrder}
+        open={detailsOrder !== null}
+        onOpenChange={(o) => { if (!o) setDetailsOrder(null) }}
+      />
+      <OrderEditDialog
+        order={editOrder}
+        open={editOrder !== null}
+        onOpenChange={(o) => { if (!o) setEditOrder(null) }}
+      />
     </div>
   )
 }

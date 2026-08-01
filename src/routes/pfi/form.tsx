@@ -146,10 +146,10 @@ function PFIForm() {
   if (submitted) {
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-5 text-center">
-        <div className="h-16 w-16 rounded-full bg-success/10 flex items-center justify-center text-success border border-success/20">
-          <CheckCircle size={32} />
+        <div className="size-16 rounded-full bg-success/10 flex items-center justify-center text-success border border-success/20">
+          <CheckCircle className="size-8" />
         </div>
-        <h2 className="text-2xl font-bold text-foreground">PFI {isEdit ? 'Updated' : 'Registered'} Successfully!</h2>
+        <h2 className="text-lg md:text-xl font-semibold text-foreground tracking-tight">PFI {isEdit ? 'Updated' : 'Registered'} Successfully!</h2>
         <p className="text-muted-foreground max-w-sm">Pro Forma Invoice {form.pfiNumber} has been saved successfully.</p>
         <div className="flex gap-3 mt-2">
           {!isEdit && (
@@ -193,9 +193,9 @@ function PFIForm() {
       <div className="flex items-center justify-between">
         <div>
           <Button variant="ghost" size="sm" onClick={() => navigate({ to: '/pfi' as any })} className="mb-2">
-            <ArrowLeft className="h-4 w-4 mr-2" />Back to PFI List
+            <ArrowLeft className="size-4 mr-2" />Back to PFI List
           </Button>
-          <h1 className="text-3xl font-bold tracking-tight">{isEdit ? 'Edit PFI' : 'Add New PFI'}</h1>
+          <h1 className="text-xl md:text-2xl font-semibold tracking-tight text-balance">{isEdit ? 'Edit PFI' : 'Add New PFI'}</h1>
           <p className="text-muted-foreground">{isEdit ? 'Modify information, officers, and vessel credentials of this PFI' : 'Register a new Pro Forma Invoice'}</p>
         </div>
       </div>
@@ -203,7 +203,7 @@ function PFIForm() {
       <form onSubmit={handleSubmit} noValidate className="space-y-6">
         {error && (
           <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm font-medium flex items-center gap-2 max-w-3xl">
-            <AlertCircle className="w-4 h-4 shrink-0" />
+            <AlertCircle className="size-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
@@ -213,7 +213,7 @@ function PFIForm() {
           {/* Section 1: PFI Identity & Specs */}
           <div className="space-y-4 border rounded-lg p-5 bg-card">
             <div className="flex items-center space-x-2 border-b pb-2">
-              <FileText className="h-5 w-5 text-primary" />
+              <FileText className="size-5 text-primary" />
               <h2 className="text-lg font-semibold">Identity & Specs</h2>
             </div>
             <div className="space-y-3">
@@ -307,8 +307,8 @@ function PFIForm() {
                           }}
                           required
                           className="pr-16 font-medium"
-                        />
-                        <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-xs font-bold text-muted-foreground bg-muted px-2 py-1 rounded">
+ />
+                        <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-xs font-semibold text-muted-foreground bg-muted px-2 py-1 rounded">
                           {unitName}
                         </div>
                       </div>
@@ -334,7 +334,7 @@ function PFIForm() {
                             }
                           }}
                           className="pr-16 text-xs text-muted-foreground"
-                        />
+ />
                         <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-[11px] font-medium text-muted-foreground bg-muted/60 px-2 py-0.5 rounded">
                           {isWeightProd ? 'Litres' : 'MT / kg'}
                         </div>
@@ -356,7 +356,7 @@ function PFIForm() {
                           value={form.unitPrice}
                           onChange={e => setForm({ ...form, unitPrice: e.target.value })}
                           className="pl-8 font-medium"
-                        />
+ />
                       </div>
                     </div>
 
@@ -366,7 +366,7 @@ function PFIForm() {
                         <span className="text-muted-foreground">
                           Projected Cumulative Cost ({activeQty.toLocaleString()} {unitName} × ₦{unitPriceVal.toLocaleString()}):
                         </span>
-                        <span className="font-bold text-primary text-sm">
+                        <span className="font-semibold text-primary text-sm">
                           ₦{projectedCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
                       </div>
@@ -380,7 +380,7 @@ function PFIForm() {
           {/* Section 2: Assigned Officers */}
           <div className="space-y-4 border rounded-lg p-5 bg-card">
             <div className="flex items-center space-x-2 border-b pb-2">
-              <User className="h-5 w-5 text-primary" />
+              <User className="size-5 text-primary" />
               <h2 className="text-lg font-semibold">Assigned Officers</h2>
             </div>
             <div className="space-y-3">
@@ -411,7 +411,7 @@ function PFIForm() {
           {/* Section 3: Vessel & Surveyor */}
           <div className="space-y-4 border rounded-lg p-5 bg-card">
             <div className="flex items-center space-x-2 border-b pb-2">
-              <Package className="h-5 w-5 text-primary" />
+              <Package className="size-5 text-primary" />
               <h2 className="text-lg font-semibold">Vessel & Surveyor</h2>
             </div>
             <div className="space-y-3">
@@ -438,8 +438,8 @@ function PFIForm() {
 
         <div className="flex justify-end gap-3 border-t pt-4">
           <Button type="button" variant="outline" onClick={() => navigate({ to: '/pfi' as any })}>Cancel</Button>
-          <Button type="submit" disabled={isSubmitting} className="gradient-primary text-white border-0 min-w-[150px]">
-            {isSubmitting ? <><Loader2 size={16} className="animate-spin mr-2" />Saving...</> : <><Save className="w-4 h-4 mr-2" />{isEdit ? 'Update PFI' : 'Save PFI'}</>}
+          <Button type="submit" disabled={isSubmitting} className="min-w-[150px]">
+            {isSubmitting ? <><Loader2 className="size-4 animate-spin mr-2" />Saving...</> : <><Save className="size-4 mr-2" />{isEdit ? 'Update PFI' : 'Save PFI'}</>}
           </Button>
         </div>
       </form>

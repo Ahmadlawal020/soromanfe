@@ -1,5 +1,13 @@
 import { SearchX, Plus, X } from 'lucide-react'
 import { Button } from '#/components/ui/button'
+import {
+  Empty,
+  EmptyMedia,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyDescription,
+  EmptyContent,
+} from '#/components/ui/empty'
 
 interface PageEmptyProps {
   icon?: React.ReactNode
@@ -13,26 +21,27 @@ interface PageEmptyProps {
 
 export function PageEmpty({ icon, title, description, actionLabel, onAction, hasFilters, onClearFilters }: PageEmptyProps) {
   return (
-    <div className="flex flex-col items-center justify-center py-24 gap-4">
-      <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-muted border border-border">
-        {icon || <SearchX size={24} className="text-muted-foreground" />}
-      </div>
-      <div className="text-center">
-        <p className="text-sm font-medium text-foreground">{title}</p>
-        {description && <p className="text-xs text-muted-foreground mt-1">{description}</p>}
-      </div>
-      <div className="flex items-center gap-2">
-        {hasFilters && onClearFilters && (
-          <Button variant="ghost" size="sm" onClick={onClearFilters} className="text-primary">
-            <X size={14} /> Clear filters
-          </Button>
-        )}
-        {!hasFilters && actionLabel && onAction && (
-          <Button size="sm" className="gradient-primary text-white border-0" onClick={onAction}>
-            <Plus size={14} className="mr-1" />{actionLabel}
-          </Button>
-        )}
-      </div>
-    </div>
+    <Empty className="my-6 py-16">
+      <EmptyMedia>{icon || <SearchX />}</EmptyMedia>
+      <EmptyHeader>
+        <EmptyTitle>{title}</EmptyTitle>
+        {description && <EmptyDescription>{description}</EmptyDescription>}
+      </EmptyHeader>
+      {((hasFilters && onClearFilters) || (!hasFilters && actionLabel && onAction)) && (
+        <EmptyContent>
+          {hasFilters && onClearFilters && (
+            <Button variant="ghost" size="sm" onClick={onClearFilters}>
+              <X data-icon="inline-start" /> Clear filters
+            </Button>
+          )}
+          {!hasFilters && actionLabel && onAction && (
+            <Button size="sm" onClick={onAction}>
+              <Plus data-icon="inline-start" />
+              {actionLabel}
+            </Button>
+          )}
+        </EmptyContent>
+      )}
+    </Empty>
   )
 }

@@ -266,7 +266,8 @@ export interface Order {
   virtualAccountBank?: string
   virtualAccountName?: string
   paymentStatus: 'Unpaid' | 'Paid'
-  status: 'Pending' | 'Completed' | 'Cancelled'
+  /** Matches the order_status enum in the database, not a subset of it. */
+  status: 'Pending' | 'Paid' | 'Released' | 'Loading' | 'Completed' | 'Cancelled'
   createdAt?: string
   updatedAt?: string
 }

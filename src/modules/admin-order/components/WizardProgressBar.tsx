@@ -1,51 +1,98 @@
-import { CheckCircle } from 'lucide-react'
+import { Check } from 'lucide-react'
+
+import { cn } from '#/lib/utils'
 import { WIZARD_STEPS } from '../utils/constants'
 
-interface WizardProgressBarProps {
-  step: number
+export type WizardStep = {
+  title: string
+  shortTitle: string
+  icon: React.ComponentType<{ className?: string }>
 }
 
-export function WizardProgressBar({ step }: WizardProgressBarProps) {
+/**
+ * The icon stepper — circles on a connector, capped at max-w-3xl.
+ *
+ * Completed steps are clickable so you can go back and correct something;
+ * future steps are inert, since skipping ahead would leave gaps behind you.
+ */
+export function WizardStepper({
+  steps,
+  step,
+  onStepClick,
+}: {
+  steps: WizardStep[]
+  /** 1-based. */
+  step: number
+  onStepClick?: (step: number) => void
+}) {
+  const pct = steps.length > 1 ? (step - 1) / (steps.length - 1) : 0
+
   return (
-    <div className="border rounded-xl bg-card p-3 sm:p-4 shadow-sm">
-      <div className="flex justify-between items-center relative">
-        <div className="absolute top-1/2 left-4 right-4 h-0.5 bg-muted -translate-y-1/2 z-0" />
-        <div
-          className="absolute top-1/2 left-4 h-0.5 -translate-y-1/2 z-0 transition-all duration-500 ease-out bg-gradient-to-r from-lime-700 to-lime-500"
-          style={{ width: `${((step - 1) / (WIZARD_STEPS.length - 1)) * (100 - 8)}%` }}
-        />
-        {WIZARD_STEPS.map((stepInfo, idx) => {
-          const StepIcon = stepInfo.icon
-          const isCompleted = step > idx + 1
-          const isActive = step === idx + 1
+    <div className="relative mx-auto w-full max-w-3xl">
+      {/* Connector track and fill, inset so they meet the dot centres. */}
+      <div className="absolute top-5 right-[10%] left-[10%] h-0.5 bg-border" />
+      <div
+        className="absolute top-5 left-[10%] h-0.5 bg-primary transition-[width] duration-300 ease-luxe"
+        style={{ width: `${pct * 80}%` }}
+      />
+
+      <ol className="relative flex items-start justify-between">
+        {steps.map((s, i) => {
+          const n = i + 1
+          const done = step > n
+          const active = step === n
+          const Icon = s.icon
+          const clickable = done && Boolean(onStepClick)
 
           return (
-            <div key={idx} className="flex flex-col items-center z-10 relative">
-              <div
-                className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${isCompleted
-                  ? 'bg-gradient-to-tr from-lime-700 to-lime-500 border-lime-600 text-white'
-                  : isActive
-                    ? 'bg-card border-primary text-primary shadow-[0_0_0_4px_rgba(13,148,136,0.15)] ring-2 ring-primary ring-offset-2'
-                    : 'bg-muted border-muted-foreground/20 text-muted-foreground'
-                  }`}
-              >
-                {isCompleted ? (
-                  <CheckCircle size={14} className="sm:w-4 sm:h-4" />
-                ) : (
-                  <StepIcon size={14} className="sm:w-4 sm:h-4" />
+            <li key={s.title} className="flex flex-1 flex-col items-center gap-2">
+              <button
+                type="button"
+                disabled={!clickable}
+                onClick={() => clickable && onStepClick?.(n)}
+                aria-current={active ? 'step' : undefined}
+                className={cn(
+                  'relative z-10 flex size-10 items-center justify-center rounded-full sm:size-11',
+                  'transition-colors duration-250 ease-luxe outline-none',
+                  'focus-visible:ring-3 focus-visible:ring-ring/50',
+                  clickable ? 'cursor-pointer' : 'cursor-default',
+                  active && 'bg-primary text-primary-foreground ring-4 ring-primary/15',
+                  done && 'bg-primary text-primary-foreground',
+                  !active && !done && 'bg-muted text-muted-foreground',
                 )}
-              </div>
-              <span
-                className={`text-[10px] sm:text-[11px] font-semibold mt-1.5 transition-colors duration-200 ${isActive ? 'text-primary' : isCompleted ? 'text-lime-700' : 'text-muted-foreground'
-                  }`}
               >
-                <span className="hidden sm:inline">{stepInfo.title}</span>
-                <span className="sm:hidden">{stepInfo.shortTitle}</span>
+                {done ? <Check className="size-4" /> : <Icon className="size-4" />}
+                <span className="sr-only">
+                  {`Step ${n} of ${steps.length}: ${s.title}`}
+                </span>
+              </button>
+
+              <span
+                className={cn(
+                  'max-w-16 text-center text-[0.65rem] leading-tight font-medium sm:max-w-20 sm:text-xs',
+                  active && 'text-primary underline decoration-2 underline-offset-4',
+                  done && 'text-muted-foreground',
+                  !active && !done && 'text-muted-foreground/50',
+                )}
+              >
+                <span className="hidden sm:inline">{s.title}</span>
+                <span className="sm:hidden">{s.shortTitle}</span>
               </span>
-            </div>
+            </li>
           )
         })}
-      </div>
+      </ol>
     </div>
   )
+}
+
+/** Back-compat wrapper for the depot flow's fixed step list. */
+export function WizardProgressBar({
+  step,
+  onStepClick,
+}: {
+  step: number
+  onStepClick?: (step: number) => void
+}) {
+  return <WizardStepper steps={WIZARD_STEPS} step={step} onStepClick={onStepClick} />
 }

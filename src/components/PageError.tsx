@@ -1,5 +1,13 @@
 import { AlertCircle, RefreshCw } from 'lucide-react'
 import { Button } from '#/components/ui/button'
+import {
+  Empty,
+  EmptyMedia,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyDescription,
+  EmptyContent,
+} from '#/components/ui/empty'
 
 interface PageErrorProps {
   title?: string
@@ -9,20 +17,22 @@ interface PageErrorProps {
 
 export function PageError({ title = 'Something went wrong', message, onRetry }: PageErrorProps) {
   return (
-    <div className="flex flex-col items-center justify-center py-24 gap-4" role="alert">
-      <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-destructive/10 border border-destructive/20">
-        <AlertCircle size={24} className="text-destructive" />
-      </div>
-      <div className="text-center">
-        <p className="text-sm font-semibold text-foreground">{title}</p>
-        <p className="text-xs text-muted-foreground mt-1 max-w-md">{message}</p>
-      </div>
+    <Empty className="my-6 border-destructive/40 py-16" role="alert">
+      <EmptyMedia className="bg-destructive/10 text-destructive">
+        <AlertCircle />
+      </EmptyMedia>
+      <EmptyHeader>
+        <EmptyTitle>{title}</EmptyTitle>
+        <EmptyDescription className="max-w-md">{message}</EmptyDescription>
+      </EmptyHeader>
       {onRetry && (
-        <Button variant="outline" size="sm" onClick={onRetry}>
-          <RefreshCw size={14} className="mr-1.5" />
-          Try Again
-        </Button>
+        <EmptyContent>
+          <Button variant="outline" size="sm" onClick={onRetry}>
+            <RefreshCw data-icon="inline-start" />
+            Try again
+          </Button>
+        </EmptyContent>
       )}
-    </div>
+    </Empty>
   )
 }

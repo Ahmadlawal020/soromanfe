@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback } from 'react'
+import { StatCard, StatCardGrid } from '#/components/ui/stat-card'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import { Card, CardHeader, CardTitle, CardContent } from '#/components/ui/card'
@@ -45,14 +46,14 @@ const fmtQty = (n: number) => n.toLocaleString(undefined, { maximumFractionDigit
 const fmtMoney = (n: number) => `₦${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 
 const CODE_PALETTE = [
-  { header: 'bg-sky-50', row: 'border-l-sky-300', badge: 'bg-sky-100 text-sky-800 border-sky-200' },
-  { header: 'bg-emerald-50', row: 'border-l-emerald-300', badge: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
-  { header: 'bg-orange-50', row: 'border-l-orange-300', badge: 'bg-orange-100 text-orange-800 border-orange-200' },
-  { header: 'bg-violet-50', row: 'border-l-violet-300', badge: 'bg-violet-100 text-violet-800 border-violet-200' },
-  { header: 'bg-pink-50', row: 'border-l-pink-300', badge: 'bg-pink-100 text-pink-800 border-pink-200' },
-  { header: 'bg-amber-50', row: 'border-l-amber-300', badge: 'bg-amber-100 text-amber-800 border-amber-200' },
-  { header: 'bg-teal-50', row: 'border-l-teal-300', badge: 'bg-teal-100 text-teal-800 border-teal-200' },
-  { header: 'bg-indigo-50', row: 'border-l-indigo-300', badge: 'bg-indigo-100 text-indigo-800 border-indigo-200' },
+  { header: 'bg-muted', row: 'border-l-sky-300', badge: 'bg-muted text-foreground border-border' },
+  { header: 'bg-accent/10', row: 'border-l-emerald-300', badge: 'bg-accent/10 text-accent border-accent/40' },
+  { header: 'bg-warning/10', row: 'border-l-orange-300', badge: 'bg-warning/10 text-warning border-warning/40' },
+  { header: 'bg-muted', row: 'border-l-violet-300', badge: 'bg-muted text-foreground border-border' },
+  { header: 'bg-muted', row: 'border-l-pink-300', badge: 'bg-muted text-foreground border-border' },
+  { header: 'bg-warning/10', row: 'border-l-amber-300', badge: 'bg-warning/10 text-warning border-warning/40' },
+  { header: 'bg-accent/10', row: 'border-l-teal-300', badge: 'bg-accent/10 text-accent border-accent/40' },
+  { header: 'bg-muted', row: 'border-l-indigo-300', badge: 'bg-muted text-foreground border-border' },
 ]
 
 const getCodeTheme = (code: string) => {
@@ -63,8 +64,8 @@ const getCodeTheme = (code: string) => {
 }
 
 const statusBadge: Record<string, { label: string; cls: string; icon: typeof CheckCircle2 }> = {
-  loaded: { label: 'In Transit', cls: 'bg-amber-50 text-amber-700 border-amber-200', icon: Truck },
-  offloaded: { label: 'Sold', cls: 'bg-emerald-50 text-emerald-700 border-emerald-200', icon: CheckCircle2 },
+  loaded: { label: 'In Transit', cls: 'bg-warning/10 text-warning border-warning/40', icon: Truck },
+  offloaded: { label: 'Sold', cls: 'bg-accent/10 text-accent border-accent/40', icon: CheckCircle2 },
 }
 
 interface TruckRecord extends DeliveryInventory {
@@ -567,15 +568,15 @@ function AllocationDetailsPage() {
   if (isLoading) {
     return (
       <div className="flex justify-center py-16">
-        <Loader2 size={28} className="animate-spin text-muted-foreground" />
+        <Loader2 className="size-7 animate-spin text-muted-foreground" />
       </div>
     )
   }
 
   if (truckRecords.length === 0) {
     return (
-      <div className="p-8 text-center max-w-md mx-auto my-12 bg-card rounded-2xl border border-border">
-        <ShieldAlert size={40} className="mx-auto text-muted-foreground mb-4" />
+      <div className="p-8 text-center max-w-md mx-auto my-12 bg-card rounded-xl border border-border">
+        <ShieldAlert className="size-10 mx-auto text-muted-foreground mb-4" />
         <h3 className="font-semibold text-lg">Allocation Not Found</h3>
         <p className="text-sm text-muted-foreground mt-1">
           No truck records found for allocation <strong>{normalizedCode || '(no code)'}</strong>.
@@ -594,29 +595,29 @@ function AllocationDetailsPage() {
   return (
     <div className="space-y-6 pb-12 animate-fade-in">
       {/* Top Header & Breadcrumb */}
-      <div className="bg-card p-5 rounded-2xl border border-border/80 shadow-xs space-y-3">
+      <div className="bg-card p-5 rounded-xl border border-border/80 space-y-3">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="flex items-center gap-3">
             <Button
               variant="outline"
               size="sm"
-              className="h-9 w-9 p-0 rounded-xl cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="size-9 p-0 rounded-xl cursor-pointer hover:bg-muted dark:hover:bg-foreground transition-colors duration-250 ease-luxe"
               onClick={() => navigate({ to: '/delivery-operations' })}
               title="Back to Delivery Operations"
             >
-              <ArrowLeft size={16} />
+              <ArrowLeft className="size-4" />
             </Button>
             <div>
               <div className="flex items-center gap-2.5 flex-wrap">
-                <h1 className="text-2xl font-extrabold tracking-tight text-foreground font-mono">
+                <h1 className="text-2xl font-semibold tracking-tight text-foreground font-mono">
                   {normalizedCode || 'Unassigned Allocation'}
                 </h1>
                 {normalizedCode && theme && (
-                  <span className={cn('inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border shadow-2xs', theme.badge)}>
-                    <Tag size={12} /> {normalizedCode}
+                  <span className={cn('inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border', theme.badge)}>
+                    <Tag className="size-3" /> {normalizedCode}
                   </span>
                 )}
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-accent/10 text-accent border border-accent/40">
                   {soldPercent}% Sold
                 </span>
               </div>
@@ -633,11 +634,11 @@ function AllocationDetailsPage() {
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
-              className="gap-2 cursor-pointer h-9 text-xs font-semibold hover:border-slate-300"
+              className="gap-2 cursor-pointer h-9 text-xs font-semibold hover:border-border"
               onClick={exportCSV}
               disabled={truckRecords.length === 0}
             >
-              <Download size={14} /> Export CSV
+              <Download className="size-3.5" /> Export CSV
             </Button>
           </div>
         </div>
@@ -645,12 +646,12 @@ function AllocationDetailsPage() {
         {/* Global Progress Bar */}
         <div className="w-full bg-muted h-2 rounded-full overflow-hidden flex">
           <div
-            className="bg-emerald-500 h-full transition-all duration-500"
+            className="bg-accent h-full transition-all duration-500 ease-luxe"
             style={{ width: `${soldPercent}%` }}
             title={`${soldPercent}% Sold`}
           />
           <div
-            className="bg-amber-400 h-full transition-all duration-500"
+            className="bg-warning h-full transition-all duration-500 ease-luxe"
             style={{ width: `${loadedPercent}%` }}
             title={`${loadedPercent}% In Transit`}
           />
@@ -658,69 +659,62 @@ function AllocationDetailsPage() {
       </div>
 
       {/* Summary Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Total Trucks */}
-        <div className="bg-card p-4 rounded-xl border border-border/80 shadow-xs flex items-center justify-between transition-all hover:shadow-md">
-          <div>
-            <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Allocated Fleet</span>
-            <div className="text-2xl font-extrabold text-foreground mt-0.5">{stats.truckCount}</div>
-            <span className="text-[11px] text-muted-foreground">Vehicles in dispatch</span>
-          </div>
-          <div className="p-3 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
-            <Truck size={22} />
-          </div>
-        </div>
-
-        {/* Total Volume */}
-        <div className="bg-card p-4 rounded-xl border border-border/80 shadow-xs flex items-center justify-between transition-all hover:shadow-md">
-          <div>
-            <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Total Volume</span>
-            <div className="text-2xl font-extrabold text-foreground mt-0.5">
-              {fmtQty(stats.totalQty)} <span className="text-xs font-semibold text-muted-foreground">{truckRecords[0]?.unitLabel || 'Ltrs'}</span>
-            </div>
-            <span className="text-[11px] text-muted-foreground">Combined capacity</span>
-          </div>
-          <div className="p-3 rounded-2xl bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20">
-            <Droplets size={22} />
-          </div>
-        </div>
-
-        {/* In Transit */}
-        <div className="bg-card p-4 rounded-xl border border-border/80 shadow-xs flex items-center justify-between transition-all hover:shadow-md">
-          <div>
-            <span className="text-[11px] font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wider">In Transit</span>
-            <div className="text-2xl font-extrabold text-amber-600 dark:text-amber-400 mt-0.5">
-              {stats.loadedCount} <span className="text-xs font-normal text-muted-foreground">({fmtQty(stats.loadedQty)} L)</span>
-            </div>
-            <span className="text-[11px] text-amber-600/80 dark:text-amber-400/80 font-medium">{loadedPercent}% of allocation</span>
-          </div>
-          <div className="p-3 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-            <Truck size={22} />
-          </div>
-        </div>
-
-        {/* Sold */}
-        <div className="bg-card p-4 rounded-xl border border-border/80 shadow-xs flex items-center justify-between transition-all hover:shadow-md">
-          <div>
-            <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">Quantity Sold</span>
-            <div className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-0.5">
-              {stats.soldCount} <span className="text-xs font-normal text-muted-foreground">({fmtQty(stats.soldQty)} L)</span>
-            </div>
-            <span className="text-[11px] text-emerald-600/80 dark:text-emerald-400/80 font-medium">{soldPercent}% completed</span>
-          </div>
-          <div className="p-3 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-            <CheckCircle2 size={22} />
-          </div>
-        </div>
-      </div>
+      <StatCardGrid count={4}>
+        <StatCard
+          icon={<Truck />}
+          label="Allocated fleet"
+          value={stats.truckCount}
+          description="Vehicles in dispatch"
+        />
+        <StatCard
+          icon={<Droplets />}
+          label="Total volume"
+          value={
+            <>
+              {fmtQty(stats.totalQty)}
+              <span className="ml-0.5 text-xs font-normal text-muted-foreground">
+                {truckRecords[0]?.unitLabel || 'Ltrs'}
+              </span>
+            </>
+          }
+          description="Combined capacity"
+        />
+        <StatCard
+          tone="amber"
+          icon={<Truck />}
+          label="In transit"
+          value={
+            <>
+              {stats.loadedCount}
+              <span className="ml-1 text-xs font-normal text-muted-foreground">
+                ({fmtQty(stats.loadedQty)} L)
+              </span>
+            </>
+          }
+          description={`${loadedPercent}% of allocation`}
+        />
+        <StatCard
+          icon={<CheckCircle2 />}
+          label="Quantity sold"
+          value={
+            <>
+              {stats.soldCount}
+              <span className="ml-1 text-xs font-normal text-muted-foreground">
+                ({fmtQty(stats.soldQty)} L)
+              </span>
+            </>
+          }
+          description={`${soldPercent}% completed`}
+        />
+      </StatCardGrid>
 
       {/* PFI Breakdown & Financial Summary Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* PFI Breakdown */}
-        <Card className="border border-border/80 shadow-xs">
+        <Card className="border border-border/80">
           <CardHeader className="bg-muted/50 border-b border-border/70 py-3 px-4">
-            <CardTitle className="flex items-center gap-2 text-sm font-bold text-foreground">
-              <FileText size={16} className="text-emerald-600" /> PFI Breakdown
+            <CardTitle className="flex items-center gap-2 text-sm font-semibold text-foreground">
+              <FileText className="size-4 text-accent" /> PFI Breakdown
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4 space-y-3">
@@ -730,20 +724,20 @@ function AllocationDetailsPage() {
                 return (
                   <div key={p.pfiId} className="p-3 rounded-xl border border-border/70 bg-muted/40 space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="font-extrabold text-xs text-foreground font-mono">{p.pfiNumber}</span>
-                      <span className="text-[10px] font-bold bg-emerald-500/20 text-emerald-800 dark:text-emerald-200 px-2 py-0.5 rounded">
+                      <span className="font-semibold text-xs text-foreground font-mono">{p.pfiNumber}</span>
+                      <span className="text-[10px] font-semibold bg-accent/20 text-accent px-2 py-0.5 rounded">
                         {pfiPercent}% of allocation
                       </span>
                     </div>
                     <div className="text-xs text-muted-foreground font-medium">{p.product}</div>
 
                     <div className="w-full bg-muted h-1.5 rounded-full overflow-hidden">
-                      <div className="bg-emerald-600 h-full rounded-full" style={{ width: `${pfiPercent}%` }} />
+                      <div className="bg-accent h-full rounded-full" style={{ width: `${pfiPercent}%` }} />
                     </div>
 
                     <div className="flex justify-between items-center text-xs pt-1">
                       <span className="text-muted-foreground font-medium">{p.truckCount} {p.truckCount === 1 ? 'truck' : 'trucks'}</span>
-                      <span className="font-bold text-foreground">{fmtQty(p.qty)} {p.unit}</span>
+                      <span className="font-semibold text-foreground">{fmtQty(p.qty)} {p.unit}</span>
                     </div>
                   </div>
                 )
@@ -753,14 +747,14 @@ function AllocationDetailsPage() {
         </Card>
 
         {/* Financial Summary */}
-        <Card className="border border-border/80 shadow-xs">
+        <Card className="border border-border/80">
           <CardHeader className="bg-muted/50 border-b border-border/70 py-3 px-4">
-            <CardTitle className="flex items-center justify-between text-sm font-bold text-foreground">
+            <CardTitle className="flex items-center justify-between text-sm font-semibold text-foreground">
               <span className="flex items-center gap-2">
-                <FileText size={16} className="text-emerald-600" /> Financial Summary
+                <FileText className="size-4 text-accent" /> Financial Summary
               </span>
               {salesSummary.balance === 0 && (
-                <span className="text-[10px] font-bold bg-emerald-500/20 text-emerald-800 dark:text-emerald-200 px-2 py-0.5 rounded-full border border-emerald-500/30">
+                <span className="text-[10px] font-semibold bg-accent/20 text-accent px-2 py-0.5 rounded-full border border-accent/30">
                   ✓ Settled
                 </span>
               )}
@@ -769,25 +763,25 @@ function AllocationDetailsPage() {
           <CardContent className="p-4 grid grid-cols-2 gap-x-6 gap-y-2 text-xs">
             <div className="flex justify-between py-1.5 border-b border-border/60 col-span-1">
               <span className="text-muted-foreground font-medium">Volume Sold</span>
-              <span className="font-bold text-foreground">{salesSummary.totalQty > 0 ? `${fmtQty(salesSummary.totalQty)} L` : '—'}</span>
+              <span className="font-semibold text-foreground">{salesSummary.totalQty > 0 ? `${fmtQty(salesSummary.totalQty)} L` : '—'}</span>
             </div>
             <div className="flex justify-between py-1.5 border-b border-border/60 col-span-1">
               <span className="text-muted-foreground font-medium">Expected Revenue</span>
-              <span className="font-bold text-foreground">{salesSummary.totalValue > 0 ? fmtMoney(salesSummary.totalValue) : '—'}</span>
+              <span className="font-semibold text-foreground">{salesSummary.totalValue > 0 ? fmtMoney(salesSummary.totalValue) : '—'}</span>
             </div>
             <div className="flex justify-between py-1.5 border-b border-border/60 col-span-1">
               <span className="text-muted-foreground font-medium">Total Deposits</span>
-              <span className="font-bold text-emerald-600 dark:text-emerald-400">{salesSummary.totalPaid > 0 ? fmtMoney(salesSummary.totalPaid) : '—'}</span>
+              <span className="font-semibold text-accent">{salesSummary.totalPaid > 0 ? fmtMoney(salesSummary.totalPaid) : '—'}</span>
             </div>
             <div className="flex justify-between py-1.5 border-b border-border/60 col-span-1">
               <span className="text-muted-foreground font-medium">Expenses</span>
-              <span className="font-bold text-amber-600 dark:text-amber-400">{salesSummary.totalExpenses > 0 ? fmtMoney(salesSummary.totalExpenses) : '—'}</span>
+              <span className="font-semibold text-warning">{salesSummary.totalExpenses > 0 ? fmtMoney(salesSummary.totalExpenses) : '—'}</span>
             </div>
             <div className="flex justify-between items-center py-2 pt-2 col-span-2 bg-muted/60 p-2.5 rounded-lg border border-border">
-              <span className="text-foreground font-bold">Outstanding Balance</span>
+              <span className="text-foreground font-semibold">Outstanding Balance</span>
               <span className={cn(
                 'font-black text-sm',
-                salesSummary.balance === 0 ? 'text-emerald-600' : salesSummary.balance > 0 ? 'text-red-600' : 'text-blue-600'
+                salesSummary.balance === 0 ? 'text-accent' : salesSummary.balance > 0 ? 'text-destructive' : 'text-muted-foreground'
               )}>
                 {salesSummary.balance === 0 ? '✓ ₦0.00' : salesSummary.balance > 0 ? fmtMoney(salesSummary.balance) : `+${fmtMoney(Math.abs(salesSummary.balance))}`}
               </span>
@@ -800,45 +794,45 @@ function AllocationDetailsPage() {
       <div className="w-full space-y-4">
         {/* Bulk Selection Floating Toolbar */}
         {selectedRowIds.size > 0 && (
-          <div className="flex items-center gap-3 px-4 py-3 bg-slate-900 text-white rounded-xl shadow-xl border border-slate-800 animate-in fade-in slide-in-from-top-2 duration-200">
-            <span className="text-xs font-extrabold bg-emerald-500 text-slate-950 px-2 py-0.5 rounded-md">
+          <div className="flex items-center gap-3 px-4 py-3 bg-foreground text-background rounded-xl border border-border animate-in fade-in slide-in-from-top-2 duration-200">
+            <span className="text-xs font-semibold bg-accent text-foreground px-2 py-0.5 rounded-md">
               {selectedRowIds.size}
             </span>
-            <span className="text-xs font-medium text-slate-300">
+            <span className="text-xs font-medium text-muted-foreground">
               truck record{selectedRowIds.size !== 1 ? 's' : ''} selected
             </span>
             <div className="flex-1" />
             <Button
               size="sm"
-              className="h-8 text-xs gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold cursor-pointer"
+              className="h-8 text-xs gap-1.5 bg-accent hover:bg-accent/80 text-foreground font-semibold cursor-pointer"
               onClick={() => { setBulkAssignCode(''); setBulkAssignPfi(''); setBulkAssignOpen(true) }}
             >
-              <Tag size={13} /> Assign PFI
+              <Tag className="size-3.5" /> Assign PFI
             </Button>
             <Button
               size="sm"
-              className="h-8 text-xs gap-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 font-bold cursor-pointer"
+              className="h-8 text-xs gap-1.5 bg-destructive/20 hover:bg-destructive/30 text-destructive border border-destructive/30 font-semibold cursor-pointer"
               onClick={() => setBulkDeleteOpen(true)}
             >
-              <Trash2 size={13} /> Delete Selected
+              <Trash2 className="size-3.5" /> Delete Selected
             </Button>
             <Button
               size="sm"
               variant="ghost"
-              className="h-8 text-xs gap-1 text-slate-400 hover:text-white hover:bg-slate-800 cursor-pointer"
+              className="h-8 text-xs gap-1 text-muted-foreground hover:text-white hover:bg-foreground cursor-pointer"
               onClick={() => setSelectedRowIds(new Set())}
             >
-              <X size={13} /> Clear
+              <X className="size-3.5" /> Clear
             </Button>
           </div>
         )}
 
         {/* Trucks Table Card (FULL WIDTH) */}
-        <Card className="w-full overflow-hidden border border-border/80 shadow-xs">
+        <Card className="w-full overflow-hidden border border-border/80">
           <CardHeader className="bg-muted/50 border-b border-border/70 py-3.5 px-5">
             <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2 text-base font-bold text-foreground">
-                <Truck size={18} className="text-emerald-600" />
+              <CardTitle className="flex items-center gap-2 text-base font-semibold text-foreground">
+                <Truck className="size-4 text-accent" />
                 Truck Records ({truckRecords.length})
               </CardTitle>
               <span className="text-xs text-muted-foreground font-medium">
@@ -855,7 +849,7 @@ function AllocationDetailsPage() {
                       <input
                         type="checkbox"
                         aria-label="Select all visible rows"
-                        className="h-4 w-4 rounded border-border accent-emerald-600 cursor-pointer"
+                        className="size-4 rounded border-border accent-primary cursor-pointer"
                         checked={truckRecords.length > 0 && truckRecords.every(r => selectedRowIds.has(r._id || r.id || ''))}
                         onChange={e => {
                           if (e.target.checked) setSelectedRowIds(new Set(truckRecords.map(r => r._id || r.id || '')))
@@ -863,18 +857,18 @@ function AllocationDetailsPage() {
                         }}
                       />
                     </TableHead>
-                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground w-[35px] text-center">#</TableHead>
-                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground min-w-[110px]">Truck</TableHead>
-                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground min-w-[100px]">Quantity</TableHead>
-                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground min-w-[100px]">Depot</TableHead>
-                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground min-w-[90px]">Product</TableHead>
-                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground min-w-[130px]">Customer</TableHead>
-                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground min-w-[90px]">Rate(s)</TableHead>
-                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground min-w-[120px]">Destination</TableHead>
-                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground min-w-[95px]">Status</TableHead>
-                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground min-w-[90px]">Date Loaded</TableHead>
-                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground min-w-[90px]">Date Sold</TableHead>
-                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground min-w-[160px] text-right">Actions</TableHead>
+                    <TableHead className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground w-[35px] text-center">#</TableHead>
+                    <TableHead className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground min-w-[110px]">Truck</TableHead>
+                    <TableHead className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground min-w-[100px]">Quantity</TableHead>
+                    <TableHead className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground min-w-[100px]">Depot</TableHead>
+                    <TableHead className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground min-w-[90px]">Product</TableHead>
+                    <TableHead className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground min-w-[130px]">Customer</TableHead>
+                    <TableHead className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground min-w-[90px]">Rate(s)</TableHead>
+                    <TableHead className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground min-w-[120px]">Destination</TableHead>
+                    <TableHead className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground min-w-[95px]">Status</TableHead>
+                    <TableHead className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground min-w-[90px]">Date Loaded</TableHead>
+                    <TableHead className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground min-w-[90px]">Date Sold</TableHead>
+                    <TableHead className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground min-w-[160px] text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -888,8 +882,8 @@ function AllocationDetailsPage() {
                       <TableRow
                         key={recordId}
                         className={cn(
-                          'hover:bg-muted/60 transition-colors border-l-[3px] text-xs',
-                          selectedRowIds.has(recordId) ? 'bg-emerald-500/10 border-l-emerald-500' : (theme ? theme.row : 'border-l-transparent')
+                          'hover:bg-muted/60 transition-colors border-l-[3px] text-xs duration-250 ease-luxe',
+                          selectedRowIds.has(recordId) ? 'bg-accent/10 border-l-emerald-500' : (theme ? theme.row : 'border-l-transparent')
                         )}
                       >
                         <TableCell className="text-center">
@@ -903,7 +897,7 @@ function AllocationDetailsPage() {
                                 return next
                               })
                             }}
-                            className="h-4 w-4 rounded border-border accent-emerald-600 cursor-pointer"
+                            className="size-4 rounded border-border accent-primary cursor-pointer"
                           />
                         </TableCell>
                         <TableCell className="text-muted-foreground text-center font-medium">{idx + 1}</TableCell>
@@ -911,12 +905,12 @@ function AllocationDetailsPage() {
                         {/* Truck Plate */}
                         <TableCell>
                           <div className="flex flex-col gap-0.5">
-                            <span className="font-bold text-xs text-foreground font-mono flex items-center gap-1">
-                              <Truck size={12} className="text-emerald-600 shrink-0" />
+                            <span className="font-semibold text-xs text-foreground font-mono flex items-center gap-1">
+                              <Truck className="size-3 text-accent shrink-0" />
                               {r.truckPlate}
                             </span>
                             {salesEntries && salesEntries.length > 1 && (
-                              <span className="inline-flex self-start items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20">
+                              <span className="inline-flex self-start items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-muted/15 text-foreground dark:text-muted-foreground border border-border/20">
                                 Split Load
                               </span>
                             )}
@@ -924,7 +918,7 @@ function AllocationDetailsPage() {
                         </TableCell>
 
                         {/* Quantity */}
-                        <TableCell className="font-extrabold text-foreground">
+                        <TableCell className="font-semibold text-foreground">
                           {r.qty > 0 ? `${fmtQty(r.qty)} ${r.unitLabel}` : '—'}
                         </TableCell>
 
@@ -950,7 +944,7 @@ function AllocationDetailsPage() {
                                     {e.customerName || `Cust #${e.customerId}`}
                                   </span>
                                   {e.qty > 0 && (
-                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">
+                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-muted text-foreground">
                                       {fmtQty(e.qty)}L
                                     </span>
                                   )}
@@ -958,7 +952,7 @@ function AllocationDetailsPage() {
                               ))}
                             </div>
                           ) : r.custName ? (
-                            <span className="text-xs text-slate-900 font-medium capitalize truncate">{r.custName}</span>
+                            <span className="text-xs text-foreground font-medium capitalize truncate">{r.custName}</span>
                           ) : <span className="text-muted-foreground">—</span>}
                         </TableCell>
 
@@ -968,7 +962,7 @@ function AllocationDetailsPage() {
                             <div className="flex flex-col gap-1 py-0.5">
                               {salesEntries.map((e, i) => (
                                 <div key={e.customerId || i} className="flex items-center">
-                                  <span className="text-xs text-slate-900 font-medium font-mono">
+                                  <span className="text-xs text-foreground font-medium font-mono">
                                     {e.rates.size > 0
                                       ? [...e.rates].map(rate => `₦${rate.toLocaleString()}`).join(', ')
                                       : '—'}
@@ -977,7 +971,7 @@ function AllocationDetailsPage() {
                               ))}
                             </div>
                           ) : toNum(r.rate) > 0 ? (
-                            <span className="text-xs text-slate-900 font-medium font-mono">
+                            <span className="text-xs text-foreground font-medium font-mono">
                               ₦{toNum(r.rate).toLocaleString()}
                             </span>
                           ) : <span className="text-muted-foreground">—</span>}
@@ -992,31 +986,31 @@ function AllocationDetailsPage() {
                                 const isFS = isFillingStation(customerObj)
                                 const destDisplay = isFS ? (customerObj?.name || e.customerName || '') : (e.location || r.destination || '—')
                                 return (
-                                  <span key={e.customerId || i} className="text-xs text-slate-700 capitalize truncate">
+                                  <span key={e.customerId || i} className="text-xs text-foreground capitalize truncate">
                                     {destDisplay || '—'}
                                   </span>
                                 )
                               })}
                             </div>
-                          ) : <span className="text-xs text-slate-700 capitalize truncate">{r.destination || '—'}</span>}
+                          ) : <span className="text-xs text-foreground capitalize truncate">{r.destination || '—'}</span>}
                         </TableCell>
 
                         {/* Status Badge */}
                         <TableCell>
                           {badge && Icon ? (
-                            <span className={cn('inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold border', badge.cls)}>
-                              <Icon size={11} /> {badge.label}
+                            <span className={cn('inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border', badge.cls)}>
+                              <Icon className="size-3" /> {badge.label}
                             </span>
                           ) : '—'}
                         </TableCell>
 
                         {/* Date Loaded */}
-                        <TableCell className="whitespace-nowrap text-slate-700 text-xs font-medium">
+                        <TableCell className="whitespace-nowrap text-foreground text-xs font-medium">
                           {r.dateAllocated ? (() => { try { return format(parseISO(r.dateAllocated), 'dd MMM yyyy') } catch { return r.dateAllocated } })() : '—'}
                         </TableCell>
 
                         {/* Date Sold */}
-                        <TableCell className="whitespace-nowrap text-slate-700 text-xs font-medium">
+                        <TableCell className="whitespace-nowrap text-foreground text-xs font-medium">
                           {r.dateOffloaded ? (() => { try { return format(parseISO(r.dateOffloaded), 'dd MMM yyyy') } catch { return r.dateOffloaded } })() : '—'}
                         </TableCell>
 
@@ -1026,28 +1020,28 @@ function AllocationDetailsPage() {
                             {r.status === 'loaded' && (
                               <Button
                                 size="sm"
-                                className="h-7 text-[11px] gap-1 bg-emerald-700 hover:bg-emerald-800 text-white px-2.5 cursor-pointer font-semibold shadow-2xs"
+                                className="h-7 text-[11px] gap-1 bg-accent hover:bg-accent/80 text-accent-foreground px-2.5 cursor-pointer font-semibold"
                                 onClick={() => { setOffloadTarget(r); setOffloadDate(format(new Date(), 'yyyy-MM-dd')) }}
                               >
-                                <CheckCircle2 size={11} /> Sold
+                                <CheckCircle2 className="size-3" /> Sold
                               </Button>
                             )}
                             <Button
                               size="sm"
                               variant="outline"
-                              className="h-7 text-[11px] gap-1 px-2 cursor-pointer hover:bg-slate-100"
+                              className="h-7 text-[11px] gap-1 px-2 cursor-pointer hover:bg-muted"
                               onClick={() => openEditDialog(r)}
                             >
-                              <Pencil size={11} /> Edit
+                              <Pencil className="size-3" /> Edit
                             </Button>
                             <Button
                               size="sm"
                               variant="ghost"
-                              className="h-7 w-7 p-0 text-slate-400 hover:text-red-600 hover:bg-red-50 cursor-pointer"
+                              className="size-7 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer"
                               title="Delete record"
                               onClick={() => setDeleteTarget({ id: recordId, label: `${r.truckPlate}${r.code ? ` (${r.code})` : ''}` })}
                             >
-                              <Trash2 size={12} />
+                              <Trash2 className="size-3" />
                             </Button>
                           </div>
                         </TableCell>

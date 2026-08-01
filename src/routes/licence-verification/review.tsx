@@ -43,7 +43,7 @@ function getStatusBadge(status: string) {
     case 'approved':
       return <Badge className="bg-success text-success-foreground">Approved</Badge>
     case 'rejected':
-      return <Badge className="bg-destructive text-destructive-foreground">Rejected</Badge>
+      return <Badge variant="destructive">Rejected</Badge>
     case 'pending':
     default:
       return <Badge className="bg-warning text-warning-foreground">Pending</Badge>
@@ -122,10 +122,10 @@ function LicenceReviewPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={handleBack}>
-            <ArrowLeft className="h-5 w-5" />
+            <ArrowLeft className="size-5" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">
+            <h1 className="text-2xl font-semibold text-foreground">
               License Review
             </h1>
             <p className="text-muted-foreground text-sm">
@@ -140,14 +140,14 @@ function LicenceReviewPage() {
               className="border-success text-success hover:bg-success/10 hover:text-success"
               onClick={() => openReviewDialog('approve')}
             >
-              <CheckCircle className="h-4 w-4 mr-1.5" />
+              <CheckCircle className="size-4 mr-1.5" />
               Approve
             </Button>
             <Button
               variant="destructive"
               onClick={() => openReviewDialog('reject')}
             >
-              <XCircle className="h-4 w-4 mr-1.5" />
+              <XCircle className="size-4 mr-1.5" />
               Reject
             </Button>
           </div>
@@ -160,7 +160,7 @@ function LicenceReviewPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-primary" />
+                <FileText className="size-5 text-primary" />
                 License Document
               </CardTitle>
             </CardHeader>
@@ -171,24 +171,24 @@ function LicenceReviewPage() {
                     <img
                       src={license.licenseUrl}
                       alt={license.companyName}
-                      className="w-full max-h-[70vh] object-contain"
+                      className="w-full max-h-[70svh] object-contain"
                     />
                   </div>
                 ) : isPdf(license.licenseUrl) ? (
                   <iframe
                     src={license.licenseUrl}
-                    className="w-full h-[70vh] rounded border"
+                    className="w-full h-[70svh] rounded border"
                     title="License PDF"
                   />
                 ) : (
                   <div className="flex items-center gap-2 p-8 border rounded-lg justify-center text-muted-foreground">
-                    <FileText className="h-5 w-5" />
+                    <FileText className="size-5" />
                     <span>Unsupported file format</span>
                   </div>
                 )
               ) : (
                 <div className="flex items-center gap-2 p-8 border rounded-lg justify-center text-muted-foreground">
-                  <FileText className="h-5 w-5" />
+                  <FileText className="size-5" />
                   <span>No file uploaded</span>
                 </div>
               )}
@@ -202,7 +202,7 @@ function LicenceReviewPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <ShieldCheck className="h-5 w-5 text-primary" />
+                <ShieldCheck className="size-5 text-primary" />
                 Verification Status
               </CardTitle>
             </CardHeader>
@@ -234,7 +234,7 @@ function LicenceReviewPage() {
               {license.verificationComment && (
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                    <MessageSquare className="h-3.5 w-3.5" />
+                    <MessageSquare className="size-3.5" />
                     Comment
                   </div>
                   <p className="text-sm p-3 rounded-lg bg-muted/50 border">
@@ -249,13 +249,13 @@ function LicenceReviewPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5 text-primary" />
+                <User className="size-5 text-primary" />
                 Customer Info
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex items-center gap-2.5">
-                <User className="h-4 w-4 text-muted-foreground shrink-0" />
+                <User className="size-4 text-muted-foreground shrink-0" />
                 <div>
                   <p className="text-xs text-muted-foreground">Name</p>
                   <p className="text-sm font-medium">
@@ -265,7 +265,7 @@ function LicenceReviewPage() {
               </div>
               {license.customerCompanyName && (
                 <div className="flex items-center gap-2.5">
-                  <Building2 className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <Building2 className="size-4 text-muted-foreground shrink-0" />
                   <div>
                     <p className="text-xs text-muted-foreground">Company</p>
                     <p className="text-sm font-medium">
@@ -276,7 +276,7 @@ function LicenceReviewPage() {
               )}
               {license.customerPhone && (
                 <div className="flex items-center gap-2.5">
-                  <Phone className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <Phone className="size-4 text-muted-foreground shrink-0" />
                   <div>
                     <p className="text-xs text-muted-foreground">Phone</p>
                     <p className="text-sm font-medium">
@@ -287,7 +287,7 @@ function LicenceReviewPage() {
               )}
               {license.customerEmail && (
                 <div className="flex items-center gap-2.5">
-                  <Mail className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <Mail className="size-4 text-muted-foreground shrink-0" />
                   <div>
                     <p className="text-xs text-muted-foreground">Email</p>
                     <p className="text-sm font-medium">
@@ -303,7 +303,7 @@ function LicenceReviewPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-primary" />
+                <FileText className="size-5 text-primary" />
                 License Details
               </CardTitle>
             </CardHeader>
@@ -315,7 +315,7 @@ function LicenceReviewPage() {
               {license.expiryDate && (
                 <div>
                   <p className="text-xs text-muted-foreground flex items-center gap-1">
-                    <Calendar className="h-3 w-3" /> Expiry Date
+                    <Calendar className="size-3" /> Expiry Date
                   </p>
                   <p className="text-sm font-medium">
                     {new Date(license.expiryDate).toLocaleDateString()}
@@ -324,7 +324,7 @@ function LicenceReviewPage() {
               )}
               <div>
                 <p className="text-xs text-muted-foreground flex items-center gap-1">
-                  <Clock className="h-3 w-3" /> Submitted
+                  <Clock className="size-3" /> Submitted
                 </p>
                 <p className="text-sm">
                   {new Date(license.createdAt).toLocaleString()}
@@ -361,7 +361,7 @@ function LicenceReviewPage() {
                     ? 'Optional approval note...'
                     : 'Reason for rejection...'
                 }
-                className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="flex min-h-[80px] w-full rounded-lg border border-input bg-background px-2.5 py-1 text-base md:text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-offset-2"
                 rows={3}
               />
             </div>
@@ -384,7 +384,7 @@ function LicenceReviewPage() {
             >
               {reviewLicense.isPending ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
+                  <Loader2 className="size-4 animate-spin mr-1.5" />
                   Processing...
                 </>
               ) : reviewAction === 'approve' ? (

@@ -67,13 +67,13 @@ function PFIDetails() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   if (isLoading) {
-    return <div className="flex h-[50vh] items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
+    return <div className="flex h-[50svh] items-center justify-center"><Loader2 className="size-8 animate-spin text-primary" /></div>
   }
 
   if (fetchError || !pfi) {
     return (
-      <div className="flex flex-col items-center justify-center h-[50vh] space-y-4">
-        <FileText className="w-12 h-12 text-muted-foreground" />
+      <div className="flex flex-col items-center justify-center h-[50svh] space-y-4">
+        <FileText className="size-12 text-muted-foreground" />
         <h2 className="text-xl font-semibold">PFI Not Found</h2>
         <p className="text-muted-foreground">The requested PFI details could not be loaded.</p>
         <Button onClick={() => navigate({ to: '/pfi' as any })}>Back to PFI List</Button>
@@ -175,35 +175,35 @@ function PFIDetails() {
       <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center gap-4">
           <Button variant="outline" size="icon" onClick={() => navigate({ to: '/pfi' as any })}>
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="size-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-foreground">PFI Profile Details</h1>
+            <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">PFI Profile Details</h1>
             <p className="text-muted-foreground">Monitor PFI transaction logs, weight & volume metrics, assigned officers, and closure state</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={handleEdit}>
-            <Edit size={16} className="mr-2" /> Edit PFI
+            <Edit className="size-4 mr-2" /> Edit PFI
           </Button>
           <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
-            <Trash2 size={16} className="mr-2" /> {isDeleting ? 'Deleting...' : 'Delete PFI'}
+            <Trash2 className="size-4 mr-2" /> {isDeleting ? 'Deleting...' : 'Delete PFI'}
           </Button>
         </div>
       </header>
 
       {/* Hero Badge Panel */}
       <Card className="card-hover">
-        <CardContent className="p-4 sm:p-5 bg-gradient-to-r from-primary/5 to-info/5">
+        <CardContent className="bg-primary/5 p-4 sm:p-5">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary shadow-sm shrink-0">
-              <FileText size={24} />
+            <div className="size-12 bg-primary/10 rounded-full flex items-center justify-center text-primary shrink-0">
+              <FileText className="size-6" />
             </div>
             <div className="flex-1">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant="outline" className="font-mono text-xs">PFI ID: {pfi._id}</Badge>
                 <Badge variant="outline" className="font-medium text-xs">
-                  {isWeight ? <Scale size={12} className="mr-1 text-info inline" /> : <DropletIcon size={12} className="mr-1 text-primary inline" />}
+                  {isWeight ? <Scale className="size-3 mr-1 text-info inline" /> : <DropletIcon className="size-3 mr-1 text-primary inline" />}
                   Unit: {unit}
                 </Badge>
                 {isActive ? (
@@ -212,7 +212,7 @@ function PFIDetails() {
                   <Badge variant="secondary">Finished</Badge>
                 )}
               </div>
-              <h2 className="text-2xl font-bold text-foreground mt-1">{pfi.pfiNumber}</h2>
+              <h2 className="text-lg md:text-xl font-semibold text-foreground mt-1 tracking-tight">{pfi.pfiNumber}</h2>
               <p className="text-muted-foreground mt-0.5 text-xs flex items-center gap-1.5">
                 {pfi.description || 'Pro Forma Invoice details and logistics status'}
               </p>
@@ -227,8 +227,8 @@ function PFIDetails() {
         <Card>
           <CardHeader className="border-b border-border">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                <MapPin size={16} />
+              <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                <MapPin className="size-4" />
               </div>
               <div>
                 <CardTitle className="text-sm">Information & Location</CardTitle>
@@ -272,8 +272,8 @@ function PFIDetails() {
         <Card>
           <CardHeader className="border-b border-border">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-info/10 flex items-center justify-center text-info">
-                <Package size={16} />
+              <div className="size-8 rounded-lg bg-info/10 flex items-center justify-center text-info">
+                <Package className="size-4" />
               </div>
               <div>
                 <CardTitle className="text-sm">Vessel & Surveyor Logs</CardTitle>
@@ -307,8 +307,8 @@ function PFIDetails() {
         <Card>
           <CardHeader className="border-b border-border">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-warning/10 flex items-center justify-center text-warning">
-                <User size={16} />
+              <div className="size-8 rounded-lg bg-warning/10 flex items-center justify-center text-warning">
+                <User className="size-4" />
               </div>
               <div>
                 <CardTitle className="text-sm">Assigned Personnel</CardTitle>
@@ -350,8 +350,8 @@ function PFIDetails() {
         <Card>
           <CardHeader className="border-b border-border">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-success/10 flex items-center justify-center text-success">
-                <Banknote size={16} />
+              <div className="size-8 rounded-lg bg-success/10 flex items-center justify-center text-success">
+                <Banknote className="size-4" />
               </div>
               <div>
                 <CardTitle className="text-sm">Quantities & Financial Value Breakdown</CardTitle>
@@ -362,34 +362,34 @@ function PFIDetails() {
           <CardContent className="space-y-4 pt-4 text-sm">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Starting Qty ({unit})</p>
-                <p className="text-lg font-bold text-foreground mt-1">{fmtQty(primaryStarting, decimals)} {unit}</p>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Starting Qty ({unit})</p>
+                <p className="text-lg font-semibold text-foreground mt-1">{fmtQty(primaryStarting, decimals)} {unit}</p>
                 {startingLitres > 0 && isWeight && (
                   <p className="text-xs text-muted-foreground">({fmtQty(startingLitres)} L)</p>
                 )}
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Total PFI Cost</p>
-                <p className="text-lg font-bold text-primary mt-1">{fmtCurrency(cumulativeCost)}</p>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Total PFI Cost</p>
+                <p className="text-lg font-semibold text-primary mt-1">{fmtCurrency(cumulativeCost)}</p>
               </div>
             </div>
             <Separator />
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Sold Qty ({unit})</p>
-                <p className="text-lg font-bold text-emerald-600 mt-1">{fmtQty(primarySold, decimals)} {unit}</p>
-                <p className="text-xs font-semibold text-emerald-600 mt-0.5">Sold Cost: {fmtCurrency(soldCost)}</p>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Sold Qty ({unit})</p>
+                <p className="text-lg font-semibold text-accent mt-1">{fmtQty(primarySold, decimals)} {unit}</p>
+                <p className="text-xs font-semibold text-accent mt-0.5">Sold Cost: {fmtCurrency(soldCost)}</p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Remaining Qty ({unit})</p>
-                <p className="text-lg font-bold text-amber-600 mt-1">{fmtQty(primaryRemaining, decimals)} {unit}</p>
-                <p className="text-xs font-semibold text-amber-600 mt-0.5">Rem Cost: {fmtCurrency(remainingCost)}</p>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Remaining Qty ({unit})</p>
+                <p className="text-lg font-semibold text-warning mt-1">{fmtQty(primaryRemaining, decimals)} {unit}</p>
+                <p className="text-xs font-semibold text-warning mt-0.5">Rem Cost: {fmtCurrency(remainingCost)}</p>
               </div>
             </div>
             {primaryStarting > 0 && (
               <div className="space-y-1 mt-2">
                 <div className="h-2 bg-muted rounded-full overflow-hidden w-full">
-                  <div className="h-full bg-emerald-500 rounded-full transition-all duration-700" style={{ width: `${Math.min(100, (primarySold / primaryStarting) * 100)}%` }} />
+                  <div className="h-full bg-accent rounded-full transition-all duration-700 ease-luxe" style={{ width: `${Math.min(100, (primarySold / primaryStarting) * 100)}%` }} />
                 </div>
                 <div className="flex justify-between text-xs text-muted-foreground">
                   <span>{((primarySold / primaryStarting) * 100).toFixed(1)}% sold ({fmtCurrency(soldCost)})</span>
@@ -404,10 +404,10 @@ function PFIDetails() {
         {/* Card 5: Closure Card */}
         <div className="md:col-span-2">
           {isActive ? (
-            <Card className="border-primary/20 shadow-md">
+            <Card className="border-primary/20">
               <CardHeader className="bg-primary/5 border-b border-primary/10">
                 <CardTitle className="text-primary flex items-center gap-2">
-                  <CheckCircle className="w-5 h-5" />
+                  <CheckCircle className="size-5" />
                   Close PFI
                 </CardTitle>
                 <CardDescription>Enter final closure details to mark this PFI as finished.</CardDescription>
@@ -416,7 +416,7 @@ function PFIDetails() {
                 <CardContent className="space-y-4 pt-6">
                   {error && (
                     <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm font-medium mb-4 flex items-center gap-2">
-                      <ShieldAlert className="w-4 h-4 shrink-0" />
+                      <ShieldAlert className="size-4 shrink-0" />
                       <span>{error}</span>
                     </div>
                   )}
@@ -457,7 +457,7 @@ function PFIDetails() {
                 </CardContent>
                 <CardFooter className="flex justify-end gap-3 bg-muted/50 p-4 border-t">
                   <Button type="submit" className="w-full sm:w-auto" disabled={isPending}>
-                    {isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                    {isPending ? <Loader2 className="size-4 mr-2 animate-spin" /> : <Save className="size-4 mr-2" />}
                     Finish PFI
                   </Button>
                 </CardFooter>
@@ -467,8 +467,8 @@ function PFIDetails() {
             <Card>
               <CardHeader className="border-b border-border">
                 <div className="flex items-center gap-2">
-                  <div className="h-8 w-8 rounded-lg bg-secondary flex items-center justify-center text-muted-foreground">
-                    <Calendar size={16} />
+                  <div className="size-8 rounded-lg bg-secondary flex items-center justify-center text-muted-foreground">
+                    <Calendar className="size-4" />
                   </div>
                   <div>
                     <CardTitle className="text-sm">Closure Summary</CardTitle>
@@ -504,7 +504,7 @@ function PFIDetails() {
                   </div>
                   <div className="sm:col-span-2">
                     <dt className="text-muted-foreground font-medium">Remarks</dt>
-                    <dd className="italic text-foreground mt-0.5">{pfi.closureRemarks || 'No remarks provided.'}</dd>
+                    <dd className="text-foreground mt-0.5">{pfi.closureRemarks || 'No remarks provided.'}</dd>
                   </div>
                 </dl>
               </CardContent>

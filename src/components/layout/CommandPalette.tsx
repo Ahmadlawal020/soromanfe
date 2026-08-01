@@ -133,10 +133,10 @@ export default function CommandPalette({ open, onOpenChange }: CommandPalettePro
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-xl p-0 overflow-hidden border-border bg-background shadow-2xl rounded-2xl">
+      <DialogContent className="max-w-xl p-0 overflow-hidden border-border bg-background rounded-xl">
         <DialogTitle className="sr-only">Quick Search & Navigation</DialogTitle>
         <div className="flex items-center border-b border-border px-4 py-3 bg-muted/30">
-          <Search className="h-5 w-5 text-muted-foreground mr-3 shrink-0" />
+          <Search className="size-5 text-muted-foreground mr-3 shrink-0" />
           <input
             type="text"
             placeholder="Type a command or search dashboard..."
@@ -169,38 +169,37 @@ export default function CommandPalette({ open, onOpenChange }: CommandPalettePro
                     onClick={() => handleSelect(item)}
                     onMouseEnter={() => setSelectedIndex(index)}
                     className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs sm:text-sm text-left transition-colors cursor-pointer ${
-                      isSelected
-                        ? 'bg-primary text-primary-foreground font-medium shadow-sm'
-                        : 'hover:bg-muted text-foreground'
-                    }`}
+ isSelected
+ ? 'bg-primary text-primary-foreground font-medium '
+ : 'hover:bg-muted text-foreground'
+ }`}
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <div
-                        className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 ${
-                          isSelected
-                            ? 'bg-primary-foreground/20 text-primary-foreground'
-                            : 'bg-muted text-muted-foreground'
-                        }`}
+                        className={`size-8 rounded-lg flex items-center justify-center shrink-0 ${
+ isSelected
+ ? 'bg-primary-foreground/20 text-primary-foreground'
+ : 'bg-muted text-muted-foreground'
+ }`}
                       >
-                        <Icon size={16} />
+                        <Icon className="size-4" />
                       </div>
                       <div className="min-w-0 truncate">
                         <div className="font-medium truncate">{item.title}</div>
                         <div
                           className={`text-[11px] truncate ${
-                            isSelected ? 'text-primary-foreground/80' : 'text-muted-foreground'
-                          }`}
+ isSelected ? 'text-primary-foreground/80' : 'text-muted-foreground'
+ }`}
                         >
                           {item.category}
                         </div>
                       </div>
                     </div>
                     <ArrowRight
-                      size={14}
-                      className={`shrink-0 transition-transform ${
-                        isSelected ? 'translate-x-0.5 text-primary-foreground' : 'opacity-0'
-                      }`}
-                    />
+                     
+                      className={`size-3.5 shrink-0 transition-transform ${
+ isSelected ? 'translate-x-0.5 text-primary-foreground' : 'opacity-0'
+ }`} />
                   </button>
                 )
               })}

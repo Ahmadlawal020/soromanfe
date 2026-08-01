@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { Mail, Lock, Eye, EyeOff, AlertTriangle } from 'lucide-react'
+import { Mail, Lock, Eye, EyeOff, AlertTriangle, Loader2 } from 'lucide-react'
 import { Button } from '#/components/ui/button.tsx'
-import { Input } from '#/components/ui/input.tsx'
+import { BoxedInput } from '#/components/ui/input.tsx'
 import { Label } from '#/components/ui/label.tsx'
+import { Checkbox } from '#/components/ui/checkbox.tsx'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '#/components/ui/dialog.tsx'
+import { MICRO } from '#/lib/panel'
 import { useAdminLogin, useRequestPasswordReset } from '../hooks/hook'
 
 export function LoginForm() {
@@ -60,49 +62,42 @@ export function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="flex min-h-svh items-center justify-center bg-background px-4 py-14 sm:py-20">
       <div className="w-full max-w-md">
-        <div className="bg-card rounded-xl shadow-lg p-8 border border-border">
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 rounded-full mx-auto flex items-center justify-center mb-4 bg-slate-50 border border-slate-100 overflow-hidden">
-              <img src="/logo.png" alt="logo" className="w-full h-full object-contain p-1" onError={(e) => {
-                // Fallback to text logo if image fails to load
-                e.currentTarget.style.display = 'none';
-                const parent = e.currentTarget.parentElement;
-                if (parent) {
-                  const fallback = document.createElement('div');
-                  fallback.className = 'w-full h-full flex items-center justify-center bg-soroman-blue text-white font-bold text-2xl';
-                  fallback.innerText = 'S';
-                  parent.appendChild(fallback);
-                }
-              }} />
-            </div>
-            <h1 className="text-2xl font-bold text-foreground">Soroman Energy</h1>
-            <p className="text-muted-foreground mt-2">Sign in to your account</p>
+        {/* The square mark sits above the panel, not inside it. */}
+        <img src="/logo.png" alt="Soroman" className="mx-auto mb-6 size-11" />
+
+        {/* The auth panel is the PANEL recipe at a wider padding. */}
+        <div className="rounded-xl border border-foreground/15 bg-background p-7 sm:p-10">
+          <div className="mb-8 text-center">
+            <p className={`${MICRO} mb-2 text-muted-foreground`}>Soroman Energy</p>
+            <h1 className="text-xl font-semibold tracking-tight text-balance">
+              Sign in to your account
+            </h1>
           </div>
 
           <form onSubmit={handleSubmit} noValidate className="space-y-6">
             {sessionExpired && (
-              <div className="p-3 bg-amber-50 border border-amber-200 dark:bg-amber-950/40 dark:border-amber-800/50 rounded-lg text-sm font-medium text-amber-900 dark:text-amber-200 flex items-start gap-2.5 shadow-sm">
-                <AlertTriangle size={16} className="shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
+              <div className="flex items-start gap-2.5 rounded-lg border border-warning/40 bg-warning/10 p-3 text-sm text-warning">
+                <AlertTriangle className="mt-0.5 size-4 shrink-0" />
                 <span>Your session has expired. Please sign in again.</span>
               </div>
             )}
             {error && (
-              <div className="p-3 bg-destructive/10 border border-destructive/25 rounded-lg text-sm text-destructive" role="alert">
+              <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive" role="alert">
                 {error}
               </div>
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-foreground">Email Address</Label>
+              <Label htmlFor="email">Email address</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
-                <Input
+                <Mail className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
+                <BoxedInput
                   id="email"
                   type="email"
                   placeholder="admin@soroman.com"
-                  className="pl-10 h-auto rounded-xl py-3 text-base"
+                  className="pl-10"
                   autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -112,14 +107,14 @@ export function LoginForm() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-foreground">Password</Label>
+              <Label htmlFor="password">Password</Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
-                <Input
+                <Lock className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
+                <BoxedInput
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   placeholder="••••••••"
-                  className="pl-10 h-auto rounded-xl py-3 text-base"
+                  className="pr-10 pl-10"
                   autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -127,28 +122,25 @@ export function LoginForm() {
                 />
                 <button
                   type="button"
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  className="absolute top-1/2 right-3.5 -translate-y-1/2 cursor-pointer text-muted-foreground transition-colors duration-250 ease-luxe outline-none hover:text-foreground focus-visible:text-foreground"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                  <span className="sr-only">
+                    {showPassword ? 'Hide password' : 'Show password'}
+                  </span>
                 </button>
               </div>
             </div>
 
             <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="w-4 h-4 rounded border-slate-300 text-soroman-blue focus:ring-soroman-blue"
-                />
-                <span className="text-sm font-medium text-foreground">
-                  Remember me
-                </span>
-              </label>
+              <Label htmlFor="remember" className="cursor-pointer">
+                <Checkbox id="remember" />
+                Remember me
+              </Label>
               <button
                 type="button"
-                className="text-sm font-medium text-primary hover:text-primary/80 transition-colors cursor-pointer"
+                className="cursor-pointer text-sm font-medium text-accent underline-offset-4 transition-colors duration-250 ease-luxe outline-none hover:underline focus-visible:underline"
                 onClick={() => {
                   setForgotOpen(true)
                   resetMutation.reset()
@@ -162,10 +154,12 @@ export function LoginForm() {
 
             <Button
               type="submit"
-              className="w-full h-auto rounded-xl py-3 text-base font-semibold gradient-primary text-white shadow-lg active:scale-95 transition-all cursor-pointer"
+              size="lg"
+              className="w-full"
               disabled={loginMutation.isPending}
             >
-              {loginMutation.isPending ? 'Signing In...' : 'Sign In'}
+              {loginMutation.isPending && <Loader2 className="animate-spin" />}
+              {loginMutation.isPending ? 'Signing in…' : 'Sign in'}
             </Button>
           </form>
         </div>
@@ -174,60 +168,48 @@ export function LoginForm() {
       <Dialog open={forgotOpen} onOpenChange={setForgotOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Reset Password</DialogTitle>
+            <DialogTitle>Reset password</DialogTitle>
             <DialogDescription>
               Enter your email address and we&apos;ll send you a password setup link.
             </DialogDescription>
           </DialogHeader>
 
           {resetMutation.isSuccess ? (
-            <div className="text-center py-4 space-y-3">
-              <p className="text-success font-semibold">Password reset sent!</p>
+            <div className="space-y-3 py-4 text-center">
+              <p className="font-medium text-accent">Password reset sent</p>
               <p className="text-sm text-muted-foreground">
                 If that email is registered, a link to configure a new password has been sent to it. Check your inbox.
               </p>
-              <Button
-                onClick={() => setForgotOpen(false)}
-                className="mt-4 gradient-primary text-white rounded-xl px-6"
-              >
+              <Button onClick={() => setForgotOpen(false)} className="mt-4">
                 Close
               </Button>
             </div>
           ) : (
             <form onSubmit={handleForgotPassword} noValidate className="space-y-4">
               {forgotError && (
-                <div className="p-3 bg-destructive/10 border border-destructive/25 rounded-lg text-sm text-destructive" role="alert">
+                <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive" role="alert">
                   {forgotError}
                 </div>
               )}
               <div className="space-y-2">
-                <Label htmlFor="forgot-email">Email Address</Label>
-                <Input
+                <Label htmlFor="forgot-email">Email address</Label>
+                <BoxedInput
                   id="forgot-email"
                   type="email"
                   placeholder="admin@soroman.com"
                   value={forgotEmail}
                   onChange={(e) => setForgotEmail(e.target.value)}
-                  className="h-auto rounded-xl py-2 px-3 text-base"
                   autoComplete="email"
                   required
                 />
               </div>
-              <div className="flex gap-3 justify-end pt-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setForgotOpen(false)}
-                  className="rounded-xl"
-                >
+              <div className="flex justify-end gap-2 pt-2">
+                <Button type="button" variant="outline" onClick={() => setForgotOpen(false)}>
                   Cancel
                 </Button>
-                <Button
-                  type="submit"
-                  disabled={resetMutation.isPending}
-                  className="gradient-primary text-white rounded-xl"
-                >
-                  {resetMutation.isPending ? 'Sending...' : 'Send Setup Link'}
+                <Button type="submit" disabled={resetMutation.isPending}>
+                  {resetMutation.isPending && <Loader2 className="animate-spin" />}
+                  {resetMutation.isPending ? 'Sending…' : 'Send setup link'}
                 </Button>
               </div>
             </form>

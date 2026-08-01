@@ -31,7 +31,7 @@ export function OffloadDialog({ target, date, setDate, onClose, onConfirm, loadi
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <CheckCircle2 size={20} className="text-emerald-600" />
+            <CheckCircle2 className="size-5 text-accent" />
             Confirm Sale / Offload
           </DialogTitle>
           <DialogDescription>
@@ -42,7 +42,7 @@ export function OffloadDialog({ target, date, setDate, onClose, onConfirm, loadi
 
         <div className="space-y-4 py-2">
           <div className="bg-muted/30 rounded-lg p-3 flex items-center gap-3">
-            <Truck size={18} className="text-muted-foreground shrink-0" />
+            <Truck className="size-4 text-muted-foreground shrink-0" />
             <div>
               <p className="font-semibold text-sm">{target.truckPlate}</p>
               {target.qty != null && target.qty > 0 && (
@@ -54,7 +54,7 @@ export function OffloadDialog({ target, date, setDate, onClose, onConfirm, loadi
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em]">
               Date Sold / Offloaded
             </label>
             <Input
@@ -71,11 +71,11 @@ export function OffloadDialog({ target, date, setDate, onClose, onConfirm, loadi
             Cancel
           </Button>
           <Button
-            className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
+            className="bg-accent hover:bg-accent/80 text-accent-foreground gap-2"
             onClick={onConfirm}
             disabled={loading}
           >
-            {loading ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
+            {loading ? <Loader2 className="size-4 animate-spin" /> : <CheckCircle2 className="size-4" />}
             {loading ? 'Saving...' : 'Confirm Sold'}
           </Button>
         </DialogFooter>

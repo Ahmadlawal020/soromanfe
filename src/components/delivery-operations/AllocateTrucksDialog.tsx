@@ -88,10 +88,10 @@ export function AllocateTrucksDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[90svh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-lg">
-            <Truck size={20} className="text-emerald-600" />
+            <Truck className="size-5 text-accent" />
             Allocate Trucks to PFI
           </DialogTitle>
           <DialogDescription>
@@ -102,8 +102,8 @@ export function AllocateTrucksDialog({
         <div className="space-y-5 py-2">
           {/* PFI Selector */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              PFI Source <span className="text-red-500">*</span>
+            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em]">
+              PFI Source <span className="text-destructive">*</span>
             </Label>
             <select
               aria-label="Select PFI"
@@ -113,7 +113,7 @@ export function AllocateTrucksDialog({
                 const pfi = pfiMap.get(e.target.value)
                 if (pfi?.locationName) setLoadDepot(pfi.locationName)
               }}
-              className="h-10 w-full rounded-lg border border-border bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="h-8 w-full rounded-lg border border-border bg-white px-2.5 text-base md:text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             >
               <option value="">Select a PFI...</option>
               {activePfiOptions.map(p => (
@@ -132,7 +132,7 @@ export function AllocateTrucksDialog({
           {/* Allocation Code + Date */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em]">
                 Allocation Code
               </Label>
               {showNewCodeInput ? (
@@ -148,7 +148,7 @@ export function AllocateTrucksDialog({
                     Add
                   </Button>
                   <Button size="sm" variant="ghost" className="h-9 px-2" onClick={() => { setShowNewCodeInput(false); setNewCodeInput('') }}>
-                    <X size={14} />
+                    <X className="size-3.5" />
                   </Button>
                 </div>
               ) : (
@@ -157,7 +157,7 @@ export function AllocateTrucksDialog({
                     aria-label="Allocation code"
                     value={loadCode}
                     onChange={e => setLoadCode(e.target.value)}
-                    className="h-9 flex-1 rounded-lg border border-border bg-white px-3 text-sm"
+                    className="h-8 flex-1 rounded-lg border border-border bg-white px-2.5 text-base md:text-sm"
                   >
                     <option value="">No code</option>
                     {deliveryCodes.map(c => (
@@ -170,14 +170,14 @@ export function AllocateTrucksDialog({
                     className="h-9 px-2.5 text-xs gap-1"
                     onClick={() => setShowNewCodeInput(true)}
                   >
-                    <Plus size={13} /> New
+                    <Plus className="size-3.5" /> New
                   </Button>
                 </div>
               )}
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em]">
                 Date Loaded
               </Label>
               <Input
@@ -192,8 +192,8 @@ export function AllocateTrucksDialog({
           {/* Truck Selection */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                Select Trucks <span className="text-red-500">*</span>
+              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em]">
+                Select Trucks <span className="text-destructive">*</span>
               </Label>
               <span className="text-[11px] text-muted-foreground">
                 {selectedTruckIds.size} selected · {availableTrucks.length} available
@@ -201,7 +201,7 @@ export function AllocateTrucksDialog({
             </div>
 
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={14} />
+              <Search className="size-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Search trucks by plate or driver..."
                 value={truckSearch}
@@ -225,14 +225,14 @@ export function AllocateTrucksDialog({
                     <label
                       key={truck._id}
                       className={`flex items-center gap-3 px-3 py-2.5 cursor-pointer transition-colors ${
-                        isSelected ? 'bg-emerald-50/60' : 'hover:bg-muted/30'
+                        isSelected ? 'bg-accent/60' : 'hover:bg-muted/30'
                       }`}
                     >
                       <input
                         type="checkbox"
                         checked={isSelected}
                         onChange={() => toggleTruck(truck._id)}
-                        className="h-4 w-4 rounded border-slate-300 accent-emerald-600"
+                        className="size-4 rounded border-border accent-primary"
                       />
                       <div className="flex-1 min-w-0">
                         <span className="font-semibold text-sm text-foreground">{truck.plateNumber}</span>
@@ -252,19 +252,19 @@ export function AllocateTrucksDialog({
 
           {/* Summary */}
           {selectedTruckIds.size > 0 && (
-            <div className="bg-emerald-50/60 border border-emerald-200 rounded-lg px-4 py-3 space-y-1">
+            <div className="bg-accent/60 border border-accent/40 rounded-lg px-4 py-3 space-y-1">
               <div className="flex items-center justify-between text-sm">
-                <span className="font-medium text-emerald-800">
+                <span className="font-medium text-accent">
                   {selectedTruckIds.size} truck{selectedTruckIds.size !== 1 ? 's' : ''} selected
                 </span>
                 {autoSumCapacity > 0 && (
-                  <span className="font-bold text-emerald-900">
+                  <span className="font-semibold text-accent">
                     Total: {autoSumCapacity.toLocaleString()} L
                   </span>
                 )}
               </div>
               {trucksWithNoCapacity.length > 0 && (
-                <p className="text-[11px] text-amber-700">
+                <p className="text-[11px] text-warning">
                   ⚠ No capacity set for: {trucksWithNoCapacity.join(', ')}
                 </p>
               )}
@@ -277,11 +277,11 @@ export function AllocateTrucksDialog({
             Cancel
           </Button>
           <Button
-            className="bg-emerald-700 hover:bg-emerald-800 text-white gap-2"
+            className="bg-accent hover:bg-accent/80 text-accent-foreground gap-2"
             onClick={handleLoadSave}
             disabled={saving || selectedTruckIds.size === 0 || !loadPfi}
           >
-            {saving ? <Loader2 size={16} className="animate-spin" /> : <Truck size={16} />}
+            {saving ? <Loader2 className="size-4 animate-spin" /> : <Truck className="size-4" />}
             {saving ? 'Saving...' : `Allocate ${selectedTruckIds.size} Truck${selectedTruckIds.size !== 1 ? 's' : ''}`}
           </Button>
         </DialogFooter>

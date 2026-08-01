@@ -43,7 +43,7 @@ function TicketDetailsComponent() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 size={32} className="animate-spin text-muted-foreground" />
+        <Loader2 className="size-8 animate-spin text-muted-foreground" />
       </div>
     )
   }
@@ -51,12 +51,12 @@ function TicketDetailsComponent() {
   if (!ticket) {
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-5 text-center">
-        <div className="h-16 w-16 rounded-full bg-warning/10 flex items-center justify-center text-warning border border-warning/20">
-          <AlertCircle size={32} />
+        <div className="size-16 rounded-full bg-warning/10 flex items-center justify-center text-warning border border-warning/20">
+          <AlertCircle className="size-8" />
         </div>
-        <h2 className="text-2xl font-bold text-foreground">Ticket Not Found</h2>
+        <h2 className="text-lg md:text-xl font-semibold text-foreground tracking-tight">Ticket Not Found</h2>
         <p className="text-muted-foreground max-w-sm">The requested ticket details could not be found or loaded.</p>
-        <Button onClick={handleBack}><ArrowLeft size={16} /> Back to Tickets</Button>
+        <Button onClick={handleBack}><ArrowLeft className="size-4" /> Back to Tickets</Button>
       </div>
     )
   }
@@ -80,11 +80,11 @@ function TicketDetailsComponent() {
   }) : null
 
   return (
-    <div className="space-y-6 animate-fade-in ">
+    <div className="space-y-6 animate-fade-in">
       <header className="flex items-center gap-4">
-        <Button variant="outline" size="icon" onClick={handleBack}><ArrowLeft size={16} /></Button>
+        <Button variant="outline" size="icon" onClick={handleBack}><ArrowLeft className="size-4" /></Button>
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Ticket Details</h1>
+          <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">Ticket Details</h1>
           <p className="text-muted-foreground">Verify and redeem pickup ticket</p>
         </div>
       </header>
@@ -93,14 +93,14 @@ function TicketDetailsComponent() {
       <div className="grid md:grid-cols-3 gap-6">
 
         {/* Ticket Left Column - Ticket/Receipt Design */}
-        <Card className="md:col-span-2 relative overflow-hidden border-2 border-primary/20 shadow-xl">
-          <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-primary to-info" />
+        <Card className="md:col-span-2 relative overflow-hidden border-2 border-primary/20">
+          <div className="bg-primary absolute top-0 left-0 w-2 h-full" />
 
           <CardContent className="p-6 md:p-8 space-y-6 pl-8">
             <div className="flex justify-between items-start">
               <div>
-                <span className="text-[10px] font-bold text-primary uppercase tracking-wider bg-primary/10 px-2 py-0.5 rounded-full">Official Receipt</span>
-                <h2 className="text-3xl font-mono font-black text-foreground mt-2">{ticket.ticketNumber}</h2>
+                <span className="text-[10px] font-semibold text-primary uppercase tracking-[0.14em] bg-primary/10 px-2 py-0.5 rounded-full">Official Receipt</span>
+                <h2 className="text-lg md:text-xl font-mono font-black text-foreground mt-2 tracking-tight">{ticket.ticketNumber}</h2>
                 <p className="text-xs text-muted-foreground mt-1">Generated on {generatedDate}</p>
               </div>
               <Badge className={ticket.status === 'Redeemed' ? 'bg-success text-success-foreground' : 'bg-primary text-primary-foreground'}>
@@ -111,16 +111,16 @@ function TicketDetailsComponent() {
             {/* Visual Dotted Cutting Separator */}
             <div className="relative flex items-center py-4">
               <div className="flex-grow border-t border-dashed border-border" />
-              <span className="absolute -left-11 w-6 h-6 rounded-full bg-background border-r border-border" />
-              <span className="absolute -right-8 w-6 h-6 rounded-full bg-background border-l border-border" />
+              <span className="absolute -left-11 size-6 rounded-full bg-background border-r border-border" />
+              <span className="absolute -right-8 size-6 rounded-full bg-background border-l border-border" />
             </div>
 
             {/* Product pickup details */}
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 bg-muted/30 p-4 rounded-xl border border-border/50">
               <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Product</p>
-                <p className="text-base font-bold mt-1 flex items-center gap-1.5">
-                  <Package size={16} className="text-primary" />
+                <p className="text-xs text-muted-foreground uppercase tracking-[0.22em] font-semibold">Product</p>
+                <p className="text-base font-semibold mt-1 flex items-center gap-1.5">
+                  <Package className="size-4 text-primary" />
                   {ticket.order?.product?.name || 'N/A'}
                 </p>
                 {ticket.order?.product?.sku && (
@@ -128,23 +128,23 @@ function TicketDetailsComponent() {
                 )}
               </div>
               <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Quantity</p>
-                <p className="text-base font-mono font-bold mt-1 text-foreground">
+                <p className="text-xs text-muted-foreground uppercase tracking-[0.22em] font-semibold">Quantity</p>
+                <p className="text-base font-mono font-semibold mt-1 text-foreground">
                   {ticket.order?.quantity?.toLocaleString()} {ticket.order?.product?.unit || 'Liters'}
                 </p>
                 <p className="text-[10px] text-muted-foreground mt-0.5">@ {formatCurrency(ticket.order?.price || 0)} / unit</p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Fulfillment Method</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-[0.22em] font-semibold">Fulfillment Method</p>
                 <p className="text-sm font-semibold mt-1 capitalize flex items-center gap-1.5">
-                  <Award size={14} className="text-info" />
+                  <Award className="size-3.5 text-info" />
                   {ticket.order?.deliveryType === 'delivery' ? 'Company Delivery' : 'Self Pickup'}
                 </p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Fulfillment Depot</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-[0.22em] font-semibold">Fulfillment Depot</p>
                 <p className="text-sm font-semibold mt-1 flex items-center gap-1.5">
-                  <Warehouse size={14} className="text-muted-foreground" />
+                  <Warehouse className="size-3.5 text-muted-foreground" />
                   {ticket.order?.depot?.name || 'N/A'}
                 </p>
                 {ticket.order?.depot?.code && (
@@ -152,15 +152,15 @@ function TicketDetailsComponent() {
                 )}
               </div>
               <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Fulfillment State</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-[0.22em] font-semibold">Fulfillment State</p>
                 <p className="text-sm font-semibold mt-1 flex items-center gap-1.5">
-                  <MapPin size={14} className="text-primary" />
+                  <MapPin className="size-3.5 text-primary" />
                   {ticket.order?.state || 'N/A'}
                 </p>
               </div>
               {ticket.order?.pfiNumber && (
                 <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">PFI reference</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-[0.22em] font-semibold">PFI reference</p>
                   <p className="text-sm font-mono font-semibold mt-1 text-foreground">
                     {ticket.order.pfiNumber || 'N/A'}
                   </p>
@@ -170,8 +170,8 @@ function TicketDetailsComponent() {
 
             {/* Payment Details */}
             {ticket.order?.virtualAccountNumber && (
-              <div className="bg-gradient-to-r from-success/5 to-primary/5 p-4 rounded-xl border border-success/10 space-y-2">
-                <h4 className="text-xs font-bold text-success uppercase tracking-wider">Payment Account Details</h4>
+              <div className="bg-success/5 p-4 rounded-xl border border-success/10 space-y-2">
+                <h4 className="text-xs font-semibold text-success uppercase tracking-[0.22em]">Payment Account Details</h4>
                 <div className="grid grid-cols-2 gap-4 text-xs">
                   <div>
                     <span className="text-muted-foreground">Bank: </span>
@@ -195,7 +195,7 @@ function TicketDetailsComponent() {
 
             <div className="flex justify-between items-center py-2">
               <span className="text-sm text-muted-foreground">Total Transaction Value</span>
-              <span className="font-mono text-base font-bold text-foreground">
+              <span className="font-mono text-base font-semibold text-foreground">
                 {formatCurrency(ticket.order?.totalAmount || 0)}
               </span>
             </div>
@@ -203,8 +203,8 @@ function TicketDetailsComponent() {
             {/* Redemption Details if already redeemed */}
             {ticket.status === 'Redeemed' && (
               <div className="bg-success/5 border border-success/20 rounded-xl p-4 space-y-2 mt-4">
-                <h4 className="text-sm font-bold text-success flex items-center gap-1.5">
-                  <CheckCircle2 size={16} /> Ticket Redeemed
+                <h4 className="text-sm font-semibold text-success flex items-center gap-1.5">
+                  <CheckCircle2 className="size-4" /> Ticket Redeemed
                 </h4>
                 <div className="text-xs text-muted-foreground space-y-1">
                   <p>Redeemed At: <span className="font-semibold text-foreground">{redeemedDate || 'N/A'}</span></p>
@@ -220,14 +220,14 @@ function TicketDetailsComponent() {
               <div className="pt-4">
                 <Button
                   size="lg"
-                  className="w-full bg-success hover:bg-success-hover text-success-foreground font-semibold flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                  className="w-full bg-success hover:bg-success-hover text-success-foreground font-semibold flex items-center justify-center gap-2 cursor-pointer"
                   onClick={handleRedeem}
                   disabled={redeemMutation.isPending}
                 >
                   {redeemMutation.isPending ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <Loader2 className="size-5 animate-spin" />
                   ) : (
-                    <CheckSquare className="w-5 h-5" />
+                    <CheckSquare className="size-5" />
                   )}
                   Redeem Ticket & Confirm Pickup
                 </Button>
@@ -238,14 +238,14 @@ function TicketDetailsComponent() {
 
         {/* Ticket Right Column - QR Code Display */}
         <div className="space-y-6">
-          <Card className="border border-border shadow-md">
+          <Card className="border border-border">
             <CardHeader className="text-center pb-2">
               <CardTitle className="text-sm font-semibold flex items-center justify-center gap-1.5">
-                <Ticket size={16} className="text-primary" /> Ticket QR Code
+                <Ticket className="size-4 text-primary" /> Ticket QR Code
               </CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col items-center p-6 pt-2">
-              <div className="bg-white p-4 border border-border rounded-xl shadow-inner mb-4 w-full flex items-center justify-center max-w-[240px]">
+              <div className="bg-white p-4 border border-border rounded-xl mb-4 w-full flex items-center justify-center max-w-[240px]">
                 <img
                   src={ticket.qrCodeDataUrl}
                   alt="Ticket QR Code"
@@ -259,7 +259,7 @@ function TicketDetailsComponent() {
           </Card>
 
           {/* Customer info card */}
-          <Card className="border border-border shadow-md">
+          <Card className="border border-border">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold">Customer Details</CardTitle>
             </CardHeader>
@@ -272,7 +272,7 @@ function TicketDetailsComponent() {
                 <div>
                   <p className="text-[10px] text-muted-foreground uppercase font-medium">Company</p>
                   <p className="font-semibold text-foreground flex items-center gap-1">
-                    <Building2 size={12} className="text-muted-foreground" />
+                    <Building2 className="size-3 text-muted-foreground" />
                     {ticket.order.customer.companyName}
                   </p>
                 </div>

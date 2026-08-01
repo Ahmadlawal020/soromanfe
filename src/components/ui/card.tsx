@@ -1,15 +1,42 @@
 import * as React from "react"
+import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "#/lib/utils.ts"
 
-function Card({ className, ...props }: React.ComponentProps<"div">) {
+/**
+ * The shadcn primitive: a **ring**, and no shadow.
+ *
+ * Do not conflate this with PANEL (lib/panel.ts), the app's editorial section
+ * card, which uses a border + soft shadow and a fixed header/body/footer rail
+ * anatomy. Mixing the two treatments looks wrong.
+ *
+ * Use Card for generic content blocks; use PANEL for the dashboard's own
+ * sections.
+ */
+const cardVariants = cva(
+  "flex flex-col rounded-xl bg-card py-(--card-spacing) text-card-foreground ring-1 ring-foreground/10",
+  {
+    variants: {
+      size: {
+        default: "gap-4 [--card-spacing:--spacing(4)]",
+        sm: "gap-3 [--card-spacing:--spacing(3)]",
+      },
+    },
+    defaultVariants: {
+      size: "default",
+    },
+  }
+)
+
+function Card({
+  className,
+  size,
+  ...props
+}: React.ComponentProps<"div"> & VariantProps<typeof cardVariants>) {
   return (
     <div
       data-slot="card"
-      className={cn(
-        "flex flex-col gap-6 rounded-xl border bg-card py-6 text-card-foreground shadow-sm",
-        className
-      )}
+      className={cn(cardVariants({ size, className }))}
       {...props}
     />
   )
@@ -20,7 +47,7 @@ function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="card-header"
       className={cn(
-        "@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6",
+        "@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1 px-(--card-spacing) has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-(--card-spacing)",
         className
       )}
       {...props}
@@ -32,7 +59,7 @@ function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-title"
-      className={cn("leading-none font-semibold", className)}
+      className={cn("text-base leading-snug font-medium", className)}
       {...props}
     />
   )
@@ -65,7 +92,7 @@ function CardContent({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-content"
-      className={cn("px-6", className)}
+      className={cn("px-(--card-spacing)", className)}
       {...props}
     />
   )
@@ -75,7 +102,10 @@ function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-footer"
-      className={cn("flex items-center px-6 [.border-t]:pt-6", className)}
+      className={cn(
+        "flex items-center rounded-b-xl p-(--card-spacing) [.border-t]:bg-muted/50 [.border-t]:pt-(--card-spacing)",
+        className
+      )}
       {...props}
     />
   )
@@ -89,4 +119,5 @@ export {
   CardAction,
   CardDescription,
   CardContent,
+  cardVariants,
 }

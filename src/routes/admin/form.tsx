@@ -134,17 +134,17 @@ function AdminForm() {
   if (submitted) {
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-5 text-center">
-        <div className="h-16 w-16 rounded-full bg-success/10 flex items-center justify-center text-success border border-success/20">
-          <CheckCircle size={32} />
+        <div className="size-16 rounded-full bg-success/10 flex items-center justify-center text-success border border-success/20">
+          <CheckCircle className="size-8" />
         </div>
-        <h2 className="text-2xl font-bold text-foreground">{isEdit ? 'User Updated Successfully!' : 'User Created Successfully!'}</h2>
+        <h2 className="text-lg md:text-xl font-semibold text-foreground tracking-tight">{isEdit ? 'User Updated Successfully!' : 'User Created Successfully!'}</h2>
         <p className="text-muted-foreground max-w-md">
           <span className="font-semibold">{formData.first_name} {formData.surname}</span> has been {isEdit ? 'updated' : 'registered'} with{' '}
           <span className="font-semibold">{formData.roles.length} role{formData.roles.length > 1 ? 's' : ''}</span> assigned.
         </p>
         {!isEdit && (
           <div className="flex items-center gap-2.5 px-5 py-3 rounded-lg bg-primary/10 border border-primary/20">
-            <Send size={16} className="text-primary" />
+            <Send className="size-4 text-primary" />
             <p className="text-sm text-foreground">
               A password setup link has been sent to <span className="font-semibold">{formData.email}</span>
             </p>
@@ -169,10 +169,10 @@ function AdminForm() {
       <header className="flex items-center justify-between">
         <div>
           <Button variant="ghost" size="sm" onClick={() => navigate({ to: '/admin/' as any })} className="mb-2">
-            <ArrowLeft className="h-4 w-4 mr-2" />
+            <ArrowLeft className="size-4 mr-2" />
             Back to Directory
           </Button>
-          <h1 className="text-3xl font-bold tracking-tight">{isEdit ? 'Edit User Account' : 'Create User Account'}</h1>
+          <h1 className="text-xl md:text-2xl font-semibold tracking-tight text-balance">{isEdit ? 'Edit User Account' : 'Create User Account'}</h1>
           <p className="text-muted-foreground">{isEdit ? 'Update user details and role assignments' : 'Register a new system user and assign roles'}</p>
         </div>
       </header>
@@ -181,7 +181,7 @@ function AdminForm() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <div className="space-y-4 border rounded-lg p-4 lg:col-span-1">
             <div className="flex items-center space-x-2">
-              <UserCheck className="h-5 w-5 text-primary" />
+              <UserCheck className="size-5 text-primary" />
               <h2 className="text-lg font-medium">Identity & Profile</h2>
             </div>
             <div className="space-y-3">
@@ -204,7 +204,7 @@ function AdminForm() {
 
           <div className="space-y-4 border rounded-lg p-4 lg:col-span-1">
             <div className="flex items-center space-x-2">
-              <Mail className="h-5 w-5 text-primary" />
+              <Mail className="size-5 text-primary" />
               <h2 className="text-lg font-medium">Contact Details</h2>
             </div>
             <div className="space-y-3">
@@ -223,13 +223,13 @@ function AdminForm() {
 
           <div className="space-y-4 border rounded-lg p-4 lg:col-span-1">
             <div className="flex items-center space-x-2">
-              <AlertCircle className="h-5 w-5 text-destructive" />
+              <AlertCircle className="size-5 text-destructive" />
               <h2 className="text-lg font-medium">Account Flags</h2>
             </div>
             <label className="flex items-start gap-3 cursor-pointer select-none group">
-              <input type="checkbox" name="suspended" checked={formData.suspended} onChange={handleChange} className="mt-1 h-4 w-4 rounded border-input text-destructive accent-destructive cursor-pointer" />
+              <input type="checkbox" name="suspended" checked={formData.suspended} onChange={handleChange} className="mt-1 size-4 rounded border-input text-destructive accent-destructive cursor-pointer" />
               <div className="flex flex-col gap-1">
-                <span className="font-medium text-foreground group-hover:text-destructive transition-colors">Create as Suspended</span>
+                <span className="font-medium text-foreground group-hover:text-destructive transition-colors duration-250 ease-luxe">Create as Suspended</span>
                 <span className="text-sm text-muted-foreground">User will not be able to log in until suspension is lifted.</span>
               </div>
             </label>
@@ -238,20 +238,20 @@ function AdminForm() {
 
         <div className="space-y-4 border rounded-lg p-4">
           <div className="flex items-center space-x-2">
-            <Shield className="h-5 w-5 text-primary" />
+            <Shield className="size-5 text-primary" />
             <h2 className="text-lg font-medium">Role Assignment*</h2>
           </div>
 
           <div>
             <Label className="mb-2 block">Active Roles</Label>
             <div className="flex flex-wrap gap-2 min-h-[44px] p-3 rounded-lg border border-border bg-muted items-center">
-              {formData.roles.length === 0 && <span className="text-sm text-muted-foreground italic px-2">No roles selected</span>}
+              {formData.roles.length === 0 && <span className="text-sm text-muted-foreground px-2">No roles selected</span>}
               {formData.roles.map((r) => (
                 <span key={r} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-primary/10 text-primary border border-primary/20">
-                  <Shield size={14} className="opacity-70" />
+                  <Shield className="size-3.5 opacity-70" />
                   {ROLE_LABELS[r] || r}
                   {formData.roles.length > 1 && (
-                    <button type="button" onClick={() => removeRole(r)} className="ml-1 hover:text-destructive hover:bg-destructive/10 rounded-full p-0.5 transition-colors cursor-pointer">&times;</button>
+                    <button type="button" onClick={() => removeRole(r)} className="ml-1 hover:text-destructive hover:bg-destructive/10 rounded-full p-0.5 transition-colors cursor-pointer duration-250 ease-luxe">&times;</button>
                   )}
                 </span>
               ))}
@@ -265,10 +265,10 @@ function AdminForm() {
               const isSelected = selectedCategory === group.label;
               return (
                 <button key={group.label} type="button" onClick={() => setSelectedCategory(group.label)}
-                  className={`relative flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ${isSelected ? 'bg-primary text-primary-foreground shadow-md' : 'bg-muted text-muted-foreground hover:bg-muted/80 border border-transparent hover:border-border'}`}>
+                  className={`relative flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ${isSelected ? 'bg-primary text-primary-foreground ' : 'bg-muted text-muted-foreground hover:bg-muted/80 border border-transparent hover:border-border'}`}>
                   {group.label}
                   {selectedCount > 0 && (
-                    <span className={`inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 rounded-full text-xs font-bold ${isSelected ? 'bg-white/20 text-inherit' : 'bg-primary text-primary-foreground'}`}>{selectedCount}</span>
+                    <span className={`inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 rounded-full text-xs font-semibold ${isSelected ? 'bg-white/20 text-inherit' : 'bg-primary text-primary-foreground'}`}>{selectedCount}</span>
                   )}
                 </button>
               );
@@ -282,7 +282,7 @@ function AdminForm() {
                   const checked = formData.roles.includes(r)
                   return (
                     <label key={r} className={`flex items-start gap-3 p-3 rounded-lg text-sm cursor-pointer border transition-all ${checked ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'}`}>
-                      <input type="checkbox" checked={checked} onChange={(e) => handleRoleToggle(r, e.target.checked)} className="mt-0.5 h-4 w-4 rounded border-input text-primary accent-primary cursor-pointer" />
+                      <input type="checkbox" checked={checked} onChange={(e) => handleRoleToggle(r, e.target.checked)} className="mt-0.5 size-4 rounded border-input text-primary accent-primary cursor-pointer" />
                       <span className={`font-medium ${checked ? 'text-primary' : 'text-foreground'}`}>{ROLE_LABELS[r]}</span>
                     </label>
                   )
@@ -294,15 +294,15 @@ function AdminForm() {
 
         {submitError && (
           <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive">
-            <AlertCircle size={16} className="shrink-0" />
+            <AlertCircle className="size-4 shrink-0" />
             <p className="text-sm font-medium">{submitError}</p>
           </div>
         )}
 
         <div className="flex flex-col sm:flex-row justify-end gap-3">
           <Button type="button" variant="outline" onClick={() => navigate({ to: '/admin/' as any })}>Cancel</Button>
-          <Button type="submit" disabled={createAdmin.isPending || updateAdmin.isPending} className="gradient-primary text-white border-0 min-w-[180px]">
-            {(createAdmin.isPending || updateAdmin.isPending) ? (<><Loader2 size={18} className="animate-spin mr-2" />{isEdit ? 'Updating User...' : 'Creating User...'}</>) : (isEdit ? 'Update User Account' : 'Create User Account')}
+          <Button type="submit" disabled={createAdmin.isPending || updateAdmin.isPending} className="min-w-[180px]">
+            {(createAdmin.isPending || updateAdmin.isPending) ? (<><Loader2 className="size-4 animate-spin mr-2" />{isEdit ? 'Updating User...' : 'Creating User...'}</>) : (isEdit ? 'Update User Account' : 'Create User Account')}
           </Button>
         </div>
       </form>

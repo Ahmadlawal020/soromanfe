@@ -47,10 +47,10 @@ export function EditRecordDialog({
 
   return (
     <Dialog open={!!target} onOpenChange={open => { if (!open) onClose() }}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-lg max-h-[90svh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Pencil size={18} className="text-blue-600" />
+            <Pencil className="size-4 text-muted-foreground" />
             Edit Record — {target.truckPlate}
           </DialogTitle>
           <DialogDescription>
@@ -60,7 +60,7 @@ export function EditRecordDialog({
 
         <div className="space-y-4 py-2">
           <div className="space-y-1.5">
-            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em]">
               Allocation Code
             </Label>
             <div className="flex gap-2">
@@ -68,7 +68,7 @@ export function EditRecordDialog({
                 aria-label="Allocation code"
                 value={form.code}
                 onChange={e => setForm({ ...form, code: e.target.value })}
-                className="h-9 flex-1 rounded-lg border border-border bg-white px-3 text-sm"
+                className="h-8 flex-1 rounded-lg border border-border bg-white px-2.5 text-base md:text-sm"
               >
                 <option value="">No code</option>
                 {deliveryCodes.map(c => (
@@ -85,7 +85,7 @@ export function EditRecordDialog({
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em]">
               PFI
             </Label>
             <select
@@ -96,7 +96,7 @@ export function EditRecordDialog({
                 const pfi = pfiMap.get(e.target.value)
                 if (pfi?.locationName) setForm({ ...form, pfi: e.target.value, depot: pfi.locationName || form.depot })
               }}
-              className="h-9 w-full rounded-lg border border-border bg-white px-3 text-sm"
+              className="h-8 w-full rounded-lg border border-border bg-white px-2.5 text-base md:text-sm"
             >
               <option value="">Select PFI...</option>
               {allPfiOptions.map(p => (
@@ -107,7 +107,7 @@ export function EditRecordDialog({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em]">
                 Depot
               </Label>
               <Input
@@ -118,7 +118,7 @@ export function EditRecordDialog({
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em]">
                 Date Loaded
               </Label>
               <Input
@@ -132,7 +132,7 @@ export function EditRecordDialog({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em]">
                 Destination / Location
               </Label>
               <Input
@@ -143,8 +143,8 @@ export function EditRecordDialog({
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1">
-                <DollarSign size={13} /> Rate (per litre)
+              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em] flex items-center gap-1">
+                <DollarSign className="size-3.5" /> Rate (per litre)
               </Label>
               <Input
                 type="number"
@@ -162,7 +162,7 @@ export function EditRecordDialog({
             Cancel
           </Button>
           <Button onClick={onSave} disabled={loading} className="gap-2">
-            {loading ? <Loader2 size={16} className="animate-spin" /> : <Pencil size={16} />}
+            {loading ? <Loader2 className="size-4 animate-spin" /> : <Pencil className="size-4" />}
             {loading ? 'Saving...' : 'Save Changes'}
           </Button>
         </DialogFooter>

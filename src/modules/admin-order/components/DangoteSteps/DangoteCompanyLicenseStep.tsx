@@ -32,7 +32,6 @@ function getStatusBadge(status: string) {
 
 export function DangoteCompanyLicenseStep({ wizard }: DangoteCompanyLicenseStepProps) {
   const {
-    selectedCustomer,
     selectedLicense,
     setSelectedLicense,
     isAddingLicense,
@@ -68,32 +67,21 @@ export function DangoteCompanyLicenseStep({ wizard }: DangoteCompanyLicenseStepP
 
   return (
     <div key="dangote-step-2" className="space-y-6 animate-fade-in">
-      <div className="flex items-center gap-3 border-b border-border pb-4">
-        <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-          <ShieldPlus size={18} />
-        </div>
-        <div>
-          <h2 className="text-lg font-bold">Company & Licence</h2>
-          <p className="text-sm text-muted-foreground">
-            Select an existing company licence for <span className="font-semibold">{selectedCustomer?.name}</span> or add a new one.
-          </p>
-        </div>
-      </div>
 
       {/* Loading state */}
       {isLoadingLicenses ? (
         <div className="flex items-center justify-center py-16">
-          <Loader2 size={24} className="animate-spin text-muted-foreground" />
+          <Loader2 className="size-6 animate-spin text-muted-foreground" />
         </div>
       ) : isAddingLicense ? (
         /* ── Inline Add Licence Form ── */
-        <div className="space-y-4 border p-5 rounded-xl bg-card shadow-sm">
+        <div className="space-y-4 border p-5 rounded-xl bg-card">
           <div className="flex justify-between items-center border-b border-border pb-2">
             <div className="flex items-center gap-2">
-              <div className="h-6 w-6 rounded bg-primary/10 flex items-center justify-center">
-                <ShieldPlus className="text-primary w-3.5 h-3.5" />
+              <div className="size-6 rounded bg-primary/10 flex items-center justify-center">
+                <ShieldPlus className="text-primary size-3.5" />
               </div>
-              <span className="font-bold text-sm">Add New Company & Licence</span>
+              <span className="font-semibold text-sm">Add New Company & Licence</span>
             </div>
             <Button variant="ghost" size="sm" onClick={() => {
               setIsAddingLicense(false)
@@ -127,9 +115,9 @@ export function DangoteCompanyLicenseStep({ wizard }: DangoteCompanyLicenseStepP
             {newLicenseForm.licenseUrl ? (
               <div className="flex items-center gap-3 p-3 border rounded-lg bg-muted/30">
                 {isImage(newLicenseForm.licenseUrl) ? (
-                  <img src={newLicenseForm.licenseUrl} alt="Licence" className="h-12 w-12 rounded object-cover border" />
+                  <img src={newLicenseForm.licenseUrl} alt="Licence" className="size-12 rounded object-cover border" />
                 ) : (
-                  <FileText className="h-8 w-8 text-primary" />
+                  <FileText className="size-8 text-primary" />
                 )}
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">File uploaded</p>
@@ -142,24 +130,24 @@ export function DangoteCompanyLicenseStep({ wizard }: DangoteCompanyLicenseStepP
                   disabled={isUploading}
                   onClick={() => fileInputRef.current?.click()}
                 >
-                  {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Replace'}
+                  {isUploading ? <Loader2 className="size-4 animate-spin" /> : 'Replace'}
                 </Button>
               </div>
             ) : (
               <div
                 className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
-                  isUploading ? 'border-primary/50 bg-primary/5' : 'hover:border-primary/50'
-                }`}
+ isUploading ? 'border-primary/50 bg-primary/5' : 'hover:border-primary/50'
+ }`}
                 onClick={() => { if (!isUploading) fileInputRef.current?.click() }}
               >
                 {isUploading ? (
                   <>
-                    <Loader2 className="h-8 w-8 mx-auto mb-2 text-primary animate-spin" />
+                    <Loader2 className="size-8 mx-auto mb-2 text-primary animate-spin" />
                     <p className="text-sm text-muted-foreground">Uploading...</p>
                   </>
                 ) : (
                   <>
-                    <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                    <Upload className="size-8 mx-auto mb-2 text-muted-foreground" />
                     <p className="text-sm text-muted-foreground">Click to upload licence file</p>
                     <p className="text-xs text-muted-foreground mt-1">Images and PDF files accepted</p>
                   </>
@@ -183,12 +171,12 @@ export function DangoteCompanyLicenseStep({ wizard }: DangoteCompanyLicenseStepP
               Cancel
             </Button>
             <Button
-              className="bg-primary hover:bg-primary/90 text-white border-0"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground border-0"
               onClick={handleAddLicense}
               disabled={createLicenseMutation.isPending || isUploading}
             >
               {createLicenseMutation.isPending ? (
-                <><Loader2 size={16} className="animate-spin mr-2" />Saving...</>
+                <><Loader2 className="size-4 animate-spin mr-2" />Saving...</>
               ) : (
                 'Save & Select'
               )}
@@ -200,15 +188,15 @@ export function DangoteCompanyLicenseStep({ wizard }: DangoteCompanyLicenseStepP
         <div className="space-y-4">
           {customerLicenses.length === 0 ? (
             <div className="p-10 text-center border border-dashed rounded-xl bg-muted/20">
-              <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-muted border border-border mb-3">
-                <ShieldPlus size={20} className="text-muted-foreground" />
+              <div className="inline-flex size-12 items-center justify-center rounded-xl bg-muted border border-border mb-3">
+                <ShieldPlus className="size-5 text-muted-foreground" />
               </div>
               <p className="text-sm font-medium text-foreground">No licences found</p>
               <p className="text-xs text-muted-foreground mt-1">
                 This customer doesn't have any company licences yet.
               </p>
               <Button variant="ghost" size="sm" onClick={() => setIsAddingLicense(true)} className="mt-3 text-primary">
-                <ShieldPlus size={14} className="mr-1" /> Add Your First Licence
+                <ShieldPlus className="size-3.5 mr-1" /> Add Your First Licence
               </Button>
             </div>
           ) : (
@@ -221,23 +209,23 @@ export function DangoteCompanyLicenseStep({ wizard }: DangoteCompanyLicenseStepP
                       key={license.id}
                       onClick={() => setSelectedLicense(license)}
                       className={`p-4 rounded-xl border cursor-pointer transition-all duration-200 flex flex-col gap-3 ${
-                        isSelected
-                          ? 'border-primary bg-primary/5 shadow-sm'
-                          : 'hover:bg-muted/50 hover:border-muted-foreground/20 border-border'
-                      }`}
+ isSelected
+ ? 'border-primary bg-primary/5 '
+ : 'hover:bg-muted/50 hover:border-muted-foreground/20 border-border'
+ }`}
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex items-center gap-3 min-w-0">
-                          <div className={`h-10 w-10 rounded-lg flex items-center justify-center shrink-0 ${
-                            isSelected ? 'bg-primary/20' : 'bg-muted'
-                          }`}>
-                            <FileText className={`h-5 w-5 ${isSelected ? 'text-primary' : 'text-muted-foreground'}`} />
+                          <div className={`size-10 rounded-lg flex items-center justify-center shrink-0 ${
+ isSelected ? 'bg-primary/20' : 'bg-muted'
+ }`}>
+                            <FileText className={`size-5 ${isSelected ? 'text-primary' : 'text-muted-foreground'}`} />
                           </div>
                           <div className="min-w-0">
                             <p className="font-semibold text-sm text-foreground truncate">{license.companyName}</p>
                             {license.expiryDate && (
                               <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                                <Calendar className="h-3 w-3" />
+                                <Calendar className="size-3" />
                                 Expires: {new Date(license.expiryDate).toLocaleDateString()}
                               </p>
                             )}
@@ -246,7 +234,7 @@ export function DangoteCompanyLicenseStep({ wizard }: DangoteCompanyLicenseStepP
                         <div className="flex flex-col items-end gap-1 shrink-0">
                           {getStatusBadge(license.status)}
                           {isSelected && (
-                            <CheckCircle2 className="h-4 w-4 text-primary" />
+                            <CheckCircle2 className="size-4 text-primary" />
                           )}
                         </div>
                       </div>
@@ -261,7 +249,7 @@ export function DangoteCompanyLicenseStep({ wizard }: DangoteCompanyLicenseStepP
                       )}
                       {license.licenseUrl && !isImage(license.licenseUrl) && (
                         <div className="flex items-center gap-2 p-2 border rounded-lg bg-background text-xs">
-                          <FileText className="h-4 w-4 text-primary shrink-0" />
+                          <FileText className="size-4 text-primary shrink-0" />
                           <span className="text-muted-foreground truncate">PDF Document</span>
                         </div>
                       )}
@@ -271,7 +259,7 @@ export function DangoteCompanyLicenseStep({ wizard }: DangoteCompanyLicenseStepP
               </div>
               <div className="flex justify-center pt-2">
                 <Button variant="outline" onClick={() => setIsAddingLicense(true)} className="text-primary">
-                  <ShieldPlus size={14} className="mr-1.5" /> Add New Company + Licence
+                  <ShieldPlus className="size-3.5 mr-1.5" /> Add New Company + Licence
                 </Button>
               </div>
             </>

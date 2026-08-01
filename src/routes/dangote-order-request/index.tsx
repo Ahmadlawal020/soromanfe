@@ -37,11 +37,11 @@ function formatDate(dateString: string) {
 function statusBadge(status: string) {
   switch (status) {
     case 'Pending Review':
-      return <Badge className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/20 gap-1"><Clock size={12} /> Pending Review</Badge>
+      return <Badge className="bg-warning/15 text-warning border-warning/20 gap-1"><Clock className="size-3" /> Pending Review</Badge>
     case 'Approved':
-      return <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 gap-1"><CheckCircle size={12} /> Approved</Badge>
+      return <Badge className="bg-accent/15 text-accent border-accent/20 gap-1"><CheckCircle className="size-3" /> Approved</Badge>
     case 'Rejected':
-      return <Badge variant="destructive" className="gap-1"><XCircle size={12} /> Rejected</Badge>
+      return <Badge variant="destructive" className="gap-1"><XCircle className="size-3" /> Rejected</Badge>
     default:
       return <Badge variant="outline">{status}</Badge>
   }
@@ -79,8 +79,8 @@ function DangoteOrderRequestPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
-            <FileText className="h-7 w-7 text-primary" />
+          <h1 className="text-2xl sm:text-xl md:text-2xl font-semibold tracking-tight text-foreground flex items-center gap-2 text-balance">
+            <FileText className="size-7 text-primary" />
             Dangote Delivery Order Requests
           </h1>
           <p className="text-muted-foreground text-sm">
@@ -88,7 +88,7 @@ function DangoteOrderRequestPage() {
           </p>
         </div>
         <Button variant="outline" size="sm" onClick={() => refetch()} className="gap-2 self-start sm:self-auto">
-          <RefreshCw className="h-4 w-4" />
+          <RefreshCw className="size-4" />
           Refresh
         </Button>
       </div>
@@ -103,7 +103,7 @@ function DangoteOrderRequestPage() {
             </div>
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="relative w-full sm:w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
                 <Input
                   placeholder="Search customer, product, ID…"
                   className="pl-9 pr-9"
@@ -112,7 +112,7 @@ function DangoteOrderRequestPage() {
                 />
                 {searchTerm && (
                   <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer">
-                    <X className="h-4 w-4" />
+                    <X className="size-4" />
                   </button>
                 )}
               </div>
@@ -132,7 +132,7 @@ function DangoteOrderRequestPage() {
         <CardContent className="p-0">
           {requests.length === 0 ? (
             <PageEmpty
-              icon={<FileText size={24} className="text-muted-foreground" />}
+              icon={<FileText className="size-6 text-muted-foreground" />}
               title={hasFilters ? 'No requests match your filters' : 'No order requests yet'}
               description={hasFilters ? 'Try adjusting your search or filter criteria.' : 'No Dangote delivery order requests have been submitted yet.'}
               hasFilters={hasFilters}
@@ -156,7 +156,7 @@ function DangoteOrderRequestPage() {
                 </TableHeader>
                 <TableBody>
                   {requests.map((req: any, idx: number) => (
-                    <TableRow key={req.id} className="hover:bg-muted/40 transition-colors">
+                    <TableRow key={req.id} className="hover:bg-muted/40 transition-colors duration-250 ease-luxe">
                       <TableCell className="text-center text-xs text-muted-foreground font-mono">{idx + 1}</TableCell>
                       <TableCell>
                         <span className="font-mono text-sm font-semibold text-primary">{req.requestNumber}</span>
@@ -169,7 +169,7 @@ function DangoteOrderRequestPage() {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1.5">
-                          <Package size={14} className="text-muted-foreground" />
+                          <Package className="size-3.5 text-muted-foreground" />
                           <span className="text-sm">{req.product}</span>
                         </div>
                       </TableCell>
@@ -187,10 +187,10 @@ function DangoteOrderRequestPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-8 px-2 text-primary hover:text-primary hover:bg-primary/10 gap-1 text-xs"
+                          className="h-8 px-2 text-primary hover:text-primary/80 hover:bg-primary/10 gap-1 text-xs"
                           onClick={() => navigate({ to: '/dangote-order-request/review', search: { id: String(req.id) } })}
                         >
-                          <Eye className="h-3.5 w-3.5" />
+                          <Eye className="size-3.5" />
                           {req.status === 'Pending Review' ? 'Review' : 'View'}
                         </Button>
                       </TableCell>

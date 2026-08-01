@@ -177,7 +177,7 @@ function SalesLedgerDashboard() {
           </span>
           <span className="hidden sm:inline text-muted-foreground/40">|</span>
           <span className="font-medium">
-            Total Paid: <strong className="text-emerald-600 dark:text-emerald-400">{fmt(totalPaidSum)}</strong>
+            Total Paid: <strong className="text-accent">{fmt(totalPaidSum)}</strong>
           </span>
         </div>
 
@@ -190,7 +190,7 @@ function SalesLedgerDashboard() {
               disabled={currentPage <= 1}
               onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
             >
-              <ChevronLeft size={14} /> Previous
+              <ChevronLeft className="size-3.5" /> Previous
             </Button>
             {Array.from({ length: totalPages }, (_, i) => i + 1)
               .filter((p) => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1)
@@ -202,11 +202,11 @@ function SalesLedgerDashboard() {
                     <Button
                       variant={currentPage === p ? 'default' : 'outline'}
                       size="sm"
-                      className={`h-8 w-8 p-0 text-xs font-semibold ${
-                        currentPage === p
-                          ? 'bg-primary text-primary-foreground hover:bg-primary/90 border-primary shadow-sm'
-                          : 'bg-card text-foreground border-border hover:bg-muted'
-                      }`}
+                      className={`size-8 p-0 text-xs font-semibold ${
+ currentPage === p
+ ? 'bg-primary text-primary-foreground hover:bg-primary/90 border-primary '
+ : 'bg-card text-foreground border-border hover:bg-muted'
+ }`}
                       onClick={() => setCurrentPage(p)}
                     >
                       {p}
@@ -221,7 +221,7 @@ function SalesLedgerDashboard() {
               disabled={currentPage >= totalPages}
               onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
             >
-              Next <ChevronRight size={14} />
+              Next <ChevronRight className="size-3.5" />
             </Button>
           </div>
         )}
@@ -305,12 +305,12 @@ function SalesLedgerDashboard() {
   const summaryCards = useMemo((): SummaryCard[] => {
     const netBalance = totals.totalOutstanding - totals.totalOverpaid
     return [
-      { title: 'Qty Sold (Ltrs)', value: totals.totalQty > 0 ? totals.totalQty.toLocaleString() : '0', icon: <Truck size={20} />, tone: 'neutral' },
-      { title: 'Expected Revenue', value: fmt(totals.totalExpected), icon: <TrendingUp size={20} />, tone: 'neutral' },
-      { title: 'Total Paid', value: fmt(totals.totalPaid), icon: <Banknote size={20} />, tone: 'green' },
-      { title: 'Outstanding', value: totals.totalOutstanding > 0 ? fmt(totals.totalOutstanding) : '₦0', icon: <Wallet size={20} />, tone: totals.totalOutstanding > 0 ? 'red' : 'green' },
-      { title: 'Overpaid', value: totals.totalOverpaid > 0 ? fmt(totals.totalOverpaid) : '₦0', icon: <Banknote size={20} />, tone: totals.totalOverpaid > 0 ? 'blue' : 'neutral' },
-      { title: 'Net Balance', value: netBalance <= 0 ? (netBalance < 0 ? `+${fmt(Math.abs(netBalance))}` : '₦0') : fmt(netBalance), icon: <TrendingUp size={20} />, tone: netBalance <= 0 ? 'blue' : 'red' },
+      { title: 'Qty Sold (Ltrs)', value: totals.totalQty > 0 ? totals.totalQty.toLocaleString() : '0', icon: <Truck className="size-5" />, tone: 'neutral' },
+      { title: 'Expected Revenue', value: fmt(totals.totalExpected), icon: <TrendingUp className="size-5" />, tone: 'neutral' },
+      { title: 'Total Paid', value: fmt(totals.totalPaid), icon: <Banknote className="size-5" />, tone: 'green' },
+      { title: 'Outstanding', value: totals.totalOutstanding > 0 ? fmt(totals.totalOutstanding) : '₦0', icon: <Wallet className="size-5" />, tone: totals.totalOutstanding > 0 ? 'red' : 'green' },
+      { title: 'Overpaid', value: totals.totalOverpaid > 0 ? fmt(totals.totalOverpaid) : '₦0', icon: <Banknote className="size-5" />, tone: totals.totalOverpaid > 0 ? 'blue' : 'neutral' },
+      { title: 'Net Balance', value: netBalance <= 0 ? (netBalance < 0 ? `+${fmt(Math.abs(netBalance))}` : '₦0') : fmt(netBalance), icon: <TrendingUp className="size-5" />, tone: netBalance <= 0 ? 'blue' : 'red' },
     ]
   }, [totals])
 
@@ -445,27 +445,27 @@ function SalesLedgerDashboard() {
         actions={
           <>
             <Button variant="outline" className="gap-2" onClick={activeView === 'ledger' ? exportExcel : exportDailyPayments} disabled={activeView === 'ledger' ? filteredLedgerGroups.length === 0 : filteredSales.length === 0}>
-              <Download size={16} />
+              <Download className="size-4" />
               <span className="hidden sm:inline">{activeView === 'ledger' ? 'Download Ledger' : 'Download Payments'}</span>
               <span className="sm:hidden">Export</span>
             </Button>
-            <Button className="gap-2 bg-emerald-600 hover:bg-emerald-700" onClick={() => openPaymentDialog()}>
-              <Plus size={16} /> Record Payment
+            <Button className="gap-2 bg-accent hover:bg-accent/80" onClick={() => openPaymentDialog()}>
+              <Plus className="size-4" /> Record Payment
             </Button>
           </>
         }
       />
 
       {/* ═══ FILTER PANEL ═══ */}
-      <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
+      <div className="bg-card rounded-xl border border-border overflow-hidden">
         <div className="p-4 space-y-4">
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={15} />
+            <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <Input placeholder="Search truck, customer, PFI, payer…" className="pl-9 h-10 text-sm" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
             {searchQuery && (
-              <button title="Clear search" onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
-                <X size={14} />
+              <button title="Clear search" onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors duration-250 ease-luxe">
+                <X className="size-3.5" />
               </button>
             )}
           </div>
@@ -478,9 +478,9 @@ function SalesLedgerDashboard() {
                 type="button"
                 onClick={() => handlePresetChange(tp)}
                 className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all ${timePreset === tp
-                    ? 'bg-primary text-primary-foreground border-primary shadow-sm'
-                    : 'bg-card text-muted-foreground border-border hover:border-foreground/40 hover:bg-muted'
-                  }`}
+ ? 'bg-primary text-primary-foreground border-primary '
+ : 'bg-card text-muted-foreground border-border hover:border-foreground/40 hover:bg-muted'
+ }`}
               >
                 {tp === 'all' ? 'All Time' : tp === 'custom' ? 'Custom' : tp.charAt(0).toUpperCase() + tp.slice(1)}
               </button>
@@ -499,16 +499,16 @@ function SalesLedgerDashboard() {
             <button
               type="button"
               onClick={() => setShowAdvancedFilters(prev => !prev)}
-              className="flex items-center gap-2 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
+              className="flex items-center gap-2 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors duration-250 ease-luxe"
             >
-              <SlidersHorizontal size={13} />
+              <SlidersHorizontal className="size-3.5" />
               Advanced Filters
               {hasActiveFilters && (
                 <Badge className="ml-1 h-5 px-1.5 text-[10px] bg-primary text-primary-foreground">
                   Active
                 </Badge>
               )}
-              {showAdvancedFilters ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
+              {showAdvancedFilters ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}
             </button>
           </div>
 
@@ -517,7 +517,7 @@ function SalesLedgerDashboard() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
               <div className="space-y-1.5">
                 <Label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                  <Truck size={12} className="text-muted-foreground" /> Truck
+                  <Truck className="size-3 text-muted-foreground" /> Truck
                 </Label>
                 <Select value={truckFilter} onValueChange={setTruckFilter}>
                   <SelectTrigger className="h-9 text-sm">
@@ -532,7 +532,7 @@ function SalesLedgerDashboard() {
 
               <div className="space-y-1.5">
                 <Label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                  <Users size={12} className="text-muted-foreground" /> Customer
+                  <Users className="size-3 text-muted-foreground" /> Customer
                 </Label>
                 <Select value={customerFilter} onValueChange={setCustomerFilter}>
                   <SelectTrigger className="h-9 text-sm">
@@ -547,7 +547,7 @@ function SalesLedgerDashboard() {
 
               <div className="space-y-1.5">
                 <Label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                  <Building2 size={12} className="text-muted-foreground" /> Customer Type
+                  <Building2 className="size-3 text-muted-foreground" /> Customer Type
                 </Label>
                 <Select value={customerTypeFilter} onValueChange={(v) => setCustomerTypeFilter(v as any)}>
                   <SelectTrigger className="h-9 text-sm">
@@ -564,7 +564,7 @@ function SalesLedgerDashboard() {
               {tripCodes.length > 0 && (
                 <div className="space-y-1.5">
                   <Label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                    <Tag size={12} className="text-purple-400" /> PFI Code
+                    <Tag className="size-3 text-muted-foreground" /> PFI Code
                   </Label>
                   <Select value={tripCodeFilter} onValueChange={setTripCodeFilter}>
                     <SelectTrigger className="h-9 text-sm">
@@ -586,34 +586,34 @@ function SalesLedgerDashboard() {
               {truckFilter !== 'all' && (
                 <Badge variant="outline" className="gap-1 pr-1 text-xs font-medium">
                   Truck: {truckFilter}
-                  <button onClick={() => setTruckFilter('all')} className="ml-0.5 hover:text-red-500 transition-colors"><X size={10} /></button>
+                  <button onClick={() => setTruckFilter('all')} className="ml-0.5 hover:text-destructive transition-colors duration-250 ease-luxe"><X className="size-2.5" /></button>
                 </Badge>
               )}
               {customerFilter !== 'all' && (
                 <Badge variant="outline" className="gap-1 pr-1 text-xs font-medium">
                   Customer: {uniqueCustomerOptions.find(c => c.id === customerFilter)?.name || customerFilter}
-                  <button onClick={() => setCustomerFilter('all')} className="ml-0.5 hover:text-red-500 transition-colors"><X size={10} /></button>
+                  <button onClick={() => setCustomerFilter('all')} className="ml-0.5 hover:text-destructive transition-colors duration-250 ease-luxe"><X className="size-2.5" /></button>
                 </Badge>
               )}
               {customerTypeFilter !== 'all' && (
                 <Badge variant="outline" className="gap-1 pr-1 text-xs font-medium">
                   Type: {customerTypeFilter === 'filling_station' ? 'Filling Station' : 'Normal'}
-                  <button onClick={() => setCustomerTypeFilter('all')} className="ml-0.5 hover:text-red-500 transition-colors"><X size={10} /></button>
+                  <button onClick={() => setCustomerTypeFilter('all')} className="ml-0.5 hover:text-destructive transition-colors duration-250 ease-luxe"><X className="size-2.5" /></button>
                 </Badge>
               )}
               {tripCodeFilter !== 'all' && (
                 <Badge variant="outline" className="gap-1 pr-1 text-xs font-medium">
                   Code: {tripCodeFilter}
-                  <button onClick={() => setTripCodeFilter('all')} className="ml-0.5 hover:text-red-500 transition-colors"><X size={10} /></button>
+                  <button onClick={() => setTripCodeFilter('all')} className="ml-0.5 hover:text-destructive transition-colors duration-250 ease-luxe"><X className="size-2.5" /></button>
                 </Badge>
               )}
               {searchQuery && (
                 <Badge variant="outline" className="gap-1 pr-1 text-xs font-medium">
                   Search: "{searchQuery}"
-                  <button onClick={() => setSearchQuery('')} className="ml-0.5 hover:text-red-500 transition-colors"><X size={10} /></button>
+                  <button onClick={() => setSearchQuery('')} className="ml-0.5 hover:text-destructive transition-colors duration-250 ease-luxe"><X className="size-2.5" /></button>
                 </Badge>
               )}
-              <button onClick={clearAllFilters} className="text-xs text-slate-500 hover:text-red-600 font-medium transition-colors underline underline-offset-2">
+              <button onClick={clearAllFilters} className="text-xs text-muted-foreground hover:text-destructive font-medium transition-colors underline underline-offset-2 duration-250 ease-luxe">
                 Clear all
               </button>
             </div>
@@ -623,11 +623,11 @@ function SalesLedgerDashboard() {
 
       {/* ═══ PFI CODE MANAGEMENT ═══ */}
       {tripCodes.length > 0 && (
-        <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
+        <div className="bg-card rounded-xl border border-border overflow-hidden">
           <div className="p-4">
             <div className="flex flex-wrap items-center gap-x-2 gap-y-2">
               <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5 shrink-0">
-                <Tag size={12} className="text-purple-400" /> PFI Codes
+                <Tag className="size-3 text-muted-foreground" /> PFI Codes
               </span>
               {tripCodes.map(code => {
                 const count = filteredLedgerGroups.filter(g => g.code === code).length
@@ -637,9 +637,9 @@ function SalesLedgerDashboard() {
                       type="button"
                       onClick={() => setTripCodeFilter(prev => prev === code ? 'all' : code)}
                       className={`px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all ${tripCodeFilter === code
-                          ? 'bg-purple-700 text-white border-purple-700 shadow-sm'
-                          : 'bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/20 hover:bg-purple-500/20'
-                        }`}
+ ? 'bg-foreground text-background border-border '
+ : 'bg-muted/10 text-foreground dark:text-muted-foreground border-border/20 hover:bg-muted/20'
+ }`}
                     >
                       {code}{count > 0 ? ` · ${count}` : ''}
                     </button>
@@ -647,9 +647,9 @@ function SalesLedgerDashboard() {
                       type="button"
                       onClick={() => deleteTripCode(code)}
                       title={`Delete ${code}`}
-                      className="text-muted-foreground/50 hover:text-red-500 transition-colors p-0.5 rounded"
+                      className="text-muted-foreground/50 hover:text-destructive transition-colors p-0.5 rounded duration-250 ease-luxe"
                     >
-                      <X size={10} />
+                      <X className="size-2.5" />
                     </button>
                   </span>
                 )
@@ -657,12 +657,12 @@ function SalesLedgerDashboard() {
               <span className="inline-flex items-center gap-1 ml-1">
                 <input
                   placeholder="+ new code"
-                  className="h-7 px-2 text-xs rounded-lg border border-dashed border-border bg-transparent text-foreground focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-200 w-24 uppercase transition-all"
+                  className="h-7 px-2 text-xs rounded-lg border border-dashed border-border bg-transparent text-foreground focus:outline-none focus:border-border focus:ring-1 focus:ring-ring w-24 uppercase transition-all duration-250 ease-luxe"
                   value={newTripCodeInput}
                   onChange={e => setNewTripCodeInput(e.target.value.toUpperCase())}
                   onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTripCode() } }}
                 />
-                <button type="button" onClick={addTripCode} className="text-xs text-purple-600 dark:text-purple-400 hover:text-purple-800 font-semibold transition-colors">
+                <button type="button" onClick={addTripCode} className="text-xs text-muted-foreground hover:text-foreground font-semibold transition-colors duration-250 ease-luxe">
                   Add
                 </button>
               </span>
@@ -672,27 +672,27 @@ function SalesLedgerDashboard() {
       )}
 
       {/* ═══ VIEW SWITCHER ═══ */}
-      <div className="flex items-center gap-1 bg-card rounded-lg border border-border shadow-sm p-1 w-fit">
+      <div className="flex items-center gap-1 bg-card rounded-lg border border-border p-1 w-fit">
         <button
           onClick={() => setActiveView('ledger')}
           className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-all ${activeView === 'ledger'
-              ? 'bg-primary text-primary-foreground shadow-sm'
-              : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-            }`}
+ ? 'bg-primary text-primary-foreground '
+ : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+ }`}
         >
-          <Truck size={14} /> Sales Ledger
+          <Truck className="size-3.5" /> Sales Ledger
         </button>
         <button
           onClick={() => setActiveView('daily')}
           className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-all ${activeView === 'daily'
-              ? 'bg-primary text-primary-foreground shadow-sm'
-              : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-            }`}
+ ? 'bg-primary text-primary-foreground '
+ : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+ }`}
         >
-          <CalendarIcon size={14} /> Daily Payments
+          <CalendarIcon className="size-3.5" /> Daily Payments
           {filteredSales.length > 0 && (
-            <span className={`ml-0.5 px-1.5 py-0.5 rounded-full text-[11px] font-bold leading-none ${activeView === 'daily' ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-muted text-muted-foreground'
-              }`}>
+            <span className={`ml-0.5 px-1.5 py-0.5 rounded-full text-[11px] font-semibold leading-none ${activeView === 'daily' ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-muted text-muted-foreground'
+ }`}>
               {filteredSales.length}
             </span>
           )}
@@ -704,24 +704,24 @@ function SalesLedgerDashboard() {
 
       {/* ═══ PFI SUMMARY TABLE ═══ */}
       {activeView === 'ledger' && totals.codeSummaries.length > 0 && (
-        <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
+        <div className="bg-card rounded-xl border border-border overflow-hidden">
           <div className="p-4 border-b border-border">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h3 className="text-sm font-bold text-foreground flex items-center gap-1.5 uppercase">
-                  <FileText size={15} className="text-indigo-500" /> PFI Summary
+                <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5 uppercase">
+                  <FileText className="size-4 text-muted-foreground" /> PFI Summary
                 </h3>
                 <p className="text-xs text-muted-foreground mt-0.5">Payment status breakdown by PFI allocation code.</p>
               </div>
               <div className="flex flex-wrap items-center gap-3 text-xs font-semibold">
-                <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2.5 py-1 text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20 gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span> Sold: <strong>{totals.soldCount}</strong>
+                <span className="inline-flex items-center rounded-md bg-accent/10 px-2.5 py-1 text-accent ring-1 ring-inset ring-accent/20 gap-1.5">
+                  <span className="size-1.5 rounded-full bg-accent"></span> Sold: <strong>{totals.soldCount}</strong>
                 </span>
-                <span className="inline-flex items-center rounded-md bg-amber-500/10 px-2.5 py-1 text-amber-600 dark:text-amber-400 ring-1 ring-inset ring-amber-500/20 gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-amber-500"></span> With Balance: <strong>{totals.withBalanceCount}</strong>
+                <span className="inline-flex items-center rounded-md bg-warning/10 px-2.5 py-1 text-warning ring-1 ring-inset ring-warning/20 gap-1.5">
+                  <span className="size-1.5 rounded-full bg-warning"></span> With Balance: <strong>{totals.withBalanceCount}</strong>
                 </span>
                 <span className="inline-flex items-center rounded-md bg-muted px-2.5 py-1 text-muted-foreground ring-1 ring-inset ring-border gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60"></span> Not Sold: <strong>{totals.notSoldCount}</strong>
+                  <span className="size-1.5 rounded-full bg-muted-foreground/60"></span> Not Sold: <strong>{totals.notSoldCount}</strong>
                 </span>
               </div>
             </div>
@@ -736,8 +736,8 @@ function SalesLedgerDashboard() {
                   <TableHead className="font-semibold text-muted-foreground w-[110px] text-center">With Balance</TableHead>
                   <TableHead className="font-semibold text-muted-foreground w-[100px] text-center">Not Sold</TableHead>
                   <TableHead className="font-semibold text-muted-foreground text-right w-[150px]">Expected Revenue</TableHead>
-                  <TableHead className="font-semibold text-emerald-600 dark:text-emerald-400 text-right w-[140px]">Total Paid</TableHead>
-                  <TableHead className="font-semibold text-red-600 dark:text-red-400 text-right w-[150px]">Balance</TableHead>
+                  <TableHead className="font-semibold text-accent text-right w-[140px]">Total Paid</TableHead>
+                  <TableHead className="font-semibold text-destructive text-right w-[150px]">Balance</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -748,17 +748,17 @@ function SalesLedgerDashboard() {
                       <TableCell className="font-semibold text-foreground uppercase whitespace-nowrap">{s.code || 'UNASSIGNED'}</TableCell>
                       <TableCell className="font-semibold text-foreground whitespace-nowrap">{s.qty > 0 ? `${s.qty.toLocaleString()} Ltrs` : '—'}</TableCell>
                       <TableCell className="text-center">
-                        <span className="inline-flex items-center justify-center rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20">{s.soldCount}</span>
+                        <span className="inline-flex items-center justify-center rounded-full bg-accent/10 px-2.5 py-0.5 text-xs font-semibold text-accent ring-1 ring-inset ring-accent/20">{s.soldCount}</span>
                       </TableCell>
                       <TableCell className="text-center">
-                        <span className="inline-flex items-center justify-center rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs font-semibold text-amber-600 dark:text-amber-400 ring-1 ring-inset ring-amber-500/20">{s.withBalanceCount}</span>
+                        <span className="inline-flex items-center justify-center rounded-full bg-warning/10 px-2.5 py-0.5 text-xs font-semibold text-warning ring-1 ring-inset ring-warning/20">{s.withBalanceCount}</span>
                       </TableCell>
                       <TableCell className="text-center">
                         <span className="inline-flex items-center justify-center rounded-full bg-muted px-2.5 py-0.5 text-xs font-semibold text-muted-foreground ring-1 ring-inset ring-border">{s.notSoldCount}</span>
                       </TableCell>
                       <TableCell className="text-right font-semibold text-foreground whitespace-nowrap">{s.expected > 0 ? fmt(s.expected) : '—'}</TableCell>
-                      <TableCell className="text-right font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">{s.paid > 0 ? fmt(s.paid) : '—'}</TableCell>
-                      <TableCell className={`text-right font-bold whitespace-nowrap ${hasOutstanding ? 'text-red-600 dark:text-red-400' : isOverpaid ? 'text-blue-600 dark:text-blue-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                      <TableCell className="text-right font-semibold text-accent whitespace-nowrap">{s.paid > 0 ? fmt(s.paid) : '—'}</TableCell>
+                      <TableCell className={`text-right font-semibold whitespace-nowrap ${hasOutstanding ? 'text-destructive' : isOverpaid ? 'text-muted-foreground' : 'text-accent'}`}>
                         {s.balance === 0 ? '₦0' : isOverpaid ? `+${fmt(Math.abs(s.balance))}` : fmt(s.balance)}
                       </TableCell>
                     </TableRow>
@@ -772,15 +772,15 @@ function SalesLedgerDashboard() {
 
       {/* ═══ LEDGER TABLE ═══ */}
       {activeView === 'ledger' && (
-        <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
+        <div className="bg-card rounded-xl border border-border overflow-hidden">
           {isLoading ? (
             <div className="flex items-center justify-center py-24">
-              <Loader2 size={24} className="animate-spin text-muted-foreground" />
+              <Loader2 className="size-6 animate-spin text-muted-foreground" />
             </div>
           ) : filteredLedgerGroups.length === 0 ? (
             <div className="p-12 text-center">
-              <div className="mx-auto w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mb-4">
-                <Truck className="text-muted-foreground/60" size={32} />
+              <div className="mx-auto size-16 rounded-xl bg-muted flex items-center justify-center mb-4">
+                <Truck className="size-8 text-muted-foreground/60" />
               </div>
               <p className="text-foreground font-semibold text-base">No sales ledger rows found</p>
               <p className="text-sm text-muted-foreground mt-1.5 max-w-sm mx-auto">
@@ -790,7 +790,7 @@ function SalesLedgerDashboard() {
               </p>
               {ledgerGroups.length > 0 && hasActiveFilters && (
                 <Button variant="outline" size="sm" className="mt-4 gap-1.5" onClick={clearAllFilters}>
-                  <X size={14} /> Clear Filters
+                  <X className="size-3.5" /> Clear Filters
                 </Button>
               )}
             </div>
@@ -807,8 +807,8 @@ function SalesLedgerDashboard() {
                     <TableHead className="font-semibold text-muted-foreground text-right whitespace-nowrap sticky top-0 bg-muted/90 backdrop-blur-sm">Quantity</TableHead>
                     <TableHead className="font-semibold text-muted-foreground text-right whitespace-nowrap sticky top-0 bg-muted/90 backdrop-blur-sm">Rate</TableHead>
                     <TableHead className="font-semibold text-muted-foreground text-right whitespace-nowrap sticky top-0 bg-muted/90 backdrop-blur-sm">Expected</TableHead>
-                    <TableHead className="font-semibold text-emerald-600 dark:text-emerald-400 text-right whitespace-nowrap sticky top-0 bg-muted/90 backdrop-blur-sm">Payment</TableHead>
-                    <TableHead className="font-semibold text-red-600 dark:text-red-400 text-right whitespace-nowrap sticky top-0 bg-muted/90 backdrop-blur-sm">Balance</TableHead>
+                    <TableHead className="font-semibold text-accent text-right whitespace-nowrap sticky top-0 bg-muted/90 backdrop-blur-sm">Payment</TableHead>
+                    <TableHead className="font-semibold text-destructive text-right whitespace-nowrap sticky top-0 bg-muted/90 backdrop-blur-sm">Balance</TableHead>
                     <TableHead className="font-semibold text-muted-foreground text-center whitespace-nowrap sticky top-0 bg-muted/90 backdrop-blur-sm">Status</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -834,8 +834,8 @@ function SalesLedgerDashboard() {
                       rows.push(
                         <TableRow
                           key={`${group.key}-main`}
-                          className={`cursor-pointer hover:bg-muted/70 border-b border-border border-l-[3px] transition-colors group ${isMultiCustGroup ? 'border-l-blue-500 bg-blue-500/10' : (theme ? theme.row : 'border-l-transparent')
-                            }`}
+                          className={`cursor-pointer hover:bg-muted/70 border-b border-border border-l-[3px] transition-colors group ${isMultiCustGroup ? 'border-l-blue-500 bg-muted/10' : (theme ? theme.row : 'border-l-transparent')
+ }`}
                           onClick={() => navigate({
                             to: '/sales-ledger/details',
                             search: {
@@ -859,15 +859,15 @@ function SalesLedgerDashboard() {
                           <TableCell className="font-semibold text-foreground whitespace-nowrap">
                             {isMultiCustGroup && !isFirstInMultiGroup ? (
                               <div className="flex items-center gap-1 pl-2 text-muted-foreground">
-                                <span className="text-blue-500 font-bold text-base leading-none">↳</span>
-                                <span className="text-xs text-muted-foreground italic">same truck</span>
+                                <span className="text-muted-foreground font-semibold text-base leading-none">↳</span>
+                                <span className="text-xs text-muted-foreground">same truck</span>
                               </div>
                             ) : (
                               <div className="flex items-center gap-1.5">
-                                <Truck size={13} className="text-amber-600 dark:text-amber-400" />
+                                <Truck className="size-3.5 text-warning" />
                                 {group.truckNumber || '—'}
                                 {isFirstInMultiGroup && (
-                                  <span className="ml-0.5 text-[10px] font-bold text-blue-600 dark:text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded-full border border-blue-500/20 whitespace-nowrap">
+                                  <span className="ml-0.5 text-[10px] font-semibold text-muted-foreground bg-muted/10 px-1.5 py-0.5 rounded-full border border-border/20 whitespace-nowrap">
                                     {multiCustCounts.get(group.loadingId!)} customers
                                   </span>
                                 )}
@@ -879,21 +879,21 @@ function SalesLedgerDashboard() {
                           <TableCell className="text-right text-muted-foreground whitespace-nowrap tabular-nums text-xs">{group.quantity > 0 ? `${fmtQty(group.quantity)} L` : '—'}</TableCell>
                           <TableCell className="text-right text-muted-foreground whitespace-nowrap tabular-nums text-xs">{group.rate > 0 ? fmt(group.rate) : '—'}</TableCell>
                           <TableCell className="text-right font-medium text-foreground whitespace-nowrap tabular-nums text-xs">{group.expected > 0 ? fmt(group.expected) : '—'}</TableCell>
-                          <TableCell className="text-right font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap tabular-nums text-xs">{fmt(toNum(group.totalPaid))}</TableCell>
-                          <TableCell className={`text-right font-bold whitespace-nowrap tabular-nums text-xs ${group.balance > 0 ? 'text-red-600 dark:text-red-400' : group.balance < 0 ? 'text-blue-600 dark:text-blue-400' : group.expected > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground'}`}>
+                          <TableCell className="text-right font-semibold text-accent whitespace-nowrap tabular-nums text-xs">{fmt(toNum(group.totalPaid))}</TableCell>
+                          <TableCell className={`text-right font-semibold whitespace-nowrap tabular-nums text-xs ${group.balance > 0 ? 'text-destructive' : group.balance < 0 ? 'text-muted-foreground' : group.expected > 0 ? 'text-accent' : 'text-muted-foreground'}`}>
                             {group.expected > 0 ? (group.balance === 0 ? '₦0' : group.balance > 0 ? fmt(group.balance) : `+${fmt(Math.abs(group.balance))}`) : '—'}
                           </TableCell>
                           <TableCell className="whitespace-nowrap text-center">
                             {group.payments.length === 0 ? (
-                              <Badge variant="outline" className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/20">
+                              <Badge variant="outline" className="text-[11px] font-semibold text-warning bg-warning/10 border-warning/20">
                                 No payment
                               </Badge>
                             ) : isFullyPaid ? (
-                              <Badge className="text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20">
+                              <Badge className="text-[11px] font-semibold bg-accent/10 text-accent border-accent/20">
                                 Fully Paid
                               </Badge>
                             ) : (
-                              <Badge className="text-[11px] font-semibold bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20">
+                              <Badge className="text-[11px] font-semibold bg-destructive/10 text-destructive border-destructive/20">
                                 Pending
                               </Badge>
                             )}
@@ -918,21 +918,21 @@ function SalesLedgerDashboard() {
 
       {/* ═══ DAILY PAYMENTS VIEW ═══ */}
       {activeView === 'daily' && (
-        <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
+        <div className="bg-card rounded-xl border border-border overflow-hidden">
           {isLoading ? (
             <div className="flex items-center justify-center py-24">
-              <Loader2 size={24} className="animate-spin text-muted-foreground" />
+              <Loader2 className="size-6 animate-spin text-muted-foreground" />
             </div>
           ) : filteredSales.length === 0 ? (
             <div className="p-12 text-center">
-              <div className="mx-auto w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mb-4">
-                <CalendarIcon className="text-muted-foreground/60" size={32} />
+              <div className="mx-auto size-16 rounded-xl bg-muted flex items-center justify-center mb-4">
+                <CalendarIcon className="size-8 text-muted-foreground/60" />
               </div>
               <p className="text-foreground font-semibold text-base">No payment entries found</p>
               <p className="text-sm text-muted-foreground mt-1.5">Try adjusting your filters or date range.</p>
               {hasActiveFilters && (
                 <Button variant="outline" size="sm" className="mt-4 gap-1.5" onClick={clearAllFilters}>
-                  <X size={14} /> Clear Filters
+                  <X className="size-3.5" /> Clear Filters
                 </Button>
               )}
             </div>
@@ -950,7 +950,7 @@ function SalesLedgerDashboard() {
                       <TableHead className="font-semibold text-muted-foreground text-right whitespace-nowrap sticky top-0 bg-muted/90 backdrop-blur-sm">Volume (L)</TableHead>
                       <TableHead className="font-semibold text-muted-foreground text-right whitespace-nowrap sticky top-0 bg-muted/90 backdrop-blur-sm">Rate</TableHead>
                       <TableHead className="font-semibold text-muted-foreground text-right whitespace-nowrap sticky top-0 bg-muted/90 backdrop-blur-sm">Expected</TableHead>
-                      <TableHead className="font-semibold text-emerald-600 dark:text-emerald-400 text-right whitespace-nowrap sticky top-0 bg-muted/90 backdrop-blur-sm">Amount Paid</TableHead>
+                      <TableHead className="font-semibold text-accent text-right whitespace-nowrap sticky top-0 bg-muted/90 backdrop-blur-sm">Amount Paid</TableHead>
                       <TableHead className="font-semibold text-muted-foreground whitespace-nowrap sticky top-0 bg-muted/90 backdrop-blur-sm">Payer</TableHead>
                       <TableHead className="font-semibold text-muted-foreground whitespace-nowrap sticky top-0 bg-muted/90 backdrop-blur-sm">Payment Method</TableHead>
                       <TableHead className="font-semibold text-muted-foreground whitespace-nowrap sticky top-0 bg-muted/90 backdrop-blur-sm">Entered By</TableHead>
@@ -964,7 +964,7 @@ function SalesLedgerDashboard() {
                       return (
                         <TableRow
                           key={sale._id || sale.id}
-                          className="cursor-pointer hover:bg-muted/70 border-b border-border transition-colors"
+                          className="cursor-pointer hover:bg-muted/70 border-b border-border transition-colors duration-250 ease-luxe"
                           onClick={() => navigate({
                             to: '/sales-ledger/details',
                             search: {
@@ -979,7 +979,7 @@ function SalesLedgerDashboard() {
                           <TableCell className="text-muted-foreground whitespace-nowrap text-xs">{safeFormatDate(datePaid)}</TableCell>
                           <TableCell className="font-semibold text-foreground whitespace-nowrap">
                             <div className="flex items-center gap-1.5">
-                              <Truck size={12} className="text-amber-600 dark:text-amber-400" />
+                              <Truck className="size-3 text-warning" />
                               {sale.truckNumber || '—'}
                             </div>
                           </TableCell>
@@ -988,7 +988,7 @@ function SalesLedgerDashboard() {
                           <TableCell className="text-right text-muted-foreground whitespace-nowrap tabular-nums text-xs">{toNum(sale.quantity) > 0 ? fmtQty(toNum(sale.quantity)) : '—'}</TableCell>
                           <TableCell className="text-right text-muted-foreground whitespace-nowrap tabular-nums text-xs">{toNum(sale.rate) > 0 ? fmt(toNum(sale.rate)) : '—'}</TableCell>
                           <TableCell className="text-right text-muted-foreground whitespace-nowrap tabular-nums text-xs">{toNum(sale.salesValue) > 0 ? fmt(toNum(sale.salesValue)) : '—'}</TableCell>
-                          <TableCell className="text-right font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap tabular-nums text-xs">{toNum(sale.paymentAmount) > 0 ? fmt(toNum(sale.paymentAmount)) : '—'}</TableCell>
+                          <TableCell className="text-right font-semibold text-accent whitespace-nowrap tabular-nums text-xs">{toNum(sale.paymentAmount) > 0 ? fmt(toNum(sale.paymentAmount)) : '—'}</TableCell>
                           <TableCell className="text-muted-foreground whitespace-nowrap text-xs">{sale.payerName || '—'}</TableCell>
                           <TableCell className="text-muted-foreground text-xs whitespace-nowrap">
                             {formatBankLabel(sale.bank) || '—'}

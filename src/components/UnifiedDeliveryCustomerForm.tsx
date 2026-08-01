@@ -180,7 +180,7 @@ export function UnifiedDeliveryCustomerForm({
   if (isFetching && !activeCustomer) {
     return (
       <div className="flex justify-center py-16">
-        <Loader2 size={28} className="animate-spin text-muted-foreground" />
+        <Loader2 className="size-7 animate-spin text-muted-foreground" />
       </div>
     )
   }
@@ -194,11 +194,11 @@ export function UnifiedDeliveryCustomerForm({
           size="sm"
           className="cursor-pointer"
           onClick={() => navigate({ to: backTarget as any })}
-        >
-          <ArrowLeft size={16} className="mr-1" /> Back
+ >
+          <ArrowLeft className="size-4 mr-1" /> Back
         </Button>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">
+          <h1 className="text-2xl font-semibold tracking-tight">
             {isEdit
               ? customerType === 'filling_station' ? 'Edit Filling Station' : 'Edit Delivery Customer'
               : customerType === 'filling_station' ? 'Create Filling Station' : 'Create Delivery Customer'}
@@ -223,13 +223,13 @@ export function UnifiedDeliveryCustomerForm({
               type="button"
               onClick={() => setCustomerType('customer')}
               className={`p-4 rounded-xl border flex items-center gap-3 transition-all cursor-pointer text-left ${
-                customerType === 'customer'
-                  ? 'border-primary bg-primary/10 text-primary shadow-sm font-semibold'
-                  : 'border-border hover:border-primary/40 text-muted-foreground'
-              }`}
-            >
-              <div className={`p-2 rounded-lg ${customerType === 'customer' ? 'bg-primary text-white' : 'bg-muted'}`}>
-                <User size={20} />
+ customerType === 'customer'
+ ? 'border-primary bg-primary/10 text-primary font-semibold'
+ : 'border-border hover:border-primary/40 text-muted-foreground'
+ }`}
+ >
+              <div className={`p-2 rounded-lg ${customerType === 'customer' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+                <User className="size-5" />
               </div>
               <div>
                 <div className="text-sm font-medium">Individual Customer</div>
@@ -241,13 +241,13 @@ export function UnifiedDeliveryCustomerForm({
               type="button"
               onClick={() => setCustomerType('filling_station')}
               className={`p-4 rounded-xl border flex items-center gap-3 transition-all cursor-pointer text-left ${
-                customerType === 'filling_station'
-                  ? 'border-primary bg-primary/10 text-primary shadow-sm font-semibold'
-                  : 'border-border hover:border-primary/40 text-muted-foreground'
-              }`}
-            >
-              <div className={`p-2 rounded-lg ${customerType === 'filling_station' ? 'bg-primary text-white' : 'bg-muted'}`}>
-                <Building2 size={20} />
+ customerType === 'filling_station'
+ ? 'border-primary bg-primary/10 text-primary font-semibold'
+ : 'border-border hover:border-primary/40 text-muted-foreground'
+ }`}
+ >
+              <div className={`p-2 rounded-lg ${customerType === 'filling_station' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+                <Building2 className="size-5" />
               </div>
               <div>
                 <div className="text-sm font-medium">Filling Station</div>
@@ -275,7 +275,7 @@ export function UnifiedDeliveryCustomerForm({
                 value={name}
                 onChange={(e) => { setName(e.target.value); if (errors.name) setErrors(prev => ({ ...prev, name: '' })) }}
                 className={errors.name ? 'border-destructive' : ''}
-              />
+ />
               {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
             </div>
 
@@ -288,7 +288,7 @@ export function UnifiedDeliveryCustomerForm({
                 value={phoneNumber}
                 onChange={(e) => { setPhoneNumber(e.target.value); if (errors.phone) setErrors(prev => ({ ...prev, phone: '' })) }}
                 className={errors.phone ? 'border-destructive' : ''}
-              />
+ />
               {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
             </div>
 
@@ -299,7 +299,7 @@ export function UnifiedDeliveryCustomerForm({
                 placeholder="+234 809 988 7766"
                 value={altPhoneNumber}
                 onChange={(e) => setAltPhoneNumber(e.target.value)}
-              />
+ />
             </div>
 
             <div className="space-y-2">
@@ -310,7 +310,7 @@ export function UnifiedDeliveryCustomerForm({
                 placeholder="customer@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-              />
+ />
             </div>
           </CardContent>
         </Card>
@@ -330,7 +330,7 @@ export function UnifiedDeliveryCustomerForm({
                   placeholder="12 Victoria Island, Lagos"
                   value={homeAddress}
                   onChange={(e) => setHomeAddress(e.target.value)}
-                />
+ />
               </div>
 
               <div className="space-y-2">
@@ -340,7 +340,7 @@ export function UnifiedDeliveryCustomerForm({
                   placeholder="Suite 404 Commercial Towers, Ikeja"
                   value={officeAddress}
                   onChange={(e) => setOfficeAddress(e.target.value)}
-                />
+ />
               </div>
 
               <div className="space-y-2 md:col-span-2">
@@ -350,17 +350,17 @@ export function UnifiedDeliveryCustomerForm({
                     <img
                       src={passportPhotoPreview}
                       alt="Passport preview"
-                      className="w-16 h-16 rounded-lg object-cover border border-border"
-                    />
+                      className="size-16 rounded-lg object-cover border border-border"
+ />
                   ) : passportPhoto ? (
                     <img
                       src={passportPhoto}
                       alt="Passport preview"
-                      className="w-16 h-16 rounded-lg object-cover border border-border"
-                    />
+                      className="size-16 rounded-lg object-cover border border-border"
+ />
                   ) : (
-                    <div className="w-16 h-16 rounded-lg border-2 border-dashed border-border flex items-center justify-center text-muted-foreground bg-muted/40">
-                      <Camera size={24} />
+                    <div className="size-16 rounded-lg border-2 border-dashed border-border flex items-center justify-center text-muted-foreground bg-muted/40">
+                      <Camera className="size-6" />
                     </div>
                   )}
                   <div className="flex-1 space-y-2">
@@ -370,7 +370,7 @@ export function UnifiedDeliveryCustomerForm({
                       accept="image/*"
                       onChange={handlePhotoFileChange}
                       className="cursor-pointer"
-                    />
+ />
                     <Input
                       id="passportPhoto"
                       placeholder="Or paste image URL (https://...)"
@@ -379,7 +379,7 @@ export function UnifiedDeliveryCustomerForm({
                         setPassportPhoto(e.target.value)
                         setPassportPhotoPreview(e.target.value)
                       }}
-                    />
+ />
                   </div>
                 </div>
               </div>
@@ -399,7 +399,7 @@ export function UnifiedDeliveryCustomerForm({
                   placeholder="Manager Adebayo"
                   value={contactPerson}
                   onChange={(e) => setContactPerson(e.target.value)}
-                />
+ />
               </div>
 
               <div className="space-y-2">
@@ -409,7 +409,7 @@ export function UnifiedDeliveryCustomerForm({
                   placeholder="+234 803 111 2233"
                   value={contactPersonPhone}
                   onChange={(e) => setContactPersonPhone(e.target.value)}
-                />
+ />
               </div>
 
               <div className="space-y-2 md:col-span-2">
@@ -419,7 +419,7 @@ export function UnifiedDeliveryCustomerForm({
                   placeholder="Plot 10 Admiralty Way, Lekki Phase 1, Lagos"
                   value={stationAddress}
                   onChange={(e) => setStationAddress(e.target.value)}
-                />
+ />
               </div>
 
               <div className="space-y-2">
@@ -431,7 +431,7 @@ export function UnifiedDeliveryCustomerForm({
                   placeholder="45000"
                   value={tankCapacity}
                   onChange={(e) => setTankCapacity(e.target.value)}
-                />
+ />
               </div>
 
               <div className="space-y-2">
@@ -443,7 +443,7 @@ export function UnifiedDeliveryCustomerForm({
                   placeholder="4"
                   value={pumpCount}
                   onChange={(e) => setPumpCount(e.target.value)}
-                />
+ />
               </div>
             </CardContent>
           </Card>
@@ -453,7 +453,7 @@ export function UnifiedDeliveryCustomerForm({
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <CreditCard size={18} className="text-primary" /> Bank & Settlement Account Details
+              <CreditCard className="size-4 text-primary" /> Bank & Settlement Account Details
             </CardTitle>
             <CardDescription>Customer banking credentials for payment reconciliation and settlement.</CardDescription>
           </CardHeader>
@@ -465,7 +465,7 @@ export function UnifiedDeliveryCustomerForm({
                 placeholder="e.g. Zenith Bank, Access Bank"
                 value={bankName}
                 onChange={(e) => setBankName(e.target.value)}
-              />
+ />
             </div>
 
             <div className="space-y-2">
@@ -475,7 +475,7 @@ export function UnifiedDeliveryCustomerForm({
                 placeholder="e.g. 0123456789"
                 value={accountNumber}
                 onChange={(e) => setAccountNumber(e.target.value)}
-              />
+ />
             </div>
 
             <div className="space-y-2">
@@ -485,7 +485,7 @@ export function UnifiedDeliveryCustomerForm({
                 placeholder="e.g. Soroman Logistics / Customer Name"
                 value={accountName}
                 onChange={(e) => setAccountName(e.target.value)}
-              />
+ />
             </div>
           </CardContent>
         </Card>
@@ -505,7 +505,7 @@ export function UnifiedDeliveryCustomerForm({
                 min="0"
                 value={creditLimit}
                 onChange={(e) => setCreditLimit(e.target.value)}
-              />
+ />
             </div>
 
             <div className="space-y-2">
@@ -514,8 +514,8 @@ export function UnifiedDeliveryCustomerForm({
                 id="status"
                 value={status}
                 onChange={(e) => setStatus(e.target.value as any)}
-                className="w-full h-10 rounded-lg border border-border bg-card px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-              >
+                className="w-full h-8 rounded-lg border border-border bg-card px-2.5 text-base md:text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+ >
                 <option value="active">Active</option>
                 <option value="dormant">Dormant</option>
                 <option value="suspended">Suspended</option>
@@ -536,7 +536,7 @@ export function UnifiedDeliveryCustomerForm({
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Any special instructions or observations..."
               className="w-full rounded-lg border border-border bg-card p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-            />
+ />
           </CardContent>
         </Card>
 
@@ -547,22 +547,22 @@ export function UnifiedDeliveryCustomerForm({
             variant="outline"
             className="cursor-pointer"
             onClick={() => navigate({ to: backTarget as any })}
-          >
+ >
             Cancel
           </Button>
 
           <Button
             type="submit"
-            className="gradient-primary text-white border-0 cursor-pointer shadow-md shadow-primary/20"
+            className="cursor-pointer"
             disabled={isSubmitting}
-          >
+ >
             {isSubmitting ? (
               <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" /> {isEdit ? 'Updating...' : 'Saving...'}
+                <Loader2 className="size-4 mr-2 animate-spin" /> {isEdit ? 'Updating...' : 'Saving...'}
               </>
             ) : (
               <>
-                <Save className="w-4 h-4 mr-2" /> {isEdit ? 'Update' : 'Save'} {customerType === 'filling_station' ? 'Station' : 'Customer'}
+                <Save className="size-4 mr-2" /> {isEdit ? 'Update' : 'Save'} {customerType === 'filling_station' ? 'Station' : 'Customer'}
               </>
             )}
           </Button>

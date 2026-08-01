@@ -22,6 +22,7 @@ import { Route as AdminUpdateRouteImport } from './routes/admin/update'
 import { Route as BankAccountsIndexRouteImport } from './routes/bank-accounts/index'
 import { Route as BankAccountsDetailsRouteImport } from './routes/bank-accounts/details'
 import { Route as BankAccountsFormRouteImport } from './routes/bank-accounts/form'
+import { Route as BankStatementsIndexRouteImport } from './routes/bank-statements/index'
 import { Route as CommissionsIndexRouteImport } from './routes/commissions/index'
 import { Route as CustomersIndexRouteImport } from './routes/customers/index'
 import { Route as CustomersDetailsRouteImport } from './routes/customers/details'
@@ -137,6 +138,11 @@ const BankAccountsDetailsRoute = BankAccountsDetailsRouteImport.update({
 const BankAccountsFormRoute = BankAccountsFormRouteImport.update({
   id: '/bank-accounts/form',
   path: '/bank-accounts/form',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BankStatementsIndexRoute = BankStatementsIndexRouteImport.update({
+  id: '/bank-statements/',
+  path: '/bank-statements/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CommissionsIndexRoute = CommissionsIndexRouteImport.update({
@@ -442,6 +448,7 @@ export interface FileRoutesByFullPath {
   '/admin-order/': typeof AdminOrderIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/bank-accounts/': typeof BankAccountsIndexRoute
+  '/bank-statements/': typeof BankStatementsIndexRoute
   '/commissions/': typeof CommissionsIndexRoute
   '/customers/': typeof CustomersIndexRoute
   '/dangote-order-request/': typeof DangoteOrderRequestIndexRoute
@@ -507,6 +514,7 @@ export interface FileRoutesByTo {
   '/admin-order': typeof AdminOrderIndexRoute
   '/admin': typeof AdminIndexRoute
   '/bank-accounts': typeof BankAccountsIndexRoute
+  '/bank-statements': typeof BankStatementsIndexRoute
   '/commissions': typeof CommissionsIndexRoute
   '/customers': typeof CustomersIndexRoute
   '/dangote-order-request': typeof DangoteOrderRequestIndexRoute
@@ -573,6 +581,7 @@ export interface FileRoutesById {
   '/admin-order/': typeof AdminOrderIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/bank-accounts/': typeof BankAccountsIndexRoute
+  '/bank-statements/': typeof BankStatementsIndexRoute
   '/commissions/': typeof CommissionsIndexRoute
   '/customers/': typeof CustomersIndexRoute
   '/dangote-order-request/': typeof DangoteOrderRequestIndexRoute
@@ -640,6 +649,7 @@ export interface FileRouteTypes {
     | '/admin-order/'
     | '/admin/'
     | '/bank-accounts/'
+    | '/bank-statements/'
     | '/commissions/'
     | '/customers/'
     | '/dangote-order-request/'
@@ -705,6 +715,7 @@ export interface FileRouteTypes {
     | '/admin-order'
     | '/admin'
     | '/bank-accounts'
+    | '/bank-statements'
     | '/commissions'
     | '/customers'
     | '/dangote-order-request'
@@ -770,6 +781,7 @@ export interface FileRouteTypes {
     | '/admin-order/'
     | '/admin/'
     | '/bank-accounts/'
+    | '/bank-statements/'
     | '/commissions/'
     | '/customers/'
     | '/dangote-order-request/'
@@ -836,6 +848,7 @@ export interface RootRouteChildren {
   AdminOrderIndexRoute: typeof AdminOrderIndexRoute
   AdminIndexRoute: typeof AdminIndexRoute
   BankAccountsIndexRoute: typeof BankAccountsIndexRoute
+  BankStatementsIndexRoute: typeof BankStatementsIndexRoute
   CommissionsIndexRoute: typeof CommissionsIndexRoute
   CustomersIndexRoute: typeof CustomersIndexRoute
   DangoteOrderRequestIndexRoute: typeof DangoteOrderRequestIndexRoute
@@ -949,6 +962,13 @@ declare module '@tanstack/react-router' {
       path: '/bank-accounts/form'
       fullPath: '/bank-accounts/form'
       preLoaderRoute: typeof BankAccountsFormRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bank-statements/': {
+      id: '/bank-statements/'
+      path: '/bank-statements'
+      fullPath: '/bank-statements/'
+      preLoaderRoute: typeof BankStatementsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/commissions/': {
@@ -1349,6 +1369,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminOrderIndexRoute: AdminOrderIndexRoute,
   AdminIndexRoute: AdminIndexRoute,
   BankAccountsIndexRoute: BankAccountsIndexRoute,
+  BankStatementsIndexRoute: BankStatementsIndexRoute,
   CommissionsIndexRoute: CommissionsIndexRoute,
   CustomersIndexRoute: CustomersIndexRoute,
   DangoteOrderRequestIndexRoute: DangoteOrderRequestIndexRoute,
