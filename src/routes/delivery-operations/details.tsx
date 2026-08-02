@@ -15,7 +15,7 @@ import { format, parseISO } from 'date-fns'
 import { useDeliveryInventoryList, useDeleteDeliveryInventory } from '#/lib/hooks/useDeliveryInventory'
 import { useDeliverySalesList } from '#/lib/hooks/useDeliverySales'
 import { usePfiList } from '#/lib/hooks/usePfis'
-import { useTruckList } from '#/lib/hooks/useTrucks'
+import { useAllocatableTrucks } from '#/lib/hooks/useFleet'
 import { useToast } from '#/lib/hooks/useToast'
 import type { DeliveryInventory, DeliverySale } from '#/lib/types'
 import type { Pfi } from '#/lib/hooks/usePfis'
@@ -54,7 +54,7 @@ function DeliveryOperationDetailsView() {
   const { data: rawInventory = [], isLoading } = useDeliveryInventoryList()
   const { data: allSales = [] } = useDeliverySalesList()
   const { data: pfisData } = usePfiList()
-  const { data: trucksData } = useTruckList()
+  const { data: trucksData } = useAllocatableTrucks()
 
   const allEntries = useMemo((): DeliveryInventory[] => {
     if (!rawInventory) return []

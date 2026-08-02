@@ -15,6 +15,7 @@ import {
   useSaveTruck, parseStatus, encodeStatus, parseIncidents, isExpired,
   STATUS_RATINGS, type StatusRating, type Incident, type FleetTruck,
 } from '#/lib/hooks/useFleet'
+import { useDriverList } from '#/lib/hooks/useDrivers'
 
 /** A labelled field; `warn` flags a lapsed compliance date. */
 function Field({
@@ -64,12 +65,15 @@ export function TruckDialog({
   onOpenChange: (o: boolean) => void
 }) {
   const save = useSaveTruck()
+  const { data: driverData } = useDriverList()
+  const drivers: any[] = Array.isArray(driverData) ? driverData : (driverData as any)?.drivers || []
   const status = parseStatus(truck?.truckStatus)
 
   const blank = {
     plateNumber: truck?.plateNumber ?? '',
     chassisNumber: truck?.chassisNumber ?? '',
     truckMake: truck?.truckMake ?? '',
+    driverId: truck?.driverId != null ? String(truck.driverId) : '',
     driverName: truck?.driverName ?? '',
     driverPhone: truck?.driverPhone ?? '',
     driverAltPhone: truck?.driverAltPhone ?? '',
@@ -116,6 +120,7 @@ export function TruckDialog({
       id: truck?.id,
       data: {
         ...form,
+        driverId: form.driverId === '' ? null : Number(form.driverId),
         maxCapacity: num(form.maxCapacity),
         fuelCapacity: num(form.fuelCapacity),
         avgLitresPerTrip: num(form.avgLitresPerTrip),
@@ -148,6 +153,36 @@ export function TruckDialog({
           </Group>
 
           <Group title="People">
+            <div className="space-y-1.5 sm:col-span-2">
+              <label className={cn(MICRO, 'block text-muted-foreground')}>Driver</label>
+              <NativeSelect
+                value={form.driverId}
+                onChange={(e) => {
+                  const id = e.target.value
+                  const d = drivers.find((x) => String(x.id ?? x._id) === id)
+                  // Keep the name in step so the plain-text field stays correct
+                  // for anything reading it directly.
+                  setForm((f) => ({
+                    ...f,
+                    driverId: id,
+                    driverName: d ? (d.name ?? `${d.firstName ?? ''} ${d.surname ?? ''}`.trim()) : f.driverName,
+                    driverPhone: d?.phone ?? f.driverPhone,
+                  }))
+                }}
+              >
+                <option value="">Not linked — type a name below</option>
+                {drivers.map((d) => (
+                  <option key={d.id ?? d._id} value={String(d.id ?? d._id)}>
+                    {d.name ?? `${d.firstName ?? ''} ${d.surname ?? ''}`.trim()}
+                    {d.phone ? ` · ${d.phone}` : ''}
+                  </option>
+                ))}
+              </NativeSelect>
+              <p className="text-xs text-muted-foreground/70">
+                Linking to a driver record keeps their details in one place. Leave it unlinked for a
+                one-off stand-in.
+              </p>
+            </div>
             <Field label="Driver's name" value={form.driverName} onChange={(v) => set('driverName', v)} />
             <Field label="Driver's phone" value={form.driverPhone} onChange={(v) => set('driverPhone', v)} />
             <Field label="Driver alt phone" value={form.driverAltPhone} onChange={(v) => set('driverAltPhone', v)} />

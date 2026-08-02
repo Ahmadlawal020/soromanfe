@@ -71,7 +71,7 @@ function OverviewDashboard() {
       description={`Welcome back, {user?.firstName || 'Admin'}. Here&apos;s what&apos;s happening today.`}
       actions={
         <>
-          <Button variant="outline" size="sm" onClick={() => navigate({ to: '/trucks/' as any })}>
+          <Button variant="outline" size="sm" onClick={() => navigate({ to: '/fleet-trucks' as any })}>
           <Users data-icon="inline-start" />
           View fleet
           </Button>
@@ -122,7 +122,7 @@ function OverviewDashboard() {
             <span className="text-xs text-muted-foreground">
               Total: <span className="font-semibold text-foreground tabular-nums">{truckStats.total}</span> trucks
             </span>
-            <HoverArrowLink to={'/trucks/' as any}>View details</HoverArrowLink>
+            <HoverArrowLink to={'/fleet-trucks' as any}>View details</HoverArrowLink>
           </div>
         </section>
 

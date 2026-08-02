@@ -89,9 +89,6 @@ import { Route as SecurityExitRouteImport } from './routes/security/exit'
 import { Route as TicketIndexRouteImport } from './routes/ticket/index'
 import { Route as TicketDetailsRouteImport } from './routes/ticket/details'
 import { Route as TicketGenerateRouteImport } from './routes/ticket/generate'
-import { Route as TrucksIndexRouteImport } from './routes/trucks/index'
-import { Route as TrucksDetailsRouteImport } from './routes/trucks/details'
-import { Route as TrucksFormRouteImport } from './routes/trucks/form'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -504,21 +501,6 @@ const TicketGenerateRoute = TicketGenerateRouteImport.update({
   path: '/ticket/generate',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TrucksIndexRoute = TrucksIndexRouteImport.update({
-  id: '/trucks/',
-  path: '/trucks/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TrucksDetailsRoute = TrucksDetailsRouteImport.update({
-  id: '/trucks/details',
-  path: '/trucks/details',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TrucksFormRoute = TrucksFormRouteImport.update({
-  id: '/trucks/form',
-  path: '/trucks/form',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -567,8 +549,6 @@ export interface FileRoutesByFullPath {
   '/security/exit': typeof SecurityExitRoute
   '/ticket/details': typeof TicketDetailsRoute
   '/ticket/generate': typeof TicketGenerateRoute
-  '/trucks/details': typeof TrucksDetailsRoute
-  '/trucks/form': typeof TrucksFormRoute
   '/admin-order/': typeof AdminOrderIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/bank-accounts/': typeof BankAccountsIndexRoute
@@ -603,7 +583,6 @@ export interface FileRoutesByFullPath {
   '/sales-ledger/': typeof SalesLedgerIndexRoute
   '/security-report/': typeof SecurityReportIndexRoute
   '/ticket/': typeof TicketIndexRoute
-  '/trucks/': typeof TrucksIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -652,8 +631,6 @@ export interface FileRoutesByTo {
   '/security/exit': typeof SecurityExitRoute
   '/ticket/details': typeof TicketDetailsRoute
   '/ticket/generate': typeof TicketGenerateRoute
-  '/trucks/details': typeof TrucksDetailsRoute
-  '/trucks/form': typeof TrucksFormRoute
   '/admin-order': typeof AdminOrderIndexRoute
   '/admin': typeof AdminIndexRoute
   '/bank-accounts': typeof BankAccountsIndexRoute
@@ -688,7 +665,6 @@ export interface FileRoutesByTo {
   '/sales-ledger': typeof SalesLedgerIndexRoute
   '/security-report': typeof SecurityReportIndexRoute
   '/ticket': typeof TicketIndexRoute
-  '/trucks': typeof TrucksIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -738,8 +714,6 @@ export interface FileRoutesById {
   '/security/exit': typeof SecurityExitRoute
   '/ticket/details': typeof TicketDetailsRoute
   '/ticket/generate': typeof TicketGenerateRoute
-  '/trucks/details': typeof TrucksDetailsRoute
-  '/trucks/form': typeof TrucksFormRoute
   '/admin-order/': typeof AdminOrderIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/bank-accounts/': typeof BankAccountsIndexRoute
@@ -774,7 +748,6 @@ export interface FileRoutesById {
   '/sales-ledger/': typeof SalesLedgerIndexRoute
   '/security-report/': typeof SecurityReportIndexRoute
   '/ticket/': typeof TicketIndexRoute
-  '/trucks/': typeof TrucksIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -825,8 +798,6 @@ export interface FileRouteTypes {
     | '/security/exit'
     | '/ticket/details'
     | '/ticket/generate'
-    | '/trucks/details'
-    | '/trucks/form'
     | '/admin-order/'
     | '/admin/'
     | '/bank-accounts/'
@@ -861,7 +832,6 @@ export interface FileRouteTypes {
     | '/sales-ledger/'
     | '/security-report/'
     | '/ticket/'
-    | '/trucks/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -910,8 +880,6 @@ export interface FileRouteTypes {
     | '/security/exit'
     | '/ticket/details'
     | '/ticket/generate'
-    | '/trucks/details'
-    | '/trucks/form'
     | '/admin-order'
     | '/admin'
     | '/bank-accounts'
@@ -946,7 +914,6 @@ export interface FileRouteTypes {
     | '/sales-ledger'
     | '/security-report'
     | '/ticket'
-    | '/trucks'
   id:
     | '__root__'
     | '/'
@@ -995,8 +962,6 @@ export interface FileRouteTypes {
     | '/security/exit'
     | '/ticket/details'
     | '/ticket/generate'
-    | '/trucks/details'
-    | '/trucks/form'
     | '/admin-order/'
     | '/admin/'
     | '/bank-accounts/'
@@ -1031,7 +996,6 @@ export interface FileRouteTypes {
     | '/sales-ledger/'
     | '/security-report/'
     | '/ticket/'
-    | '/trucks/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1081,8 +1045,6 @@ export interface RootRouteChildren {
   SecurityExitRoute: typeof SecurityExitRoute
   TicketDetailsRoute: typeof TicketDetailsRoute
   TicketGenerateRoute: typeof TicketGenerateRoute
-  TrucksDetailsRoute: typeof TrucksDetailsRoute
-  TrucksFormRoute: typeof TrucksFormRoute
   AdminOrderIndexRoute: typeof AdminOrderIndexRoute
   AdminIndexRoute: typeof AdminIndexRoute
   BankAccountsIndexRoute: typeof BankAccountsIndexRoute
@@ -1117,7 +1079,6 @@ export interface RootRouteChildren {
   SalesLedgerIndexRoute: typeof SalesLedgerIndexRoute
   SecurityReportIndexRoute: typeof SecurityReportIndexRoute
   TicketIndexRoute: typeof TicketIndexRoute
-  TrucksIndexRoute: typeof TrucksIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1682,27 +1643,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TicketGenerateRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/trucks/': {
-      id: '/trucks/'
-      path: '/trucks'
-      fullPath: '/trucks/'
-      preLoaderRoute: typeof TrucksIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/trucks/details': {
-      id: '/trucks/details'
-      path: '/trucks/details'
-      fullPath: '/trucks/details'
-      preLoaderRoute: typeof TrucksDetailsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/trucks/form': {
-      id: '/trucks/form'
-      path: '/trucks/form'
-      fullPath: '/trucks/form'
-      preLoaderRoute: typeof TrucksFormRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -1754,8 +1694,6 @@ const rootRouteChildren: RootRouteChildren = {
   SecurityExitRoute: SecurityExitRoute,
   TicketDetailsRoute: TicketDetailsRoute,
   TicketGenerateRoute: TicketGenerateRoute,
-  TrucksDetailsRoute: TrucksDetailsRoute,
-  TrucksFormRoute: TrucksFormRoute,
   AdminOrderIndexRoute: AdminOrderIndexRoute,
   AdminIndexRoute: AdminIndexRoute,
   BankAccountsIndexRoute: BankAccountsIndexRoute,
@@ -1790,7 +1728,6 @@ const rootRouteChildren: RootRouteChildren = {
   SalesLedgerIndexRoute: SalesLedgerIndexRoute,
   SecurityReportIndexRoute: SecurityReportIndexRoute,
   TicketIndexRoute: TicketIndexRoute,
-  TrucksIndexRoute: TrucksIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -17,7 +17,7 @@ import { format, parseISO } from 'date-fns'
 import { useDeliveryInventoryList, useUpdateDeliveryInventory, useDeleteDeliveryInventory } from '#/lib/hooks/useDeliveryInventory'
 import { useDeliverySalesList, useDeleteDeliverySale } from '#/lib/hooks/useDeliverySales'
 import { usePfiList } from '#/lib/hooks/usePfis'
-import { useTruckList } from '#/lib/hooks/useTrucks'
+import { useAllocatableTrucks } from '#/lib/hooks/useFleet'
 import { useDeliveryCustomerList } from '#/lib/hooks/useDeliveryCustomers'
 import { useToast } from '#/lib/hooks/useToast'
 import { cn } from '#/lib/utils'
@@ -115,7 +115,7 @@ function AllocationDetailsPage() {
   const { data: rawInventory = [], isLoading: isLoadingInventory } = useDeliveryInventoryList()
   const { data: allSales = [] } = useDeliverySalesList()
   const { data: pfisData } = usePfiList()
-  const { data: trucksData } = useTruckList()
+  const { data: trucksData } = useAllocatableTrucks()
   const { data: customersData = [] } = useDeliveryCustomerList()
 
   const allPfis: Pfi[] = useMemo(() => {

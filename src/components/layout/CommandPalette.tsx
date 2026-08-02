@@ -63,7 +63,7 @@ export default function CommandPalette({ open, onOpenChange }: CommandPalettePro
       { id: 'nav-lpg-stations', title: 'LPG Stations', category: 'Navigation', icon: Flame, path: '/lpg-stations', keywords: ['lpg', 'gas', 'home delivery', 'station'] },
       { id: 'nav-products', title: 'Product Inventory', category: 'Navigation', icon: Package, path: '/products', keywords: ['pms', 'ago', 'dpk', 'lpg'] },
       { id: 'nav-deposits', title: 'Financial Deposits', category: 'Navigation', icon: DollarSign, path: '/deposits', keywords: ['payments', 'ledger', 'balance'] },
-      { id: 'nav-trucks', title: 'Fleet Directory', category: 'Navigation', icon: Truck, path: '/trucks', keywords: ['vehicles', 'tankers'] },
+      { id: 'nav-trucks', title: 'Fleet', category: 'Navigation', icon: Truck, path: '/fleet-trucks', keywords: ['vehicles', 'tankers'] },
       { id: 'nav-drivers', title: 'Drivers Directory', category: 'Navigation', icon: Contact, path: '/drivers', keywords: ['logistics', 'personnel'] },
       { id: 'nav-delivery-ops', title: 'Delivery Operations', category: 'Navigation', icon: Package, path: '/delivery-operations', keywords: ['dispatch', 'allocations'] },
       { id: 'nav-sales-ledger', title: 'Sales Ledger', category: 'Navigation', icon: DollarSign, path: '/sales-ledger', keywords: ['truck sales', 'filling stations'] },

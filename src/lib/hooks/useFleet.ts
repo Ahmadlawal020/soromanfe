@@ -97,6 +97,35 @@ export function useFleetLedger() {
   })
 }
 
+/**
+ * Fleet trucks shaped for the delivery-allocation screens.
+ *
+ * Those pages were written against the old `trucks` table and read
+ * `_id`, `capacity` and `driver`. The registries are now one table, so rather
+ * than touch four screens this maps the fleet record onto the names they
+ * already use. New code should use `useFleetTrucks` directly.
+ */
+export function useAllocatableTrucks() {
+  return useQuery({
+    queryKey: [...KEYS.trucks, 'allocatable'],
+    queryFn: async () => {
+      const res = await api.get('/fleet', { params: { limit: 100 } })
+      // Same envelope the old useTruckList returned, so the four allocation
+      // screens keep reading `data.trucks`.
+      return {
+        trucks: ((res.data.data.trucks || []) as FleetTruck[]).map((t) => ({
+          ...t,
+          _id: String(t.id),
+          capacity: t.maxCapacity,
+          capacity_litres: t.maxCapacity,
+          driver: t.driverName,
+          driver_name: t.driverName,
+        })),
+      }
+    },
+  })
+}
+
 /** Every write invalidates both keys — that is what keeps the two pages in step. */
 function useFleetMutation<T>(fn: (v: T) => Promise<any>, fallback: string) {
   const qc = useQueryClient()

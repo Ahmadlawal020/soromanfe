@@ -14,7 +14,7 @@ import {
 import { format, parseISO, isWithinInterval, startOfDay, endOfDay } from 'date-fns'
 import { useDeliveryInventoryList, useCreateDeliveryInventory, useUpdateDeliveryInventory } from '#/lib/hooks/useDeliveryInventory'
 import { usePfiList, useUpdatePfi } from '#/lib/hooks/usePfis'
-import { useTruckList } from '#/lib/hooks/useTrucks'
+import { useAllocatableTrucks } from '#/lib/hooks/useFleet'
 import { useDeliveryCustomerList } from '#/lib/hooks/useDeliveryCustomers'
 import { useToast } from '#/lib/hooks/useToast'
 import { cn } from '#/lib/utils'
@@ -94,7 +94,7 @@ function DeliveryOperationsPage() {
   // ── Queries ─────────────────────────────────────────────────────────────
   const { data: rawInventory = [], isLoading: isLoadingInventory } = useDeliveryInventoryList()
   const { data: pfisData } = usePfiList()
-  const { data: trucksData } = useTruckList()
+  const { data: trucksData } = useAllocatableTrucks()
   const { data: customersData = [] } = useDeliveryCustomerList()
 
   const allPfis: Pfi[] = useMemo(() => {

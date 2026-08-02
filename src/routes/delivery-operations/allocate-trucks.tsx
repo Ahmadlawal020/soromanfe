@@ -3,7 +3,7 @@ import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate, Link } from '@tanstack/react-router'
 import { format } from 'date-fns'
 import { usePfiList, useUpdatePfi, type Pfi } from '#/lib/hooks/usePfis'
-import { useTruckList } from '#/lib/hooks/useTrucks'
+import { useAllocatableTrucks } from '#/lib/hooks/useFleet'
 import { useDeliveryInventoryList, useCreateDeliveryInventory } from '#/lib/hooks/useDeliveryInventory'
 import { useToast } from '#/lib/hooks/useToast'
 import { Button } from '#/components/ui/button'
@@ -29,7 +29,7 @@ function AllocateTrucksPage() {
 
   // Queries
   const { data: pfisData } = usePfiList()
-  const { data: trucksData } = useTruckList()
+  const { data: trucksData } = useAllocatableTrucks()
   const { data: rawInventory = [] } = useDeliveryInventoryList()
 
   const allPfis: Pfi[] = useMemo(() => {

@@ -92,7 +92,6 @@ const navCategories: NavCategory[] = [
     items: [
       { title: "Fleet", icon: Truck, path: "/fleet-trucks" },
       { title: "Trucks Ledger", icon: BarChart3, path: "/fleet-ledger" },
-      { title: "Truck Directory", icon: Truck, path: "/trucks" },
       { title: "Drivers Directory", icon: Contact, path: "/drivers" },
     ],
   },
