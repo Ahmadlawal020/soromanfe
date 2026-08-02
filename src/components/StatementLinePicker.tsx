@@ -121,7 +121,7 @@ export function StatementLinePicker({
         )}
       </div>
 
-      <p className={cn(MICRO, 'flex items-center gap-1.5 text-[0.6rem] text-muted-foreground/70')}>
+      <p className={cn(MICRO, 'flex items-center gap-1.5 text-xs text-muted-foreground/70')}>
         <Link2 className="size-3" />
         Amount search ignores commas
       </p>

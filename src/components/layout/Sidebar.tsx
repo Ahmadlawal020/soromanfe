@@ -24,6 +24,7 @@ import {
   LogIn,
   ClipboardList,
   Flame,
+  Percent,
 } from "lucide-react";
 import { useAuthStore, useAdminLogout } from "#/modules/auth";
 import { useLayoutStore } from "#/stores/layoutStore";
@@ -45,36 +46,16 @@ const navCategories: NavCategory[] = [
     category: "", // Overview
     items: [{ title: "Overview", icon: GaugeIcon, path: "/overview" }],
   },
-  {
-    category: "LPG Home Delivery",
-    items: [
-      { title: "LPG Stations", icon: Flame, path: "/lpg-stations" },
-      { title: "LPG Orders", icon: ShoppingBag, path: "/lpg-orders" },
-      { title: "Payable Orders", icon: DollarSign, path: "/lpg-payable-orders" },
-      { title: "Order Requests", icon: FileText, path: "/lpg-order-request" },
-    ],
-  },
+  // Ordered by how much of the day is spent in each: the core order desk
+  // first, then the floor, then money, then the side businesses. LPG is a
+  // newer, smaller line, so it sits below the established ones.
   {
     category: "Orders",
     items: [
       { title: "Orders", icon: ShoppingBag, path: "/orders" },
-      { title: "Payable Orders", icon: DollarSign, path: "/payable-orders" },
       { title: "Create Order", icon: PlusCircle, path: "/admin-order" },
+      { title: "Payable Orders", icon: DollarSign, path: "/payable-orders" },
       { title: "Our Customers", icon: Building2, path: "/customers" },
-    ],
-  },
-
-  {
-    category: "Dangote Delivery",
-    items: [
-      { title: "Dangote Orders", icon: ShoppingBag, path: "/dangote-orders" },
-      { title: "Payable Orders", icon: DollarSign, path: "/dangote-payable-orders" },
-      {
-        title: "Order Requests",
-        icon: FileText,
-        path: "/dangote-order-request",
-      },
-      { title: "Dangote Products", icon: Package, path: "/dangote-products" },
     ],
   },
   {
@@ -82,43 +63,10 @@ const navCategories: NavCategory[] = [
     items: [
       { title: "Loading Tickets", icon: Ticket, path: "/ticket" },
       { title: "Depots", icon: Warehouse, path: "/depots" },
-      { title: "Product Pricing", icon: Fuel, path: "/product-pricing" },
       { title: "Products", icon: Package, path: "/products" },
+      { title: "Product Pricing", icon: Fuel, path: "/product-pricing" },
     ],
   },
-  {
-    category: "Finance",
-    items: [
-      { title: "Deposits", icon: Receipt, path: "/deposits" },
-      { title: "Expenses", icon: Receipt, path: "/expenses" },
-      { title: "Bank Accounts", icon: Landmark, path: "/bank-accounts" },
-      { title: "Bank Statements", icon: FileSpreadsheet, path: "/bank-statements" },
-      { title: "Commissions", icon: DollarSign, path: "/commissions" },
-    ],
-  },
-  {
-    category: "Transport",
-    items: [
-      { title: "Fleet Directory", icon: Truck, path: "/trucks" },
-      { title: "Drivers Directory", icon: Contact, path: "/drivers" },
-      { title: "Fleet", icon: Truck, path: "/fleet-trucks" },
-      { title: "Trucks Ledger", icon: BarChart3, path: "/fleet-ledger" },
-    ],
-  },
-  {
-    category: "Truck Sales",
-    items: [
-      {
-        title: "Delivery Operations",
-        icon: Truck,
-        path: "/delivery-operations",
-      },
-      { title: "Sales Ledger", icon: BarChart3, path: "/sales-ledger" },
-      { title: "Filling Stations", icon: Fuel, path: "/filing-stations" },
-      { title: "Delivery Customers", icon: Users, path: "/delivery-customer" },
-    ],
-  },
-
   {
     category: "Security",
     items: [
@@ -128,11 +76,58 @@ const navCategories: NavCategory[] = [
     ],
   },
   {
-    category: "Admin",
+    category: "Finance",
     items: [
       { title: "PFI Tracking", icon: FileText, path: "/pfi" },
+      { title: "Expenses", icon: Receipt, path: "/expenses" },
+      { title: "Deposits", icon: Receipt, path: "/deposits" },
+      { title: "Customer Commissions", icon: DollarSign, path: "/commissions" },
+      { title: "Commission Rates", icon: Percent, path: "/commission-rates" },
+      { title: "Bank Accounts", icon: Landmark, path: "/bank-accounts" },
+      { title: "Bank Statements", icon: FileSpreadsheet, path: "/bank-statements" },
+    ],
+  },
+  {
+    category: "Transport",
+    items: [
+      { title: "Fleet", icon: Truck, path: "/fleet-trucks" },
+      { title: "Trucks Ledger", icon: BarChart3, path: "/fleet-ledger" },
+      { title: "Truck Directory", icon: Truck, path: "/trucks" },
+      { title: "Drivers Directory", icon: Contact, path: "/drivers" },
+    ],
+  },
+  {
+    category: "Dangote Delivery",
+    items: [
+      { title: "Dangote Orders", icon: ShoppingBag, path: "/dangote-orders" },
+      { title: "Order Requests", icon: FileText, path: "/dangote-order-request" },
+      { title: "Payable Orders", icon: DollarSign, path: "/dangote-payable-orders" },
+      { title: "Dangote Products", icon: Package, path: "/dangote-products" },
+    ],
+  },
+  {
+    category: "Truck Sales",
+    items: [
+      { title: "Delivery Operations", icon: Truck, path: "/delivery-operations" },
+      { title: "Sales Ledger", icon: BarChart3, path: "/sales-ledger" },
+      { title: "Filling Stations", icon: Fuel, path: "/filing-stations" },
+      { title: "Delivery Customers", icon: Users, path: "/delivery-customer" },
+    ],
+  },
+  {
+    category: "LPG Home Delivery",
+    items: [
+      { title: "LPG Orders", icon: ShoppingBag, path: "/lpg-orders" },
+      { title: "Order Requests", icon: FileText, path: "/lpg-order-request" },
+      { title: "Payable Orders", icon: DollarSign, path: "/lpg-payable-orders" },
+      { title: "LPG Stations", icon: Flame, path: "/lpg-stations" },
+    ],
+  },
+  {
+    category: "Administration",
+    items: [
+      { title: "User Management", icon: Users, path: "/admin" },
       { title: "Licence Verification", icon: ShieldCheck, path: "/licence-verification" },
-      { title: "Admin Settings", icon: ShieldCheck, path: "/admin" },
     ],
   },
 ];
@@ -152,10 +147,8 @@ function NavGroup({
 }) {
   return (
     <div className="mb-2">
-      {/* Group labels sit on the tracking ladder at 0.22em — the rung between
-          panel headers (0.25em) and stepper labels (0.2em). */}
       {label && expanded && (
-        <div className="px-3 py-2 text-[0.65rem] uppercase text-muted-foreground/70 select-none">
+        <div className="px-3 py-2 text-xs uppercase text-muted-foreground/70 select-none">
           {label}
         </div>
       )}

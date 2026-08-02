@@ -57,8 +57,6 @@ export const bankStringToId = (bankStr: string): string => {
 
 // Helpers (imported from lib/sales-ledger-utils)
 
-
-
 // ═══════════════════════════════════════════════════════════════════════════
 // Types
 // ═══════════════════════════════════════════════════════════════════════════
@@ -435,7 +433,7 @@ export function RecordPaymentDialog({
                       <span className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1.5">
                         {isFS ? <Fuel className="size-3 text-warning" /> : null}
                         Customer #{idx + 1}
-                        {isFS && <span className="ml-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-warning/10 text-warning border border-warning/40 normal-case tracking-normal">Filling Station</span>}
+                        {isFS && <span className="ml-1 px-1.5 py-0.5 rounded text-xs font-semibold bg-warning/10 text-warning border border-warning/40 normal-case tracking-normal">Filling Station</span>}
                       </span>
                       {saleRows.length > 1 && (
                         <button type="button" onClick={() => removeSaleRow(row.uid)} className="text-muted-foreground hover:text-destructive transition-colors p-0.5 rounded duration-250 ease-luxe" title="Remove row">
@@ -463,12 +461,12 @@ export function RecordPaymentDialog({
                             <option key={c._id || c.id} value={c._id || c.id || ''}>{c.name}</option>
                           ))}
                         </select>
-                        {rowErrors[row.uid]?.customer && <p className="text-[11px] text-destructive">{rowErrors[row.uid].customer}</p>}
+                        {rowErrors[row.uid]?.customer && <p className="text-xs text-destructive">{rowErrors[row.uid].customer}</p>}
                       </div>
                       <div className="space-y-1">
                         <Label className="text-xs text-muted-foreground">Destination <span className="text-destructive">*</span></Label>
                         <Input placeholder="e.g. Kano, Abuja…" className={`h-9 text-sm ${rowErrors[row.uid]?.location ? 'border-destructive bg-destructive/10' : ''}`} value={row.location} onChange={e => updateSaleRow(row.uid, 'location', e.target.value)} />
-                        {rowErrors[row.uid]?.location && <p className="text-[11px] text-destructive">{rowErrors[row.uid].location}</p>}
+                        {rowErrors[row.uid]?.location && <p className="text-xs text-destructive">{rowErrors[row.uid].location}</p>}
                       </div>
                       <div className="space-y-1">
                         <Label className="text-xs text-muted-foreground">Quantity (L)</Label>
@@ -491,10 +489,10 @@ export function RecordPaymentDialog({
                           <div className="space-y-1">
                             <Label className="text-xs text-muted-foreground flex items-center gap-1">
                               Rate (₦/L) <span className="text-destructive">*</span>
-                              {row.rateLocked && <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-warning/10 text-warning border border-warning/40"><FileText className="size-2.5" /> Locked</span>}
+                              {row.rateLocked && <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs font-semibold bg-warning/10 text-warning border border-warning/40"><FileText className="size-2.5" /> Locked</span>}
                             </Label>
                             <Input type="text" inputMode="decimal" placeholder="e.g. 1,210" className={`h-9 text-sm ${row.rateLocked ? 'bg-warning/10 text-warning font-semibold cursor-not-allowed' : rowErrors[row.uid]?.rate ? 'border-destructive bg-destructive/10' : ''}`} value={row.rate} readOnly={row.rateLocked} onChange={e => updateSaleRow(row.uid, 'rate', e.target.value)} />
-                            {rowErrors[row.uid]?.rate && <p className="text-[11px] text-destructive">{rowErrors[row.uid].rate}</p>}
+                            {rowErrors[row.uid]?.rate && <p className="text-xs text-destructive">{rowErrors[row.uid].rate}</p>}
                           </div>
                           <div className="space-y-1">
                             <Label className="text-xs text-muted-foreground">Expected (₦)</Label>
@@ -681,7 +679,6 @@ export function QuickPaymentDialog({ open, onOpenChange, target, customerMap: _c
               <Input value={form.phone_number} onChange={e => setForm(prev => ({ ...prev, phone_number: e.target.value }))} />
             </div>
           </div>
-
 
         </div>
 

@@ -248,7 +248,7 @@ function BankAccountsIndex() {
                           </div>
                           <div className="flex items-center gap-1.5 shrink-0">
                             {account.isDefault && (
-                              <Badge className="bg-warning/15 text-warning border-warning/30 gap-1 text-[11px] py-0.5 px-2">
+                              <Badge className="bg-warning/15 text-warning border-warning/30 gap-1 text-xs py-0.5 px-2">
                                 <Star className="size-3 fill-warning" /> Default
                               </Badge>
                             )}
@@ -259,7 +259,7 @@ function BankAccountsIndex() {
                         {/* Account Number Box */}
                         <div className="bg-muted/40 border border-border/50 rounded-lg p-3 my-3 flex items-center justify-between">
                           <div>
-                            <p className="text-[10px] font-semibold uppercase text-muted-foreground">
+                            <p className="text-xs font-semibold uppercase text-muted-foreground">
                               Account Number ({account.currency})
                             </p>
                             <p className="text-lg font-mono font-semibold text-foreground">
@@ -283,7 +283,7 @@ function BankAccountsIndex() {
 
                         {/* Account Name */}
                         <div className="mb-3">
-                          <p className="text-[11px] text-muted-foreground uppercase font-normal">Account Name</p>
+                          <p className="text-xs text-muted-foreground uppercase font-normal">Account Name</p>
                           <p className="text-sm font-semibold text-foreground truncate">{account.accountName}</p>
                         </div>
 
@@ -294,7 +294,7 @@ function BankAccountsIndex() {
                               <Warehouse className="size-3.5 text-primary" /> Linked Depots ({assignedDepots.length})
                             </span>
                             {assignedDepots.length > 1 && (
-                              <span className="text-[10px] text-warning font-semibold bg-warning/10 px-1.5 py-0.5 rounded border border-warning/20">
+                              <span className="text-xs text-warning font-semibold bg-warning/10 px-1.5 py-0.5 rounded border border-warning/20">
                                 Shared Account
                               </span>
                             )}

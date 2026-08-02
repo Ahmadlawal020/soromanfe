@@ -5,7 +5,7 @@ import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '#/components/ui/select'
-import { ArrowLeft, Contact, CheckCircle, Loader2, AlertCircle, Truck, FileText } from 'lucide-react'
+import { Contact, CheckCircle, Loader2, Truck, FileText } from 'lucide-react'
 import { useCreateDriver, useUpdateDriver } from '#/lib/hooks/useDrivers'
 
 export const Route = createFileRoute('/drivers/form')({

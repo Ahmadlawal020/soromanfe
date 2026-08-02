@@ -162,7 +162,7 @@ export function LpgCustomerStep({ wizard }: LpgCustomerStepProps) {
                           </p>
                         </div>
                         <div className="text-right shrink-0">
-                          <span className="text-[10px] text-muted-foreground block">Balance</span>
+                          <span className="text-xs text-muted-foreground block">Balance</span>
                           <span className={`font-semibold text-sm ${(c.balance || 0) < 0 ? 'text-destructive' : 'text-foreground'}`}>
                             {formatCurrency(c.balance || 0)}
                           </span>

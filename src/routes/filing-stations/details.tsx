@@ -3,7 +3,7 @@ import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate, useRouterState } from '@tanstack/react-router'
 import { Card, CardContent } from '#/components/ui/card'
 import { Button } from '#/components/ui/button'
-import { Badge } from '#/components/ui/badge'
+
 import { Input } from '#/components/ui/input'
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -613,12 +613,12 @@ function FilingStationDetailsView() {
                         {group.truckNumber || 'Unassigned Truck'}
                       </h3>
                       {group.code && (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-muted/10 text-foreground dark:text-muted-foreground border-border/20">
+                        <span className="px-2 py-0.5 rounded-full text-xs font-semibold border bg-muted/10 text-foreground dark:text-muted-foreground border-border/20">
                           {group.code}
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center gap-2 mt-1 text-[11px] text-muted-foreground flex-wrap">
+                    <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground flex-wrap">
                       <span className="flex items-center gap-1">
                         <CalendarIcon className="size-3" />
                         {group.dateLoaded ? (() => { try { return format(parseISO(group.dateLoaded), 'dd MMM yyyy') } catch { return group.dateLoaded } })() : '—'}
@@ -653,19 +653,19 @@ function FilingStationDetailsView() {
                 {/* Summary */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 pt-4 border-t border-border">
                   <div className="space-y-0.5">
-                    <p className="text-[10px] uppercase text-muted-foreground font-semibold">Allocated</p>
+                    <p className="text-xs uppercase text-muted-foreground font-semibold">Allocated</p>
                     <p className="text-sm font-semibold text-foreground">{group.quantity > 0 ? `${fmtQty(group.quantity)} L` : '—'}</p>
                   </div>
                   <div className="space-y-0.5">
-                    <p className="text-[10px] uppercase text-muted-foreground font-semibold">Sold</p>
+                    <p className="text-xs uppercase text-muted-foreground font-semibold">Sold</p>
                     <p className="text-sm font-semibold text-foreground">{group.totalQtySold > 0 ? `${fmtQty(group.totalQtySold)} L` : '—'}</p>
                   </div>
                   <div className="space-y-0.5">
-                    <p className="text-[10px] uppercase text-muted-foreground font-semibold">Deposited</p>
+                    <p className="text-xs uppercase text-muted-foreground font-semibold">Deposited</p>
                     <p className="text-sm font-semibold text-accent">{group.totalPaid > 0 ? fmt(group.totalPaid) : '—'}</p>
                   </div>
                   <div className="space-y-0.5">
-                    <p className="text-[10px] uppercase text-muted-foreground font-semibold">Balance</p>
+                    <p className="text-xs uppercase text-muted-foreground font-semibold">Balance</p>
                     <p className={cn('text-sm font-semibold', group.balance === 0 ? 'text-accent' : group.balance > 0 ? 'text-destructive' : 'text-muted-foreground')}>
                       {group.balance === 0 ? '✓ Settled' : group.balance > 0 ? fmt(group.balance) : `+${fmt(Math.abs(group.balance))}`}
                     </p>
@@ -727,7 +727,7 @@ function FilingStationDetailsView() {
                                       disabled={updatingStatusId === entryId}
                                       onClick={() => handleToggleDepositStatus(entry)}
                                       title="Click to toggle status (Confirmed / Pending)"
-                                      className={cn('inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold border transition-all cursor-pointer hover:opacity-80 duration-250 ease-luxe', isConfirmed ? 'bg-accent/10 text-accent border-accent/40' : 'bg-warning/10 text-warning border-warning/40')}
+                                      className={cn('inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-semibold border transition-all cursor-pointer hover:opacity-80 duration-250 ease-luxe', isConfirmed ? 'bg-accent/10 text-accent border-accent/40' : 'bg-warning/10 text-warning border-warning/40')}
                                     >
                                       {updatingStatusId === entryId && <Loader2 className="size-2.5 animate-spin" />}
                                       {isConfirmed ? 'Confirmed' : 'Pending'}
@@ -768,10 +768,10 @@ function FilingStationDetailsView() {
               Station Total · {stationGroups.length} allocation{stationGroups.length === 1 ? '' : 's'} · {stationTotals.entries} entries
             </p>
             <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
-              <div><span className="text-background/50 text-[11px] uppercase mr-1.5">Expected</span><span className="font-semibold">{fmt(stationTotals.expected)}</span></div>
-              <div><span className="text-background/50 text-[11px] uppercase mr-1.5">Deposited</span><span className="font-semibold text-accent">{fmt(stationTotals.paid)}</span></div>
-              <div><span className="text-background/50 text-[11px] uppercase mr-1.5">Expenses</span><span className="font-semibold text-warning">{fmt(stationTotals.expenses)}</span></div>
-              <div><span className="text-background/50 text-[11px] uppercase mr-1.5">Balance</span>
+              <div><span className="text-background/50 text-xs uppercase mr-1.5">Expected</span><span className="font-semibold">{fmt(stationTotals.expected)}</span></div>
+              <div><span className="text-background/50 text-xs uppercase mr-1.5">Deposited</span><span className="font-semibold text-accent">{fmt(stationTotals.paid)}</span></div>
+              <div><span className="text-background/50 text-xs uppercase mr-1.5">Expenses</span><span className="font-semibold text-warning">{fmt(stationTotals.expenses)}</span></div>
+              <div><span className="text-background/50 text-xs uppercase mr-1.5">Balance</span>
                 <span className={cn('font-semibold', stationTotals.balance > 0 ? 'text-destructive' : 'text-accent')}>
                   {stationTotals.balance === 0 ? '₦0.00 ✓' : stationTotals.balance > 0 ? fmt(stationTotals.balance) : `+${fmt(Math.abs(stationTotals.balance))}`}
                 </span>
@@ -931,7 +931,7 @@ function FilingStationDetailsView() {
                   <Receipt className="size-4 text-warning shrink-0 mt-0.5" />
                   <div>
                     <p className="text-xs font-semibold text-warning">Record Daily Expense</p>
-                    <p className="text-[10px] text-warning mt-0.5">Record expenses like supplies, paper, maintenance etc.</p>
+                    <p className="text-xs text-warning mt-0.5">Record expenses like supplies, paper, maintenance etc.</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">

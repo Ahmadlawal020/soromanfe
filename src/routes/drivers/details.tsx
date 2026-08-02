@@ -151,6 +151,7 @@ function DriverDetailPage() {
       eyebrow="Transport"
       title="Driver Profile"
       description="License credentials, safety metrics, and contact information"
+      backAction={handleBack}
     />
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={handleEdit}>

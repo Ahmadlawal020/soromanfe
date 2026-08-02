@@ -719,7 +719,7 @@ function AllocationDetailsPage() {
                   <div key={p.pfiId} className="p-3 rounded-xl border border-border/70 bg-muted/40 space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="font-semibold text-xs text-foreground font-mono">{p.pfiNumber}</span>
-                      <span className="text-[10px] font-semibold bg-accent/20 text-accent px-2 py-0.5 rounded">
+                      <span className="text-xs font-semibold bg-accent/20 text-accent px-2 py-0.5 rounded">
                         {pfiPercent}% of allocation
                       </span>
                     </div>
@@ -748,7 +748,7 @@ function AllocationDetailsPage() {
                 <FileText className="size-4 text-accent" /> Financial Summary
               </span>
               {salesSummary.balance === 0 && (
-                <span className="text-[10px] font-semibold bg-accent/20 text-accent px-2 py-0.5 rounded-full border border-accent/30">
+                <span className="text-xs font-semibold bg-accent/20 text-accent px-2 py-0.5 rounded-full border border-accent/30">
                   ✓ Settled
                 </span>
               )}
@@ -851,18 +851,18 @@ function AllocationDetailsPage() {
                         }}
                       />
                     </TableHead>
-                    <TableHead className="text-[11px] font-semibold uppercase text-muted-foreground w-[35px] text-center">#</TableHead>
-                    <TableHead className="text-[11px] font-semibold uppercase text-muted-foreground min-w-[110px]">Truck</TableHead>
-                    <TableHead className="text-[11px] font-semibold uppercase text-muted-foreground min-w-[100px]">Quantity</TableHead>
-                    <TableHead className="text-[11px] font-semibold uppercase text-muted-foreground min-w-[100px]">Depot</TableHead>
-                    <TableHead className="text-[11px] font-semibold uppercase text-muted-foreground min-w-[90px]">Product</TableHead>
-                    <TableHead className="text-[11px] font-semibold uppercase text-muted-foreground min-w-[130px]">Customer</TableHead>
-                    <TableHead className="text-[11px] font-semibold uppercase text-muted-foreground min-w-[90px]">Rate(s)</TableHead>
-                    <TableHead className="text-[11px] font-semibold uppercase text-muted-foreground min-w-[120px]">Destination</TableHead>
-                    <TableHead className="text-[11px] font-semibold uppercase text-muted-foreground min-w-[95px]">Status</TableHead>
-                    <TableHead className="text-[11px] font-semibold uppercase text-muted-foreground min-w-[90px]">Date Loaded</TableHead>
-                    <TableHead className="text-[11px] font-semibold uppercase text-muted-foreground min-w-[90px]">Date Sold</TableHead>
-                    <TableHead className="text-[11px] font-semibold uppercase text-muted-foreground min-w-[160px] text-right">Actions</TableHead>
+                    <TableHead className="text-xs font-semibold uppercase text-muted-foreground w-[35px] text-center">#</TableHead>
+                    <TableHead className="text-xs font-semibold uppercase text-muted-foreground min-w-[110px]">Truck</TableHead>
+                    <TableHead className="text-xs font-semibold uppercase text-muted-foreground min-w-[100px]">Quantity</TableHead>
+                    <TableHead className="text-xs font-semibold uppercase text-muted-foreground min-w-[100px]">Depot</TableHead>
+                    <TableHead className="text-xs font-semibold uppercase text-muted-foreground min-w-[90px]">Product</TableHead>
+                    <TableHead className="text-xs font-semibold uppercase text-muted-foreground min-w-[130px]">Customer</TableHead>
+                    <TableHead className="text-xs font-semibold uppercase text-muted-foreground min-w-[90px]">Rate(s)</TableHead>
+                    <TableHead className="text-xs font-semibold uppercase text-muted-foreground min-w-[120px]">Destination</TableHead>
+                    <TableHead className="text-xs font-semibold uppercase text-muted-foreground min-w-[95px]">Status</TableHead>
+                    <TableHead className="text-xs font-semibold uppercase text-muted-foreground min-w-[90px]">Date Loaded</TableHead>
+                    <TableHead className="text-xs font-semibold uppercase text-muted-foreground min-w-[90px]">Date Sold</TableHead>
+                    <TableHead className="text-xs font-semibold uppercase text-muted-foreground min-w-[160px] text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -904,7 +904,7 @@ function AllocationDetailsPage() {
                               {r.truckPlate}
                             </span>
                             {salesEntries && salesEntries.length > 1 && (
-                              <span className="inline-flex self-start items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-muted/15 text-foreground dark:text-muted-foreground border border-border/20">
+                              <span className="inline-flex self-start items-center px-1.5 py-0.5 rounded text-xs font-semibold bg-muted/15 text-foreground dark:text-muted-foreground border border-border/20">
                                 Split Load
                               </span>
                             )}
@@ -922,7 +922,7 @@ function AllocationDetailsPage() {
                         {/* Product */}
                         <TableCell>
                           {r.product ? (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-muted text-foreground border border-border">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-muted text-foreground border border-border">
                               {r.product}
                             </span>
                           ) : <span className="text-muted-foreground">—</span>}
@@ -938,7 +938,7 @@ function AllocationDetailsPage() {
                                     {e.customerName || `Cust #${e.customerId}`}
                                   </span>
                                   {e.qty > 0 && (
-                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-muted text-foreground">
+                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold bg-muted text-foreground">
                                       {fmtQty(e.qty)}L
                                     </span>
                                   )}
@@ -992,7 +992,7 @@ function AllocationDetailsPage() {
                         {/* Status Badge */}
                         <TableCell>
                           {badge && Icon ? (
-                            <span className={cn('inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border', badge.cls)}>
+                            <span className={cn('inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold border', badge.cls)}>
                               <Icon className="size-3" /> {badge.label}
                             </span>
                           ) : '—'}
@@ -1014,7 +1014,7 @@ function AllocationDetailsPage() {
                             {r.status === 'loaded' && (
                               <Button
                                 size="sm"
-                                className="h-7 text-[11px] gap-1 bg-accent hover:bg-accent/80 text-accent-foreground px-2.5 cursor-pointer font-semibold"
+                                className="h-7 text-xs gap-1 bg-accent hover:bg-accent/80 text-accent-foreground px-2.5 cursor-pointer font-semibold"
                                 onClick={() => { setOffloadTarget(r); setOffloadDate(format(new Date(), 'yyyy-MM-dd')) }}
                               >
                                 <CheckCircle2 className="size-3" /> Sold
@@ -1023,7 +1023,7 @@ function AllocationDetailsPage() {
                             <Button
                               size="sm"
                               variant="outline"
-                              className="h-7 text-[11px] gap-1 px-2 cursor-pointer hover:bg-muted"
+                              className="h-7 text-xs gap-1 px-2 cursor-pointer hover:bg-muted"
                               onClick={() => openEditDialog(r)}
                             >
                               <Pencil className="size-3" /> Edit

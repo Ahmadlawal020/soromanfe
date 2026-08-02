@@ -504,7 +504,7 @@ function SalesLedgerDashboard() {
               <SlidersHorizontal className="size-3.5" />
               Advanced Filters
               {hasActiveFilters && (
-                <Badge className="ml-1 h-5 px-1.5 text-[10px] bg-primary text-primary-foreground">
+                <Badge className="ml-1 h-5 px-1.5 text-xs bg-primary text-primary-foreground">
                   Active
                 </Badge>
               )}
@@ -691,7 +691,7 @@ function SalesLedgerDashboard() {
         >
           <CalendarIcon className="size-3.5" /> Daily Payments
           {filteredSales.length > 0 && (
-            <span className={`ml-0.5 px-1.5 py-0.5 rounded-full text-[11px] font-semibold leading-none ${activeView === 'daily' ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-muted text-muted-foreground'
+            <span className={`ml-0.5 px-1.5 py-0.5 rounded-full text-xs font-semibold leading-none ${activeView === 'daily' ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-muted text-muted-foreground'
  }`}>
               {filteredSales.length}
             </span>
@@ -867,7 +867,7 @@ function SalesLedgerDashboard() {
                                 <Truck className="size-3.5 text-warning" />
                                 {group.truckNumber || '—'}
                                 {isFirstInMultiGroup && (
-                                  <span className="ml-0.5 text-[10px] font-semibold text-muted-foreground bg-muted/10 px-1.5 py-0.5 rounded-full border border-border/20 whitespace-nowrap">
+                                  <span className="ml-0.5 text-xs font-semibold text-muted-foreground bg-muted/10 px-1.5 py-0.5 rounded-full border border-border/20 whitespace-nowrap">
                                     {multiCustCounts.get(group.loadingId!)} customers
                                   </span>
                                 )}
@@ -885,15 +885,15 @@ function SalesLedgerDashboard() {
                           </TableCell>
                           <TableCell className="whitespace-nowrap text-center">
                             {group.payments.length === 0 ? (
-                              <Badge variant="outline" className="text-[11px] font-semibold text-warning bg-warning/10 border-warning/20">
+                              <Badge variant="outline" className="text-xs font-semibold text-warning bg-warning/10 border-warning/20">
                                 No payment
                               </Badge>
                             ) : isFullyPaid ? (
-                              <Badge className="text-[11px] font-semibold bg-accent/10 text-accent border-accent/20">
+                              <Badge className="text-xs font-semibold bg-accent/10 text-accent border-accent/20">
                                 Fully Paid
                               </Badge>
                             ) : (
-                              <Badge className="text-[11px] font-semibold bg-destructive/10 text-destructive border-destructive/20">
+                              <Badge className="text-xs font-semibold bg-destructive/10 text-destructive border-destructive/20">
                                 Pending
                               </Badge>
                             )}

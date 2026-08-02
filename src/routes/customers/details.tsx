@@ -150,6 +150,7 @@ function CustomerDetailPage() {
       eyebrow="Orders"
       title="Customer Profile"
       description="Account details, deposits, and contact information"
+      backAction={handleBack}
     />
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={handleEdit}>
@@ -297,7 +298,7 @@ function CustomerDetailPage() {
               <div className="space-y-4">
                 <div className="p-4 rounded-xl border-2 border-primary/20 bg-primary/5 space-y-3">
                   <div>
-                    <p className="text-[10px] text-muted-foreground uppercase font-normal">Account Number</p>
+                    <p className="text-xs text-muted-foreground uppercase font-normal">Account Number</p>
                     <div className="flex items-center gap-2 mt-1">
                       <p className="text-xl font-semibold font-mono text-foreground tabular-nums">{customer.virtualAccountNumber}</p>
                       <button
@@ -310,11 +311,11 @@ function CustomerDetailPage() {
                     </div>
                   </div>
                   <div>
-                    <p className="text-[10px] text-muted-foreground uppercase font-normal">Bank Name</p>
+                    <p className="text-xs text-muted-foreground uppercase font-normal">Bank Name</p>
                     <p className="text-sm font-semibold text-foreground mt-0.5">{customer.virtualAccountBank || '—'}</p>
                   </div>
                   <div>
-                    <p className="text-[10px] text-muted-foreground uppercase font-normal">Account Name</p>
+                    <p className="text-xs text-muted-foreground uppercase font-normal">Account Name</p>
                     <p className="text-sm font-semibold text-foreground mt-0.5">{customer.virtualAccountName || customer.name}</p>
                   </div>
                 </div>

@@ -12,9 +12,9 @@ import { depotPhones, truckSuffix } from '#/lib/depot-contacts'
  * one surface in the app that ignores dark mode.
  */
 
-const LABEL = 'text-[9px] font-normal uppercase text-neutral-500'
-const VALUE = 'mt-0.5 text-[13px] font-semibold text-black'
-const HINT = 'text-[8px] uppercase text-neutral-300'
+const LABEL = 'text-xs font-normal uppercase text-neutral-500'
+const VALUE = 'mt-0.5 text-sm font-semibold text-black'
+const HINT = 'text-xs uppercase text-neutral-300'
 
 function Cell({
   label,
@@ -37,7 +37,7 @@ function SignatureLine({ label, hint = true }: { label: string; hint?: boolean }
   return (
     <div className="pt-6">
       <div className="border-t border-neutral-400" />
-      <p className="mt-1 text-[10px] font-semibold text-black">{label}</p>
+      <p className="mt-1 text-xs font-semibold text-black">{label}</p>
       {hint && <p className={HINT}>Full Name &amp; Signature</p>}
     </div>
   )
@@ -77,17 +77,17 @@ export function WaybillSheet({ data }: { data: Record<string, any> }) {
           <div>
             <div className="flex items-center gap-2.5">
               <img src="/logo.png" alt="" aria-hidden className="size-12" />
-              <span className="text-[15px] font-semibold tracking-tight text-black">
+              <span className="text-base font-semibold tracking-tight text-black">
                 Soroman Energy
               </span>
             </div>
-            <p className="mt-1.5 text-[13px] font-semibold text-[#007a55]">
+            <p className="mt-1.5 text-sm font-semibold text-[#007a55]">
               {data.location || '—'}
             </p>
           </div>
           <div className="text-right">
             <p className={LABEL}>Order Reference</p>
-            <p className="mt-0.5 font-mono text-[15px] font-semibold text-black">
+            <p className="mt-0.5 font-mono text-base font-semibold text-black">
               {reference}
             </p>
           </div>
@@ -95,7 +95,7 @@ export function WaybillSheet({ data }: { data: Record<string, any> }) {
 
         {/* Banner */}
         <div className="mt-5 bg-[#00563c] px-4 py-2.5 text-center">
-          <p className="text-[13px] font-semibold text-white uppercase">
+          <p className="text-sm font-semibold text-white uppercase">
             Waybill &amp; Payment Receipt
           </p>
         </div>
@@ -136,7 +136,7 @@ export function WaybillSheet({ data }: { data: Record<string, any> }) {
                   {['S/N', 'Quantity', 'Ullage'].map((h) => (
                     <th
                       key={h}
-                      className="border border-neutral-300 px-2 py-1 text-left text-[9px] font-normal text-neutral-500 uppercase"
+                      className="border border-neutral-300 px-2 py-1 text-left text-xs font-normal text-neutral-500 uppercase"
                     >
                       {h}
                     </th>
@@ -146,7 +146,7 @@ export function WaybillSheet({ data }: { data: Record<string, any> }) {
               <tbody>
                 {[1, 2, 3, 4, 5].map((n) => (
                   <tr key={n}>
-                    <td className="border border-neutral-300 px-2 py-1.5 text-[11px] font-normal">
+                    <td className="border border-neutral-300 px-2 py-1.5 text-xs font-normal">
                       {n}
                     </td>
                     <td className="border border-neutral-300 px-2 py-1.5" />
@@ -171,16 +171,16 @@ export function WaybillSheet({ data }: { data: Record<string, any> }) {
         {/* Footer pinned to the foot of the sheet. */}
         <footer className="mt-auto flex items-end justify-between gap-6 pt-8">
           <div className="space-y-1.5">
-            <p className="flex items-center gap-1.5 text-[10px] text-neutral-700">
+            <p className="flex items-center gap-1.5 text-xs text-neutral-700">
               <Globe className="size-3 shrink-0" />
               Visit ordersoroman.com to order fuel online without stress!
             </p>
-            <p className="flex items-center gap-1.5 text-[10px] text-neutral-700">
+            <p className="flex items-center gap-1.5 text-xs text-neutral-700">
               <Phone className="size-3 shrink-0" />
               {phones.join('  ·  ')}
             </p>
           </div>
-          <p className="max-w-[46%] border-l border-neutral-300 pl-4 text-[9px] leading-relaxed text-neutral-600">
+          <p className="max-w-[46%] border-l border-neutral-300 pl-4 text-xs leading-relaxed text-neutral-600">
             This waybill and receipt confirm successful payment and authorization for the
             associated truck transaction. For enquiries or verification, kindly contact
             Soroman Energy.

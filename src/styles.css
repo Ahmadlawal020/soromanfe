@@ -48,12 +48,12 @@
  */
 :root {
   --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --foreground: oklch(0 0 0);
 
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: oklch(0 0 0);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
+  --popover-foreground: oklch(0 0 0);
 
   --primary: #007a55; /* emerald-700 — white on it is 5.3:1 */
   --primary-foreground: oklch(0.985 0 0);
@@ -61,7 +61,7 @@
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
+  --muted-foreground: oklch(0.44 0 0);
 
   /* One accent, and it is the brand green — used as link/brand ink app-wide.
      NOT a neutral hover fill; hover grounds are --muted. */

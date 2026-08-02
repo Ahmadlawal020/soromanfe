@@ -5,7 +5,7 @@ import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '#/components/ui/select'
-import { Loader2, ArrowLeft, Save, CheckCircle, AlertCircle, FileText, User, Package, Search, Warehouse, Flame, MapPin, X } from 'lucide-react'
+import { Loader2, Save, CheckCircle, AlertCircle, FileText, User, Package, Search, Warehouse, Flame, X } from 'lucide-react'
 import { useCreatePfi, useDepotsForFilter, useUpdatePfi } from '#/lib/hooks/usePfis'
 import { useProductList } from '#/lib/hooks/useProducts'
 import { useAdminList } from '#/lib/hooks/useAdmin'
@@ -343,7 +343,7 @@ function PFIForm() {
                                   <p className="font-normal text-sm text-foreground truncate">{l.name}</p>
                                   <p className="text-xs text-muted-foreground truncate">{l.code} {l.address ? `• ${l.address}` : ''}</p>
                                 </div>
-                                <span className={`text-[10px] font-normal px-1.5 py-0.5 rounded ${l.type === 'lpg' ? 'bg-orange-100 text-orange-600' : 'bg-primary/10 text-primary'}`}>
+                                <span className={`text-xs font-normal px-1.5 py-0.5 rounded ${l.type === 'lpg' ? 'bg-orange-100 text-orange-600' : 'bg-primary/10 text-primary'}`}>
                                   {l.type === 'lpg' ? 'LPG' : 'Depot'}
                                 </span>
                               </div>
@@ -398,7 +398,7 @@ function PFIForm() {
                         <Label className="font-semibold text-foreground">
                           Quantity ({unitName}) *
                         </Label>
-                        <span className="text-[11px] font-normal text-primary bg-primary/10 px-2 py-0.5 rounded-md">
+                        <span className="text-xs font-normal text-primary bg-primary/10 px-2 py-0.5 rounded-md">
                           Unit: {unitName}
                         </span>
                       </div>
@@ -455,7 +455,7 @@ function PFIForm() {
                         const tank = Number(form.startingQtyLitres)
                         if (!form.blQtyLitres || !bl || !tank) {
                           return (
-                            <p className="text-[11px] text-muted-foreground">
+                            <p className="text-xs text-muted-foreground">
                               What you pay for. Cargo value is computed from this, not the tank
                               quantity — leave it blank and every money figure will read “—”.
                             </p>
@@ -463,18 +463,18 @@ function PFIForm() {
                         }
                         const gap = tank - bl
                         if (gap === 0) {
-                          return <p className="text-[11px] text-muted-foreground">Tank matches the papers exactly.</p>
+                          return <p className="text-xs text-muted-foreground">Tank matches the papers exactly.</p>
                         }
                         const price = Number(form.unitPrice) || 0
                         const worth = price > 0
                           ? ` — worth ₦${(Math.abs(gap) * price).toLocaleString('en-NG', { maximumFractionDigits: 0 })}`
                           : ''
                         return gap > 0 ? (
-                          <p className="text-[11px] text-accent">
+                          <p className="text-xs text-accent">
                             Surplus of {gap.toLocaleString()} L — more landed than the papers say.
                           </p>
                         ) : (
-                          <p className="text-[11px] text-destructive">
+                          <p className="text-xs text-destructive">
                             Deficit of {Math.abs(gap).toLocaleString()} L{worth} — you are billed for
                             product that never arrived.
                           </p>
@@ -503,7 +503,7 @@ function PFIForm() {
                           }}
                           className="pr-16 text-xs text-muted-foreground"
  />
-                        <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-[11px] font-normal text-muted-foreground bg-muted/60 px-2 py-0.5 rounded">
+                        <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-xs font-normal text-muted-foreground bg-muted/60 px-2 py-0.5 rounded">
                           {isWeightProd ? 'Litres' : 'MT / kg'}
                         </div>
                       </div>

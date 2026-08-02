@@ -11,15 +11,7 @@ import {
   SelectContent,
   SelectItem,
 } from "#/components/ui/select";
-import {
-  ArrowLeft,
-  Scale,
-  Save,
-  Loader2,
-  Package,
-  AlertTriangle,
-  FileText,
-} from "lucide-react";
+import { Scale, Save, Loader2, Package, AlertTriangle, FileText } from "lucide-react";
 import {
   useProductDetails,
   useCreateProduct,

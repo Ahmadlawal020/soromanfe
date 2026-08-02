@@ -419,7 +419,7 @@ function DailyGateReport({
         {/* These are the officer's own counts. The system knows how many trucks
             entered and have not exited, but the two are never reconciled — a
             disagreement is visible to a reader, not caught by the app. */}
-        <p className="text-[0.65rem] text-muted-foreground/70">
+        <p className="text-xs text-muted-foreground/70">
           These counts are typed by hand and are not reconciled against the truck
           records above.
         </p>

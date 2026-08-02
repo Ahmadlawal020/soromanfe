@@ -4,12 +4,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '#/components/ui/card'
-import {
-  ArrowLeft, AlertCircle, Package, MapPin,
-  Calendar, Phone, Mail, Truck, FileCheck,
-  Banknote, Copy, CheckCircle, Clock, XCircle, User, CircleDollarSign,
-  Flame,
-} from 'lucide-react'
+import { ArrowLeft, AlertCircle, MapPin, Calendar, Phone, Mail, Truck, FileCheck, Banknote, Copy, CheckCircle, Clock, XCircle, User, CircleDollarSign, Flame } from 'lucide-react'
 import { useLpgOrderRequestDetails, useUpdateLpgOrderCollectionStatus } from '#/lib/hooks/useLpgOrders'
 import { Breadcrumbs } from '#/components/Breadcrumbs'
 import { ConfirmDialog } from '#/components/ConfirmDialog'

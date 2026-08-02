@@ -132,6 +132,7 @@ function RouteComponent() {
       eyebrow="Orders"
       title="Order Details"
       description="Detailed breakdown of the sales order and fulfillment status"
+      backAction={handleBack}
     />
       </header>
 
@@ -303,7 +304,7 @@ function RouteComponent() {
               <p className="text-sm font-semibold text-foreground mt-0.5 flex items-center gap-1.5">
                 {order.depotName || order.depot?.name || 'N/A'}
                 {(order.depotCode || order.depot?.code) && (
-                  <Badge variant="outline" className="font-mono text-[10px] py-0 px-1.5">{order.depotCode || order.depot?.code}</Badge>
+                  <Badge variant="outline" className="font-mono text-xs py-0 px-1.5">{order.depotCode || order.depot?.code}</Badge>
                 )}
               </p>
             </div>

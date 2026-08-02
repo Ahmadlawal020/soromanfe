@@ -50,11 +50,11 @@ export function LpgCompletionStep({ wizard }: LpgCompletionStepProps) {
           </div>
           <div className="space-y-2">
             <div>
-              <p className="text-[10px] text-muted-foreground uppercase">Status</p>
+              <p className="text-xs text-muted-foreground uppercase">Status</p>
               <p className="text-sm font-semibold text-primary">Pending Review</p>
             </div>
             <div>
-              <p className="text-[10px] text-muted-foreground uppercase">What Happens Next</p>
+              <p className="text-xs text-muted-foreground uppercase">What Happens Next</p>
               <p className="text-xs text-muted-foreground leading-snug">
                 The customer will be notified that their LPG order request has been received. Once reviewed and approved with pricing, they will receive a follow-up notification with the full details.
               </p>

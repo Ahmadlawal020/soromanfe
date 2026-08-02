@@ -1,9 +1,8 @@
 import { useState } from 'react'
 import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { ArrowLeft, Truck, Building2, Package, ClipboardCheck, User, Flame } from 'lucide-react'
+import { Truck, Building2, Package, ClipboardCheck, User, Flame } from 'lucide-react'
 
-import { Button } from '#/components/ui/button'
 import { SegmentedChoice } from '#/components/ui/segmented-choice'
 import { MICRO } from '#/lib/panel'
 import { cn } from '#/lib/utils'

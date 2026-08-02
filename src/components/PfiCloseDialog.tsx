@@ -27,7 +27,7 @@ function Field({
     <div className="space-y-1.5">
       <label className={cn(MICRO, 'block text-muted-foreground')}>{label}</label>
       <Input type={type} value={value} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} />
-      {hint && <p className="text-[0.7rem] leading-tight text-muted-foreground/70">{hint}</p>}
+      {hint && <p className="text-xs leading-tight text-muted-foreground/70">{hint}</p>}
     </div>
   )
 }

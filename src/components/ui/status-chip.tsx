@@ -26,8 +26,8 @@ const statusChipVariants = cva(
         inert: "border-foreground/15 text-muted-foreground/60",
       },
       size: {
-        default: "text-[0.6rem]",
-        rail: "text-[0.65rem]",
+        default: "text-xs",
+        rail: "text-xs",
       },
     },
     defaultVariants: {

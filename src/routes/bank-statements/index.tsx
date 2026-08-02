@@ -215,7 +215,7 @@ function BankStatementsPage() {
           </option>
           ))}
           </NativeSelect>
-          {f.hint && <p className="text-[0.65rem] text-muted-foreground/70">{f.hint}</p>}
+          {f.hint && <p className="text-xs text-muted-foreground/70">{f.hint}</p>}
           </div>
           ))}
           </div>
@@ -230,7 +230,7 @@ function BankStatementsPage() {
           Save format
           </Button>
           {draft.amountColumn === null && draft.creditColumn === null && (
-          <p className="text-[0.65rem] text-muted-foreground/70">
+          <p className="text-xs text-muted-foreground/70">
           Choose either a credit column or a signed amount column.
           </p>
           )}
@@ -283,7 +283,7 @@ function BankStatementsPage() {
           Import {preview.rows.length} row{preview.rows.length === 1 ? '' : 's'}
           </Button>
           {!mapping && (
-          <p className="text-[0.65rem] text-muted-foreground/70">
+          <p className="text-xs text-muted-foreground/70">
           Save the format first — uploads are rejected until it exists.
           </p>
           )}
@@ -350,7 +350,7 @@ function BankStatementsPage() {
           ))}
           </TableBody>
           </Table>
-          <p className="px-4 pb-2 text-[0.65rem] text-muted-foreground/70">
+          <p className="px-4 pb-2 text-xs text-muted-foreground/70">
           A statement with matched lines cannot be deleted — that would break the audit
           trail behind a confirmed payment.
           </p>

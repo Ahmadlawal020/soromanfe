@@ -6,11 +6,7 @@ import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
 import { Badge } from '#/components/ui/badge'
-import {
-  ArrowLeft, Truck, Calendar, Tag, Building2, UserPlus,
-  Loader2, Plus, X, Fuel, CheckCircle2, ChevronRight,
-  Users, MapPin, AlertTriangle,
-} from 'lucide-react'
+import { Truck, Calendar, Tag, Building2, UserPlus, Loader2, Plus, X, Fuel, CheckCircle2, ChevronRight, Users, MapPin, AlertTriangle } from 'lucide-react'
 import { useDeliveryInventoryList, useUpdateDeliveryInventory } from '#/lib/hooks/useDeliveryInventory'
 import { useDeliveryCustomerList } from '#/lib/hooks/useDeliveryCustomers'
 import { useDeliverySalesList, useCreateDeliverySale } from '#/lib/hooks/useDeliverySales'
@@ -548,7 +544,7 @@ function AssignCustomerPage() {
                           </span>
                         )}
                         {a.isFillingStation && (
-                          <Badge className="text-[10px] bg-warning/20 text-warning border-warning/30 px-1 py-0">
+                          <Badge className="text-xs bg-warning/20 text-warning border-warning/30 px-1 py-0">
                             FS
                           </Badge>
                         )}
@@ -558,7 +554,7 @@ function AssignCustomerPage() {
                   <div className="text-right shrink-0 ml-3">
                     <p className="font-semibold text-foreground text-sm">{a.quantity > 0 ? `${a.quantity.toLocaleString()} L` : '—'}</p>
                     {a.paymentCount > 0 && (
-                      <p className="text-[11px] text-accent font-normal">
+                      <p className="text-xs text-accent font-normal">
                         {a.paymentCount} payment{a.paymentCount !== 1 ? 's' : ''} · {a.totalPaid.toLocaleString()} paid
                       </p>
                     )}
@@ -638,7 +634,7 @@ function AssignCustomerPage() {
                     {isFS && <Fuel className="size-3.5 text-warning" />}
                     Customer #{idx + 1}
                     {isFS && (
-                      <Badge className="ml-1 text-[10px] font-semibold bg-warning/20 text-warning border-warning/30 px-1.5 py-0 normal-case tracking-normal">
+                      <Badge className="ml-1 text-xs font-semibold bg-warning/20 text-warning border-warning/30 px-1.5 py-0 normal-case tracking-normal">
                         Filling Station
                       </Badge>
                     )}
@@ -679,7 +675,7 @@ function AssignCustomerPage() {
                       })}
                     </select>
                     {rowErrors[row.uid]?.customer && (
-                      <p className="text-[11px] text-destructive font-normal">{rowErrors[row.uid].customer}</p>
+                      <p className="text-xs text-destructive font-normal">{rowErrors[row.uid].customer}</p>
                     )}
                   </div>
 
@@ -694,7 +690,7 @@ function AssignCustomerPage() {
                       onChange={e => updateSaleRow(row.uid, 'location', e.target.value)}
                     />
                     {rowErrors[row.uid]?.location && (
-                      <p className="text-[11px] text-destructive font-normal">{rowErrors[row.uid].location}</p>
+                      <p className="text-xs text-destructive font-normal">{rowErrors[row.uid].location}</p>
                     )}
                   </div>
 
@@ -711,7 +707,7 @@ function AssignCustomerPage() {
                       onChange={e => updateSaleRow(row.uid, 'quantity', e.target.value)}
                     />
                     {rowErrors[row.uid]?.quantity && (
-                      <p className="text-[11px] text-destructive font-normal">{rowErrors[row.uid].quantity}</p>
+                      <p className="text-xs text-destructive font-normal">{rowErrors[row.uid].quantity}</p>
                     )}
                   </div>
                 </div>
@@ -767,7 +763,7 @@ function AssignCustomerPage() {
                   />
                 )}
               </div>
-              <div className="flex items-center gap-4 mt-2 text-[11px]">
+              <div className="flex items-center gap-4 mt-2 text-xs">
                 {alreadyAllocatedQty > 0 && (
                   <span className="flex items-center gap-1.5">
                     <span className="size-2 rounded-full bg-muted" />

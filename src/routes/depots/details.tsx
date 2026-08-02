@@ -58,7 +58,7 @@ function getPfiVolumeStats(pfi: any) {
   const soldLitres = Number(pfi.soldQtyLitres ?? pfi.sold_qty_litres ?? pfi.soldVolumeLitres ?? pfi.soldQty ?? 0)
 
   let starting = startingLitres
-  let sold = soldLitres
+  const sold = soldLitres
 
   if (starting === 0 && Number(pfi.qtyVolumeMt ?? pfi.qty_volume_mt ?? 0) > 0) {
     starting = Number(pfi.qtyVolumeMt ?? pfi.qty_volume_mt)
@@ -124,16 +124,16 @@ function OrderDepositBreakdown({ order }: { order: any }) {
                   <div>
                     <div className="font-semibold text-foreground flex items-center gap-2">
                       <span>₦{amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                      <Badge variant="outline" className="text-[10px] bg-accent/10 text-accent border-accent/20 font-normal">Credit Deposit</Badge>
+                      <Badge variant="outline" className="text-xs bg-accent/10 text-accent border-accent/20 font-normal">Credit Deposit</Badge>
                     </div>
-                    <div className="text-[11px] text-muted-foreground font-mono mt-0.5">
+                    <div className="text-xs text-muted-foreground font-mono mt-0.5">
                       Ref: <span className="text-foreground font-normal">{ref}</span> &bull; {bankName} {depositor ? `(${depositor})` : ''}
                     </div>
                   </div>
                 </div>
-                <div className="text-right text-[11px] text-muted-foreground">
+                <div className="text-right text-xs text-muted-foreground">
                   <div className="font-normal text-foreground">{dateStr}</div>
-                  {dep.description && <div className="truncate max-w-[220px] text-muted-foreground text-[10px] mt-0.5">{dep.description}</div>}
+                  {dep.description && <div className="truncate max-w-[220px] text-muted-foreground text-xs mt-0.5">{dep.description}</div>}
                 </div>
               </div>
             )
@@ -368,6 +368,7 @@ function DepotDetailPage() {
         <PageHeader
       eyebrow="Operations"
       title={depot.name}
+      backAction={handleBack}
     />
 
         {/* Action Header Buttons */}
@@ -536,7 +537,7 @@ function DepotDetailPage() {
               <div>
                 <h4 className="font-semibold text-foreground text-sm flex items-center gap-2">
                   <span>Low Stock Warning &bull; Available Stock at {Math.round(remainingStockPct)}%</span>
-                  <Badge variant="destructive" className="text-[10px] uppercase font-semibold">Action Required</Badge>
+                  <Badge variant="destructive" className="text-xs uppercase font-semibold">Action Required</Badge>
                 </h4>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   Active PFI stock at {depot.name} is down to <strong>{totalPfiRemainingQty.toLocaleString()} Litres</strong> (out of {totalPfiStartingQty.toLocaleString()} L total allocated). Consider assigning a new PFI or updating capacity.
@@ -588,7 +589,7 @@ function DepotDetailPage() {
           >
             <FileText className="size-4" />
             <span>PFIs & Allocation</span>
-            <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${activeTab === 'pfis' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+            <span className={`px-1.5 py-0.2 rounded-full text-xs ${activeTab === 'pfis' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
               {pfis.length}
             </span>
           </button>
@@ -602,7 +603,7 @@ function DepotDetailPage() {
           >
             <ShoppingBag className="size-4" />
             <span>Orders & Sales</span>
-            <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${activeTab === 'orders' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+            <span className={`px-1.5 py-0.2 rounded-full text-xs ${activeTab === 'orders' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
               {ordersList.length}
             </span>
           </button>
@@ -616,7 +617,7 @@ function DepotDetailPage() {
           >
             <Activity className="size-4" />
             <span>Audit & Activity Log</span>
-            <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${activeTab === 'activity' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+            <span className={`px-1.5 py-0.2 rounded-full text-xs ${activeTab === 'activity' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
               {activityEvents.length}
             </span>
           </button>
@@ -641,31 +642,31 @@ function DepotDetailPage() {
             </CardHeader>
             <CardContent className="space-y-4 pt-4">
               <div>
-                <p className="text-[11px] text-muted-foreground font-semibold uppercase">Street Address</p>
+                <p className="text-xs text-muted-foreground font-semibold uppercase">Street Address</p>
                 <p className="text-sm text-foreground font-normal mt-0.5">{depot.address || 'N/A'}</p>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-[11px] text-muted-foreground font-semibold uppercase">LGA / City</p>
+                  <p className="text-xs text-muted-foreground font-semibold uppercase">LGA / City</p>
                   <p className="text-sm text-foreground font-normal mt-0.5">{depot.city || 'N/A'}</p>
                 </div>
                 <div>
-                  <p className="text-[11px] text-muted-foreground font-semibold uppercase">State</p>
+                  <p className="text-xs text-muted-foreground font-semibold uppercase">State</p>
                   <p className="text-sm text-foreground font-normal mt-0.5">{depot.state || 'N/A'}</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-[11px] text-muted-foreground font-semibold uppercase">Country</p>
+                  <p className="text-xs text-muted-foreground font-semibold uppercase">Country</p>
                   <p className="text-sm text-foreground font-normal mt-0.5">{depot.country || 'Nigeria'}</p>
                 </div>
                 <div>
-                  <p className="text-[11px] text-muted-foreground font-semibold uppercase">Postcode</p>
+                  <p className="text-xs text-muted-foreground font-semibold uppercase">Postcode</p>
                   <p className="text-sm text-foreground font-mono mt-0.5">{depot.postcode || 'N/A'}</p>
                 </div>
               </div>
               <div className="pt-2 border-t">
-                <p className="text-[11px] text-muted-foreground font-semibold uppercase">System Database ID</p>
+                <p className="text-xs text-muted-foreground font-semibold uppercase">System Database ID</p>
                 <p className="text-xs font-mono text-muted-foreground mt-0.5 truncate select-all">{activeDepotId}</p>
               </div>
             </CardContent>
@@ -686,7 +687,7 @@ function DepotDetailPage() {
             </CardHeader>
             <CardContent className="space-y-4 pt-4">
               <div>
-                <p className="text-[11px] text-muted-foreground font-semibold uppercase">Operating Schedule</p>
+                <p className="text-xs text-muted-foreground font-semibold uppercase">Operating Schedule</p>
                 <p className="text-sm text-foreground font-normal mt-0.5 flex items-center gap-1.5">
                   <Activity className="size-3.5 text-accent" />
                   <span>24 Hours / 7 Days a week</span>
@@ -694,12 +695,12 @@ function DepotDetailPage() {
               </div>
 
               <div>
-                <p className="text-[11px] text-muted-foreground font-semibold uppercase">Hub Status</p>
+                <p className="text-xs text-muted-foreground font-semibold uppercase">Hub Status</p>
                 <div className="mt-1">{getStatusBadge(depot.status)}</div>
               </div>
 
               <div>
-                <p className="text-[11px] text-muted-foreground font-semibold uppercase">Assigned Staff Members ({staffList.length})</p>
+                <p className="text-xs text-muted-foreground font-semibold uppercase">Assigned Staff Members ({staffList.length})</p>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {staffList.length > 0 ? (
                     staffList.map((s) => {
@@ -710,7 +711,7 @@ function DepotDetailPage() {
                       const fullName = typeof s === 'object' ? (`${fn} ${sn}`.trim() || s.full_name || s.email || 'Staff') : String(s)
                       return (
                         <div key={sId} className="flex items-center gap-2 bg-secondary px-3 py-1.5 rounded-full text-xs font-normal">
-                          <div className="size-5 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-semibold text-primary">
+                          <div className="size-5 rounded-full bg-primary/20 flex items-center justify-center text-xs font-semibold text-primary">
                             {initials || '?'}
                           </div>
                           <span className="text-foreground">{fullName}</span>
@@ -759,7 +760,7 @@ function DepotDetailPage() {
                       <div key={accId} className="flex flex-col justify-between p-4 border rounded-xl bg-card hover:border-primary/50 transition-colors duration-250 ease-luxe">
                         <div className="flex items-start justify-between gap-2">
                           <div>
-                            <Badge variant="outline" className="text-[10px] font-mono mb-1.5 bg-primary/5 text-primary border-primary/20">
+                            <Badge variant="outline" className="text-xs font-mono mb-1.5 bg-primary/5 text-primary border-primary/20">
                               {acc.bankCode ? `${acc.bankName} (${acc.bankCode})` : acc.bankName}
                             </Badge>
                             <h4 className="text-sm font-semibold text-foreground">{acc.accountName}</h4>
@@ -771,7 +772,7 @@ function DepotDetailPage() {
 
                         <div className="mt-4 pt-3 border-t flex items-center justify-between">
                           <div>
-                            <p className="text-[10px] text-muted-foreground uppercase font-semibold">Account Number</p>
+                            <p className="text-xs text-muted-foreground uppercase font-semibold">Account Number</p>
                             <p className="text-lg font-mono font-semibold text-primary">{acc.accountNumber}</p>
                           </div>
                           <Button
@@ -1116,7 +1117,7 @@ function DepotDetailPage() {
                                 {pfi.pfiNumber || pfi.pfi_number}
                               </span>
                               {pfiDateStr && (
-                                <span className="text-[10px] text-muted-foreground font-mono">
+                                <span className="text-xs text-muted-foreground font-mono">
                                   {pfiDateStr}
                                 </span>
                               )}
@@ -1146,7 +1147,7 @@ function DepotDetailPage() {
                       </div>
 
                       {(pfi.vesselName || pfi.vessel_name) && (
-                        <div className="mt-4 pt-3 border-t border-dashed flex justify-between items-center text-[11px] text-muted-foreground">
+                        <div className="mt-4 pt-3 border-t border-dashed flex justify-between items-center text-xs text-muted-foreground">
                           <span className="truncate max-w-[55%]">Vessel: <strong className="text-foreground">{pfi.vesselName || pfi.vessel_name}</strong></span>
                           {(pfi.unitPrice || pfi.unit_price) && (
                             <span className="font-mono font-normal text-foreground">₦{Number(pfi.unitPrice || pfi.unit_price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} / L</span>
@@ -1196,7 +1197,7 @@ function DepotDetailPage() {
  }`}
                     >
                       <span>{st}</span>
-                      <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${isActive ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-muted text-muted-foreground'
+                      <span className={`px-1.5 py-0.2 rounded-full text-xs ${isActive ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-muted text-muted-foreground'
  }`}>
                         {count}
                       </span>
@@ -1258,7 +1259,7 @@ function DepotDetailPage() {
                             >
                               {order.status}
                             </Badge>
-                            <Badge variant="outline" className="capitalize text-[10px] font-mono">
+                            <Badge variant="outline" className="capitalize text-xs font-mono">
                               {order.deliveryType || order.delivery_type || 'pickup'}
                             </Badge>
                           </div>
@@ -1277,7 +1278,7 @@ function DepotDetailPage() {
                             <div className="text-sm font-semibold text-foreground">
                               ₦{Number(order.totalAmount ?? order.total_amount ?? order.amount ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </div>
-                            <div className="text-[10px] text-muted-foreground font-mono">
+                            <div className="text-xs text-muted-foreground font-mono">
                               {ordDateStr}
                             </div>
                           </div>
@@ -1347,19 +1348,19 @@ function DepotDetailPage() {
                   const IconComp = evt.icon
                   return (
                     <div key={evt.id} className="relative flex items-start justify-between gap-4 group">
-                      <div className="absolute -left-6 top-1 size-5 rounded-full bg-background border-2 border-primary flex items-center justify-center text-primary text-[10px]">
+                      <div className="absolute -left-6 top-1 size-5 rounded-full bg-background border-2 border-primary flex items-center justify-center text-primary text-xs">
                         <IconComp className="size-2.5" />
                       </div>
                       <div className="space-y-0.5">
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-semibold text-foreground">{evt.title}</span>
-                          <Badge variant="outline" className={`text-[10px] ${evt.badgeColor}`}>
+                          <Badge variant="outline" className={`text-xs ${evt.badgeColor}`}>
                             {evt.type.toUpperCase()}
                           </Badge>
                         </div>
                         <p className="text-xs text-muted-foreground">{evt.description}</p>
                       </div>
-                      <span className="text-[11px] text-muted-foreground font-mono shrink-0">
+                      <span className="text-xs text-muted-foreground font-mono shrink-0">
                         {evt.date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}{' '}
                         {evt.date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
                       </span>

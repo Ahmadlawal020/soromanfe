@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
+import { FilterBar } from '#/components/FilterBar'
 import { PageHeader } from '#/components/PageHeader'
 import { StatCard, StatCardGrid } from '#/components/ui/stat-card'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
@@ -157,56 +158,50 @@ function DepositsDashboard() {
         ))}
       </StatCardGrid>
 
+      <FilterBar>
+      <div className="relative flex-1 max-w-md">
+      <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+      <Input
+      type="text"
+      placeholder="Search description, reference, or customer..."
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+      className="pl-10 pr-8"
+      />
+      {searchTerm && (
+      <button
+      onClick={() => setSearchTerm('')}
+      className="absolute right-3 top-1/2 -translate-y-1/2 size-5 rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground flex items-center justify-center cursor-pointer transition-colors duration-250 ease-luxe"
+      aria-label="Clear search"
+      >
+      <X className="size-2.5" />
+      </button>
+      )}
+      </div>
+      {/* Time Filter Buttons */}
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
+      <span className="text-xs font-normal text-muted-foreground flex items-center gap-1 mr-1 shrink-0">
+      <Filter className="size-3" /> Range:
+      </span>
+      {(['all', 'today', 'week', 'month'] as const).map((t) => (
+      <Button
+      key={t}
+      variant={timeFilter === t ? 'default' : 'outline'}
+      size="sm"
+      className="h-8 text-xs capitalize whitespace-nowrap"
+      onClick={() => setTimeFilter(t)}
+      >
+      {t === 'all' ? 'All Time' : t === 'week' ? 'This Week' : t === 'month' ? 'This Month' : 'Today'}
+      </Button>
+      ))}
+      </div>
+      </FilterBar>
+
       <Card>
-        <CardHeader className="border-b border-border pb-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <CardTitle>Deposit Transactions</CardTitle>
-              <CardDescription>All recorded deposits across customers</CardDescription>
-            </div>
-          </div>
-        </CardHeader>
+
         <CardContent className="pt-6">
           {/* Top Search & Time Filter Controls */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search description, reference, or customer..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-8"
- />
-              {searchTerm && (
-                <button
-                  onClick={() => setSearchTerm('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 size-5 rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground flex items-center justify-center cursor-pointer transition-colors duration-250 ease-luxe"
-                  aria-label="Clear search"
- >
-                  <X className="size-2.5" />
-                </button>
-              )}
-            </div>
-
-            {/* Time Filter Buttons */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
-              <span className="text-xs font-normal text-muted-foreground flex items-center gap-1 mr-1 shrink-0">
-                <Filter className="size-3" /> Range:
-              </span>
-              {(['all', 'today', 'week', 'month'] as const).map((t) => (
-                <Button
-                  key={t}
-                  variant={timeFilter === t ? 'default' : 'outline'}
-                  size="sm"
-                  className="h-8 text-xs capitalize whitespace-nowrap"
-                  onClick={() => setTimeFilter(t)}
- >
-                  {t === 'all' ? 'All Time' : t === 'week' ? 'This Week' : t === 'month' ? 'This Month' : 'Today'}
-                </Button>
-              ))}
-            </div>
-          </div>
+          
 
           {/* Payment Method Tabs & Reset */}
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3 mb-6">
@@ -218,7 +213,7 @@ function DepositsDashboard() {
                 onClick={() => setFilterType('all')}
  >
                 All Deposits
-                <Badge variant={filterType === 'all' ? 'secondary' : 'outline'} className="text-[10px] px-1.5 py-0 h-4">
+                <Badge variant={filterType === 'all' ? 'secondary' : 'outline'} className="text-xs px-1.5 py-0 h-4">
                   {deposits.length}
                 </Badge>
               </Button>
@@ -231,7 +226,7 @@ function DepositsDashboard() {
  >
                 <Landmark className={cn('size-3.5', filterType === 'manual' ? 'text-primary-foreground' : 'text-warning')} />
                 Manual Transfers
-                <Badge variant={filterType === 'manual' ? 'secondary' : 'outline'} className="text-[10px] px-1.5 py-0 h-4">
+                <Badge variant={filterType === 'manual' ? 'secondary' : 'outline'} className="text-xs px-1.5 py-0 h-4">
                   {manualDeposits.length}
                 </Badge>
               </Button>
@@ -244,7 +239,7 @@ function DepositsDashboard() {
  >
                 <ArrowRightLeft className={cn('size-3.5', filterType === 'paystack' ? 'text-primary-foreground' : 'text-muted-foreground')} />
                 Paystack
-                <Badge variant={filterType === 'paystack' ? 'secondary' : 'outline'} className="text-[10px] px-1.5 py-0 h-4">
+                <Badge variant={filterType === 'paystack' ? 'secondary' : 'outline'} className="text-xs px-1.5 py-0 h-4">
                   {paystackDeposits.length}
                 </Badge>
               </Button>

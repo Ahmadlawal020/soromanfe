@@ -1,8 +1,9 @@
 import { useState } from 'react'
+import { FilterBar } from '#/components/FilterBar'
 import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Button } from '#/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '#/components/ui/card'
+import { Card, CardContent } from '#/components/ui/card'
 import { Input } from '#/components/ui/input'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '#/components/ui/table'
 import { Package, DollarSign, Search, X, Wallet, MapPin } from 'lucide-react'
@@ -91,34 +92,30 @@ function PayableDangoteOrdersPage() {
           </CardContent>
           </Card>
           </div>
+          <FilterBar>
+        <div className="relative w-full sm:w-64">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground size-4" />
+        <Input
+        type="text"
+        placeholder="Search request ID, customer..."
+        value={searchTerm}
+        onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1) }}
+        className="pl-10"
+        />
+        {searchTerm && (
+        <button
+        onClick={() => { setSearchTerm(''); setCurrentPage(1) }}
+        className="absolute right-3 top-1/2 -translate-y-1/2 size-5 rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground flex items-center justify-center cursor-pointer transition-colors"
+        aria-label="Clear search"
+        >
+        <X className="size-2.5" />
+        </button>
+        )}
+        </div>
+          </FilterBar>
+
           <Card>
-          <CardHeader className="border-b border-border">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-          <CardTitle>Payable Dangote Order Register</CardTitle>
-          <CardDescription>Approved unpaid Dangote orders with sufficient customer wallet balance</CardDescription>
-          </div>
-          <div className="relative w-full sm:w-64">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground size-4" />
-          <Input
-          type="text"
-          placeholder="Search request ID, customer..."
-          value={searchTerm}
-          onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1) }}
-          className="pl-10"
-          />
-          {searchTerm && (
-          <button
-          onClick={() => { setSearchTerm(''); setCurrentPage(1) }}
-          className="absolute right-3 top-1/2 -translate-y-1/2 size-5 rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground flex items-center justify-center cursor-pointer transition-colors"
-          aria-label="Clear search"
-          >
-          <X className="size-2.5" />
-          </button>
-          )}
-          </div>
-          </div>
-          </CardHeader>
+          
           <CardContent>
           {filteredOrders.length === 0 ? (
           <PageEmpty

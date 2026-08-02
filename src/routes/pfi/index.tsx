@@ -15,6 +15,7 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '#
 import { PageLoader } from '#/components/PageLoader'
 import { PageError } from '#/components/PageError'
 import { PageEmpty } from '#/components/PageEmpty'
+import { FilterBar } from '#/components/FilterBar'
 import { PfiDetailDialog } from '#/components/PfiDetailDialog'
 import { PfiCloseDialog } from '#/components/PfiCloseDialog'
 import { MICRO, PANEL } from '#/lib/panel'
@@ -181,27 +182,28 @@ function PFIDashboard() {
         </div>
       )}
 
-      <div className={cn(PANEL)}>
-        <div className="flex flex-wrap items-center gap-2 border-b border-foreground/10 p-3">
-          <div className="relative min-w-[12rem] flex-1">
-            <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              className="pl-8" placeholder="Search PFI number, vessel, location…"
-              value={search} onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-          <NativeSelect className="w-40" value={status} onChange={(e) => setStatus(e.target.value)}>
-            <option value="all">All statuses</option>
-            <option value="active">Active</option>
-            <option value="finished">Finished</option>
-          </NativeSelect>
-          {hasFilters && (
-            <Button variant="ghost" size="sm" onClick={() => { setSearch(''); setStatus('all') }}>
-              <X data-icon="inline-start" />
-              Clear
-            </Button>
-          )}
+      <FilterBar>
+        <div className="relative min-w-[12rem] flex-1">
+        <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+        className="pl-8" placeholder="Search PFI number, vessel, location…"
+        value={search} onChange={(e) => setSearch(e.target.value)}
+        />
         </div>
+        <NativeSelect className="w-40" value={status} onChange={(e) => setStatus(e.target.value)}>
+        <option value="all">All statuses</option>
+        <option value="active">Active</option>
+        <option value="finished">Finished</option>
+        </NativeSelect>
+        {hasFilters && (
+        <Button variant="ghost" size="sm" onClick={() => { setSearch(''); setStatus('all') }}>
+        <X data-icon="inline-start" />
+        Clear
+        </Button>
+        )}
+      </FilterBar>
+
+      <div className={cn(PANEL)}>
 
         {rows.length === 0 ? (
           <PageEmpty

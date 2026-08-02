@@ -1,17 +1,16 @@
 import { useState, useEffect } from 'react'
+import { FilterBar } from '#/components/FilterBar'
 import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '#/components/ui/card'
+import { Card, CardContent } from '#/components/ui/card'
 import { Input } from '#/components/ui/input'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '#/components/ui/select'
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '#/components/ui/table'
-import {
-  Search, X, RefreshCw, FileText, Eye, Clock, CheckCircle, XCircle, Package,
-} from 'lucide-react'
+import { Search, X, FileText, Eye, Clock, CheckCircle, XCircle, Package } from 'lucide-react'
 import { useDangoteOrderRequests } from '#/lib/hooks/useDangoteOrders'
 import { PageLoader } from '#/components/PageLoader'
 import { PageError } from '#/components/PageError'
@@ -85,40 +84,36 @@ function DangoteOrderRequestPage() {
     />
 
       {/* Table */}
+      <FilterBar>
+        <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative w-full sm:w-64">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+        <Input
+        placeholder="Search customer, product, ID…"
+        className="pl-9 pr-9"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        {searchTerm && (
+        <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer">
+        <X className="size-4" />
+        </button>
+        )}
+        </div>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+        <SelectTrigger className="w-full sm:w-40"><SelectValue placeholder="All Status" /></SelectTrigger>
+        <SelectContent>
+        <SelectItem value="all">All Status</SelectItem>
+        <SelectItem value="Pending Review">Pending Review</SelectItem>
+        <SelectItem value="Approved">Approved</SelectItem>
+        <SelectItem value="Rejected">Rejected</SelectItem>
+        </SelectContent>
+        </Select>
+        </div>
+      </FilterBar>
+
       <Card>
-        <CardHeader className="border-b border-border p-4 sm:p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <CardTitle className="text-lg">Order Request Queue</CardTitle>
-              <CardDescription>Customer requests awaiting review or already processed</CardDescription>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <div className="relative w-full sm:w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search customer, product, ID…"
-                  className="pl-9 pr-9"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                {searchTerm && (
-                  <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer">
-                    <X className="size-4" />
-                  </button>
-                )}
-              </div>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full sm:w-40"><SelectValue placeholder="All Status" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="Pending Review">Pending Review</SelectItem>
-                  <SelectItem value="Approved">Approved</SelectItem>
-                  <SelectItem value="Rejected">Rejected</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </CardHeader>
+        
 
         <CardContent className="p-0">
           {requests.length === 0 ? (

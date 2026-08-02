@@ -603,7 +603,7 @@ function DeliveryOperationsPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 pt-2 border-t border-border">
           <div className="flex flex-col gap-1">
-            <label className="text-[10px] font-semibold text-muted-foreground uppercase">Status</label>
+            <label className="text-xs font-semibold text-muted-foreground uppercase">Status</label>
             <select aria-label="Filter by status" value={statusFilter}
               onChange={e => setStatusFilter(e.target.value as StatusFilter)}
               className="h-8 rounded-md border border-border bg-background text-foreground px-2 text-xs">
@@ -614,7 +614,7 @@ function DeliveryOperationsPage() {
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-[10px] font-semibold text-muted-foreground uppercase">Truck</label>
+            <label className="text-xs font-semibold text-muted-foreground uppercase">Truck</label>
             <select aria-label="Filter by truck" value={truckFilter}
               onChange={e => setTruckFilter(e.target.value)}
               className="h-8 rounded-md border border-border bg-background text-foreground px-2 text-xs">
@@ -626,7 +626,7 @@ function DeliveryOperationsPage() {
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-[10px] font-semibold text-muted-foreground uppercase">Customer</label>
+            <label className="text-xs font-semibold text-muted-foreground uppercase">Customer</label>
             <select aria-label="Filter by customer" value={customerFilter}
               onChange={e => setCustomerFilter(e.target.value)}
               className="h-8 rounded-md border border-border bg-background text-foreground px-2 text-xs">
@@ -638,7 +638,7 @@ function DeliveryOperationsPage() {
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-[10px] font-semibold text-muted-foreground uppercase">Customer Type</label>
+            <label className="text-xs font-semibold text-muted-foreground uppercase">Customer Type</label>
             <select aria-label="Filter by Customer Type" value={customerTypeFilter}
               onChange={e => setCustomerTypeFilter(e.target.value as any)}
               className="h-8 rounded-md border border-border bg-background text-foreground px-2 text-xs">
@@ -649,7 +649,7 @@ function DeliveryOperationsPage() {
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-[10px] font-semibold text-muted-foreground uppercase">Allocation Code</label>
+            <label className="text-xs font-semibold text-muted-foreground uppercase">Allocation Code</label>
             <select aria-label="Filter by allocation code" value={codeFilter}
               onChange={e => setCodeFilter(e.target.value)}
               className="h-8 rounded-md border border-border bg-background text-foreground px-2 text-xs font-normal">
@@ -771,12 +771,12 @@ function DeliveryOperationsPage() {
                     {(distinctProducts.length > 0 || distinctDepots.length > 0) && (
                       <div className="flex items-center justify-between gap-2 text-xs pt-0.5">
                         {distinctProducts.length > 0 && (
-                          <span className="font-semibold text-accent bg-accent/80 dark:bg-accent/60 px-2 py-0.5 rounded text-[11px]">
+                          <span className="font-semibold text-accent bg-accent/80 dark:bg-accent/60 px-2 py-0.5 rounded text-xs">
                             {distinctProducts.join(', ')}
                           </span>
                         )}
                         {distinctDepots.length > 0 && (
-                          <span className="truncate text-muted-foreground font-normal text-[11px]">
+                          <span className="truncate text-muted-foreground font-normal text-xs">
                             📍 {distinctDepots.join(', ')}
                           </span>
                         )}
@@ -785,7 +785,7 @@ function DeliveryOperationsPage() {
 
                     {/* PFI Reference */}
                     <div>
-                      <div className="text-[10px] font-semibold text-muted-foreground uppercase mb-1">PFI Reference</div>
+                      <div className="text-xs font-semibold text-muted-foreground uppercase mb-1">PFI Reference</div>
                       {distinctPfis.length > 0 ? (
                         <div className="flex flex-wrap gap-1.5">
                           {distinctPfis.slice(0, 3).map(pfi => (
@@ -814,12 +814,12 @@ function DeliveryOperationsPage() {
                     {/* Status Badges */}
                     <div className="flex items-center gap-2 flex-wrap">
                       {loadedCount > 0 && (
-                        <span className="text-[11px] font-normal text-warning bg-warning/10 px-2 py-0.5 rounded-full border border-warning/40 dark:border-warning/20">
+                        <span className="text-xs font-normal text-warning bg-warning/10 px-2 py-0.5 rounded-full border border-warning/40 dark:border-warning/20">
                           {loadedCount} in transit ({fmtQty(loadedQty)} L)
                         </span>
                       )}
                       {soldCount > 0 && (
-                        <span className="text-[11px] font-normal text-accent bg-accent/10 px-2 py-0.5 rounded-full border border-accent/40 dark:border-accent/20">
+                        <span className="text-xs font-normal text-accent bg-accent/10 px-2 py-0.5 rounded-full border border-accent/40 dark:border-accent/20">
                           {soldCount} sold ({fmtQty(soldQty)} L)
                         </span>
                       )}
@@ -833,7 +833,7 @@ function DeliveryOperationsPage() {
                           {(() => { try { return format(parseISO(latestDate), 'dd MMM yyyy') } catch { return latestDate } })()}
                         </span>
                         {distinctDestinations.length > 0 && (
-                          <span className="truncate max-w-[140px] text-[11px] text-muted-foreground/80 font-normal" title={distinctDestinations.join(', ')}>
+                          <span className="truncate max-w-[140px] text-xs text-muted-foreground/80 font-normal" title={distinctDestinations.join(', ')}>
                             To: {distinctDestinations[0]} {distinctDestinations.length > 1 ? `+${distinctDestinations.length - 1}` : ''}
                           </span>
                         )}

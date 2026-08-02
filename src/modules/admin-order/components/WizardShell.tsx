@@ -78,7 +78,7 @@ export function WizardShell({
                 {!nextPending && <ArrowRight data-icon="inline-end" />}
               </Button>
               {nextDisabled && hint && (
-                <p className="text-right text-[0.65rem] text-muted-foreground/70">{hint}</p>
+                <p className="text-right text-xs text-muted-foreground/70">{hint}</p>
               )}
             </div>
           )}

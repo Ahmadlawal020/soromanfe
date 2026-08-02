@@ -91,6 +91,7 @@ function UserDetailPage() {
       eyebrow="Admin"
       title="User Details"
       description="View and manage user account information"
+      backAction={handleBack}
     />
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={() => navigate({ to: '/admin/form', state: { staff, isEdit: true } as any })}><Edit className="size-4" /> Edit</Button>

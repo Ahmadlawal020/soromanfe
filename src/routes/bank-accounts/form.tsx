@@ -7,17 +7,7 @@ import { Label } from '#/components/ui/label'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '#/components/ui/select'
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '#/components/ui/card'
 import { Badge } from '#/components/ui/badge'
-import {
-  ArrowLeft,
-  Landmark,
-  Building2,
-  Warehouse,
-  Loader2,
-  Search,
-  Check,
-  X,
-  Star,
-} from 'lucide-react'
+import { ArrowLeft, Landmark, Warehouse, Loader2, Search, Check, X, Star } from 'lucide-react'
 import {
   useCreateBankAccount,
   useUpdateBankAccount,
@@ -425,7 +415,7 @@ function BankAccountForm() {
             {/* Selected Depot Chips */}
             {selectedDepotIds.length > 0 && (
               <div className="p-3 bg-muted/30 border border-border/40 rounded-xl">
-                <p className="text-[11px] font-semibold uppercase text-muted-foreground mb-2">
+                <p className="text-xs font-semibold uppercase text-muted-foreground mb-2">
                   Currently Assigned ({selectedDepotIds.length}):
                 </p>
                 <div className="flex flex-wrap gap-1.5">
@@ -482,10 +472,10 @@ function BankAccountForm() {
                           <span className={`font-semibold text-xs ${isChecked ? 'text-primary' : 'text-foreground'}`}>
                             {depot.name}
                           </span>
-                          <span className="text-[10px] font-mono opacity-80">({depot.code})</span>
+                          <span className="text-xs font-mono opacity-80">({depot.code})</span>
                         </div>
                         {depot.city && (
-                          <p className="text-[11px] text-muted-foreground truncate mt-0.5">{depot.city}, {depot.state}</p>
+                          <p className="text-xs text-muted-foreground truncate mt-0.5">{depot.city}, {depot.state}</p>
                         )}
                       </div>
 

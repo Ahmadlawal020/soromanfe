@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
+import { FilterBar } from '#/components/FilterBar'
 import { PageHeader } from '#/components/PageHeader'
 import { StatCard } from '#/components/ui/stat-card'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '#/components/ui/card'
+import { Card, CardContent } from '#/components/ui/card'
 import { Input } from '#/components/ui/input'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '#/components/ui/table'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '#/components/ui/select'
@@ -85,28 +86,27 @@ function TrucksDashboard() {
         </div>
       )}
 
+      <FilterBar>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <div className="relative flex-1 sm:w-64">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground size-4" />
+        <Input type="text" placeholder="Search plate, model, driver..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
+        {searchTerm && <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 size-5 rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground flex items-center justify-center cursor-pointer transition-colors duration-250 ease-luxe" aria-label="Clear search"><X className="size-2.5" /></button>}
+        </div>
+        <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+        <SelectTrigger className="w-full sm:w-[180px]"><SelectValue placeholder="All Statuses" /></SelectTrigger>
+        <SelectContent>
+        <SelectItem value="all">All Statuses</SelectItem>
+        <SelectItem value="In Transit">In Transit</SelectItem>
+        <SelectItem value="Idle">Idle</SelectItem>
+        <SelectItem value="Maintenance">Maintenance</SelectItem>
+        </SelectContent>
+        </Select>
+        </div>
+      </FilterBar>
+
       <Card>
-        <CardHeader className="border-b border-border">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div><CardTitle>Fleet Directory</CardTitle><CardDescription>Browse vehicle status, assigned operators, and fuel metrics</CardDescription></div>
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-              <div className="relative flex-1 sm:w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground size-4" />
-                <Input type="text" placeholder="Search plate, model, driver..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
-                {searchTerm && <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 size-5 rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground flex items-center justify-center cursor-pointer transition-colors duration-250 ease-luxe" aria-label="Clear search"><X className="size-2.5" /></button>}
-              </div>
-              <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                <SelectTrigger className="w-full sm:w-[180px]"><SelectValue placeholder="All Statuses" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="In Transit">In Transit</SelectItem>
-                  <SelectItem value="Idle">Idle</SelectItem>
-                  <SelectItem value="Maintenance">Maintenance</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </CardHeader>
+        
         <CardContent>
           {isLoading ? (
             <PageLoader message="Loading trucks..." />

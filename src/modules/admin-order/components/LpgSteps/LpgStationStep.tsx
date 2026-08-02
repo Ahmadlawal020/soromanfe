@@ -5,7 +5,7 @@ import {
   Flame,
   MapPin,
 } from 'lucide-react'
-import { nigeriaStates, nigeriaLgas } from '#/lib/nigeria-data'
+import { nigeriaStates } from '#/lib/nigeria-data'
 import type { LpgOrderWizardReturn } from '../../hooks/useLpgOrderWizard'
 
 interface LpgStationStepProps {

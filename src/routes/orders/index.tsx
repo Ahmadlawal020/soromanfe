@@ -41,7 +41,7 @@ const ALL = 'all'
 /** A removable active-filter chip. */
 function FilterChip({ label, onClear }: { label: string; onClear: () => void }) {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-foreground/15 bg-muted/40 py-0.5 pr-1 pl-2.5 text-[0.65rem] uppercase">
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-foreground/15 bg-muted/40 py-0.5 pr-1 pl-2.5 text-xs uppercase">
       {label}
       <button
         type="button"
@@ -435,7 +435,7 @@ function OrdersDashboard() {
 
                         {showSubtotals && (
                           <TableRow className="bg-muted/40 hover:bg-muted/40">
-                            <TableCell colSpan={6} className={cn(MICRO, 'text-[0.6rem] text-muted-foreground')}>
+                            <TableCell colSpan={6} className={cn(MICRO, 'text-xs text-muted-foreground')}>
                               {day} · {rows.length} order{rows.length === 1 ? '' : 's'}
                             </TableCell>
                             <TableCell className="text-right font-semibold tabular-nums">

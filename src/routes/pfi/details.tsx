@@ -7,7 +7,7 @@ import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
 import { Badge } from '#/components/ui/badge'
 import { Separator } from '#/components/ui/separator'
-import { Loader2, ArrowLeft, Save, CheckCircle, FileText, Edit, Trash2, User, Calendar, Banknote, MapPin, Package, ShieldAlert, Scale, DropletIcon } from 'lucide-react'
+import { Loader2, Save, CheckCircle, FileText, Edit, Trash2, User, Calendar, Banknote, MapPin, Package, ShieldAlert, Scale, DropletIcon } from 'lucide-react'
 import { usePfiDetails, useUpdatePfi, useDeletePfi } from '#/lib/hooks/usePfis'
 import { useAdminList } from '#/lib/hooks/useAdmin'
 import { useToast } from '#/lib/hooks/useToast'
@@ -396,7 +396,6 @@ function PFIDetails() {
             )}
           </CardContent>
         </Card>
-
 
         {/* Card 5: Closure Card */}
         <div className="md:col-span-2">

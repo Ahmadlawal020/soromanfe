@@ -276,7 +276,7 @@ function FleetDirectoryPage() {
                       <TableCell className="font-mono font-normal">
                         {r.truck.plateNumber}
                         {!r.truck.isActive && (
-                          <span className="ml-1.5 text-[0.65rem] text-muted-foreground">retired</span>
+                          <span className="ml-1.5 text-xs text-muted-foreground">retired</span>
                         )}
                       </TableCell>
                       <TableCell>
@@ -294,7 +294,7 @@ function FleetDirectoryPage() {
                           )}
                         </div>
                         {r.status.reason && (
-                          <p className="mt-0.5 max-w-[12rem] truncate text-[0.65rem] text-muted-foreground">
+                          <p className="mt-0.5 max-w-[12rem] truncate text-xs text-muted-foreground">
                             {r.status.reason}
                           </p>
                         )}

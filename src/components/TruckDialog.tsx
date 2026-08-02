@@ -173,7 +173,7 @@ export function TruckDialog({
                 disabled={rating === 'Excellent' || rating === 'Good'}
               />
               {(rating === 'Excellent' || rating === 'Good') && (
-                <p className="text-[0.65rem] text-muted-foreground/70">
+                <p className="text-xs text-muted-foreground/70">
                   A reason is only kept for Fair and Bad.
                 </p>
               )}
@@ -255,7 +255,7 @@ export function TruckDialog({
           </Button>
         </DialogFooter>
         {!ready && (
-          <p className="text-right text-[0.65rem] text-muted-foreground/70">
+          <p className="text-right text-xs text-muted-foreground/70">
             Plate number and driver name are required
           </p>
         )}

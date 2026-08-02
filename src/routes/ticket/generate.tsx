@@ -1,10 +1,7 @@
 import { useMemo, useState } from 'react'
 import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import {
-  ArrowLeft, Plus, Trash2, Truck, Printer, Loader2, Search,
-  LogIn, PackageCheck, LogOut, CircleDashed,
-} from 'lucide-react'
+import { Plus, Trash2, Truck, Printer, Loader2, Search, LogIn, PackageCheck, LogOut, CircleDashed } from 'lucide-react'
 
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
@@ -269,7 +266,7 @@ function GenerateTicketsPage() {
                       {drafts.map((d, i) => (
                         <div key={i} className="grid gap-3 sm:grid-cols-[7rem_1fr_1fr_9rem_auto]">
                           <div className="space-y-1.5">
-                            <label className={cn(MICRO, 'block text-[0.6rem] text-muted-foreground')}>
+                            <label className={cn(MICRO, 'block text-xs text-muted-foreground')}>
                               Quantity
                             </label>
                             <Input
@@ -281,7 +278,7 @@ function GenerateTicketsPage() {
                             />
                           </div>
                           <div className="space-y-1.5">
-                            <label className={cn(MICRO, 'block text-[0.6rem] text-muted-foreground')}>
+                            <label className={cn(MICRO, 'block text-xs text-muted-foreground')}>
                               Plate number
                             </label>
                             <Input
@@ -291,7 +288,7 @@ function GenerateTicketsPage() {
                             />
                           </div>
                           <div className="space-y-1.5">
-                            <label className={cn(MICRO, 'block text-[0.6rem] text-muted-foreground')}>
+                            <label className={cn(MICRO, 'block text-xs text-muted-foreground')}>
                               Driver
                             </label>
                             <Input
@@ -301,7 +298,7 @@ function GenerateTicketsPage() {
                             />
                           </div>
                           <div className="space-y-1.5">
-                            <label className={cn(MICRO, 'block text-[0.6rem] text-muted-foreground')}>
+                            <label className={cn(MICRO, 'block text-xs text-muted-foreground')}>
                               Phone
                             </label>
                             <Input
@@ -336,7 +333,7 @@ function GenerateTicketsPage() {
                     <div className={cn(PANEL_FOOTER, 'justify-between')}>
                       <div className="min-w-0">
                         {problems.length > 0 && (
-                          <p className="truncate text-[0.65rem] text-muted-foreground/70">
+                          <p className="truncate text-xs text-muted-foreground/70">
                             {problems[0]}
                             {problems.length > 1 && ` · +${problems.length - 1} more`}
                           </p>

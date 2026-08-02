@@ -151,7 +151,7 @@ export default function CommandPalette({ open, onOpenChange }: CommandPalettePro
             className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
             autoFocus
           />
-          <kbd className="hidden sm:inline-flex items-center gap-1 rounded bg-muted px-2 py-0.5 text-[10px] font-mono text-muted-foreground border border-border">
+          <kbd className="hidden sm:inline-flex items-center gap-1 rounded bg-muted px-2 py-0.5 text-xs font-mono text-muted-foreground border border-border">
             ESC
           </kbd>
         </div>
@@ -192,7 +192,7 @@ export default function CommandPalette({ open, onOpenChange }: CommandPalettePro
                       <div className="min-w-0 truncate">
                         <div className="font-normal truncate">{item.title}</div>
                         <div
-                          className={`text-[11px] truncate ${
+                          className={`text-xs truncate ${
  isSelected ? 'text-primary-foreground/80' : 'text-muted-foreground'
  }`}
                         >
@@ -212,7 +212,7 @@ export default function CommandPalette({ open, onOpenChange }: CommandPalettePro
           )}
         </div>
 
-        <div className="border-t border-border px-4 py-2 bg-muted/30 flex items-center justify-between text-[11px] text-muted-foreground">
+        <div className="border-t border-border px-4 py-2 bg-muted/30 flex items-center justify-between text-xs text-muted-foreground">
           <div className="flex items-center gap-3">
             <span>
               <kbd className="px-1 py-0.5 rounded bg-muted border border-border">↑↓</kbd> navigate

@@ -66,7 +66,7 @@ export function DangoteProductStep({ wizard }: DangoteProductStepProps) {
                 <div>
                   <div className="flex justify-between items-start">
                     <p className="font-semibold text-sm text-foreground">{product.name}</p>
-                    <Badge variant="outline" className="text-[10px] uppercase font-mono">{product.sku}</Badge>
+                    <Badge variant="outline" className="text-xs uppercase font-mono">{product.sku}</Badge>
                   </div>
                   <div className="flex items-center gap-2 mt-1.5">
                     <div className={`size-5 rounded-md ${categoryColors[product.category] || 'from-muted to-muted'} flex items-center justify-center`}>

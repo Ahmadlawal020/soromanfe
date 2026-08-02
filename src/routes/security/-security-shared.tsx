@@ -169,11 +169,11 @@ export function TruckCard({
         <div className="flex flex-col items-end gap-2">
           {exited ? (
             <>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-accent px-2.5 py-0.5 text-[0.65rem] whitespace-nowrap text-accent-foreground uppercase">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-accent px-2.5 py-0.5 text-xs whitespace-nowrap text-accent-foreground uppercase">
                 Exited
               </span>
               {(load.gantry || load.loaderName) && (
-                <span className="text-[0.65rem] text-muted-foreground">
+                <span className="text-xs text-muted-foreground">
                   {[load.gantry && `Arm ${load.gantry}`, load.loaderName].filter(Boolean).join(' · ')}
                 </span>
               )}
@@ -245,7 +245,7 @@ export function GateDialog({
           </Button>
         </DialogFooter>
         {!ready && (
-          <p className="text-right text-[0.65rem] text-muted-foreground/70">
+          <p className="text-right text-xs text-muted-foreground/70">
             All fields are required
           </p>
         )}

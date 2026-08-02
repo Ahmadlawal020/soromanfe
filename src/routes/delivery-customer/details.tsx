@@ -3,7 +3,7 @@ import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate, useRouterState } from '@tanstack/react-router'
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '#/components/ui/card'
 import { Button } from '#/components/ui/button'
-import { Badge } from '#/components/ui/badge'
+
 import {
   ArrowLeft, User, Phone, MapPin, Building2, ShieldAlert,
   FileText, Loader2, DollarSign, Trash2, CreditCard,
@@ -40,7 +40,6 @@ function DeliveryCustomerDetailsView() {
   const deleteMutation = useDeleteDeliveryCustomer()
 
   const rawCustomer = state.customer || fetchedCustomer
-
 
   // Normalize fields to handle both camelCase and snake_case
   const customer = useMemo(() => {
@@ -207,7 +206,7 @@ function DeliveryCustomerDetailsView() {
               ) : (
                 <div className="size-24 rounded-xl border-2 border-dashed border-border bg-muted/30 flex flex-col items-center justify-center text-muted-foreground">
                   <Camera className="size-7" />
-                  <span className="text-[10px] mt-1 font-normal">No Photo</span>
+                  <span className="text-xs mt-1 font-normal">No Photo</span>
                 </div>
               )}
             </div>

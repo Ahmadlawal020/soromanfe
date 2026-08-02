@@ -5,10 +5,9 @@ import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '#/components/ui/select'
-import { ArrowLeft, Truck, ShieldAlert, CheckCircle, Loader2, AlertCircle, Compass, Search, Check, ChevronDown } from 'lucide-react'
+import { Truck, ShieldAlert, CheckCircle, Loader2, Compass, Search, Check, ChevronDown } from 'lucide-react'
 import { useCreateTruck, useUpdateTruck } from '#/lib/hooks/useTrucks'
 import { useDriverList } from '#/lib/hooks/useDrivers'
-
 
 export const Route = createFileRoute('/trucks/form')({
   component: TruckForm,
@@ -407,7 +406,7 @@ function TruckForm() {
                   onChange={(e) => handleInputChange('capacityLitres', Number(e.target.value) || 0)}
                   placeholder="e.g. 30000"
  />
-                <p className="text-[11px] text-muted-foreground mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   Numeric capacity in litres — used for delivery allocation calculations.
                 </p>
               </div>

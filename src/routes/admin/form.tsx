@@ -1,16 +1,7 @@
 import { useState } from 'react'
 import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
-import {
-  ArrowLeft,
-  Mail,
-  Shield,
-  CheckCircle,
-  Loader2,
-  AlertCircle,
-  UserCheck,
-  Send,
-} from 'lucide-react'
+import { Mail, Shield, CheckCircle, Loader2, AlertCircle, UserCheck, Send } from 'lucide-react'
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'

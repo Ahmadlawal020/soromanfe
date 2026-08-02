@@ -75,8 +75,6 @@ function ProductDetailPage() {
     'Lubricants & Base Oils': 'from-muted to-muted',
   }
 
-
-
   const getSingularUnit = (unit?: string) => {
     switch (unit) {
       case 'Liters': return 'Liter'
@@ -107,6 +105,7 @@ function ProductDetailPage() {
       eyebrow="Operations"
       title="Product Details"
       description="View specifications, inventory levels, and hazard ratings"
+      backAction={handleBack}
     />
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={() => navigate({ to: '/products/form', search: { id: product._id } })}><Edit className="size-4" /> Edit</Button>
@@ -215,7 +214,7 @@ function ProductDetailPage() {
                               className="flex items-center gap-2 hover:text-primary transition-colors text-left duration-250 ease-luxe"
                             >
                               <span>{depot.name}</span>
-                              <Badge variant="outline" className="font-mono text-[10px] py-0 px-1.5">{depot.code}</Badge>
+                              <Badge variant="outline" className="font-mono text-xs py-0 px-1.5">{depot.code}</Badge>
                             </button>
                           </td>
                           <td className="px-6 py-4 text-muted-foreground">

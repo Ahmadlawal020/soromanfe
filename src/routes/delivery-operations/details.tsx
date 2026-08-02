@@ -3,7 +3,7 @@ import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate, useRouterState } from '@tanstack/react-router'
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '#/components/ui/card'
 import { Button } from '#/components/ui/button'
-import { Badge } from '#/components/ui/badge'
+
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '#/components/ui/table'

@@ -184,7 +184,7 @@ function BankAccountDetails() {
             {/* Large Account Number Card */}
             <div className="bg-muted/40 border border-border/60 rounded-xl p-4 md:px-6 md:py-4 flex items-center justify-between gap-6 shrink-0">
               <div>
-                <p className="text-[11px] font-semibold uppercase text-muted-foreground">
+                <p className="text-xs font-semibold uppercase text-muted-foreground">
                   Account Number ({account.currency})
                 </p>
                 <p className="text-2xl md:text-3xl font-mono font-semibold text-foreground mt-0.5 tabular-nums">
@@ -337,7 +337,7 @@ function BankAccountDetails() {
                             <Warehouse className="size-4 text-primary shrink-0" />
                             {depot.name}
                           </h4>
-                          <Badge variant="outline" className="text-[10px] font-mono">
+                          <Badge variant="outline" className="text-xs font-mono">
                             {depot.code}
                           </Badge>
                         </div>

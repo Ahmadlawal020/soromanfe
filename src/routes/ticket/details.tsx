@@ -99,7 +99,7 @@ function TicketDetailsComponent() {
           <CardContent className="p-6 md:p-8 space-y-6 pl-8">
             <div className="flex justify-between items-start">
               <div>
-                <span className="text-[10px] font-semibold text-primary uppercase bg-primary/10 px-2 py-0.5 rounded-full">Official Receipt</span>
+                <span className="text-xs font-semibold text-primary uppercase bg-primary/10 px-2 py-0.5 rounded-full">Official Receipt</span>
                 <h2 className="text-lg md:text-xl font-mono font-semibold text-foreground mt-2 tracking-tight">{ticket.ticketNumber}</h2>
                 <p className="text-xs text-muted-foreground mt-1">Generated on {generatedDate}</p>
               </div>
@@ -124,7 +124,7 @@ function TicketDetailsComponent() {
                   {ticket.order?.product?.name || 'N/A'}
                 </p>
                 {ticket.order?.product?.sku && (
-                  <p className="text-[10px] text-muted-foreground mt-0.5">SKU: {ticket.order.product.sku}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">SKU: {ticket.order.product.sku}</p>
                 )}
               </div>
               <div>
@@ -132,7 +132,7 @@ function TicketDetailsComponent() {
                 <p className="text-base font-mono font-semibold mt-1 text-foreground">
                   {ticket.order?.quantity?.toLocaleString()} {ticket.order?.product?.unit || 'Liters'}
                 </p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">@ {formatCurrency(ticket.order?.price || 0)} / unit</p>
+                <p className="text-xs text-muted-foreground mt-0.5">@ {formatCurrency(ticket.order?.price || 0)} / unit</p>
               </div>
               <div>
                 <p className="text-xs text-muted-foreground uppercase font-semibold">Fulfillment Method</p>
@@ -148,7 +148,7 @@ function TicketDetailsComponent() {
                   {ticket.order?.depot?.name || 'N/A'}
                 </p>
                 {ticket.order?.depot?.code && (
-                  <p className="text-[10px] text-muted-foreground mt-0.5">Code: {ticket.order.depot.code}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Code: {ticket.order.depot.code}</p>
                 )}
               </div>
               <div>
@@ -259,7 +259,7 @@ function TicketDetailsComponent() {
                       className="w-full h-auto object-contain max-h-[200px]"
                     />
                   </div>
-                  <p className="text-[10px] text-center text-muted-foreground max-w-[180px]">
+                  <p className="text-xs text-center text-muted-foreground max-w-[180px]">
                     Present this QR code to the terminal manager. Scanner validates
                     token and verifies product quantity.
                   </p>
@@ -274,12 +274,12 @@ function TicketDetailsComponent() {
             </CardHeader>
             <CardContent className="space-y-3 text-xs">
               <div>
-                <p className="text-[10px] text-muted-foreground uppercase font-normal">Name</p>
+                <p className="text-xs text-muted-foreground uppercase font-normal">Name</p>
                 <p className="font-semibold text-foreground text-sm">{ticket.order?.customer?.name || 'N/A'}</p>
               </div>
               {ticket.order?.customer?.companyName && (
                 <div>
-                  <p className="text-[10px] text-muted-foreground uppercase font-normal">Company</p>
+                  <p className="text-xs text-muted-foreground uppercase font-normal">Company</p>
                   <p className="font-semibold text-foreground flex items-center gap-1">
                     <Building2 className="size-3 text-muted-foreground" />
                     {ticket.order.customer.companyName}
@@ -288,11 +288,11 @@ function TicketDetailsComponent() {
               )}
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <p className="text-[10px] text-muted-foreground uppercase font-normal">Email</p>
+                  <p className="text-xs text-muted-foreground uppercase font-normal">Email</p>
                   <p className="font-normal text-foreground truncate">{ticket.order?.customer?.email || 'N/A'}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-muted-foreground uppercase font-normal">Phone</p>
+                  <p className="text-xs text-muted-foreground uppercase font-normal">Phone</p>
                   <p className="font-normal text-foreground">{ticket.order?.customer?.phone || 'N/A'}</p>
                 </div>
               </div>

@@ -176,7 +176,7 @@ export function TicketGenerateDialog({
               ['Remaining', Math.max(remaining, 0)],
             ].map(([label, value]) => (
               <div key={String(label)}>
-                <p className={cn(MICRO, 'text-[0.6rem] text-muted-foreground')}>{label}</p>
+                <p className={cn(MICRO, 'text-xs text-muted-foreground')}>{label}</p>
                 <p className="mt-1 text-base font-semibold tracking-tight tabular-nums">
                   {fmt(Number(value))}
                 </p>
@@ -271,7 +271,7 @@ export function TicketGenerateDialog({
         <DialogFooter>
           <div className="mr-auto min-w-0">
             {problem && (
-              <p className="truncate text-[0.65rem] text-muted-foreground/70">{problem}</p>
+              <p className="truncate text-xs text-muted-foreground/70">{problem}</p>
             )}
             {!problem && over === false && pct === 100 && (
               <StatusChip tone="accent">Fully allocated</StatusChip>

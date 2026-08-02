@@ -307,7 +307,7 @@ export function SalesLedgerDetails() {
               <div className="text-xl font-semibold text-foreground mt-0.5 tabular-nums">
                 {targetGroup.quantity > 0 ? `${fmtQty(targetGroup.quantity)} L` : '—'}
               </div>
-              <div className="text-[11px] text-muted-foreground mt-0.5">
+              <div className="text-xs text-muted-foreground mt-0.5">
                 Rate: {targetGroup.rate > 0 ? fmt(targetGroup.rate) : '—'}
               </div>
             </div>
@@ -324,7 +324,7 @@ export function SalesLedgerDetails() {
               <div className="text-xl font-semibold text-foreground mt-0.5 tabular-nums">
                 {targetGroup.expected > 0 ? fmt(targetGroup.expected) : '—'}
               </div>
-              <div className="text-[11px] text-muted-foreground mt-0.5">
+              <div className="text-xs text-muted-foreground mt-0.5">
                 Qty × Rate
               </div>
             </div>
@@ -341,7 +341,7 @@ export function SalesLedgerDetails() {
               <div className="text-xl font-semibold text-accent mt-0.5 tabular-nums">
                 {fmt(targetGroup.totalPaid)}
               </div>
-              <div className="text-[11px] text-muted-foreground mt-0.5">
+              <div className="text-xs text-muted-foreground mt-0.5">
                 {targetGroup.payments.length} payment{targetGroup.payments.length !== 1 ? 's' : ''}
               </div>
             </div>
@@ -362,7 +362,7 @@ export function SalesLedgerDetails() {
                   ? (targetGroup.balance === 0 ? '₦0.00' : targetGroup.balance > 0 ? fmt(targetGroup.balance) : `+${fmt(Math.abs(targetGroup.balance))}`)
                   : '₦0.00'}
               </div>
-              <div className="text-[11px] text-muted-foreground mt-0.5">
+              <div className="text-xs text-muted-foreground mt-0.5">
                 {targetGroup.balance === 0 ? 'Fully Settled' : targetGroup.balance > 0 ? 'Outstanding' : 'Overpaid'}
               </div>
             </div>
@@ -417,7 +417,7 @@ export function SalesLedgerDetails() {
                   <div key={i} className="flex items-center gap-3 p-3 bg-muted/60 rounded-xl border border-border">
                     {item.icon}
                     <div className="min-w-0">
-                      <div className="text-[11px] text-muted-foreground font-normal">{item.label}</div>
+                      <div className="text-xs text-muted-foreground font-normal">{item.label}</div>
                       <div className="font-semibold text-foreground text-sm truncate uppercase">{item.value}</div>
                     </div>
                   </div>
@@ -488,7 +488,7 @@ export function SalesLedgerDetails() {
                                 {payment.payerName ? (
                                   <div>
                                     <p className="uppercase">{payment.payerName}</p>
-                                    {payment.phoneNumber && <p className="text-[11px] text-muted-foreground">{payment.phoneNumber}</p>}
+                                    {payment.phoneNumber && <p className="text-xs text-muted-foreground">{payment.phoneNumber}</p>}
                                   </div>
                                 ) : payment.phoneNumber ? (
                                   <span className="text-muted-foreground">{payment.phoneNumber}</span>
@@ -498,7 +498,7 @@ export function SalesLedgerDetails() {
                                 {bankAcct ? (
                                   <div>
                                     <p className="font-semibold text-foreground">{bankAcct.account_name}</p>
-                                    <p className="text-[11px] text-muted-foreground">{bankAcct.bank_name} ({bankAcct.account_number})</p>
+                                    <p className="text-xs text-muted-foreground">{bankAcct.bank_name} ({bankAcct.account_number})</p>
                                   </div>
                                 ) : payment.bank ? (
                                   <span className="text-xs text-muted-foreground">{payment.bank}</span>
@@ -580,11 +580,11 @@ export function SalesLedgerDetails() {
                           {cg.customerName || 'Unassigned Customer'}
                         </span>
                         {cg.isFillingStation ? (
-                          <Badge className="text-[10px] bg-warning/20 text-warning border-warning/30 px-1.5 py-0">
+                          <Badge className="text-xs bg-warning/20 text-warning border-warning/30 px-1.5 py-0">
                             FS
                           </Badge>
                         ) : (
-                          <Badge variant="outline" className="text-[10px] text-muted-foreground border-border px-1.5 py-0">
+                          <Badge variant="outline" className="text-xs text-muted-foreground border-border px-1.5 py-0">
                             Normal
                           </Badge>
                         )}
@@ -602,7 +602,7 @@ export function SalesLedgerDetails() {
                       </div>
 
                       {(cgCustObj?.phoneNumber || cgCustObj?.contactPersonPhone) && (
-                        <div className="text-[11px] text-muted-foreground flex items-center gap-1">
+                        <div className="text-xs text-muted-foreground flex items-center gap-1">
                           <Phone className="size-2.5 text-muted-foreground" />
                           {cgCustObj.contactPersonPhone || cgCustObj.phoneNumber}
                         </div>

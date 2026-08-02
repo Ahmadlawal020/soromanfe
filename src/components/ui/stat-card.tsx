@@ -83,7 +83,7 @@ function StatCard({
             card rather than blow the grid column out. */}
         <div
           className={cn(
-            "text-[28px] leading-[1.05] font-semibold tracking-[-0.02em] break-all tabular-nums",
+            "text-3xl leading-[1.05] font-semibold tracking-[-0.02em] break-all tabular-nums",
             valueClassName ?? "text-foreground",
           )}
         >
@@ -91,7 +91,7 @@ function StatCard({
         </div>
 
         {description && (
-          <div className="text-[0.95rem] leading-[1.4] text-muted-foreground">
+          <div className="text-base leading-[1.4] text-muted-foreground">
             {description}
           </div>
         )}

@@ -131,6 +131,7 @@ function TruckDetailPage() {
       eyebrow="Transport"
       title="Truck Profile Details"
       description="Fleet status, active operator, and compliance schedules"
+      backAction={handleBack}
     />
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={() => navigate({ to: '/trucks/form', state: { truck, isEdit: true } as any })}>

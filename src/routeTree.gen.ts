@@ -24,6 +24,7 @@ import { Route as BankAccountsIndexRouteImport } from './routes/bank-accounts/in
 import { Route as BankAccountsDetailsRouteImport } from './routes/bank-accounts/details'
 import { Route as BankAccountsFormRouteImport } from './routes/bank-accounts/form'
 import { Route as BankStatementsIndexRouteImport } from './routes/bank-statements/index'
+import { Route as CommissionRatesIndexRouteImport } from './routes/commission-rates/index'
 import { Route as CommissionsIndexRouteImport } from './routes/commissions/index'
 import { Route as CustomersIndexRouteImport } from './routes/customers/index'
 import { Route as CustomersDetailsRouteImport } from './routes/customers/details'
@@ -167,6 +168,11 @@ const BankAccountsFormRoute = BankAccountsFormRouteImport.update({
 const BankStatementsIndexRoute = BankStatementsIndexRouteImport.update({
   id: '/bank-statements/',
   path: '/bank-statements/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommissionRatesIndexRoute = CommissionRatesIndexRouteImport.update({
+  id: '/commission-rates/',
+  path: '/commission-rates/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CommissionsIndexRoute = CommissionsIndexRouteImport.update({
@@ -567,6 +573,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/bank-accounts/': typeof BankAccountsIndexRoute
   '/bank-statements/': typeof BankStatementsIndexRoute
+  '/commission-rates/': typeof CommissionRatesIndexRoute
   '/commissions/': typeof CommissionsIndexRoute
   '/customers/': typeof CustomersIndexRoute
   '/dangote-order-request/': typeof DangoteOrderRequestIndexRoute
@@ -651,6 +658,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/bank-accounts': typeof BankAccountsIndexRoute
   '/bank-statements': typeof BankStatementsIndexRoute
+  '/commission-rates': typeof CommissionRatesIndexRoute
   '/commissions': typeof CommissionsIndexRoute
   '/customers': typeof CustomersIndexRoute
   '/dangote-order-request': typeof DangoteOrderRequestIndexRoute
@@ -736,6 +744,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/bank-accounts/': typeof BankAccountsIndexRoute
   '/bank-statements/': typeof BankStatementsIndexRoute
+  '/commission-rates/': typeof CommissionRatesIndexRoute
   '/commissions/': typeof CommissionsIndexRoute
   '/customers/': typeof CustomersIndexRoute
   '/dangote-order-request/': typeof DangoteOrderRequestIndexRoute
@@ -822,6 +831,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/bank-accounts/'
     | '/bank-statements/'
+    | '/commission-rates/'
     | '/commissions/'
     | '/customers/'
     | '/dangote-order-request/'
@@ -906,6 +916,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/bank-accounts'
     | '/bank-statements'
+    | '/commission-rates'
     | '/commissions'
     | '/customers'
     | '/dangote-order-request'
@@ -990,6 +1001,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/bank-accounts/'
     | '/bank-statements/'
+    | '/commission-rates/'
     | '/commissions/'
     | '/customers/'
     | '/dangote-order-request/'
@@ -1075,6 +1087,7 @@ export interface RootRouteChildren {
   AdminIndexRoute: typeof AdminIndexRoute
   BankAccountsIndexRoute: typeof BankAccountsIndexRoute
   BankStatementsIndexRoute: typeof BankStatementsIndexRoute
+  CommissionRatesIndexRoute: typeof CommissionRatesIndexRoute
   CommissionsIndexRoute: typeof CommissionsIndexRoute
   CustomersIndexRoute: typeof CustomersIndexRoute
   DangoteOrderRequestIndexRoute: typeof DangoteOrderRequestIndexRoute
@@ -1212,6 +1225,13 @@ declare module '@tanstack/react-router' {
       path: '/bank-statements'
       fullPath: '/bank-statements/'
       preLoaderRoute: typeof BankStatementsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/commission-rates/': {
+      id: '/commission-rates/'
+      path: '/commission-rates'
+      fullPath: '/commission-rates/'
+      preLoaderRoute: typeof CommissionRatesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/commissions/': {
@@ -1740,6 +1760,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminIndexRoute: AdminIndexRoute,
   BankAccountsIndexRoute: BankAccountsIndexRoute,
   BankStatementsIndexRoute: BankStatementsIndexRoute,
+  CommissionRatesIndexRoute: CommissionRatesIndexRoute,
   CommissionsIndexRoute: CommissionsIndexRoute,
   CustomersIndexRoute: CustomersIndexRoute,
   DangoteOrderRequestIndexRoute: DangoteOrderRequestIndexRoute,

@@ -55,7 +55,7 @@ function getPfiVolumeStats(pfi: any) {
   const soldLitres = Number(pfi.soldQtyLitres ?? pfi.sold_qty_litres ?? pfi.soldVolumeLitres ?? pfi.soldQty ?? 0)
 
   let starting = startingLitres
-  let sold = soldLitres
+  const sold = soldLitres
 
   if (starting === 0 && Number(pfi.qtyVolumeMt ?? pfi.qty_volume_mt ?? 0) > 0) {
     starting = Number(pfi.qtyVolumeMt ?? pfi.qty_volume_mt)
@@ -161,6 +161,7 @@ function LpgStationDetailPage() {
         <PageHeader
       eyebrow="LPG Home Delivery"
       title={station.name}
+      backAction={handleBack}
     />
 
         <div className="flex items-center gap-2 flex-wrap">
@@ -331,7 +332,7 @@ function LpgStationDetailPage() {
               <div>
                 <h4 className="font-semibold text-foreground text-sm flex items-center gap-2">
                   <span>Low Stock Warning &bull; Available at {Math.round(remainingStockPct)}%</span>
-                  <Badge variant="destructive" className="text-[10px] uppercase font-semibold">Action Required</Badge>
+                  <Badge variant="destructive" className="text-xs uppercase font-semibold">Action Required</Badge>
                 </h4>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   Active PFI stock at {station.name} is down to <strong>{totalPfiRemainingQty.toLocaleString()} Kg</strong>. Consider assigning a new PFI.
@@ -372,7 +373,7 @@ function LpgStationDetailPage() {
           >
             <FileText className="size-4" />
             <span>PFIs & Allocation</span>
-            <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${activeTab === 'pfis' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+            <span className={`px-1.5 py-0.2 rounded-full text-xs ${activeTab === 'pfis' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
               {pfis.length}
             </span>
           </button>
@@ -407,31 +408,31 @@ function LpgStationDetailPage() {
             </CardHeader>
             <CardContent className="space-y-4 pt-4">
               <div>
-                <p className="text-[11px] text-muted-foreground font-semibold uppercase">Street Address</p>
+                <p className="text-xs text-muted-foreground font-semibold uppercase">Street Address</p>
                 <p className="text-sm text-foreground font-normal mt-0.5">{station.address || 'N/A'}</p>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-[11px] text-muted-foreground font-semibold uppercase">LGA / City</p>
+                  <p className="text-xs text-muted-foreground font-semibold uppercase">LGA / City</p>
                   <p className="text-sm text-foreground font-normal mt-0.5">{station.city || 'N/A'}</p>
                 </div>
                 <div>
-                  <p className="text-[11px] text-muted-foreground font-semibold uppercase">State</p>
+                  <p className="text-xs text-muted-foreground font-semibold uppercase">State</p>
                   <p className="text-sm text-foreground font-normal mt-0.5">{station.state || 'N/A'}</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-[11px] text-muted-foreground font-semibold uppercase">Country</p>
+                  <p className="text-xs text-muted-foreground font-semibold uppercase">Country</p>
                   <p className="text-sm text-foreground font-normal mt-0.5">{station.country || 'Nigeria'}</p>
                 </div>
                 <div>
-                  <p className="text-[11px] text-muted-foreground font-semibold uppercase">Postcode</p>
+                  <p className="text-xs text-muted-foreground font-semibold uppercase">Postcode</p>
                   <p className="text-sm text-foreground font-mono mt-0.5">{station.postcode || 'N/A'}</p>
                 </div>
               </div>
               <div className="pt-2 border-t">
-                <p className="text-[11px] text-muted-foreground font-semibold uppercase">System Database ID</p>
+                <p className="text-xs text-muted-foreground font-semibold uppercase">System Database ID</p>
                 <p className="text-xs font-mono text-muted-foreground mt-0.5 truncate select-all">{activeStationId}</p>
               </div>
             </CardContent>
@@ -451,7 +452,7 @@ function LpgStationDetailPage() {
             </CardHeader>
             <CardContent className="space-y-4 pt-4">
               <div>
-                <p className="text-[11px] text-muted-foreground font-semibold uppercase">Operating Schedule</p>
+                <p className="text-xs text-muted-foreground font-semibold uppercase">Operating Schedule</p>
                 <p className="text-sm text-foreground font-normal mt-0.5 flex items-center gap-1.5">
                   <Activity className="size-3.5 text-accent" />
                   <span>24 Hours / 7 Days a week</span>
@@ -459,12 +460,12 @@ function LpgStationDetailPage() {
               </div>
 
               <div>
-                <p className="text-[11px] text-muted-foreground font-semibold uppercase">Station Status</p>
+                <p className="text-xs text-muted-foreground font-semibold uppercase">Station Status</p>
                 <div className="mt-1">{getStatusBadge(station.status)}</div>
               </div>
 
               <div>
-                <p className="text-[11px] text-muted-foreground font-semibold uppercase">LPG Capacity</p>
+                <p className="text-xs text-muted-foreground font-semibold uppercase">LPG Capacity</p>
                 <p className="text-lg font-semibold text-foreground mt-0.5 flex items-center gap-2">
                   <Flame className="size-4 text-primary" />
                   {station.lpgCapacityKg?.toLocaleString()} Kg
@@ -472,7 +473,7 @@ function LpgStationDetailPage() {
               </div>
 
               <div>
-                <p className="text-[11px] text-muted-foreground font-semibold uppercase">Assigned Staff ({staffList.length})</p>
+                <p className="text-xs text-muted-foreground font-semibold uppercase">Assigned Staff ({staffList.length})</p>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {staffList.length > 0 ? (
                     staffList.map((s) => {
@@ -483,7 +484,7 @@ function LpgStationDetailPage() {
                       const fullName = typeof s === 'object' ? (`${fn} ${sn}`.trim() || s.full_name || s.email || 'Staff') : String(s)
                       return (
                         <div key={sId} className="flex items-center gap-2 bg-secondary px-3 py-1.5 rounded-full text-xs font-normal">
-                          <div className="size-5 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-semibold text-primary">
+                          <div className="size-5 rounded-full bg-primary/20 flex items-center justify-center text-xs font-semibold text-primary">
                             {initials || '?'}
                           </div>
                           <span className="text-foreground">{fullName}</span>
@@ -556,7 +557,7 @@ function LpgStationDetailPage() {
             <CardContent className="pt-6">
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 mb-6">
                 <div className="flex-1">
-                  <p className="text-[11px] text-muted-foreground font-semibold uppercase">Current Price Per Kg</p>
+                  <p className="text-xs text-muted-foreground font-semibold uppercase">Current Price Per Kg</p>
                   <div className="flex items-baseline gap-2 mt-1">
                     <span className="text-3xl font-semibold text-foreground">
                       {Number(station.pricePerKg || 0) > 0 ? `₦${Number(station.pricePerKg).toLocaleString()}` : '—'}
@@ -571,17 +572,17 @@ function LpgStationDetailPage() {
                 </div>
                 <div className="flex items-center gap-3 bg-muted/50 rounded-lg px-4 py-3 border">
                   <div className="text-center">
-                    <p className="text-[10px] text-muted-foreground uppercase">12.5 Kg</p>
+                    <p className="text-xs text-muted-foreground uppercase">12.5 Kg</p>
                     <p className="text-sm font-semibold text-foreground">{Number(station.pricePerKg || 0) > 0 ? `₦${(Number(station.pricePerKg) * 12.5).toLocaleString()}` : '—'}</p>
                   </div>
                   <div className="w-px h-8 bg-border" />
                   <div className="text-center">
-                    <p className="text-[10px] text-muted-foreground uppercase">25 Kg</p>
+                    <p className="text-xs text-muted-foreground uppercase">25 Kg</p>
                     <p className="text-sm font-semibold text-foreground">{Number(station.pricePerKg || 0) > 0 ? `₦${(Number(station.pricePerKg) * 25).toLocaleString()}` : '—'}</p>
                   </div>
                   <div className="w-px h-8 bg-border" />
                   <div className="text-center">
-                    <p className="text-[10px] text-muted-foreground uppercase">50 Kg</p>
+                    <p className="text-xs text-muted-foreground uppercase">50 Kg</p>
                     <p className="text-sm font-semibold text-foreground">{Number(station.pricePerKg || 0) > 0 ? `₦${(Number(station.pricePerKg) * 50).toLocaleString()}` : '—'}</p>
                   </div>
                 </div>
@@ -589,7 +590,7 @@ function LpgStationDetailPage() {
 
               {/* Price History */}
               <div className="border-t pt-4">
-                <p className="text-[11px] text-muted-foreground font-semibold uppercase mb-3">Price History</p>
+                <p className="text-xs text-muted-foreground font-semibold uppercase mb-3">Price History</p>
                 {(() => {
                   const history = (station as any).priceHistory || []
                   if (history.length === 0) {
@@ -621,7 +622,7 @@ function LpgStationDetailPage() {
                             <div className="flex items-center gap-3 text-xs text-muted-foreground">
                               <span>{date.toLocaleDateString('en-NG', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
                               <span className="text-muted-foreground/50">{date.toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' })}</span>
-                              <span className="bg-muted px-2 py-0.5 rounded text-[10px] font-normal">{timeAgo}</span>
+                              <span className="bg-muted px-2 py-0.5 rounded text-xs font-normal">{timeAgo}</span>
                             </div>
                           </div>
                         )
@@ -658,7 +659,7 @@ function LpgStationDetailPage() {
                       <div>
                         <div className="flex items-center gap-2">
                           <h3 className="text-base font-semibold text-foreground">{pfi.pfiNumber || 'N/A'}</h3>
-                          <Badge variant={pfi.status === 'active' ? 'default' : 'secondary'} className="text-[10px]">
+                          <Badge variant={pfi.status === 'active' ? 'default' : 'secondary'} className="text-xs">
                             {pfi.status}
                           </Badge>
                         </div>
@@ -673,15 +674,15 @@ function LpgStationDetailPage() {
                     </div>
                     <div className="grid grid-cols-3 gap-4 text-center">
                       <div>
-                        <p className="text-[10px] text-muted-foreground uppercase">Starting</p>
+                        <p className="text-xs text-muted-foreground uppercase">Starting</p>
                         <p className="text-sm font-semibold">{stats.starting.toLocaleString()}</p>
                       </div>
                       <div>
-                        <p className="text-[10px] text-muted-foreground uppercase">Sold</p>
+                        <p className="text-xs text-muted-foreground uppercase">Sold</p>
                         <p className="text-sm font-semibold">{stats.sold.toLocaleString()}</p>
                       </div>
                       <div>
-                        <p className="text-[10px] text-muted-foreground uppercase">Progress</p>
+                        <p className="text-xs text-muted-foreground uppercase">Progress</p>
                         <p className="text-sm font-semibold">{Math.round(remainingPct)}%</p>
                       </div>
                     </div>

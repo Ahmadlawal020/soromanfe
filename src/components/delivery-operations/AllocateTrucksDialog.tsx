@@ -121,7 +121,7 @@ export function AllocateTrucksDialog({
               ))}
             </select>
             {selectedPfi && (
-              <p className="text-[11px] text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 Product: <strong>{selectedPfi.productName || 'N/A'}</strong> ·
                 Depot: <strong>{selectedPfi.locationName || 'N/A'}</strong> ·
                 Remaining: <strong>{(toNum(selectedPfi.startingQtyLitres) - toNum(selectedPfi.soldQtyLitres)).toLocaleString()} L</strong>
@@ -195,7 +195,7 @@ export function AllocateTrucksDialog({
               <Label className="text-xs font-semibold text-muted-foreground uppercase">
                 Select Trucks <span className="text-destructive">*</span>
               </Label>
-              <span className="text-[11px] text-muted-foreground">
+              <span className="text-xs text-muted-foreground">
                 {selectedTruckIds.size} selected · {availableTrucks.length} available
               </span>
             </div>
@@ -264,7 +264,7 @@ export function AllocateTrucksDialog({
                 )}
               </div>
               {trucksWithNoCapacity.length > 0 && (
-                <p className="text-[11px] text-warning">
+                <p className="text-xs text-warning">
                   ⚠ No capacity set for: {trucksWithNoCapacity.join(', ')}
                 </p>
               )}

@@ -32,7 +32,7 @@ function Row({
     <div className="flex items-baseline justify-between gap-4 py-2">
       <div className="min-w-0">
         <p className="text-sm text-muted-foreground">{label}</p>
-        {hint && <p className="text-[0.7rem] leading-tight text-muted-foreground/60">{hint}</p>}
+        {hint && <p className="text-xs leading-tight text-muted-foreground/60">{hint}</p>}
       </div>
       <p className={cn('shrink-0 text-sm font-normal tabular-nums', tone)}>{value}</p>
     </div>
@@ -58,14 +58,14 @@ function QuantityPair({ f }: { f: PfiFinancials }) {
       <div className={cn(PANEL, 'p-3')}>
         <p className={cn(MICRO, 'text-muted-foreground')}>BL quantity</p>
         <p className="mt-1 text-lg font-semibold tabular-nums">{litres(f.blQtyLitres)}</p>
-        <p className="mt-0.5 text-[0.7rem] leading-tight text-muted-foreground/70">
+        <p className="mt-0.5 text-xs leading-tight text-muted-foreground/70">
           From the shipping papers — what you pay for
         </p>
       </div>
       <div className={cn(PANEL, 'p-3')}>
         <p className={cn(MICRO, 'text-muted-foreground')}>Tank quantity</p>
         <p className="mt-1 text-lg font-semibold tabular-nums">{litres(f.tankQtyLitres)}</p>
-        <p className="mt-0.5 text-[0.7rem] leading-tight text-muted-foreground/70">
+        <p className="mt-0.5 text-xs leading-tight text-muted-foreground/70">
           Measured on discharge — what you sell from
         </p>
       </div>

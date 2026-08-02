@@ -18,6 +18,7 @@ import {
 import { PageLoader } from '#/components/PageLoader'
 import { PageError } from '#/components/PageError'
 import { PageEmpty } from '#/components/PageEmpty'
+import { FilterBar } from '#/components/FilterBar'
 import { MICRO, PANEL } from '#/lib/panel'
 import { cn, getErrorMessage } from '#/lib/utils'
 import {
@@ -128,7 +129,7 @@ function ExpenseDialog({
               </optgroup>
             </NativeSelect>
             {chosen && (
-              <p className="text-[0.7rem] leading-tight text-muted-foreground/70">
+              <p className="text-xs leading-tight text-muted-foreground/70">
                 {chosen.pfi_id
                   ? 'Books against this PFI and rolls into its total expenses.'
                   : 'General overhead — not attached to any batch.'}
@@ -244,48 +245,49 @@ function ExpensesPage() {
         />
       </StatCardGrid>
 
-      <div className={cn(PANEL)}>
-        <div className="flex flex-wrap items-center gap-2 border-b border-foreground/10 p-3">
-          <div className="relative min-w-[11rem] flex-1">
-            <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              className="pl-8" placeholder="Search description, vendor, category…"
-              value={filters.search || ''} onChange={(e) => set('search', e.target.value)}
-            />
-          </div>
-          <NativeSelect className="w-36" value={filters.type || ''} onChange={(e) => set('type', e.target.value)}>
-            <option value="">All spend</option>
-            <option value="pfi">PFI only</option>
-            <option value="general">General only</option>
-          </NativeSelect>
-          <NativeSelect className="w-48" value={filters.category || ''} onChange={(e) => set('category', e.target.value)}>
-            <option value="">All categories</option>
-            <optgroup label="General Categories">
-              {cats?.general.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </optgroup>
-            <optgroup label="PFIs">
-              {cats?.pfi.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </optgroup>
-          </NativeSelect>
-          <NativeSelect className="w-36" value={filters.bank || ''} onChange={(e) => set('bank', e.target.value)}>
-            <option value="">All banks</option>
-            {data?.banks.map((b) => <option key={b} value={b}>{b}</option>)}
-          </NativeSelect>
-          <Input
-            type="date" className="w-36" value={filters.dateFrom || ''}
-            onChange={(e) => set('dateFrom', e.target.value)}
-          />
-          <Input
-            type="date" className="w-36" value={filters.dateTo || ''}
-            onChange={(e) => set('dateTo', e.target.value)}
-          />
-          {hasFilters && (
-            <Button variant="ghost" size="sm" onClick={() => setFilters({})}>
-              <X data-icon="inline-start" />
-              Clear
-            </Button>
-          )}
+      <FilterBar>
+        <div className="relative min-w-[11rem] flex-1">
+        <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+        className="pl-8" placeholder="Search description, vendor, category…"
+        value={filters.search || ''} onChange={(e) => set('search', e.target.value)}
+        />
         </div>
+        <NativeSelect className="w-36" value={filters.type || ''} onChange={(e) => set('type', e.target.value)}>
+        <option value="">All spend</option>
+        <option value="pfi">PFI only</option>
+        <option value="general">General only</option>
+        </NativeSelect>
+        <NativeSelect className="w-48" value={filters.category || ''} onChange={(e) => set('category', e.target.value)}>
+        <option value="">All categories</option>
+        <optgroup label="General Categories">
+        {cats?.general.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+        </optgroup>
+        <optgroup label="PFIs">
+        {cats?.pfi.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+        </optgroup>
+        </NativeSelect>
+        <NativeSelect className="w-36" value={filters.bank || ''} onChange={(e) => set('bank', e.target.value)}>
+        <option value="">All banks</option>
+        {data?.banks.map((b) => <option key={b} value={b}>{b}</option>)}
+        </NativeSelect>
+        <Input
+        type="date" className="w-36" value={filters.dateFrom || ''}
+        onChange={(e) => set('dateFrom', e.target.value)}
+        />
+        <Input
+        type="date" className="w-36" value={filters.dateTo || ''}
+        onChange={(e) => set('dateTo', e.target.value)}
+        />
+        {hasFilters && (
+        <Button variant="ghost" size="sm" onClick={() => setFilters({})}>
+        <X data-icon="inline-start" />
+        Clear
+        </Button>
+        )}
+      </FilterBar>
+
+      <div className={cn(PANEL)}>
 
         {rows.length === 0 ? (
           <PageEmpty

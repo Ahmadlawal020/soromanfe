@@ -89,6 +89,7 @@ function DangoteProductDetailPage() {
       eyebrow="Dangote Delivery"
       title={product.name}
       description="Dangote product details and specifications"
+      backAction={handleBack}
     />
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={() => navigate({ to: '/dangote-products/form', search: { id: product._id } } as any)}>

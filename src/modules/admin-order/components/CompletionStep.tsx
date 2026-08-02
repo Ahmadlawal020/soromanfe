@@ -58,11 +58,11 @@ export function CompletionStep({ wizard }: CompletionStepProps) {
             </div>
             <div className="space-y-2">
               <div>
-                <p className="text-[10px] text-muted-foreground uppercase">Bank</p>
+                <p className="text-xs text-muted-foreground uppercase">Bank</p>
                 <p className="text-sm font-semibold text-foreground">{paymentInfo.bankName}</p>
               </div>
               <div>
-                <p className="text-[10px] text-muted-foreground uppercase">Account Number</p>
+                <p className="text-xs text-muted-foreground uppercase">Account Number</p>
                 <div className="flex items-center gap-2">
                   <p className="text-xl font-semibold font-mono text-foreground tabular-nums">{paymentInfo.accountNumber}</p>
                   <button
@@ -79,11 +79,11 @@ export function CompletionStep({ wizard }: CompletionStepProps) {
                 </div>
               </div>
               <div>
-                <p className="text-[10px] text-muted-foreground uppercase">Account Name</p>
+                <p className="text-xs text-muted-foreground uppercase">Account Name</p>
                 <p className="text-sm font-semibold text-foreground">{paymentInfo.accountName || formatAccountName(placedOrder.customerName)}</p>
               </div>
             </div>
-            <p className="text-[11px] text-success/80 leading-snug">Share this account number with the customer for payment.</p>
+            <p className="text-xs text-success/80 leading-snug">Share this account number with the customer for payment.</p>
           </div>
         )}
 

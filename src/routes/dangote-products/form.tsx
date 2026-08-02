@@ -5,7 +5,7 @@ import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '#/components/ui/select'
-import { ArrowLeft, Scale, Save, Loader2, Package, AlertTriangle, FileText } from 'lucide-react'
+import { Scale, Save, Loader2, Package, AlertTriangle, FileText } from 'lucide-react'
 import { useProductDetails, useCreateProduct, useUpdateProduct } from '#/lib/hooks/useProducts'
 
 export const Route = createFileRoute('/dangote-products/form')({

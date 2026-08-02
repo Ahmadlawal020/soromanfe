@@ -9,20 +9,7 @@ import { useToast } from '#/lib/hooks/useToast'
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
-import {
-  Truck,
-  ArrowLeft,
-  Plus,
-  Search,
-  Loader2,
-  CheckCircle2,
-  Droplets,
-  Building2,
-  Calendar,
-  Tag,
-  AlertCircle,
-  X,
-} from 'lucide-react'
+import { Truck, Plus, Search, Loader2, CheckCircle2, Droplets, Building2, Calendar, Tag, AlertCircle, X } from 'lucide-react'
 
 export const Route = createFileRoute('/delivery-operations/allocate-trucks')({
   component: AllocateTrucksPage,
@@ -323,7 +310,7 @@ function AllocateTrucksPage() {
                 <div className="p-3.5 bg-accent/10 border border-accent/20 rounded-lg text-xs space-y-1.5">
                   <div className="flex justify-between font-semibold text-accent">
                     <span>{selectedPfi.pfiNumber}</span>
-                    <span className="bg-accent/20 text-accent px-2 py-0.5 rounded text-[10px] uppercase font-semibold">Active</span>
+                    <span className="bg-accent/20 text-accent px-2 py-0.5 rounded text-xs uppercase font-semibold">Active</span>
                   </div>
                   <div className="text-accent space-y-1">
                     <p className="flex items-center gap-1.5">
@@ -462,7 +449,7 @@ function AllocateTrucksPage() {
             </div>
 
             {trucksWithNoCapacity.length > 0 && (
-              <div className="p-2 bg-warning/60 border border-warning/50 rounded text-[11px] text-warning flex items-start gap-1.5">
+              <div className="p-2 bg-warning/60 border border-warning/50 rounded text-xs text-warning flex items-start gap-1.5">
                 <AlertCircle className="size-3.5 shrink-0 mt-0.5" />
                 <span>No capacity set for: {trucksWithNoCapacity.join(', ')}</span>
               </div>
@@ -561,7 +548,7 @@ function AllocateTrucksPage() {
                             {truck.plateNumber}
                           </span>
                           <span
-                            className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${capacity > 0
+                            className={`text-xs font-semibold px-2 py-0.5 rounded-full ${capacity > 0
  ? 'bg-accent/15 text-accent'
  : 'bg-muted text-muted-foreground'
  }`}
@@ -575,7 +562,7 @@ function AllocateTrucksPage() {
                         </p>
 
                         {truck.model && (
-                          <p className="text-[11px] text-muted-foreground truncate mt-0.5">
+                          <p className="text-xs text-muted-foreground truncate mt-0.5">
                             Model: {truck.model}
                           </p>
                         )}

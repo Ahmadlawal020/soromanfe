@@ -12,21 +12,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from '#/components/ui/dialog'
-import {
-  ArrowLeft,
-  ShieldCheck,
-  FileText,
-  Calendar,
-  Loader2,
-  CheckCircle,
-  XCircle,
-  User,
-  Phone,
-  Mail,
-  Building2,
-  Clock,
-  MessageSquare,
-} from 'lucide-react'
+import { ShieldCheck, FileText, Calendar, Loader2, CheckCircle, XCircle, User, Phone, Mail, Building2, Clock, MessageSquare } from 'lucide-react'
 import { useLicenseDetails, useReviewLicense } from '#/lib/hooks/useCustomerLicenses'
 import { PageLoader } from '#/components/PageLoader'
 import { PageError } from '#/components/PageError'
@@ -125,6 +111,7 @@ function LicenceReviewPage() {
       eyebrow="Admin"
       title="License Review"
       description={`{license.companyName}`}
+      backAction={handleBack}
     />
         {license.status === 'pending' && (
           <div className="flex items-center gap-2">

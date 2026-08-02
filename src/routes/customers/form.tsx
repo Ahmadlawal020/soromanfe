@@ -5,7 +5,7 @@ import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '#/components/ui/select'
-import { ArrowLeft, Users, CheckCircle, Loader2, AlertCircle, Building2 } from 'lucide-react'
+import { Users, CheckCircle, Loader2, Building2 } from 'lucide-react'
 import { useCreateCustomer, useUpdateCustomer } from '#/lib/hooks/useCustomers'
 import { CustomerLicenses } from '#/components/CustomerLicenses'
 

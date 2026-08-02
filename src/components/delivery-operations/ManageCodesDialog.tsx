@@ -173,7 +173,7 @@ export function ManageCodesDialog({
                       <>
                         <Tag className="size-3 text-muted-foreground shrink-0" />
                         <span className="flex-1 font-semibold text-sm">{code}</span>
-                        <span className="text-[11px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                        <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
                           {usage} record{usage !== 1 ? 's' : ''}
                         </span>
                         <Button

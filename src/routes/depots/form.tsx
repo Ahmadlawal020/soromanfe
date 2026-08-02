@@ -5,7 +5,7 @@ import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '#/components/ui/select'
-import { ArrowLeft, Warehouse, MapPin, Activity, CheckCircle, Loader2, AlertCircle, Trash2, Plus, Layers, Users, Search, X, UserCheck } from 'lucide-react'
+import { Warehouse, MapPin, Activity, CheckCircle, Loader2, AlertCircle, Trash2, Plus, Layers, Users, Search, X, UserCheck } from 'lucide-react'
 import type { DepotItem } from './index'
 import { useCreateDepot, useUpdateDepot, useDepotDetails } from '#/lib/hooks/useDepots'
 import { useProductList } from '#/lib/hooks/useProducts'
@@ -471,7 +471,7 @@ function DepotForm() {
                       const staff = getStaffDetails(staffId)
                       return (
                         <div key={staffId} className="flex items-center gap-2 bg-secondary px-3 py-1 rounded-full text-sm">
-                          <div className="size-6 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-semibold text-primary">
+                          <div className="size-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-semibold text-primary">
                             {staff ? (staff.full_name?.charAt(0) || '?') : '?'}
                           </div>
                           <span>{staff?.full_name || 'Unknown'}</span>
