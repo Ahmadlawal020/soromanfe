@@ -7,11 +7,12 @@ import { Input } from '#/components/ui/input'
 import {
   ArrowLeft, Loader2, AlertCircle, ShoppingBag,
   User, Warehouse, Package, MapPin,
-  Calendar, Info, Phone, Mail, Building2, Truck, FileCheck, Banknote, Copy, CheckCircle, Ticket as TicketIcon, XCircle
+  Calendar, Info, Phone, Mail, Building2, Truck, FileCheck, Banknote, Copy, CheckCircle, Ticket as TicketIcon, XCircle, Hourglass, Plus
 } from 'lucide-react'
 import { useOrderDetails, useUpdateOrder, useCancelOrder } from '#/lib/hooks/useOrders'
 import { Breadcrumbs } from '#/components/Breadcrumbs'
 import { ConfirmDialog } from '#/components/ConfirmDialog'
+import { OrderExpiryBadge } from './-order-expiry'
 
 export const Route = createFileRoute('/orders/details')({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -49,6 +50,8 @@ function getStatusBadge(status: string) {
       return <Badge className="bg-warning text-warning-foreground">Pending</Badge>
     case 'Cancelled':
       return <Badge variant="destructive">Cancelled</Badge>
+    case 'Expired':
+      return <Badge variant="destructive"><Hourglass className="size-3 mr-1" /> Expired</Badge>
     default:
       return <Badge variant="outline">{status}</Badge>
   }
@@ -148,6 +151,7 @@ function RouteComponent() {
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge variant="outline" className="font-mono text-xs">ID: {order._id || order.id}</Badge>
                   {getStatusBadge(order.status)}
+                  <OrderExpiryBadge status={order.status} createdAt={order.createdAt} expiredAt={order.expiredAt} />
                 </div>
                 <h2 className="text-lg md:text-xl font-semibold text-foreground mt-2 tracking-tight">Order {order.orderNumber}</h2>
                 <p className="text-muted-foreground mt-1 text-sm flex items-center gap-1.5">
@@ -159,6 +163,31 @@ function RouteComponent() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Expired Order Banner */}
+      {order.status === 'Expired' && (
+        <Card className="border-destructive/30 bg-destructive/5">
+          <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="size-10 rounded-full bg-destructive/10 flex items-center justify-center text-destructive shrink-0">
+                <Hourglass className="size-5" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-destructive">This order has expired</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  The payment window closed{order.expiredAt ? ` on ${new Date(order.expiredAt).toLocaleDateString('en-NG', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}` : ''}. Please place a new order at current prices.
+                </p>
+              </div>
+            </div>
+            <Button
+              className="bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer shrink-0"
+              onClick={() => navigate({ to: '/admin-order' as any })}
+            >
+              <Plus className="size-4 mr-2" /> Place New Order
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Order Info & Cost Breakdown */}
@@ -431,7 +460,7 @@ function RouteComponent() {
           <CardDescription className="text-xs">Update order status or view generated pickup tickets.</CardDescription>
         </CardHeader>
         <CardContent className="pt-6 flex flex-wrap gap-4">
-          {order.status !== 'Completed' && order.status !== 'Cancelled' && (
+          {order.status !== 'Completed' && order.status !== 'Cancelled' && order.status !== 'Expired' && (
             <Button
               className="bg-info text-info-foreground hover:bg-info/90 cursor-pointer"
               onClick={() => handleUpdateStatus()}
@@ -441,7 +470,7 @@ function RouteComponent() {
             </Button>
           )}
 
-          {order.status !== 'Completed' && order.status !== 'Cancelled' && (
+          {order.status !== 'Completed' && order.status !== 'Cancelled' && order.status !== 'Expired' && (
             <Button
               variant="destructive"
               className="cursor-pointer"
@@ -454,6 +483,12 @@ function RouteComponent() {
 
           {order.status === 'Cancelled' && (
             <span className="text-sm text-destructive font-medium flex items-center">Order was Cancelled</span>
+          )}
+
+          {order.status === 'Expired' && (
+            <span className="text-sm text-destructive font-medium flex items-center gap-1.5">
+              <Hourglass className="size-4" /> Order has expired — no actions available
+            </span>
           )}
 
           {(order.paymentStatus === 'Paid' || order.status === 'Completed') && (

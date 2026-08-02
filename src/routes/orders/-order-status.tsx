@@ -1,4 +1,4 @@
-import { Clock, CheckCircle2, Send, Truck, PackageCheck, XCircle, CircleDashed } from 'lucide-react'
+import { Clock, CheckCircle2, Send, Truck, PackageCheck, XCircle, CircleDashed, Hourglass } from 'lucide-react'
 
 import { cn } from '#/lib/utils'
 
@@ -48,6 +48,10 @@ const STATUS: Record<string, { label: string; icon: typeof Clock; className: str
   },
   canceled: {
     label: 'Canceled', icon: XCircle,
+    className: 'border-destructive/40 bg-destructive/10 text-destructive',
+  },
+  expired: {
+    label: 'Expired', icon: Hourglass,
     className: 'border-destructive/40 bg-destructive/10 text-destructive',
   },
 }

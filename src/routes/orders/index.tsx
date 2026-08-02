@@ -2,7 +2,7 @@ import { Fragment, useMemo, useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { format, isWithinInterval } from 'date-fns'
 import {
-  Package, CheckCircle2, Clock, DollarSign, Droplets, Truck,
+  Package, CheckCircle2, Clock, DollarSign, Droplets, Truck, Hourglass,
   Search, Plus, X, RefreshCw, FileSpreadsheet, FileText, Eye, Pencil,
 } from 'lucide-react'
 
@@ -28,6 +28,7 @@ import {
   type DatePreset,
 } from './-orders-utils'
 import { OrderStatusBadge } from './-order-status'
+import { OrderExpiryBadge } from './-order-expiry'
 import { OrderDetailsDialog, OrderEditDialog } from './-order-dialogs'
 import { exportOrdersExcel, exportOrdersPdf } from './-order-exports'
 
@@ -126,10 +127,12 @@ function OrdersDashboard() {
       ['Released', 'Loading', 'Completed'].includes(String(o.status)),
     )
     const loading = filtered.filter((o) => String(o.status) === 'Loading')
+    const expired = filtered.filter((o) => String(o.status) === 'Expired')
     return {
       count: filtered.length,
       paidCount: paid.length,
       unpaidCount: filtered.length - paid.length,
+      expiredCount: expired.length,
       qty: filtered.reduce((s, o) => s + toNumber(o.quantity), 0),
       amount: filtered.reduce((s, o) => s + toNumber(o.totalAmount), 0),
       amountPaid: paid.reduce((s, o) => s + toNumber(o.totalAmount), 0),
@@ -219,7 +222,7 @@ function OrdersDashboard() {
         <PageError message={(error as any)?.message || 'Could not load orders.'} onRetry={() => refetch()} />
       ) : (
         <>
-          <StatCardGrid count={6}>
+          <StatCardGrid count={7}>
             <StatCard
               icon={<Package />} label="Total orders" value={formatQty(totals.count)}
               description={`${formatQty(totals.paidCount)} paid & ${formatQty(totals.releasedCount)} released`}
@@ -229,6 +232,11 @@ function OrdersDashboard() {
               tone={totals.unpaidCount > 0 ? 'amber' : 'green'}
               icon={<Clock />} label="Payment not confirmed" value={formatQty(totals.unpaidCount)}
               description={totals.unpaidCount > 0 ? 'Awaiting confirmation' : 'All confirmed'}
+            />
+            <StatCard
+              tone={totals.expiredCount > 0 ? 'red' : undefined}
+              icon={<Hourglass />} label="Expired" value={formatQty(totals.expiredCount)}
+              description={totals.expiredCount > 0 ? 'Unpaid & lapsed' : 'None'}
             />
             <StatCard
               icon={<Droplets />} label="Total qty ordered"
@@ -413,7 +421,12 @@ function OrdersDashboard() {
                               <TableCell className="text-right tabular-nums">{formatQty(toNumber(o.quantity))}</TableCell>
                               <TableCell className="text-right tabular-nums">{formatNaira(toNumber(o.price))}</TableCell>
                               <TableCell className="text-right font-semibold tabular-nums">{formatNaira(toNumber(o.totalAmount))}</TableCell>
-                              <TableCell><OrderStatusBadge status={o.status} /></TableCell>
+                              <TableCell>
+                                <div className="flex flex-col gap-1">
+                                  <OrderStatusBadge status={o.status} />
+                                  <OrderExpiryBadge status={o.status} createdAt={o.createdAt} expiredAt={o.expiredAt} />
+                                </div>
+                              </TableCell>
                               <TableCell className="text-muted-foreground">{o.pfiNumber || '—'}</TableCell>
                               <TableCell>
                                 <div className="flex items-center justify-end gap-1">

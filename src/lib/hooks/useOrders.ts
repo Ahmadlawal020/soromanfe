@@ -150,6 +150,13 @@ export function usePayOrder() {
       queryClient.invalidateQueries({ queryKey: ['customers'] })
     },
     onError: (err: any) => {
+      const status = err?.response?.status
+      const msg = String(err?.response?.data?.message || err?.message || '')
+      if (status === 409 && msg.toLowerCase().includes('expired')) {
+        toast.error('This order has expired and can no longer be paid. Please place a new order.')
+        queryClient.invalidateQueries({ queryKey: ['orders'] })
+        return
+      }
       toast.error(getErrorMessage(err))
     },
   })

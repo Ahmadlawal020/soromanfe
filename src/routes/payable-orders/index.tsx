@@ -4,12 +4,13 @@ import { Button } from '#/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '#/components/ui/card'
 import { Input } from '#/components/ui/input'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '#/components/ui/table'
-import { Building2, Package, DollarSign, Search, X, Wallet } from 'lucide-react'
+import { Building2, Package, DollarSign, Search, X, Wallet, Hourglass } from 'lucide-react'
 import { usePayableOrders, usePayOrder } from '#/lib/hooks/useOrders'
 import { PageLoader } from '#/components/PageLoader'
 import { PageError } from '#/components/PageError'
 import { PageEmpty } from '#/components/PageEmpty'
 import { Pagination } from '#/components/Pagination'
+import { toast } from 'sonner'
 
 export const Route = createFileRoute('/payable-orders/')({
   component: PayableOrdersPage,
@@ -55,6 +56,15 @@ function PayableOrdersPage() {
     setPayingId(orderId)
     try {
       await payOrder.mutateAsync(orderId)
+    } catch (err: any) {
+      const status = err?.response?.status
+      const msg = String(err?.response?.data?.message || err?.message || '')
+      if (status === 409 && msg.toLowerCase().includes('expired')) {
+        toast.error('This order has expired and can no longer be paid. Please place a new order.', {
+          icon: <Hourglass className="size-4" />,
+        })
+        refetch()
+      }
     } finally {
       setPayingId(null)
     }

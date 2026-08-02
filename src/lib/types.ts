@@ -333,7 +333,8 @@ export interface Order {
   virtualAccountName?: string
   paymentStatus: 'Unpaid' | 'Paid'
   /** Matches the order_status enum in the database, not a subset of it. */
-  status: 'Pending' | 'Paid' | 'Released' | 'Loading' | 'Completed' | 'Cancelled'
+  status: 'Pending' | 'Paid' | 'Released' | 'Loading' | 'Completed' | 'Cancelled' | 'Expired'
+  expiredAt?: string
   createdAt?: string
   updatedAt?: string
 }
