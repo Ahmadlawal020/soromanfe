@@ -1,10 +1,11 @@
 import { useState } from 'react'
+import { StatCard, StatCardGrid } from '#/components/ui/stat-card'
 import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '#/components/ui/card'
-import { Fuel, Layers, ArrowLeft, Edit, Trash2, AlertOctagon, Scale, Thermometer, ShieldAlert, Archive, Truck, AlertCircle, Loader2, Warehouse } from 'lucide-react'
+import { Fuel, Award, Layers, ArrowLeft, Edit, Trash2, AlertOctagon, Scale, Thermometer, ShieldAlert, Archive, Truck, AlertCircle, Loader2, Warehouse } from 'lucide-react'
 import { useProductDetails, useDeleteProduct } from '#/lib/hooks/useProducts'
 import { useDepots } from '#/lib/hooks/useDepots'
 import { Breadcrumbs } from '#/components/Breadcrumbs'
@@ -97,36 +98,44 @@ function ProductDetailPage() {
     }
   }
 
+  // Same match rule the depot table below uses: a depot counts if it has
+  // either a capacity or a price recorded for this product.
+  const prodKey = product._id || (product as any).id
+  const depotCount = (depots as any[]).filter((d) =>
+    (d.productCapacities || []).some((pc: any) => String(pc.product?._id || pc.product?.id || pc.productId) === String(prodKey)) ||
+    (d.productPrices || []).some((pp: any) => String(pp.product?._id || pp.product?.id || pp.productId) === String(prodKey)),
+  ).length
+
   return (
     <div className="space-y-6 animate-fade-in">
       <Breadcrumbs items={[{ label: 'Products', href: '/products' }, { label: product?.name || 'Details' }]} />
-      <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <PageHeader
-      eyebrow="Operations"
-      title="Product Details"
-      description="View specifications, inventory levels, and hazard ratings"
-      backAction={handleBack}
-    />
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => navigate({ to: '/products/form', search: { id: product._id } })}><Edit className="size-4" /> Edit</Button>
-          <Button variant="destructive" onClick={handleDelete} disabled={deleteProduct.isPending}>
-            {deleteProduct.isPending ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />} Delete
-          </Button>
-        </div>
-      </header>
+      <PageHeader
+        eyebrow="Operations"
+        title={product.name}
+        description={product.description || 'No description recorded for this product.'}
+        backAction={handleBack}
+        actions={
+          <>
+            <Button variant="outline" onClick={() => navigate({ to: '/products/form', search: { id: product._id } })}>
+              <Edit data-icon="inline-start" /> Edit
+            </Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={deleteProduct.isPending}>
+              {deleteProduct.isPending ? <Loader2 className="animate-spin" /> : <Trash2 data-icon="inline-start" />}
+              Delete
+            </Button>
+          </>
+        }
+      />
 
-      <Card className="card-hover">
-        <CardContent className="bg-primary/5 p-6 md:p-8">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-            <div className={`size-20 rounded-full ${categoryColors[product.category] || 'from-muted to-muted'} flex items-center justify-center text-white `}><Fuel className="size-9" /></div>
-            <div className="flex-1">
-              <div className="flex flex-wrap items-center gap-2"><Badge variant="outline" className="font-mono text-xs">{product.sku}</Badge><Badge className="bg-success text-success-foreground text-xs">{product.gradeClass}</Badge></div>
-              <h2 className="text-lg md:text-xl font-semibold text-foreground mt-2 tracking-tight">{product.name}</h2>
-              <p className="text-muted-foreground mt-1.5 max-w-2xl text-sm leading-relaxed">{product.description || 'No description provided.'}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <StatCardGrid count={4}>
+        <StatCard icon={<Fuel />} label="Category" value={product.category || '—'} description="Product classification" />
+        <StatCard icon={<Award />} label="Grade" value={product.gradeClass || '—'} description="Quality classification" />
+        <StatCard icon={<Scale />} label="Unit" value={product.unit || 'Litres'} description="How it is measured and sold" />
+        <StatCard
+          icon={<Warehouse />} label="Depots stocking it" value={depotCount}
+          description={depotCount ? 'With capacity or a price set' : 'Not yet stocked anywhere'}
+        />
+      </StatCardGrid>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card>

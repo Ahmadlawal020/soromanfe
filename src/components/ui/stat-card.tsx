@@ -79,11 +79,11 @@ function StatCard({
           {label}
         </div>
 
-        {/* break-all is deliberate: long naira figures must wrap inside the
+        {/* break-words is deliberate: long naira figures must wrap inside the
             card rather than blow the grid column out. */}
         <div
           className={cn(
-            "text-3xl leading-[1.05] font-semibold tracking-[-0.02em] break-all tabular-nums",
+            "text-3xl leading-[1.05] font-semibold tracking-[-0.02em] break-words tabular-nums",
             valueClassName ?? "text-foreground",
           )}
         >

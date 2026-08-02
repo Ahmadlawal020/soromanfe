@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { StatCard, StatCardGrid } from '#/components/ui/stat-card'
 import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
@@ -401,130 +402,31 @@ function DepotDetailPage() {
       </header>
 
       {/* Hero Depot Card Banner */}
-      <Card className="overflow-hidden border bg-card">
-        <div className="bg-primary/10 p-6 md:p-8">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-            <div className="flex items-start gap-4">
-              <div className="size-16 rounded-xl bg-primary/15 border border-primary/20 flex items-center justify-center text-primary shrink-0">
-                <Warehouse className="size-8" />
-              </div>
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Badge variant="outline" className="font-mono text-xs bg-background/80">
-                    Code: {depot.code}
-                  </Badge>
-                  <div className="sm:hidden">{getStatusBadge(depot.status)}</div>
-                  {depot.establishedYear && (
-                    <Badge variant="secondary" className="text-xs font-normal">
-                      Est. {depot.establishedYear}
-                    </Badge>
-                  )}
-                </div>
-                <h2 className="text-xl md:text-lg md:text-xl font-semibold text-foreground tracking-tight">{depot.name}</h2>
-                <p className="text-xs md:text-sm text-muted-foreground flex items-center gap-1.5 pt-0.5">
-                  <MapPin className="size-3.5 shrink-0 text-primary" />
-                  <span>{[depot.address, depot.city, depot.state, depot.postcode, depot.country].filter(Boolean).join(', ') || 'Address N/A'}</span>
-                </p>
-              </div>
-            </div>
-
-            {/* Quick Metrics Badges in Hero */}
-            <div className="flex flex-wrap md:flex-col items-start md:items-end gap-2 text-xs border-t md:border-t-0 pt-4 md:pt-0 w-full md:w-auto">
-              <div className="flex items-center gap-2 bg-background/80 backdrop-blur px-3 py-1.5 rounded-lg border text-muted-foreground">
-                <FileText className="size-3.5 text-primary" />
-                <span><strong className="text-foreground">{pfis.length}</strong> Assigned PFI(s)</span>
-              </div>
-              <div className="flex items-center gap-2 bg-background/80 backdrop-blur px-3 py-1.5 rounded-lg border text-muted-foreground">
-                <Landmark className="size-3.5 text-accent" />
-                <span><strong className="text-foreground">{displayBankAccounts.length}</strong> Bank Account(s)</span>
-              </div>
-              <div className="flex items-center gap-2 bg-background/80 backdrop-blur px-3 py-1.5 rounded-lg border text-muted-foreground">
-                <ShoppingBag className="size-3.5 text-warning" />
-                <span><strong className="text-foreground">{ordersList.length}</strong> Orders Total</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Card>
-
       {/* Depot Key Metrics Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Total Stock Allocated */}
-        <Card className="border-l-4 border-l-primary hover:shadow transition-shadow duration-250 ease-luxe">
-          <CardContent className="p-5 flex items-center justify-between">
-            <div className="space-y-1">
-              <p className="text-xs text-muted-foreground font-semibold uppercase">Total Allocated Stock</p>
-              <h3 className="text-2xl font-semibold text-foreground">
-                {totalPfiStartingQty.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">L</span>
-              </h3>
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
-                <FileText className="size-3 text-primary" />
-                <span>Across {pfis.length} registered PFI(s)</span>
-              </p>
-            </div>
-            <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
-              <PackageCheck className="size-6" />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Total Volume Sold */}
-        <Card className="border-l-4 border-l-emerald-500 hover:shadow transition-shadow duration-250 ease-luxe">
-          <CardContent className="p-5 flex items-center justify-between">
-            <div className="space-y-1">
-              <p className="text-xs text-muted-foreground font-semibold uppercase">Total Volume Sold</p>
-              <h3 className="text-2xl font-semibold text-foreground">
-                {totalPfiSoldQty.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">L</span>
-              </h3>
-              <p className="text-xs text-accent font-normal flex items-center gap-1">
-                <TrendingUp className="size-3" />
-                <span>{Math.round(fulfillmentPct)}% of total stock sold</span>
-              </p>
-            </div>
-            <div className="size-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent shrink-0">
-              <CheckCircle2 className="size-6" />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Stock Remaining */}
-        <Card className={`border-l-4 hover:shadow transition-shadow ${isStockLow ? 'border-l-destructive' : 'border-l-amber-500'}`}>
-          <CardContent className="p-5 flex items-center justify-between">
-            <div className="space-y-1">
-              <p className="text-xs text-muted-foreground font-semibold uppercase">Stock Remaining</p>
-              <h3 className="text-2xl font-semibold text-foreground">
-                {totalPfiRemainingQty.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">L</span>
-              </h3>
-              <p className={`text-xs font-normal flex items-center gap-1 ${isStockLow ? 'text-destructive font-semibold' : 'text-warning'}`}>
-                <Droplets className="size-3" />
-                <span>{Math.round(remainingStockPct)}% stock available</span>
-              </p>
-            </div>
-            <div className={`size-12 rounded-xl flex items-center justify-center shrink-0 ${isStockLow ? 'bg-destructive/10 text-destructive' : 'bg-warning/10 text-warning'}`}>
-              <Droplets className="size-6" />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Total Depot Sales Revenue */}
-        <Card className="border-l-4 border-l-blue-500 hover:shadow transition-shadow duration-250 ease-luxe">
-          <CardContent className="p-5 flex items-center justify-between">
-            <div className="space-y-1">
-              <p className="text-xs text-muted-foreground font-semibold uppercase">Depot Order Sales</p>
-              <h3 className="text-2xl font-semibold text-foreground">
-                ₦{totalOrderRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </h3>
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
-                <ShoppingBag className="size-3 text-muted-foreground" />
-                <span>{ordersList.length} Order(s) &bull; {totalCompletedOrders} Done</span>
-              </p>
-            </div>
-            <div className="size-12 rounded-xl bg-muted/10 flex items-center justify-center text-muted-foreground shrink-0">
-              <DollarSign className="size-6" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <StatCardGrid count={4}>
+        <StatCard
+          icon={<PackageCheck />} label="Allocated stock"
+          value={<>{totalPfiStartingQty.toLocaleString()}<span className="ml-1 text-base font-normal text-muted-foreground">L</span></>}
+          description={`Across ${pfis.length} PFI${pfis.length === 1 ? '' : 's'}`}
+        />
+        <StatCard
+          icon={<CheckCircle2 />} label="Volume sold"
+          value={<>{totalPfiSoldQty.toLocaleString()}<span className="ml-1 text-base font-normal text-muted-foreground">L</span></>}
+          description={`${Math.round(fulfillmentPct)}% of allocated stock`}
+        />
+        <StatCard
+          // Goes red once the depot is running dry.
+          tone={isStockLow ? 'red' : 'amber'}
+          icon={<Droplets />} label="Stock remaining"
+          value={<>{totalPfiRemainingQty.toLocaleString()}<span className="ml-1 text-base font-normal text-muted-foreground">L</span></>}
+          description={`${Math.round(remainingStockPct)}% still available`}
+        />
+        <StatCard
+          icon={<DollarSign />} label="Order sales"
+          value={`₦${totalOrderRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+          description={`${ordersList.length} order${ordersList.length === 1 ? '' : 's'} · ${totalCompletedOrders} completed`}
+        />
+      </StatCardGrid>
 
       {/* Low Stock Warning Alert Banner */}
       {isStockLow && (
