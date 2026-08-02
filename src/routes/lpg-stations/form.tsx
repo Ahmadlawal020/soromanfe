@@ -280,7 +280,7 @@ function LpgStationForm() {
         <h2 className="text-lg md:text-xl font-semibold text-foreground tracking-tight">LPG Station {isEdit ? 'Updated' : 'Created'} Successfully!</h2>
         <p className="text-muted-foreground max-w-sm">{formData.name} has been saved to the LPG station directory.</p>
         <div className="flex gap-3 mt-2">
-          {!isEdit && <Button variant="outline" onClick={() => { setSubmitted(false); setFormData({ id: '', name: '', code: '', address: '', city: '', state: '', country: '', postcode: '', lpgCapacityKg: '', status: 'Active', establishedYear: new Date().getFullYear().toString() }); setSelectedStaffIds([]); setCylinders([]); setErrors({}) }}>Add Another</Button>}
+          {!isEdit && <Button variant="outline" onClick={() => { setSubmitted(false); setFormData({ id: '', name: '', code: '', address: '', city: '', state: '', country: '', postcode: '', lpgCapacityKg: '', pricePerKg: '', status: 'Active', establishedYear: new Date().getFullYear().toString() }); setSelectedStaffIds([]); setCylinders([]); setErrors({}) }}>Add Another</Button>}
           <Button onClick={() => navigate({ to: '/lpg-stations/' as any })}>Back to LPG Stations</Button>
         </div>
       </div>
