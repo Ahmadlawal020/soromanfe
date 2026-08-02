@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
+import { PageHeader } from '#/components/PageHeader'
 import { useState } from 'react'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
@@ -86,13 +87,11 @@ function UserDetailPage() {
     <div className="space-y-6 animate-fade-in">
       <Breadcrumbs items={[{ label: 'Staff', href: '/admin' }, { label: staff?.full_name || 'Details' }]} />
       <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" onClick={handleBack} aria-label="Go back"><ArrowLeft className="size-4" /></Button>
-          <div>
-            <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">User Details</h1>
-            <p className="text-muted-foreground">View and manage user account information</p>
-          </div>
-        </div>
+        <PageHeader
+      eyebrow="Admin"
+      title="User Details"
+      description="View and manage user account information"
+    />
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={() => navigate({ to: '/admin/form', state: { staff, isEdit: true } as any })}><Edit className="size-4" /> Edit</Button>
           <Button variant="destructive" onClick={handleDelete}><Trash2 className="size-4" /> Delete</Button>
@@ -136,10 +135,10 @@ function UserDetailPage() {
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div><p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Full Name</p><p className="text-sm font-medium text-foreground mt-0.5">{staff.full_name}</p></div>
-            <div><p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Username</p><p className="text-sm text-foreground mt-0.5 font-mono">{staff.username || <span className="text-muted-foreground font-sans">Not set</span>}</p></div>
-            <div><p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Date Joined</p><p className="text-sm text-foreground mt-0.5 flex items-center gap-1.5"><Calendar className="size-3.5 text-muted-foreground" />{formatDate(staff.date_joined)}</p></div>
-            <div><p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Email Verified</p><p className={`text-sm mt-0.5 flex items-center gap-1.5 font-semibold ${staff.email_verified ? 'text-success' : 'text-warning'}`}>{staff.email_verified ? <><CheckCircle2 className="size-3.5" />Verified</> : <><XCircle className="size-3.5" />Not Verified</>}</p></div>
+            <div><p className="text-xs text-muted-foreground font-normal uppercase">Full Name</p><p className="text-sm font-normal text-foreground mt-0.5">{staff.full_name}</p></div>
+            <div><p className="text-xs text-muted-foreground font-normal uppercase">Username</p><p className="text-sm text-foreground mt-0.5 font-mono">{staff.username || <span className="text-muted-foreground font-sans">Not set</span>}</p></div>
+            <div><p className="text-xs text-muted-foreground font-normal uppercase">Date Joined</p><p className="text-sm text-foreground mt-0.5 flex items-center gap-1.5"><Calendar className="size-3.5 text-muted-foreground" />{formatDate(staff.date_joined)}</p></div>
+            <div><p className="text-xs text-muted-foreground font-normal uppercase">Email Verified</p><p className={`text-sm mt-0.5 flex items-center gap-1.5 font-semibold ${staff.email_verified ? 'text-success' : 'text-warning'}`}>{staff.email_verified ? <><CheckCircle2 className="size-3.5" />Verified</> : <><XCircle className="size-3.5" />Not Verified</>}</p></div>
           </CardContent>
         </Card>
 
@@ -151,9 +150,9 @@ function UserDetailPage() {
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div><p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Email</p><a href={`mailto:${staff.email}`} className="text-sm text-primary mt-0.5 hover:underline flex items-center gap-1.5"><Mail className="size-3.5" /> {staff.email}</a></div>
-            <div><p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Phone Number</p>{staff.phone_number ? <a href={`tel:${staff.phone_number}`} className="text-sm text-primary mt-0.5 hover:underline flex items-center gap-1.5"><Phone className="size-3.5" /> {staff.phone_number}</a> : <p className="text-sm text-muted-foreground mt-0.5">Not provided</p>}</div>
-            <div><p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Location Scope</p><p className="text-sm text-foreground mt-0.5 flex items-center gap-1.5"><MapPin className="size-3.5 text-muted-foreground" />{isSuperAdminUser ? <span className="text-muted-foreground">&mdash;</span> : scopeNames.length === 0 ? <span className="flex items-center gap-1"><Globe className="size-3" /> Full Access</span> : scopeNames.join(', ')}</p></div>
+            <div><p className="text-xs text-muted-foreground font-normal uppercase">Email</p><a href={`mailto:${staff.email}`} className="text-sm text-primary mt-0.5 hover:underline flex items-center gap-1.5"><Mail className="size-3.5" /> {staff.email}</a></div>
+            <div><p className="text-xs text-muted-foreground font-normal uppercase">Phone Number</p>{staff.phone_number ? <a href={`tel:${staff.phone_number}`} className="text-sm text-primary mt-0.5 hover:underline flex items-center gap-1.5"><Phone className="size-3.5" /> {staff.phone_number}</a> : <p className="text-sm text-muted-foreground mt-0.5">Not provided</p>}</div>
+            <div><p className="text-xs text-muted-foreground font-normal uppercase">Location Scope</p><p className="text-sm text-foreground mt-0.5 flex items-center gap-1.5"><MapPin className="size-3.5 text-muted-foreground" />{isSuperAdminUser ? <span className="text-muted-foreground">&mdash;</span> : scopeNames.length === 0 ? <span className="flex items-center gap-1"><Globe className="size-3" /> Full Access</span> : scopeNames.join(', ')}</p></div>
           </CardContent>
         </Card>
 
@@ -165,12 +164,12 @@ function UserDetailPage() {
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div><p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Primary Role</p><Badge variant="outline" className="mt-1.5 bg-primary/10 text-primary font-semibold">{ROLE_LABELS[staff.role]}</Badge></div>
-            <div><p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em] mb-2">All Assigned Roles</p><div className="flex flex-wrap gap-1.5">{userRoles.map((r) => <Badge key={r} variant="outline" className="text-xs">{ROLE_LABELS[r]}</Badge>)}</div></div>
-            <div><p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Account Status</p>
+            <div><p className="text-xs text-muted-foreground font-normal uppercase">Primary Role</p><Badge variant="outline" className="mt-1.5 bg-primary/10 text-primary font-semibold">{ROLE_LABELS[staff.role]}</Badge></div>
+            <div><p className="text-xs text-muted-foreground font-normal uppercase mb-2">All Assigned Roles</p><div className="flex flex-wrap gap-1.5">{userRoles.map((r) => <Badge key={r} variant="outline" className="text-xs">{ROLE_LABELS[r]}</Badge>)}</div></div>
+            <div><p className="text-xs text-muted-foreground font-normal uppercase">Account Status</p>
               <div className="flex flex-col gap-1.5 mt-1.5">
-                <span className={`text-xs flex items-center gap-1.5 font-medium ${!staff.suspended ? 'text-success' : 'text-destructive'}`}>{!staff.suspended ? <CheckCircle2 className="size-3.5" /> : <XCircle className="size-3.5" />}{staff.suspended ? 'Suspended' : 'Active'}</span>
-                <span className={`text-xs flex items-center gap-1.5 font-medium ${staff.email_verified ? 'text-success' : 'text-warning'}`}>{staff.email_verified ? <CheckCircle2 className="size-3.5" /> : <XCircle className="size-3.5" />}Email {staff.email_verified ? 'Verified' : 'Not Verified'}</span>
+                <span className={`text-xs flex items-center gap-1.5 font-normal ${!staff.suspended ? 'text-success' : 'text-destructive'}`}>{!staff.suspended ? <CheckCircle2 className="size-3.5" /> : <XCircle className="size-3.5" />}{staff.suspended ? 'Suspended' : 'Active'}</span>
+                <span className={`text-xs flex items-center gap-1.5 font-normal ${staff.email_verified ? 'text-success' : 'text-warning'}`}>{staff.email_verified ? <CheckCircle2 className="size-3.5" /> : <XCircle className="size-3.5" />}Email {staff.email_verified ? 'Verified' : 'Not Verified'}</span>
               </div>
             </div>
           </CardContent>
@@ -186,9 +185,9 @@ function UserDetailPage() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            <div><p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Last Login</p><p className="text-sm text-foreground mt-0.5 flex items-center gap-1.5"><Clock className="size-3.5 text-muted-foreground" />{formatDate(staff.last_login, true)}</p></div>
-            <div><p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Last Login IP</p><p className="text-sm text-foreground mt-0.5 flex items-center gap-1.5 font-mono"><Globe className="size-3.5 text-muted-foreground" />{staff.last_login_ip || '\u2014'}</p></div>
-            <div><p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">User Agent</p><p className="text-sm text-foreground mt-0.5 flex items-start gap-1.5 truncate"><Monitor className="size-3.5 text-muted-foreground mt-0.5 shrink-0" /><span className="truncate">{staff.last_login_user_agent || '\u2014'}</span></p></div>
+            <div><p className="text-xs text-muted-foreground font-normal uppercase">Last Login</p><p className="text-sm text-foreground mt-0.5 flex items-center gap-1.5"><Clock className="size-3.5 text-muted-foreground" />{formatDate(staff.last_login, true)}</p></div>
+            <div><p className="text-xs text-muted-foreground font-normal uppercase">Last Login IP</p><p className="text-sm text-foreground mt-0.5 flex items-center gap-1.5 font-mono"><Globe className="size-3.5 text-muted-foreground" />{staff.last_login_ip || '\u2014'}</p></div>
+            <div><p className="text-xs text-muted-foreground font-normal uppercase">User Agent</p><p className="text-sm text-foreground mt-0.5 flex items-start gap-1.5 truncate"><Monitor className="size-3.5 text-muted-foreground mt-0.5 shrink-0" /><span className="truncate">{staff.last_login_user_agent || '\u2014'}</span></p></div>
           </div>
         </CardContent>
       </Card>

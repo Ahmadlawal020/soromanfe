@@ -85,7 +85,7 @@ function DialogTitle({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="dialog-title"
-      className={cn("text-base leading-snug font-medium tracking-tight", className)}
+      className={cn("text-base leading-snug font-normal tracking-tight", className)}
       {...props}
     />
   )

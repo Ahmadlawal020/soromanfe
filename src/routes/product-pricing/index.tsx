@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { StatCard } from '#/components/ui/stat-card'
 import { createFileRoute } from '@tanstack/react-router'
 import { Button } from '#/components/ui/button'
@@ -189,21 +190,11 @@ function ProductPricingPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-xl md:text-2xl font-semibold tracking-tight text-foreground flex items-center gap-2 text-balance">
-            <Fuel className="size-7 text-primary" />
-            Depot Product Pricing
-          </h1>
-          <p className="text-muted-foreground text-sm">
-            View and manage real-time fuel and product prices across all depot hubs.
-          </p>
-        </div>
-        <Button variant="outline" size="sm" onClick={() => refetch()} className="gap-2 self-start sm:self-auto">
-          <RefreshCw className="size-4" />
-          Refresh Data
-        </Button>
-      </div>
+      <PageHeader
+      eyebrow="Operations"
+      title="Depot Product Pricing"
+      description="View and manage real-time fuel and product prices across all depot hubs."
+    />
 
       {/* Stats Cards */}
       {!isLoading && !isError && (
@@ -421,7 +412,7 @@ function ProductPricingPage() {
                   </div>
 
                   <div className="relative w-40">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-mono font-medium">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-mono font-normal">
                       ₦
                     </span>
                     <CommaInput

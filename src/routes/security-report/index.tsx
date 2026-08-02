@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute } from '@tanstack/react-router'
 import { format, isWithinInterval, startOfDay, endOfDay } from 'date-fns'
 import { Truck, Droplets, FileSpreadsheet, FileText, Loader2, ClipboardList } from 'lucide-react'
@@ -197,124 +198,117 @@ function SecurityReportPage() {
   }
 
   return (
-    <div className="animate-fade-in space-y-6">
-      <div>
-        <p className={cn(MICRO, 'mb-1.5 text-muted-foreground')}>Security</p>
-        <h1 className="text-xl font-semibold tracking-tight text-balance md:text-2xl">
-          Security report
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          List of trucks cleared by security, with a summary for the selected period.
-        </p>
-      </div>
-
-      <StatCardGrid count={4}>
-        <StatCard icon={<Truck />} label="Total trucks for the day" value={fmt(totals.trucksDay)} />
-        <StatCard icon={<Truck />} label="Cumulative trucks out" value={fmt(cumulative.trucks)} />
-        <StatCard icon={<Droplets />} label="Total quantity for the day" value={fmt(totals.qtyDay)} />
-        <StatCard icon={<Droplets />} label="Cumulative quantity" value={fmt(cumulative.qty)} />
-      </StatCardGrid>
-
-      <section className={PANEL}>
-        <div className={PANEL_RAIL}>
+    <PageHeader
+      eyebrow="Security"
+      title="Security report"
+      description="List of trucks cleared by security, with a summary for the selected period."
+      actions={
+        <>
+          <StatCardGrid count={4}>
+          <StatCard icon={<Truck />} label="Total trucks for the day" value={fmt(totals.trucksDay)} />
+          <StatCard icon={<Truck />} label="Cumulative trucks out" value={fmt(cumulative.trucks)} />
+          <StatCard icon={<Droplets />} label="Total quantity for the day" value={fmt(totals.qtyDay)} />
+          <StatCard icon={<Droplets />} label="Cumulative quantity" value={fmt(cumulative.qty)} />
+          </StatCardGrid>
+          <section className={PANEL}>
+          <div className={PANEL_RAIL}>
           <span className={MICRO}>Filters</span>
-        </div>
-        <div className={cn(PANEL_BODY, 'space-y-4')}>
+          </div>
+          <div className={cn(PANEL_BODY, 'space-y-4')}>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="space-y-1.5">
-              <label className={cn(MICRO, 'block text-muted-foreground')} htmlFor="from">Date from</label>
-              <Input id="from" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
-            </div>
-            <div className="space-y-1.5">
-              <label className={cn(MICRO, 'block text-muted-foreground')} htmlFor="to">Date to</label>
-              <Input id="to" type="date" value={to} onChange={(e) => setTo(e.target.value)} />
-            </div>
-            <div className="space-y-1.5">
-              <label className={cn(MICRO, 'block text-muted-foreground')}>PFI</label>
-              <NativeSelect value={pfi} onChange={(e) => setPfi(e.target.value)}>
-                <option value={ALL}>All PFIs</option>
-                {options.pfis.map((p) => <option key={p} value={p}>{p}</option>)}
-              </NativeSelect>
-            </div>
-            <div className="space-y-1.5">
-              <label className={cn(MICRO, 'block text-muted-foreground')}>Location</label>
-              <NativeSelect value={location} onChange={(e) => setLocation(e.target.value)}>
-                <option value={ALL}>All locations</option>
-                {options.locations.map((l) => <option key={l} value={l}>{l}</option>)}
-              </NativeSelect>
-            </div>
+          <div className="space-y-1.5">
+          <label className={cn(MICRO, 'block text-muted-foreground')} htmlFor="from">Date from</label>
+          <Input id="from" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
           </div>
-
+          <div className="space-y-1.5">
+          <label className={cn(MICRO, 'block text-muted-foreground')} htmlFor="to">Date to</label>
+          <Input id="to" type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+          <label className={cn(MICRO, 'block text-muted-foreground')}>PFI</label>
+          <NativeSelect value={pfi} onChange={(e) => setPfi(e.target.value)}>
+          <option value={ALL}>All PFIs</option>
+          {options.pfis.map((p) => <option key={p} value={p}>{p}</option>)}
+          </NativeSelect>
+          </div>
+          <div className="space-y-1.5">
+          <label className={cn(MICRO, 'block text-muted-foreground')}>Location</label>
+          <NativeSelect value={location} onChange={(e) => setLocation(e.target.value)}>
+          <option value={ALL}>All locations</option>
+          {options.locations.map((l) => <option key={l} value={l}>{l}</option>)}
+          </NativeSelect>
+          </div>
+          </div>
           <div className="flex flex-wrap gap-2">
-            <Button size="sm" onClick={build} disabled={isLoading || loadingRows}>
-              {loadingRows && <Loader2 className="animate-spin" />}
-              Run report
-            </Button>
-            <Button variant="outline" size="sm" onClick={exportExcel} disabled={!rows?.length || exporting !== null}>
-              {exporting === 'excel' ? <Loader2 className="animate-spin" /> : <FileSpreadsheet data-icon="inline-start" />}
-              Excel
-            </Button>
-            <Button variant="outline" size="sm" onClick={exportPdf} disabled={!rows?.length || exporting !== null}>
-              {exporting === 'pdf' ? <Loader2 className="animate-spin" /> : <FileText data-icon="inline-start" />}
-              PDF
-            </Button>
+          <Button size="sm" onClick={build} disabled={isLoading || loadingRows}>
+          {loadingRows && <Loader2 className="animate-spin" />}
+          Run report
+          </Button>
+          <Button variant="outline" size="sm" onClick={exportExcel} disabled={!rows?.length || exporting !== null}>
+          {exporting === 'excel' ? <Loader2 className="animate-spin" /> : <FileSpreadsheet data-icon="inline-start" />}
+          Excel
+          </Button>
+          <Button variant="outline" size="sm" onClick={exportPdf} disabled={!rows?.length || exporting !== null}>
+          {exporting === 'pdf' ? <Loader2 className="animate-spin" /> : <FileText data-icon="inline-start" />}
+          PDF
+          </Button>
           </div>
-        </div>
-      </section>
-
-      <section className={PANEL}>
-        <div className={PANEL_RAIL}>
+          </div>
+          </section>
+          <section className={PANEL}>
+          <div className={PANEL_RAIL}>
           <span className={MICRO}>
-            {rows ? `${fmt(rows.length)} truck${rows.length === 1 ? '' : 's'} cleared` : 'Trucks cleared'}
+          {rows ? `${fmt(rows.length)} truck${rows.length === 1 ? '' : 's'} cleared` : 'Trucks cleared'}
           </span>
-        </div>
-        {isLoading ? (
-          <PageLoader message="Loading orders…" />
-        ) : !rows ? (
-          <PageEmpty title="Run the report" description="Choose a period and press Run report." />
-        ) : rows.length === 0 ? (
-          <PageEmpty title="No trucks cleared in that period" description="Widen the dates or clear a filter." />
-        ) : (
-          <div className="px-2 pb-2">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-12">S/N</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Truck No</TableHead>
-                  <TableHead>Order Ref</TableHead>
-                  <TableHead className="text-right">Quantity</TableHead>
-                  <TableHead>Time of Exit</TableHead>
-                  <TableHead>Gantry</TableHead>
-                  <TableHead>Loader</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {rows.map((r, i) => (
-                  <TableRow key={r.id}>
-                    <TableCell className="text-muted-foreground tabular-nums">{i + 1}</TableCell>
-                    <TableCell className="tabular-nums">{r.date}</TableCell>
-                    <TableCell className="font-mono">{r.truckNumber}</TableCell>
-                    <TableCell className="font-medium text-accent">{r.orderRef}</TableCell>
-                    <TableCell className="text-right tabular-nums">{fmt(r.quantity)}</TableCell>
-                    <TableCell className="tabular-nums">{r.exitedAt}</TableCell>
-                    <TableCell>{r.gantry}</TableCell>
-                    <TableCell>{r.loader}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
           </div>
-        )}
-      </section>
-
-      <DailyGateReport
-        locations={options.locations}
-        pfis={options.pfis}
-        staffName={user ? `${user.firstName} ${user.surname}` : ''}
-        outstanding={0}
-      />
-    </div>
+          {isLoading ? (
+          <PageLoader message="Loading orders…" />
+          ) : !rows ? (
+          <PageEmpty title="Run the report" description="Choose a period and press Run report." />
+          ) : rows.length === 0 ? (
+          <PageEmpty title="No trucks cleared in that period" description="Widen the dates or clear a filter." />
+          ) : (
+          <div className="px-2 pb-2">
+          <Table>
+          <TableHeader>
+          <TableRow>
+          <TableHead className="w-12">S/N</TableHead>
+          <TableHead>Date</TableHead>
+          <TableHead>Truck No</TableHead>
+          <TableHead>Order Ref</TableHead>
+          <TableHead className="text-right">Quantity</TableHead>
+          <TableHead>Time of Exit</TableHead>
+          <TableHead>Gantry</TableHead>
+          <TableHead>Loader</TableHead>
+          </TableRow>
+          </TableHeader>
+          <TableBody>
+          {rows.map((r, i) => (
+          <TableRow key={r.id}>
+          <TableCell className="text-muted-foreground tabular-nums">{i + 1}</TableCell>
+          <TableCell className="tabular-nums">{r.date}</TableCell>
+          <TableCell className="font-mono">{r.truckNumber}</TableCell>
+          <TableCell className="font-normal text-accent">{r.orderRef}</TableCell>
+          <TableCell className="text-right tabular-nums">{fmt(r.quantity)}</TableCell>
+          <TableCell className="tabular-nums">{r.exitedAt}</TableCell>
+          <TableCell>{r.gantry}</TableCell>
+          <TableCell>{r.loader}</TableCell>
+          </TableRow>
+          ))}
+          </TableBody>
+          </Table>
+          </div>
+          )}
+          </section>
+          <DailyGateReport
+          locations={options.locations}
+          pfis={options.pfis}
+          staffName={user ? `${user.firstName} ${user.surname}` : ''}
+          outstanding={0}
+          />
+        </>
+      }
+    />
   )
 }
 

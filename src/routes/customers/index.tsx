@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { StatCard } from '#/components/ui/stat-card'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
@@ -67,15 +68,18 @@ function CustomerDashboard() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">Customers</h1>
-          <p className="text-muted-foreground">Manage customer profiles, deposits, balances, and account status.</p>
-        </div>
-        <Button size="sm"  onClick={() => navigate({ to: '/customers/form' })}>
+      <PageHeader
+      eyebrow="Orders"
+      title="Customers"
+      description="Manage customer profiles, deposits, balances, and account status."
+      actions={
+        <>
+          <Button size="sm"  onClick={() => navigate({ to: '/customers/form' })}>
           <Plus className="size-4 mr-2" />Add New Customer
-        </Button>
-      </div>
+          </Button>
+        </>
+      }
+    />
 
       {!isLoading && !isError && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -142,14 +146,14 @@ function CustomerDashboard() {
                       <TableRow key={customer._id || customer.id} className="cursor-pointer hover:bg-muted transition" onClick={() => navigate({ to: '/customers/details' as any, search: { id: customer._id || customer.id } as any, state: { customer } } as any)}>
                         <TableCell>
                           <div className="flex items-center gap-3">
-                            <div className="size-10 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-medium">{getInitials(customer.name)}</div>
-                            <p className="font-medium">{customer.name}</p>
+                            <div className="size-10 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-normal">{getInitials(customer.name)}</div>
+                            <p className="font-normal">{customer.name}</p>
                           </div>
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-1.5">
                             <Building2 className="size-3.5 text-muted-foreground" />
-                            <span className="font-medium">{customer.companyName || '—'}</span>
+                            <span className="font-normal">{customer.companyName || '—'}</span>
                           </div>
                         </TableCell>
                         <TableCell className="text-xs text-muted-foreground hidden md:table-cell">
@@ -161,7 +165,7 @@ function CustomerDashboard() {
                         </TableCell>
                         <TableCell className="hidden lg:table-cell">
                           <div className="space-y-0.5">
-                            <div className="flex items-center gap-1 text-sm"><Banknote className="size-3 text-success" /><span className="font-medium">{formatCurrency(customer.deposit || 0)}</span></div>
+                            <div className="flex items-center gap-1 text-sm"><Banknote className="size-3 text-success" /><span className="font-normal">{formatCurrency(customer.deposit || 0)}</span></div>
                             <div className="text-xs text-muted-foreground">Prev: {formatCurrency(customer.previousDeposit || 0)}</div>
                           </div>
                         </TableCell>

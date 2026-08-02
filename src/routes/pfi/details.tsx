@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '#/components/ui/card'
 import { Button } from '#/components/ui/button'
@@ -173,15 +174,11 @@ function PFIDetails() {
     <div className="space-y-6 animate-fade-in">
       <Breadcrumbs items={[{ label: 'PFIs', href: '/pfi' }, { label: pfi?.pfiNumber || 'Details' }]} />
       <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" onClick={() => navigate({ to: '/pfi' as any })}>
-            <ArrowLeft className="size-4" />
-          </Button>
-          <div>
-            <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">PFI Profile Details</h1>
-            <p className="text-muted-foreground">Monitor PFI transaction logs, weight & volume metrics, assigned officers, and closure state</p>
-          </div>
-        </div>
+        <PageHeader
+      eyebrow="Admin"
+      title="PFI Profile Details"
+      description="Monitor PFI transaction logs, weight & volume metrics, assigned officers, and closure state"
+    />
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={handleEdit}>
             <Edit className="size-4 mr-2" /> Edit PFI
@@ -202,7 +199,7 @@ function PFIDetails() {
             <div className="flex-1">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant="outline" className="font-mono text-xs">PFI ID: {pfi._id}</Badge>
-                <Badge variant="outline" className="font-medium text-xs">
+                <Badge variant="outline" className="font-normal text-xs">
                   {isWeight ? <Scale className="size-3 mr-1 text-info inline" /> : <DropletIcon className="size-3 mr-1 text-primary inline" />}
                   Unit: {unit}
                 </Badge>
@@ -239,27 +236,27 @@ function PFIDetails() {
           <CardContent className="space-y-4 pt-4 text-sm">
             <dl className="grid grid-cols-2 gap-4">
               <div>
-                <dt className="text-muted-foreground font-medium">PFI Date</dt>
+                <dt className="text-muted-foreground font-normal">PFI Date</dt>
                 <dd className="font-semibold text-foreground mt-0.5">{pfi.pfiDate ? new Date(pfi.pfiDate).toLocaleDateString() : '—'}</dd>
               </div>
               <div>
-                <dt className="text-muted-foreground font-medium">Location</dt>
+                <dt className="text-muted-foreground font-normal">Location</dt>
                 <dd className="font-semibold text-foreground mt-0.5">{pfi.locationName || '—'}</dd>
               </div>
               <div>
-                <dt className="text-muted-foreground font-medium">Product Type</dt>
+                <dt className="text-muted-foreground font-normal">Product Type</dt>
                 <dd className="font-semibold text-foreground mt-0.5">{pfi.productName || '—'}</dd>
               </div>
               <div>
-                <dt className="text-muted-foreground font-medium">Measurement Unit</dt>
+                <dt className="text-muted-foreground font-normal">Measurement Unit</dt>
                 <dd className="font-semibold text-foreground mt-0.5">{unit}</dd>
               </div>
               <div>
-                <dt className="text-muted-foreground font-medium">Qty Volume (MT)</dt>
+                <dt className="text-muted-foreground font-normal">Qty Volume (MT)</dt>
                 <dd className="font-semibold text-foreground mt-0.5">{qtyMt > 0 ? `${fmtQty(qtyMt, 2)} MT` : '—'}</dd>
               </div>
               <div>
-                <dt className="text-muted-foreground font-medium">Unit Price</dt>
+                <dt className="text-muted-foreground font-normal">Unit Price</dt>
                 <dd className="font-semibold text-foreground mt-0.5">
                   {unitPrice > 0 ? `₦${unitPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} / ${unit}` : '—'}
                 </dd>
@@ -284,19 +281,19 @@ function PFIDetails() {
           <CardContent className="space-y-4 pt-4 text-sm">
             <dl className="grid grid-cols-2 gap-4">
               <div>
-                <dt className="text-muted-foreground font-medium">Vessel Broker</dt>
+                <dt className="text-muted-foreground font-normal">Vessel Broker</dt>
                 <dd className="font-semibold text-foreground mt-0.5">{pfi.vesselBroker || '—'}</dd>
               </div>
               <div>
-                <dt className="text-muted-foreground font-medium">Vessel Name</dt>
+                <dt className="text-muted-foreground font-normal">Vessel Name</dt>
                 <dd className="font-semibold text-foreground mt-0.5">{pfi.vesselName || '—'}</dd>
               </div>
               <div>
-                <dt className="text-muted-foreground font-medium">Surveyor Name</dt>
+                <dt className="text-muted-foreground font-normal">Surveyor Name</dt>
                 <dd className="font-semibold text-foreground mt-0.5">{pfi.surveyorName || '—'}</dd>
               </div>
               <div>
-                <dt className="text-muted-foreground font-medium">Surveyor Phone</dt>
+                <dt className="text-muted-foreground font-normal">Surveyor Phone</dt>
                 <dd className="font-semibold text-foreground mt-0.5">{pfi.surveyorPhone || '—'}</dd>
               </div>
             </dl>
@@ -319,27 +316,27 @@ function PFIDetails() {
           <CardContent className="space-y-4 pt-4 text-sm">
             <dl className="grid grid-cols-2 gap-y-3 gap-x-4">
               <div>
-                <dt className="text-muted-foreground font-medium">Audit Officer</dt>
+                <dt className="text-muted-foreground font-normal">Audit Officer</dt>
                 <dd className="font-semibold text-foreground mt-0.5">{getOfficerName(pfi.auditOfficerId, pfi.auditOfficerName)}</dd>
               </div>
               <div>
-                <dt className="text-muted-foreground font-medium">Product Officer</dt>
+                <dt className="text-muted-foreground font-normal">Product Officer</dt>
                 <dd className="font-semibold text-foreground mt-0.5">{getOfficerName(pfi.productOfficerId, pfi.productOfficerName)}</dd>
               </div>
               <div>
-                <dt className="text-muted-foreground font-medium">IT Compliance Officer</dt>
+                <dt className="text-muted-foreground font-normal">IT Compliance Officer</dt>
                 <dd className="font-semibold text-foreground mt-0.5">{getOfficerName(pfi.itComplianceOfficerId, pfi.itComplianceOfficerName)}</dd>
               </div>
               <div>
-                <dt className="text-muted-foreground font-medium">Security Exit Officer</dt>
+                <dt className="text-muted-foreground font-normal">Security Exit Officer</dt>
                 <dd className="font-semibold text-foreground mt-0.5">{getOfficerName(pfi.securityExitOfficerId, pfi.securityExitOfficerName)}</dd>
               </div>
               <div>
-                <dt className="text-muted-foreground font-medium">Commission Officer</dt>
+                <dt className="text-muted-foreground font-normal">Commission Officer</dt>
                 <dd className="font-semibold text-foreground mt-0.5">{getOfficerName(pfi.commissionOfficerId, pfi.commissionOfficerName)}</dd>
               </div>
               <div>
-                <dt className="text-muted-foreground font-medium">Sales Manager</dt>
+                <dt className="text-muted-foreground font-normal">Sales Manager</dt>
                 <dd className="font-semibold text-foreground mt-0.5">{getOfficerName(pfi.salesManagerId, pfi.salesManagerName)}</dd>
               </div>
             </dl>
@@ -362,26 +359,26 @@ function PFIDetails() {
           <CardContent className="space-y-4 pt-4 text-sm">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Starting Qty ({unit})</p>
+                <p className="text-xs text-muted-foreground font-normal uppercase">Starting Qty ({unit})</p>
                 <p className="text-lg font-semibold text-foreground mt-1">{fmtQty(primaryStarting, decimals)} {unit}</p>
                 {startingLitres > 0 && isWeight && (
                   <p className="text-xs text-muted-foreground">({fmtQty(startingLitres)} L)</p>
                 )}
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Total PFI Cost</p>
+                <p className="text-xs text-muted-foreground font-normal uppercase">Total PFI Cost</p>
                 <p className="text-lg font-semibold text-primary mt-1">{fmtCurrency(cumulativeCost)}</p>
               </div>
             </div>
             <Separator />
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Sold Qty ({unit})</p>
+                <p className="text-xs text-muted-foreground font-normal uppercase">Sold Qty ({unit})</p>
                 <p className="text-lg font-semibold text-accent mt-1">{fmtQty(primarySold, decimals)} {unit}</p>
                 <p className="text-xs font-semibold text-accent mt-0.5">Sold Cost: {fmtCurrency(soldCost)}</p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Remaining Qty ({unit})</p>
+                <p className="text-xs text-muted-foreground font-normal uppercase">Remaining Qty ({unit})</p>
                 <p className="text-lg font-semibold text-warning mt-1">{fmtQty(primaryRemaining, decimals)} {unit}</p>
                 <p className="text-xs font-semibold text-warning mt-0.5">Rem Cost: {fmtCurrency(remainingCost)}</p>
               </div>
@@ -415,7 +412,7 @@ function PFIDetails() {
               <form onSubmit={handleClosePfi}>
                 <CardContent className="space-y-4 pt-6">
                   {error && (
-                    <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm font-medium mb-4 flex items-center gap-2">
+                    <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm font-normal mb-4 flex items-center gap-2">
                       <ShieldAlert className="size-4 shrink-0" />
                       <span>{error}</span>
                     </div>
@@ -479,31 +476,31 @@ function PFIDetails() {
               <CardContent className="pt-4 text-sm">
                 <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <dt className="text-muted-foreground font-medium">Closure Date</dt>
+                    <dt className="text-muted-foreground font-normal">Closure Date</dt>
                     <dd className="font-semibold text-foreground mt-0.5">{pfi.closureDate ? new Date(pfi.closureDate).toLocaleDateString() : '—'}</dd>
                   </div>
                   <div>
-                    <dt className="text-muted-foreground font-medium">Closure Bank</dt>
+                    <dt className="text-muted-foreground font-normal">Closure Bank</dt>
                     <dd className="font-semibold text-foreground mt-0.5">{pfi.closureBank || '—'}</dd>
                   </div>
                   <div>
-                    <dt className="text-muted-foreground font-medium">Total Inflow</dt>
+                    <dt className="text-muted-foreground font-normal">Total Inflow</dt>
                     <dd className="font-semibold text-success mt-0.5">{pfi.totalInflow ? fmtCurrency(toNum(pfi.totalInflow)) : '—'}</dd>
                   </div>
                   <div>
-                    <dt className="text-muted-foreground font-medium">Purchase Cost</dt>
+                    <dt className="text-muted-foreground font-normal">Purchase Cost</dt>
                     <dd className="font-semibold text-destructive mt-0.5">{pfi.purchaseCost ? fmtCurrency(toNum(pfi.purchaseCost)) : '—'}</dd>
                   </div>
                   <div>
-                    <dt className="text-muted-foreground font-medium">Aggregate Expenses</dt>
+                    <dt className="text-muted-foreground font-normal">Aggregate Expenses</dt>
                     <dd className="font-semibold text-destructive mt-0.5">{pfi.aggregateExpenses ? fmtCurrency(toNum(pfi.aggregateExpenses)) : '—'}</dd>
                   </div>
                   <div>
-                    <dt className="text-muted-foreground font-medium">Closure Handler</dt>
+                    <dt className="text-muted-foreground font-normal">Closure Handler</dt>
                     <dd className="font-semibold text-foreground mt-0.5">{pfi.closureHandler || '—'}</dd>
                   </div>
                   <div className="sm:col-span-2">
-                    <dt className="text-muted-foreground font-medium">Remarks</dt>
+                    <dt className="text-muted-foreground font-normal">Remarks</dt>
                     <dd className="text-foreground mt-0.5">{pfi.closureRemarks || 'No remarks provided.'}</dd>
                   </div>
                 </dl>

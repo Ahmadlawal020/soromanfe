@@ -59,7 +59,7 @@ export function SurplusDeficit({
     <span className={cn(surplus ? 'text-accent' : 'text-destructive', className)}>
       {surplus ? '+' : '−'}
       {Math.abs(value).toLocaleString('en-NG')} L
-      <span className="ml-1 text-[0.7em] uppercase tracking-[0.14em] opacity-70">
+      <span className="ml-1 text-[0.7em] uppercase opacity-70">
         {surplus ? 'surplus' : 'deficit'}
       </span>
     </span>

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
@@ -25,21 +26,21 @@ function getStatusBadge(status: string) {
   switch (status) {
     case 'Active':
       return (
-        <Badge className="bg-accent/15 text-accent border-accent/30 gap-1.5 font-medium">
+        <Badge className="bg-accent/15 text-accent border-accent/30 gap-1.5 font-normal">
           <span className="size-1.5 rounded-full bg-accent animate-pulse" />
           {status}
         </Badge>
       )
     case 'High Capacity':
       return (
-        <Badge className="bg-warning/15 text-warning border-warning/30 gap-1.5 font-medium">
+        <Badge className="bg-warning/15 text-warning border-warning/30 gap-1.5 font-normal">
           <span className="size-1.5 rounded-full bg-warning animate-pulse" />
           {status}
         </Badge>
       )
     case 'Maintenance':
       return (
-        <Badge variant="destructive" className="gap-1.5 font-medium">
+        <Badge variant="destructive" className="gap-1.5 font-normal">
           <span className="size-1.5 rounded-full bg-destructive-foreground animate-pulse" />
           {status}
         </Badge>
@@ -132,7 +133,7 @@ function LpgStationDetailPage() {
     return (
       <div className="flex flex-col items-center justify-center py-28 gap-4 text-center">
         <Loader2 className="size-10 animate-spin text-primary" />
-        <p className="text-sm font-medium text-muted-foreground">Loading LPG station details...</p>
+        <p className="text-sm font-normal text-muted-foreground">Loading LPG station details...</p>
       </div>
     )
   }
@@ -157,15 +158,10 @@ function LpgStationDetailPage() {
       <Breadcrumbs items={[{ label: 'LPG Stations', href: '/lpg-stations' }, { label: station?.name || 'Details' }]} />
 
       <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b pb-4">
-        <div>
-          <div className="flex items-center gap-3">
-            <Button variant="outline" size="icon" className="size-8" onClick={handleBack}>
-              <ArrowLeft className="size-4" />
-            </Button>
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground text-balance">{station.name}</h1>
-            <div className="hidden sm:block">{getStatusBadge(station.status)}</div>
-          </div>
-        </div>
+        <PageHeader
+      eyebrow="LPG Home Delivery"
+      title={station.name}
+    />
 
         <div className="flex items-center gap-2 flex-wrap">
           <Button
@@ -178,7 +174,7 @@ function LpgStationDetailPage() {
           <Button
             variant="outline"
             size="sm"
-            className="gap-1.5 text-xs font-medium"
+            className="gap-1.5 text-xs font-normal"
             onClick={() => navigate({ to: '/lpg-stations/form' as any, search: { id: activeStationId } as any, state: { station, isEdit: true } as any })}
           >
             <Edit className="size-4" /> Edit Station
@@ -186,7 +182,7 @@ function LpgStationDetailPage() {
           <Button
             variant="destructive"
             size="sm"
-            className="gap-1.5 text-xs font-medium"
+            className="gap-1.5 text-xs font-normal"
             onClick={handleDelete}
             disabled={deleteStation.isPending}
           >
@@ -254,7 +250,7 @@ function LpgStationDetailPage() {
         <Card className="border-l-4 border-l-primary hover:shadow transition-shadow duration-250 ease-luxe">
           <CardContent className="p-5 flex items-center justify-between">
             <div className="space-y-1">
-              <p className="text-xs text-muted-foreground font-semibold uppercase tracking-[0.22em]">Total Allocated Stock</p>
+              <p className="text-xs text-muted-foreground font-semibold uppercase">Total Allocated Stock</p>
               <h3 className="text-2xl font-semibold text-foreground">
                 {totalPfiStartingQty.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">Kg</span>
               </h3>
@@ -272,11 +268,11 @@ function LpgStationDetailPage() {
         <Card className="border-l-4 border-l-emerald-500 hover:shadow transition-shadow duration-250 ease-luxe">
           <CardContent className="p-5 flex items-center justify-between">
             <div className="space-y-1">
-              <p className="text-xs text-muted-foreground font-semibold uppercase tracking-[0.22em]">Volume Sold</p>
+              <p className="text-xs text-muted-foreground font-semibold uppercase">Volume Sold</p>
               <h3 className="text-2xl font-semibold text-foreground">
                 {totalPfiSoldQty.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">Kg</span>
               </h3>
-              <p className="text-xs text-accent font-medium flex items-center gap-1">
+              <p className="text-xs text-accent font-normal flex items-center gap-1">
                 <TrendingUp className="size-3" />
                 <span>{Math.round(fulfillmentPct)}% sold</span>
               </p>
@@ -290,11 +286,11 @@ function LpgStationDetailPage() {
         <Card className={`border-l-4 hover:shadow transition-shadow ${isStockLow ? 'border-l-destructive' : 'border-l-amber-500'}`}>
           <CardContent className="p-5 flex items-center justify-between">
             <div className="space-y-1">
-              <p className="text-xs text-muted-foreground font-semibold uppercase tracking-[0.22em]">Stock Remaining</p>
+              <p className="text-xs text-muted-foreground font-semibold uppercase">Stock Remaining</p>
               <h3 className="text-2xl font-semibold text-foreground">
                 {totalPfiRemainingQty.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">Kg</span>
               </h3>
-              <p className={`text-xs font-medium flex items-center gap-1 ${isStockLow ? 'text-destructive font-semibold' : 'text-warning'}`}>
+              <p className={`text-xs font-normal flex items-center gap-1 ${isStockLow ? 'text-destructive font-semibold' : 'text-warning'}`}>
                 <Droplets className="size-3" />
                 <span>{Math.round(remainingStockPct)}% available</span>
               </p>
@@ -308,7 +304,7 @@ function LpgStationDetailPage() {
         <Card className="border-l-4 border-l-blue-500 hover:shadow transition-shadow duration-250 ease-luxe">
           <CardContent className="p-5 flex items-center justify-between">
             <div className="space-y-1">
-              <p className="text-xs text-muted-foreground font-semibold uppercase tracking-[0.22em]">LPG Capacity</p>
+              <p className="text-xs text-muted-foreground font-semibold uppercase">LPG Capacity</p>
               <h3 className="text-2xl font-semibold text-foreground">
                 {station.lpgCapacityKg?.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">Kg</span>
               </h3>
@@ -411,31 +407,31 @@ function LpgStationDetailPage() {
             </CardHeader>
             <CardContent className="space-y-4 pt-4">
               <div>
-                <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-[0.14em]">Street Address</p>
-                <p className="text-sm text-foreground font-medium mt-0.5">{station.address || 'N/A'}</p>
+                <p className="text-[11px] text-muted-foreground font-semibold uppercase">Street Address</p>
+                <p className="text-sm text-foreground font-normal mt-0.5">{station.address || 'N/A'}</p>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-[0.14em]">LGA / City</p>
-                  <p className="text-sm text-foreground font-medium mt-0.5">{station.city || 'N/A'}</p>
+                  <p className="text-[11px] text-muted-foreground font-semibold uppercase">LGA / City</p>
+                  <p className="text-sm text-foreground font-normal mt-0.5">{station.city || 'N/A'}</p>
                 </div>
                 <div>
-                  <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-[0.14em]">State</p>
-                  <p className="text-sm text-foreground font-medium mt-0.5">{station.state || 'N/A'}</p>
+                  <p className="text-[11px] text-muted-foreground font-semibold uppercase">State</p>
+                  <p className="text-sm text-foreground font-normal mt-0.5">{station.state || 'N/A'}</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-[0.14em]">Country</p>
-                  <p className="text-sm text-foreground font-medium mt-0.5">{station.country || 'Nigeria'}</p>
+                  <p className="text-[11px] text-muted-foreground font-semibold uppercase">Country</p>
+                  <p className="text-sm text-foreground font-normal mt-0.5">{station.country || 'Nigeria'}</p>
                 </div>
                 <div>
-                  <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-[0.14em]">Postcode</p>
+                  <p className="text-[11px] text-muted-foreground font-semibold uppercase">Postcode</p>
                   <p className="text-sm text-foreground font-mono mt-0.5">{station.postcode || 'N/A'}</p>
                 </div>
               </div>
               <div className="pt-2 border-t">
-                <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-[0.14em]">System Database ID</p>
+                <p className="text-[11px] text-muted-foreground font-semibold uppercase">System Database ID</p>
                 <p className="text-xs font-mono text-muted-foreground mt-0.5 truncate select-all">{activeStationId}</p>
               </div>
             </CardContent>
@@ -455,20 +451,20 @@ function LpgStationDetailPage() {
             </CardHeader>
             <CardContent className="space-y-4 pt-4">
               <div>
-                <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-[0.14em]">Operating Schedule</p>
-                <p className="text-sm text-foreground font-medium mt-0.5 flex items-center gap-1.5">
+                <p className="text-[11px] text-muted-foreground font-semibold uppercase">Operating Schedule</p>
+                <p className="text-sm text-foreground font-normal mt-0.5 flex items-center gap-1.5">
                   <Activity className="size-3.5 text-accent" />
                   <span>24 Hours / 7 Days a week</span>
                 </p>
               </div>
 
               <div>
-                <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-[0.14em]">Station Status</p>
+                <p className="text-[11px] text-muted-foreground font-semibold uppercase">Station Status</p>
                 <div className="mt-1">{getStatusBadge(station.status)}</div>
               </div>
 
               <div>
-                <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-[0.14em]">LPG Capacity</p>
+                <p className="text-[11px] text-muted-foreground font-semibold uppercase">LPG Capacity</p>
                 <p className="text-lg font-semibold text-foreground mt-0.5 flex items-center gap-2">
                   <Flame className="size-4 text-primary" />
                   {station.lpgCapacityKg?.toLocaleString()} Kg
@@ -476,7 +472,7 @@ function LpgStationDetailPage() {
               </div>
 
               <div>
-                <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-[0.14em]">Assigned Staff ({staffList.length})</p>
+                <p className="text-[11px] text-muted-foreground font-semibold uppercase">Assigned Staff ({staffList.length})</p>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {staffList.length > 0 ? (
                     staffList.map((s) => {
@@ -486,7 +482,7 @@ function LpgStationDetailPage() {
                       const initials = (fn[0] || '') + (sn[0] || '')
                       const fullName = typeof s === 'object' ? (`${fn} ${sn}`.trim() || s.full_name || s.email || 'Staff') : String(s)
                       return (
-                        <div key={sId} className="flex items-center gap-2 bg-secondary px-3 py-1.5 rounded-full text-xs font-medium">
+                        <div key={sId} className="flex items-center gap-2 bg-secondary px-3 py-1.5 rounded-full text-xs font-normal">
                           <div className="size-5 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-semibold text-primary">
                             {initials || '?'}
                           </div>
@@ -552,7 +548,7 @@ function LpgStationDetailPage() {
                     <CardDescription className="text-xs">Current price per Kg and price change history</CardDescription>
                   </div>
                 </div>
-                <Button size="sm" variant="outline" className="gap-1.5 text-xs font-medium" onClick={handleEditPrice}>
+                <Button size="sm" variant="outline" className="gap-1.5 text-xs font-normal" onClick={handleEditPrice}>
                   <Edit className="size-3.5" /> Update Price
                 </Button>
               </div>
@@ -560,9 +556,9 @@ function LpgStationDetailPage() {
             <CardContent className="pt-6">
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 mb-6">
                 <div className="flex-1">
-                  <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-[0.14em]">Current Price Per Kg</p>
+                  <p className="text-[11px] text-muted-foreground font-semibold uppercase">Current Price Per Kg</p>
                   <div className="flex items-baseline gap-2 mt-1">
-                    <span className="text-3xl font-bold text-foreground">
+                    <span className="text-3xl font-semibold text-foreground">
                       {Number(station.pricePerKg || 0) > 0 ? `₦${Number(station.pricePerKg).toLocaleString()}` : '—'}
                     </span>
                     <span className="text-sm text-muted-foreground">/ Kg</span>
@@ -593,7 +589,7 @@ function LpgStationDetailPage() {
 
               {/* Price History */}
               <div className="border-t pt-4">
-                <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-[0.14em] mb-3">Price History</p>
+                <p className="text-[11px] text-muted-foreground font-semibold uppercase mb-3">Price History</p>
                 {(() => {
                   const history = (station as any).priceHistory || []
                   if (history.length === 0) {
@@ -625,7 +621,7 @@ function LpgStationDetailPage() {
                             <div className="flex items-center gap-3 text-xs text-muted-foreground">
                               <span>{date.toLocaleDateString('en-NG', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
                               <span className="text-muted-foreground/50">{date.toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' })}</span>
-                              <span className="bg-muted px-2 py-0.5 rounded text-[10px] font-medium">{timeAgo}</span>
+                              <span className="bg-muted px-2 py-0.5 rounded text-[10px] font-normal">{timeAgo}</span>
                             </div>
                           </div>
                         )
@@ -725,7 +721,7 @@ function LpgStationDetailPage() {
           </DialogHeader>
           <div className="space-y-3 py-2">
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">Price Per Kg (₦)</label>
+              <label className="text-sm font-normal">Price Per Kg (₦)</label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-mono">₦</span>
                 <Input

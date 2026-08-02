@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { StatCard, StatCardGrid } from '#/components/ui/stat-card'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
@@ -36,7 +37,7 @@ export const Route = createFileRoute('/bank-accounts/')({
 function getStatusBadge(status: string) {
   switch (status) {
     case 'Active':
-      return <Badge className="bg-accent/15 text-accent border-accent/30 font-medium">{status}</Badge>
+      return <Badge className="bg-accent/15 text-accent border-accent/30 font-normal">{status}</Badge>
     case 'Inactive':
       return <Badge variant="outline" className="text-muted-foreground">{status}</Badge>
     case 'Suspended':
@@ -124,22 +125,23 @@ function BankAccountsIndex() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header Section */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">Bank Accounts Management</h1>
-          <p className="text-muted-foreground mt-1">
-            Manage corporate bank accounts and depot collection assignments. Multiple depots can share a single bank account.
-          </p>
-        </div>
-        <Button
+      <PageHeader
+      eyebrow="Finance"
+      title="Bank Accounts Management"
+      description="Manage corporate bank accounts and depot collection assignments. Multiple depots can share a single bank account."
+      actions={
+        <>
+          <Button
           size="sm"
           className="shrink-0"
           onClick={() => navigate({ to: '/bank-accounts/form' })}
- >
+          >
           <Plus className="size-4 mr-2" />
           Add Bank Account
-        </Button>
-      </div>
+          </Button>
+        </>
+      }
+    />
 
       {/* Stats Cards */}
       {!isLoading && !isError && (
@@ -257,7 +259,7 @@ function BankAccountsIndex() {
                         {/* Account Number Box */}
                         <div className="bg-muted/40 border border-border/50 rounded-lg p-3 my-3 flex items-center justify-between">
                           <div>
-                            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                            <p className="text-[10px] font-semibold uppercase text-muted-foreground">
                               Account Number ({account.currency})
                             </p>
                             <p className="text-lg font-mono font-semibold text-foreground">
@@ -281,14 +283,14 @@ function BankAccountsIndex() {
 
                         {/* Account Name */}
                         <div className="mb-3">
-                          <p className="text-[11px] text-muted-foreground uppercase font-medium">Account Name</p>
+                          <p className="text-[11px] text-muted-foreground uppercase font-normal">Account Name</p>
                           <p className="text-sm font-semibold text-foreground truncate">{account.accountName}</p>
                         </div>
 
                         {/* Linked Depots Section */}
                         <div className="mt-4 pt-3 border-t border-border/40">
                           <div className="flex items-center justify-between text-xs mb-2">
-                            <span className="text-muted-foreground font-medium flex items-center gap-1.5">
+                            <span className="text-muted-foreground font-normal flex items-center gap-1.5">
                               <Warehouse className="size-3.5 text-primary" /> Linked Depots ({assignedDepots.length})
                             </span>
                             {assignedDepots.length > 1 && (
@@ -308,7 +310,7 @@ function BankAccountsIndex() {
                                 <Badge
                                   key={depot.id}
                                   variant="secondary"
-                                  className="text-xs bg-primary/10 text-primary border border-primary/20 font-medium py-0.5"
+                                  className="text-xs bg-primary/10 text-primary border border-primary/20 font-normal py-0.5"
  >
                                   {depot.name} ({depot.code})
                                 </Badge>
@@ -323,7 +325,7 @@ function BankAccountsIndex() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-8 text-xs font-medium"
+                          className="h-8 text-xs font-normal"
                           onClick={() =>
                             navigate({
                               to: '/bank-accounts/details' as any,
@@ -336,7 +338,7 @@ function BankAccountsIndex() {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="h-8 text-xs font-medium border-border/60"
+                          className="h-8 text-xs font-normal border-border/60"
                           onClick={() =>
                             navigate({
                               to: '/bank-accounts/form' as any,
@@ -349,7 +351,7 @@ function BankAccountsIndex() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-8 text-xs font-medium text-destructive hover:text-destructive/80 hover:bg-destructive/10"
+                          className="h-8 text-xs font-normal text-destructive hover:text-destructive/80 hover:bg-destructive/10"
                           disabled={deletingId === account.id}
                           onClick={() => handleDelete(account.id, account.bankName)}
  >

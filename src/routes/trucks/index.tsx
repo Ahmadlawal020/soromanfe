@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { StatCard } from '#/components/ui/stat-card'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
@@ -64,13 +65,16 @@ function TrucksDashboard() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">Trucks Fleet Management</h1>
-          <p className="text-muted-foreground">Monitor and coordinate heavy duty vehicles, assignments, and locations.</p>
-        </div>
-        <Button size="sm"  onClick={() => navigate({ to: '/trucks/form' })}><Plus className="size-4 mr-2" />Register New Truck</Button>
-      </div>
+      <PageHeader
+      eyebrow="Transport"
+      title="Trucks Fleet Management"
+      description="Monitor and coordinate heavy duty vehicles, assignments, and locations."
+      actions={
+        <>
+          <Button size="sm"  onClick={() => navigate({ to: '/trucks/form' })}><Plus className="size-4 mr-2" />Register New Truck</Button>
+        </>
+      }
+    />
 
       {!isLoading && !isError && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -128,11 +132,11 @@ function TrucksDashboard() {
                       <TableRow key={truck._id} className="cursor-pointer hover:bg-muted transition" onClick={() => navigate({ to: '/trucks/details' as any, search: { id: truck._id || truck.id } as any, state: { truck } } as any)}>
                         <TableCell>
                           <div className="flex items-center gap-3">
-                            <div className="size-10 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-medium"><Truck className="size-4" /></div>
-                            <div><p className="font-medium">{truck.plateNumber}</p><p className="text-xs text-muted-foreground">{truck.make || ''} {truck.model}</p></div>
+                            <div className="size-10 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-normal"><Truck className="size-4" /></div>
+                            <div><p className="font-normal">{truck.plateNumber}</p><p className="text-xs text-muted-foreground">{truck.make || ''} {truck.model}</p></div>
                           </div>
                         </TableCell>
-                        <TableCell className="font-medium">{truck.capacity}</TableCell>
+                        <TableCell className="font-normal">{truck.capacity}</TableCell>
                         <TableCell><div className="flex items-center gap-1.5"><User className="size-3.5 text-muted-foreground" />{truck.driverName || 'Unassigned'}</div></TableCell>
                         <TableCell>
                           <div className="w-full max-w-[100px] flex items-center gap-2">

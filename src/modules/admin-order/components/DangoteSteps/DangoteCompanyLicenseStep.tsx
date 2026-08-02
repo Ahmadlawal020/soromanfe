@@ -120,7 +120,7 @@ export function DangoteCompanyLicenseStep({ wizard }: DangoteCompanyLicenseStepP
                   <FileText className="size-8 text-primary" />
                 )}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">File uploaded</p>
+                  <p className="text-sm font-normal text-foreground truncate">File uploaded</p>
                   <p className="text-xs text-muted-foreground truncate">{newLicenseForm.licenseUrl}</p>
                 </div>
                 <Button
@@ -191,7 +191,7 @@ export function DangoteCompanyLicenseStep({ wizard }: DangoteCompanyLicenseStepP
               <div className="inline-flex size-12 items-center justify-center rounded-xl bg-muted border border-border mb-3">
                 <ShieldPlus className="size-5 text-muted-foreground" />
               </div>
-              <p className="text-sm font-medium text-foreground">No licences found</p>
+              <p className="text-sm font-normal text-foreground">No licences found</p>
               <p className="text-xs text-muted-foreground mt-1">
                 This customer doesn't have any company licences yet.
               </p>

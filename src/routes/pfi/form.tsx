@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
@@ -224,19 +225,15 @@ function PFIForm() {
 
   return (
     <div className="space-y-6 animate-fade-in ">
-      <div className="flex items-center justify-between">
-        <div>
-          <Button variant="ghost" size="sm" onClick={() => navigate({ to: '/pfi' as any })} className="mb-2">
-            <ArrowLeft className="size-4 mr-2" />Back to PFI List
-          </Button>
-          <h1 className="text-xl md:text-2xl font-semibold tracking-tight text-balance">{isEdit ? 'Edit PFI' : 'Add New PFI'}</h1>
-          <p className="text-muted-foreground">{isEdit ? 'Modify information, officers, and vessel credentials of this PFI' : 'Register a new Pro Forma Invoice'}</p>
-        </div>
-      </div>
+      <PageHeader
+      eyebrow="Admin"
+      title={isEdit ? 'Edit PFI' : 'Add New PFI'}
+      description={isEdit ? 'Modify information, officers, and vessel credentials of this PFI' : 'Register a new Pro Forma Invoice'}
+    />
 
       <form onSubmit={handleSubmit} noValidate className="space-y-6">
         {error && (
-          <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm font-medium flex items-center gap-2 max-w-3xl">
+          <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm font-normal flex items-center gap-2 max-w-3xl">
             <AlertCircle className="size-4 shrink-0" />
             <span>{error}</span>
           </div>
@@ -343,10 +340,10 @@ function PFIForm() {
                                   {l.type === 'lpg' ? <Flame className="size-3.5" /> : <Warehouse className="size-3.5" />}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <p className="font-medium text-sm text-foreground truncate">{l.name}</p>
+                                  <p className="font-normal text-sm text-foreground truncate">{l.name}</p>
                                   <p className="text-xs text-muted-foreground truncate">{l.code} {l.address ? `• ${l.address}` : ''}</p>
                                 </div>
-                                <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${l.type === 'lpg' ? 'bg-orange-100 text-orange-600' : 'bg-primary/10 text-primary'}`}>
+                                <span className={`text-[10px] font-normal px-1.5 py-0.5 rounded ${l.type === 'lpg' ? 'bg-orange-100 text-orange-600' : 'bg-primary/10 text-primary'}`}>
                                   {l.type === 'lpg' ? 'LPG' : 'Depot'}
                                 </span>
                               </div>
@@ -401,7 +398,7 @@ function PFIForm() {
                         <Label className="font-semibold text-foreground">
                           Quantity ({unitName}) *
                         </Label>
-                        <span className="text-[11px] font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-md">
+                        <span className="text-[11px] font-normal text-primary bg-primary/10 px-2 py-0.5 rounded-md">
                           Unit: {unitName}
                         </span>
                       </div>
@@ -420,7 +417,7 @@ function PFIForm() {
                             }
                           }}
                           required
-                          className="pr-16 font-medium"
+                          className="pr-16 font-normal"
  />
                         <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-xs font-semibold text-muted-foreground bg-muted px-2 py-1 rounded">
                           {unitName}
@@ -447,7 +444,7 @@ function PFIForm() {
                           placeholder="e.g. 1000000"
                           value={form.blQtyLitres}
                           onChange={e => setForm({ ...form, blQtyLitres: e.target.value })}
-                          className="pr-16 font-medium"
+                          className="pr-16 font-normal"
                         />
                         <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-xs font-semibold text-muted-foreground bg-muted px-2 py-1 rounded">
                           Litres
@@ -506,7 +503,7 @@ function PFIForm() {
                           }}
                           className="pr-16 text-xs text-muted-foreground"
  />
-                        <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-[11px] font-medium text-muted-foreground bg-muted/60 px-2 py-0.5 rounded">
+                        <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-[11px] font-normal text-muted-foreground bg-muted/60 px-2 py-0.5 rounded">
                           {isWeightProd ? 'Litres' : 'MT / kg'}
                         </div>
                       </div>
@@ -526,7 +523,7 @@ function PFIForm() {
                           placeholder="e.g. 950.00"
                           value={form.unitPrice}
                           onChange={e => setForm({ ...form, unitPrice: e.target.value })}
-                          className="pl-8 font-medium"
+                          className="pl-8 font-normal"
  />
                       </div>
                     </div>

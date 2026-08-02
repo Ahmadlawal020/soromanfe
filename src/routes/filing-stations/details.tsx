@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate, useRouterState } from '@tanstack/react-router'
 import { Card, CardContent } from '#/components/ui/card'
 import { Button } from '#/components/ui/button'
@@ -522,22 +523,17 @@ function FilingStationDetailsView() {
           <Button variant="outline" size="sm" className="cursor-pointer" onClick={() => navigate({ to: '/filing-stations' })}>
             <ArrowLeft className="size-4" />
           </Button>
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-2xl font-semibold tracking-tight text-foreground">{station.name}</h1>
-              {station.customerCode && (
-                <Badge variant="outline" className="font-mono text-xs uppercase">{station.customerCode}</Badge>
-              )}
-              <Badge className={cn(
-                station.status === 'active' ? 'bg-accent/10 text-accent border-accent/20' :
-                  station.status === 'dormant' ? 'bg-warning/10 text-warning border-warning/20' :
-                    'bg-destructive/10 text-destructive border-destructive/20'
-              )}>{station.status}</Badge>
-            </div>
-            <p className="text-muted-foreground text-sm mt-0.5">
-              {station.contactPerson || 'Soroman'} · {station.tankCapacity?.toLocaleString()} L capacity · {station.pumpCount} pumps
-            </p>
-          </div>
+          <PageHeader
+      eyebrow="Truck Sales"
+      title={station.name}
+      actions={
+        <>
+          <p className="text-muted-foreground text-sm mt-0.5">
+          {station.contactPerson || 'Soroman'} · {station.tankCapacity?.toLocaleString()} L capacity · {station.pumpCount} pumps
+          </p>
+        </>
+      }
+    />
         </div>
         <div className="flex gap-2">
           <Button size="sm" variant="outline" className="cursor-pointer"
@@ -602,7 +598,7 @@ function FilingStationDetailsView() {
         ) : stationGroups.length === 0 ? (
           <div className="bg-card rounded-xl border border-border p-16 text-center">
             <Fuel className="size-10 mx-auto text-muted-foreground mb-3" />
-            <p className="text-muted-foreground font-medium">No allocations found for this station</p>
+            <p className="text-muted-foreground font-normal">No allocations found for this station</p>
             <p className="text-sm text-muted-foreground/70 mt-1">Allocations will appear here once trucks are assigned to this station.</p>
           </div>
         ) : (
@@ -657,19 +653,19 @@ function FilingStationDetailsView() {
                 {/* Summary */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 pt-4 border-t border-border">
                   <div className="space-y-0.5">
-                    <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-semibold">Allocated</p>
+                    <p className="text-[10px] uppercase text-muted-foreground font-semibold">Allocated</p>
                     <p className="text-sm font-semibold text-foreground">{group.quantity > 0 ? `${fmtQty(group.quantity)} L` : '—'}</p>
                   </div>
                   <div className="space-y-0.5">
-                    <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-semibold">Sold</p>
+                    <p className="text-[10px] uppercase text-muted-foreground font-semibold">Sold</p>
                     <p className="text-sm font-semibold text-foreground">{group.totalQtySold > 0 ? `${fmtQty(group.totalQtySold)} L` : '—'}</p>
                   </div>
                   <div className="space-y-0.5">
-                    <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-semibold">Deposited</p>
+                    <p className="text-[10px] uppercase text-muted-foreground font-semibold">Deposited</p>
                     <p className="text-sm font-semibold text-accent">{group.totalPaid > 0 ? fmt(group.totalPaid) : '—'}</p>
                   </div>
                   <div className="space-y-0.5">
-                    <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-semibold">Balance</p>
+                    <p className="text-[10px] uppercase text-muted-foreground font-semibold">Balance</p>
                     <p className={cn('text-sm font-semibold', group.balance === 0 ? 'text-accent' : group.balance > 0 ? 'text-destructive' : 'text-muted-foreground')}>
                       {group.balance === 0 ? '✓ Settled' : group.balance > 0 ? fmt(group.balance) : `+${fmt(Math.abs(group.balance))}`}
                     </p>
@@ -715,12 +711,12 @@ function FilingStationDetailsView() {
                             return (
                               <TableRow key={entryId || idx} className="hover:bg-muted/30 border-b border-border/50">
                                 <TableCell className="px-4 text-muted-foreground">{idx + 1}</TableCell>
-                                <TableCell className="text-muted-foreground whitespace-nowrap font-medium">
+                                <TableCell className="text-muted-foreground whitespace-nowrap font-normal">
                                   {entryDate ? (() => { try { return format(parseISO(entryDate), 'dd MMM yy') } catch { return entryDate } })() : '—'}
                                 </TableCell>
                                 <TableCell className="text-right font-semibold text-foreground">{isSale ? `${fmtQty(saleQty)} L` : '—'}</TableCell>
                                 <TableCell className="text-right text-muted-foreground">{isSale ? `₦${saleRate.toLocaleString()}` : '—'}</TableCell>
-                                <TableCell className="text-right text-foreground font-medium">{isSale ? fmt(saleVal) : '—'}</TableCell>
+                                <TableCell className="text-right text-foreground font-normal">{isSale ? fmt(saleVal) : '—'}</TableCell>
                                 <TableCell className="text-right font-semibold text-accent">{depositAmt > 0 ? fmt(depositAmt) : '—'}</TableCell>
                                 <TableCell className="text-muted-foreground">{entry.payerName || '—'}</TableCell>
                                 <TableCell className="text-muted-foreground">{entry.bank ? entry.bank.split(' · ')[1] || entry.bank : '—'}</TableCell>
@@ -768,14 +764,14 @@ function FilingStationDetailsView() {
       {stationGroups.length > 0 && (
         <div className="bg-foreground text-background rounded-xl px-5 sm:px-6 py-4">
           <div className="flex flex-wrap items-center justify-between gap-4">
-            <p className="text-xs uppercase tracking-[0.22em] text-background/60 font-semibold">
+            <p className="text-xs uppercase text-background/60 font-semibold">
               Station Total · {stationGroups.length} allocation{stationGroups.length === 1 ? '' : 's'} · {stationTotals.entries} entries
             </p>
             <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
-              <div><span className="text-background/50 text-[11px] uppercase tracking-[0.14em] mr-1.5">Expected</span><span className="font-semibold">{fmt(stationTotals.expected)}</span></div>
-              <div><span className="text-background/50 text-[11px] uppercase tracking-[0.14em] mr-1.5">Deposited</span><span className="font-semibold text-accent">{fmt(stationTotals.paid)}</span></div>
-              <div><span className="text-background/50 text-[11px] uppercase tracking-[0.14em] mr-1.5">Expenses</span><span className="font-semibold text-warning">{fmt(stationTotals.expenses)}</span></div>
-              <div><span className="text-background/50 text-[11px] uppercase tracking-[0.14em] mr-1.5">Balance</span>
+              <div><span className="text-background/50 text-[11px] uppercase mr-1.5">Expected</span><span className="font-semibold">{fmt(stationTotals.expected)}</span></div>
+              <div><span className="text-background/50 text-[11px] uppercase mr-1.5">Deposited</span><span className="font-semibold text-accent">{fmt(stationTotals.paid)}</span></div>
+              <div><span className="text-background/50 text-[11px] uppercase mr-1.5">Expenses</span><span className="font-semibold text-warning">{fmt(stationTotals.expenses)}</span></div>
+              <div><span className="text-background/50 text-[11px] uppercase mr-1.5">Balance</span>
                 <span className={cn('font-semibold', stationTotals.balance > 0 ? 'text-destructive' : 'text-accent')}>
                   {stationTotals.balance === 0 ? '₦0.00 ✓' : stationTotals.balance > 0 ? fmt(stationTotals.balance) : `+${fmt(Math.abs(stationTotals.balance))}`}
                 </span>

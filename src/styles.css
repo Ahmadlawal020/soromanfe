@@ -8,7 +8,25 @@
  * optical-size axis. Subsets are unicode-range gated, so only latin is fetched.
  * Its italic is deliberately not loaded — emphasis stays weight and colour.
  */
-@import "@fontsource-variable/inter/opsz.css";
+/*
+ * General Sans, self-hosted. Two weights only — 400 and 600, nothing between.
+ * The 500 tier is deliberately absent: with no file to load, a `font-weight:500`
+ * would be synthesised, so the codebase resolves everything to one of these two.
+ */
+@font-face {
+  font-family: "General Sans";
+  src: url("./assets/fonts/GeneralSans-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "General Sans";
+  src: url("./assets/fonts/GeneralSans-Semibold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
 
 /* Dark mode is driven by a .dark class on <html> (see stores/layoutStore.ts).
    Without this, Tailwind v4 falls back to prefers-color-scheme and the app's
@@ -154,7 +172,7 @@
 }
 
 @theme inline {
-  --font-sans: "Inter Variable", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-sans: "General Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 
   /* Cinematic timing — nothing snaps */
   --ease-luxe: cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -230,7 +248,7 @@
   h1,
   h2,
   h3 {
-    @apply font-medium tracking-tight;
+    @apply font-normal tracking-tight;
   }
 
   input,

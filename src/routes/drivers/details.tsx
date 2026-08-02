@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
@@ -146,15 +147,11 @@ function DriverDetailPage() {
       <Breadcrumbs items={[{ label: 'Drivers', href: '/drivers' }, { label: driver?.name || 'Details' }]} />
 
       <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" onClick={handleBack}>
-            <ArrowLeft className="size-4" />
-          </Button>
-          <div>
-            <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">Driver Profile</h1>
-            <p className="text-muted-foreground">License credentials, safety metrics, and contact information</p>
-          </div>
-        </div>
+        <PageHeader
+      eyebrow="Transport"
+      title="Driver Profile"
+      description="License credentials, safety metrics, and contact information"
+    />
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={handleEdit}>
             <Edit className="size-4" /> Edit Profile
@@ -183,7 +180,7 @@ function DriverDetailPage() {
                 {assignedTruckName && assignedTruckName !== 'None' && assignedTruckId ? (
                   <button
                     onClick={() => navigate({ to: '/trucks/details' as any, search: { id: assignedTruckId } as any, state: { id: assignedTruckId } } as any)}
-                    className="text-foreground hover:text-primary font-medium transition-colors underline underline-offset-2 duration-250 ease-luxe"
+                    className="text-foreground hover:text-primary font-normal transition-colors underline underline-offset-2 duration-250 ease-luxe"
                   >
                     Assigned to {assignedTruckName}
                   </button>
@@ -217,17 +214,17 @@ function DriverDetailPage() {
           <CardContent className="space-y-5 pt-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">License Number</p>
+                <p className="text-xs text-muted-foreground font-normal uppercase">License Number</p>
                 <p className="text-lg font-semibold font-mono text-foreground mt-1">{driver.licenseNumber}</p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">License Class</p>
+                <p className="text-xs text-muted-foreground font-normal uppercase">License Class</p>
                 <p className="text-lg font-semibold text-foreground mt-1">{driver.licenseClass}</p>
               </div>
             </div>
 
             <div className="border-t pt-4">
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">License Expiry</p>
+              <p className="text-xs text-muted-foreground font-normal uppercase">License Expiry</p>
               <div className="flex items-center justify-between mt-1">
                 <span className="text-sm font-semibold text-foreground">
                   {driver.licenseExpiry ? new Date(driver.licenseExpiry).toLocaleDateString() : 'N/A'}
@@ -241,7 +238,7 @@ function DriverDetailPage() {
             {licenseStatus.alert && (
               <div className="mt-2 p-3 bg-destructive/5 border border-destructive/10 rounded flex items-start gap-2">
                 <ShieldAlert className="size-4 text-destructive shrink-0 mt-0.5" />
-                <p className="text-xs text-destructive-foreground font-medium">
+                <p className="text-xs text-destructive-foreground font-normal">
                   Attention: License requires immediate renewal. Driver may not be legally permitted to operate.
                 </p>
               </div>
@@ -268,14 +265,14 @@ function DriverDetailPage() {
                 <Mail className="size-4 text-muted-foreground shrink-0" />
                 <div>
                   <p className="text-xs text-muted-foreground">Email</p>
-                  <p className="text-sm font-medium text-foreground">{driver.email || 'Not provided'}</p>
+                  <p className="text-sm font-normal text-foreground">{driver.email || 'Not provided'}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 <Phone className="size-4 text-muted-foreground shrink-0" />
                 <div>
                   <p className="text-xs text-muted-foreground">Phone</p>
-                  <p className="text-sm font-medium text-foreground">{driver.phone}</p>
+                  <p className="text-sm font-normal text-foreground">{driver.phone}</p>
                 </div>
               </div>
             </div>
@@ -319,14 +316,14 @@ function DriverDetailPage() {
           <CardContent className="space-y-5 pt-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Driver Rating</p>
+                <p className="text-xs text-muted-foreground font-normal uppercase">Driver Rating</p>
                 <div className="flex items-center gap-1.5 mt-2">
                   {getRatingStars(driver.rating || 0)}
                   <span className="text-sm font-semibold text-foreground ml-1">{(driver.rating || 0).toFixed(1)}</span>
                 </div>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Safety Score</p>
+                <p className="text-xs text-muted-foreground font-normal uppercase">Safety Score</p>
                 <div className={`inline-flex items-center gap-1.5 mt-2 px-2.5 py-0.5 rounded-full text-xs font-semibold ${getSafetyColor(driver.safetyScore || 0)}`}>
                   <Gauge className="size-3" /> {driver.safetyScore || 0}%
                 </div>
@@ -365,7 +362,7 @@ function DriverDetailPage() {
           </CardHeader>
           <CardContent className="space-y-4 pt-4">
             <div>
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Current Status</p>
+              <p className="text-xs text-muted-foreground font-normal uppercase">Current Status</p>
               <div className="mt-2">
                 {getStatusBadge(driver.status)}
               </div>
@@ -374,13 +371,13 @@ function DriverDetailPage() {
             <div className="border-t pt-4 space-y-3">
               <div>
                 <p className="text-xs text-muted-foreground">Record Created</p>
-                <p className="text-sm font-medium text-foreground">
+                <p className="text-sm font-normal text-foreground">
                   {driver.createdAt ? new Date(driver.createdAt).toLocaleDateString() : 'N/A'}
                 </p>
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Last Updated</p>
-                <p className="text-sm font-medium text-foreground">
+                <p className="text-sm font-normal text-foreground">
                   {driver.updatedAt ? new Date(driver.updatedAt).toLocaleDateString() : 'N/A'}
                 </p>
               </div>
@@ -418,7 +415,7 @@ function DriverDetailPage() {
                       {record.truckRef && typeof record.truckRef === 'object' ? (
                         <button
                           onClick={() => navigate({ to: '/trucks/details' as any, search: { id: record.truckRef._id || record.truckRef } as any, state: { id: record.truckRef._id || record.truckRef } } as any)}
-                          className="font-medium text-sm text-foreground hover:text-primary transition-colors text-left block duration-250 ease-luxe"
+                          className="font-normal text-sm text-foreground hover:text-primary transition-colors text-left block duration-250 ease-luxe"
                         >
                           {record.truckPlate}
                           {record.truckRef.model && (
@@ -426,7 +423,7 @@ function DriverDetailPage() {
                           )}
                         </button>
                       ) : (
-                        <span className="font-medium text-sm text-foreground">{record.truckPlate}</span>
+                        <span className="font-normal text-sm text-foreground">{record.truckPlate}</span>
                       )}
                       <p className="text-xs text-muted-foreground">Assigned on: {new Date(record.assignedAt).toLocaleDateString()}</p>
                     </div>

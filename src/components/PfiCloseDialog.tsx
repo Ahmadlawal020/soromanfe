@@ -106,7 +106,7 @@ export function PfiCloseDialog({
           <div className="flex items-start gap-2.5 rounded-lg border border-warning/30 bg-warning/5 p-3">
             <TriangleAlert className="mt-0.5 size-4 shrink-0 text-warning" />
             <p className="text-sm text-muted-foreground">
-              <span className="font-medium text-foreground">{litres(f.remaining)}</span> still shows as
+              <span className="font-normal text-foreground">{litres(f.remaining)}</span> still shows as
               remaining ({Math.round((f.sellThrough ?? 0) * 100)}% sold). Either that stock is genuinely
               unsold, or movements were never recorded against it. Worth checking before closing.
             </p>
@@ -124,12 +124,12 @@ export function PfiCloseDialog({
           <Field
             label="Purchase cost" type="number" value={form.purchaseCost}
             onChange={(v) => set('purchaseCost', v)}
-            hint={<>System computes <span className="font-medium">{naira(f?.pfiValue)}</span></>}
+            hint={<>System computes <span className="font-normal">{naira(f?.pfiValue)}</span></>}
           />
           <Field
             label="Aggregate expenses" type="number" value={form.aggregateExpenses}
             onChange={(v) => set('aggregateExpenses', v)}
-            hint={<>System computes <span className="font-medium">{naira(f?.totalExpenses)}</span></>}
+            hint={<>System computes <span className="font-normal">{naira(f?.totalExpenses)}</span></>}
           />
           <div className="space-y-1.5 sm:col-span-2">
             <label className={cn(MICRO, 'block text-muted-foreground')}>Remarks</label>

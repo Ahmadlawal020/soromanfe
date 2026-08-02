@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute } from '@tanstack/react-router'
 import { LogOut } from 'lucide-react'
 
@@ -46,84 +47,77 @@ function SecurityExitPage() {
   const outstanding = loads.filter((l) => l.securityEnteredAt && !l.securityExitedAt)
 
   return (
-    <div className="animate-fade-in space-y-6">
-      <div>
-        <p className={cn(MICRO, 'mb-1.5 text-muted-foreground')}>Security</p>
-        <h1 className="text-xl font-semibold tracking-tight text-balance md:text-2xl">
-          Gate exit
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Clear each loaded truck off the yard, recording the arm it loaded from.
-        </p>
-      </div>
-
-      <OrderSearch {...lookup} placeholder="Search by order reference, truck, or customer…" />
-
-      {picked && (
-        loads.length === 0 ? (
+    <PageHeader
+      eyebrow="Security"
+      title="Gate exit"
+      description="Clear each loaded truck off the yard, recording the arm it loaded from."
+      actions={
+        <>
+          <OrderSearch {...lookup} placeholder="Search by order reference, truck, or customer…" />
+          {picked && (
+          loads.length === 0 ? (
           <PageEmpty
-            title="No tickets on this order"
-            description="Tickets are generated at the loading desk before a truck can be cleared."
+          title="No tickets on this order"
+          description="Tickets are generated at the loading desk before a truck can be cleared."
           />
-        ) : (
+          ) : (
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className={cn(MICRO, 'text-muted-foreground')}>
-                {loads.length} truck{loads.length === 1 ? '' : 's'}
-              </span>
-              <span className="text-xs text-muted-foreground">
-                {outstanding.length} still on the yard
-              </span>
-            </div>
-
-            {loads.map((l) => {
-              const entered = Boolean(l.securityEnteredAt)
-              const exited = Boolean(l.securityExitedAt)
-              return (
-                <TruckCard key={l.id} load={l} unit={unit}>
-                  {exited ? (
-                    <span className="text-[0.65rem] text-muted-foreground tabular-nums">
-                      {gateTime(l.securityExitedAt)}
-                    </span>
-                  ) : entered ? (
-                    <Button variant="destructive" size="sm" onClick={() => openFor(l)}>
-                      <LogOut data-icon="inline-start" />
-                      Confirm exit
-                    </Button>
-                  ) : (
-                    // The server enforces this too; saying so here saves a
-                    // pointless round trip and a confusing 409.
-                    <span className="text-[0.65rem] text-muted-foreground/70">
-                      Not yet entered
-                    </span>
-                  )}
-                </TruckCard>
-              )
-            })}
+          <div className="flex items-center justify-between">
+          <span className={cn(MICRO, 'text-muted-foreground')}>
+          {loads.length} truck{loads.length === 1 ? '' : 's'}
+          </span>
+          <span className="text-xs text-muted-foreground">
+          {outstanding.length} still on the yard
+          </span>
           </div>
-        )
-      )}
-
-      {!picked && (
-        <p className="pt-2 text-center text-sm text-muted-foreground">
+          {loads.map((l) => {
+          const entered = Boolean(l.securityEnteredAt)
+          const exited = Boolean(l.securityExitedAt)
+          return (
+          <TruckCard key={l.id} load={l} unit={unit}>
+          {exited ? (
+          <span className="text-[0.65rem] text-muted-foreground tabular-nums">
+          {gateTime(l.securityExitedAt)}
+          </span>
+          ) : entered ? (
+          <Button variant="destructive" size="sm" onClick={() => openFor(l)}>
+          <LogOut data-icon="inline-start" />
+          Confirm exit
+          </Button>
+          ) : (
+          // The server enforces this too; saying so here saves a
+          // pointless round trip and a confusing 409.
+          <span className="text-[0.65rem] text-muted-foreground/70">
+          Not yet entered
+          </span>
+          )}
+          </TruckCard>
+          )
+          })}
+          </div>
+          )
+          )}
+          {!picked && (
+          <p className="pt-2 text-center text-sm text-muted-foreground">
           Search for an order to begin.
-        </p>
-      )}
-
-      <GateDialog
-        title={target ? `Confirm exit — Truck ${target.truckIndex}` : 'Confirm exit'}
-        description={target ? `${target.truckNumber} · ${picked?.orderNumber}` : ''}
-        open={target !== null}
-        onOpenChange={(o) => { if (!o) setTarget(null) }}
-        pending={pending}
-        submitLabel="Confirm exit"
-        onSubmit={submit}
-        fields={[
+          </p>
+          )}
+          <GateDialog
+          title={target ? `Confirm exit — Truck ${target.truckIndex}` : 'Confirm exit'}
+          description={target ? `${target.truckNumber} · ${picked?.orderNumber}` : ''}
+          open={target !== null}
+          onOpenChange={(o) => { if (!o) setTarget(null) }}
+          pending={pending}
+          submitLabel="Confirm exit"
+          onSubmit={submit}
+          fields={[
           { key: 'exited-at', label: 'Exit time', value: exitedAt, set: setExitedAt, type: 'datetime-local' },
           { key: 'gantry', label: 'Arm', value: gantry, set: setGantry, placeholder: 'e.g. 3' },
           { key: 'loader-name', label: "Loader's name", value: loaderName, set: setLoaderName },
-        ]}
-      />
-    </div>
+          ]}
+          />
+        </>
+      }
+    />
   )
 }

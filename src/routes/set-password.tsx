@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Lock, Eye, EyeOff, CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
 import { Button } from '#/components/ui/button'
@@ -63,18 +64,21 @@ function SetPassword() {
   if (!token) {
     return (
       <AuthShell>
-        <div className="text-center">
-          <div className="mx-auto mb-4 flex size-8 items-center justify-center rounded-lg bg-destructive/10 text-destructive">
-            <AlertCircle className="size-4" />
-          </div>
+        <PageHeader
+      eyebrow="Soroman"
+      title="Invalid link"
+      actions={
+        <>
           <h1 className="text-xl font-semibold tracking-tight">Invalid link</h1>
           <p className="mt-2 mb-6 text-sm text-muted-foreground">
-            This password setup link is invalid or missing a token.
+          This password setup link is invalid or missing a token.
           </p>
           <Button size="lg" className="w-full" onClick={() => navigate({ to: '/login' })}>
-            Go to login
+          Go to login
           </Button>
-        </div>
+        </>
+      }
+    />
       </AuthShell>
     )
   }
@@ -178,7 +182,7 @@ function SetPassword() {
             role="alert"
           >
             <AlertCircle className="size-4 shrink-0" />
-            <p className="text-sm font-medium">{submitError}</p>
+            <p className="text-sm font-normal">{submitError}</p>
           </div>
         )}
 

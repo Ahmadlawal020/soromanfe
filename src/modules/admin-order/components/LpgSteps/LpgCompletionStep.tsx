@@ -50,11 +50,11 @@ export function LpgCompletionStep({ wizard }: LpgCompletionStepProps) {
           </div>
           <div className="space-y-2">
             <div>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-[0.14em]">Status</p>
+              <p className="text-[10px] text-muted-foreground uppercase">Status</p>
               <p className="text-sm font-semibold text-primary">Pending Review</p>
             </div>
             <div>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-[0.14em]">What Happens Next</p>
+              <p className="text-[10px] text-muted-foreground uppercase">What Happens Next</p>
               <p className="text-xs text-muted-foreground leading-snug">
                 The customer will be notified that their LPG order request has been received. Once reviewed and approved with pricing, they will receive a follow-up notification with the full details.
               </p>
@@ -76,7 +76,7 @@ export function LpgCompletionStep({ wizard }: LpgCompletionStepProps) {
                 <Mail className="size-4" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-foreground">Order Received Notification</p>
+                <p className="text-sm font-normal text-foreground">Order Received Notification</p>
                 <p className="text-xs text-muted-foreground">
                   {selectedCustomer?.email ? `Sent to customer at ${selectedCustomer.email}` : 'No customer email on file'}
                 </p>
@@ -88,7 +88,7 @@ export function LpgCompletionStep({ wizard }: LpgCompletionStepProps) {
                 <Mail className="size-4" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-foreground">Approval Notification</p>
+                <p className="text-sm font-normal text-foreground">Approval Notification</p>
                 <p className="text-xs text-muted-foreground">
                   Customer will be notified after approval with pricing details
                 </p>
@@ -103,7 +103,7 @@ export function LpgCompletionStep({ wizard }: LpgCompletionStepProps) {
       <div className="max-w-2xl mx-auto border rounded-xl divide-y divide-border">
         <div className="p-4 flex items-center gap-2">
           <Package className="size-4 text-primary" />
-          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em]">Request Summary</span>
+          <span className="text-xs font-semibold text-muted-foreground uppercase">Request Summary</span>
         </div>
         <div className="p-4 grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
           <div>

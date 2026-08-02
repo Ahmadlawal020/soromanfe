@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import {
   ArrowLeft, Plus, Trash2, Truck, Printer, Loader2, Search,
@@ -98,25 +99,11 @@ function GenerateTicketsPage() {
 
   return (
     <div className="animate-fade-in space-y-6">
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-        <div>
-          <Button
-            variant="ghost" size="sm"
-            className="mb-2 -ml-2 text-muted-foreground hover:text-foreground"
-            onClick={() => navigate({ to: '/ticket' as any })}
-          >
-            <ArrowLeft data-icon="inline-start" />
-            Back to tickets
-          </Button>
-          <p className={cn(MICRO, 'mb-1.5 text-muted-foreground')}>Loading tickets</p>
-          <h1 className="text-xl font-semibold tracking-tight text-balance md:text-2xl">
-            Generate tickets
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Tickets are issued after release, one per truck, and append to what's already there.
-          </p>
-        </div>
-      </div>
+      <PageHeader
+      eyebrow="Operations"
+      title="Generate tickets"
+      description="Tickets are issued after release, one per truck, and append to what's already there."
+    />
 
       <div className="grid gap-6 lg:grid-cols-[22rem_1fr]">
         {/* Released orders waiting to be ticketed. */}
@@ -162,7 +149,7 @@ function GenerateTicketsPage() {
                       )}
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <span className={cn('truncate text-sm font-medium', orderId === o.id && 'text-accent')}>
+                        <span className={cn('truncate text-sm font-normal', orderId === o.id && 'text-accent')}>
                           {o.orderNumber}
                         </span>
                         <StatusChip tone={o.status === 'Loading' ? 'warning' : 'accent'}>
@@ -227,7 +214,7 @@ function GenerateTicketsPage() {
                           return (
                             <TableRow key={l.id}>
                               <TableCell className="text-muted-foreground tabular-nums">{l.truckIndex}</TableCell>
-                              <TableCell className="font-medium">{l.truckNumber}</TableCell>
+                              <TableCell className="font-normal">{l.truckNumber}</TableCell>
                               <TableCell className="text-right tabular-nums">{qty(Number(l.quantity))}</TableCell>
                               <TableCell>
                                 <span className="block truncate">{l.driverName || '—'}</span>

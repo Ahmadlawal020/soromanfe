@@ -78,7 +78,7 @@ function ProgressRail({
           )
         })}
       </div>
-      <div className="mt-1.5 flex justify-between text-[0.65rem] tracking-[0.12em] uppercase">
+      <div className="mt-1.5 flex justify-between text-[0.65rem] uppercase">
         {stages.map((stage, i) => (
           <span
             key={stage.label}

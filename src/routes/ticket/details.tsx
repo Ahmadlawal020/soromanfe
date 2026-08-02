@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { PageHeader } from '#/components/PageHeader'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '#/components/ui/card'
@@ -81,13 +82,12 @@ function TicketDetailsComponent() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <header className="flex items-center gap-4">
-        <Button variant="outline" size="icon" onClick={handleBack}><ArrowLeft className="size-4" /></Button>
-        <div>
-          <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">Ticket Details</h1>
-          <p className="text-muted-foreground">Verify and redeem pickup ticket</p>
-        </div>
-      </header>
+      <PageHeader
+      eyebrow="Operations"
+      title="Ticket Details"
+      description="Verify and redeem pickup ticket"
+      backAction={handleBack}
+    />
 
       {/* Ticket Layout Card */}
       <div className="grid md:grid-cols-3 gap-6">
@@ -99,8 +99,8 @@ function TicketDetailsComponent() {
           <CardContent className="p-6 md:p-8 space-y-6 pl-8">
             <div className="flex justify-between items-start">
               <div>
-                <span className="text-[10px] font-semibold text-primary uppercase tracking-[0.14em] bg-primary/10 px-2 py-0.5 rounded-full">Official Receipt</span>
-                <h2 className="text-lg md:text-xl font-mono font-black text-foreground mt-2 tracking-tight">{ticket.ticketNumber}</h2>
+                <span className="text-[10px] font-semibold text-primary uppercase bg-primary/10 px-2 py-0.5 rounded-full">Official Receipt</span>
+                <h2 className="text-lg md:text-xl font-mono font-semibold text-foreground mt-2 tracking-tight">{ticket.ticketNumber}</h2>
                 <p className="text-xs text-muted-foreground mt-1">Generated on {generatedDate}</p>
               </div>
               <Badge className={ticket.status === 'Redeemed' ? 'bg-success text-success-foreground' : 'bg-primary text-primary-foreground'}>
@@ -118,7 +118,7 @@ function TicketDetailsComponent() {
             {/* Product pickup details */}
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 bg-muted/30 p-4 rounded-xl border border-border/50">
               <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-[0.22em] font-semibold">Product</p>
+                <p className="text-xs text-muted-foreground uppercase font-semibold">Product</p>
                 <p className="text-base font-semibold mt-1 flex items-center gap-1.5">
                   <Package className="size-4 text-primary" />
                   {ticket.order?.product?.name || 'N/A'}
@@ -128,21 +128,21 @@ function TicketDetailsComponent() {
                 )}
               </div>
               <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-[0.22em] font-semibold">Quantity</p>
+                <p className="text-xs text-muted-foreground uppercase font-semibold">Quantity</p>
                 <p className="text-base font-mono font-semibold mt-1 text-foreground">
                   {ticket.order?.quantity?.toLocaleString()} {ticket.order?.product?.unit || 'Liters'}
                 </p>
                 <p className="text-[10px] text-muted-foreground mt-0.5">@ {formatCurrency(ticket.order?.price || 0)} / unit</p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-[0.22em] font-semibold">Fulfillment Method</p>
+                <p className="text-xs text-muted-foreground uppercase font-semibold">Fulfillment Method</p>
                 <p className="text-sm font-semibold mt-1 capitalize flex items-center gap-1.5">
                   <Award className="size-3.5 text-info" />
                   {ticket.order?.deliveryType === 'delivery' ? 'Company Delivery' : 'Self Pickup'}
                 </p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-[0.22em] font-semibold">Fulfillment Depot</p>
+                <p className="text-xs text-muted-foreground uppercase font-semibold">Fulfillment Depot</p>
                 <p className="text-sm font-semibold mt-1 flex items-center gap-1.5">
                   <Warehouse className="size-3.5 text-muted-foreground" />
                   {ticket.order?.depot?.name || 'N/A'}
@@ -152,7 +152,7 @@ function TicketDetailsComponent() {
                 )}
               </div>
               <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-[0.22em] font-semibold">Fulfillment State</p>
+                <p className="text-xs text-muted-foreground uppercase font-semibold">Fulfillment State</p>
                 <p className="text-sm font-semibold mt-1 flex items-center gap-1.5">
                   <MapPin className="size-3.5 text-primary" />
                   {ticket.order?.state || 'N/A'}
@@ -160,7 +160,7 @@ function TicketDetailsComponent() {
               </div>
               {ticket.order?.pfiNumber && (
                 <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-[0.22em] font-semibold">PFI reference</p>
+                  <p className="text-xs text-muted-foreground uppercase font-semibold">PFI reference</p>
                   <p className="text-sm font-mono font-semibold mt-1 text-foreground">
                     {ticket.order.pfiNumber || 'N/A'}
                   </p>
@@ -171,7 +171,7 @@ function TicketDetailsComponent() {
             {/* Payment Details */}
             {ticket.order?.virtualAccountNumber && (
               <div className="bg-success/5 p-4 rounded-xl border border-success/10 space-y-2">
-                <h4 className="text-xs font-semibold text-success uppercase tracking-[0.22em]">Payment Account Details</h4>
+                <h4 className="text-xs font-semibold text-success uppercase">Payment Account Details</h4>
                 <div className="grid grid-cols-2 gap-4 text-xs">
                   <div>
                     <span className="text-muted-foreground">Bank: </span>
@@ -274,12 +274,12 @@ function TicketDetailsComponent() {
             </CardHeader>
             <CardContent className="space-y-3 text-xs">
               <div>
-                <p className="text-[10px] text-muted-foreground uppercase font-medium">Name</p>
+                <p className="text-[10px] text-muted-foreground uppercase font-normal">Name</p>
                 <p className="font-semibold text-foreground text-sm">{ticket.order?.customer?.name || 'N/A'}</p>
               </div>
               {ticket.order?.customer?.companyName && (
                 <div>
-                  <p className="text-[10px] text-muted-foreground uppercase font-medium">Company</p>
+                  <p className="text-[10px] text-muted-foreground uppercase font-normal">Company</p>
                   <p className="font-semibold text-foreground flex items-center gap-1">
                     <Building2 className="size-3 text-muted-foreground" />
                     {ticket.order.customer.companyName}
@@ -288,12 +288,12 @@ function TicketDetailsComponent() {
               )}
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <p className="text-[10px] text-muted-foreground uppercase font-medium">Email</p>
-                  <p className="font-medium text-foreground truncate">{ticket.order?.customer?.email || 'N/A'}</p>
+                  <p className="text-[10px] text-muted-foreground uppercase font-normal">Email</p>
+                  <p className="font-normal text-foreground truncate">{ticket.order?.customer?.email || 'N/A'}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-muted-foreground uppercase font-medium">Phone</p>
-                  <p className="font-medium text-foreground">{ticket.order?.customer?.phone || 'N/A'}</p>
+                  <p className="text-[10px] text-muted-foreground uppercase font-normal">Phone</p>
+                  <p className="font-normal text-foreground">{ticket.order?.customer?.phone || 'N/A'}</p>
                 </div>
               </div>
             </CardContent>

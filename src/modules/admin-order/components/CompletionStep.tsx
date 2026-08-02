@@ -58,11 +58,11 @@ export function CompletionStep({ wizard }: CompletionStepProps) {
             </div>
             <div className="space-y-2">
               <div>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-[0.14em]">Bank</p>
+                <p className="text-[10px] text-muted-foreground uppercase">Bank</p>
                 <p className="text-sm font-semibold text-foreground">{paymentInfo.bankName}</p>
               </div>
               <div>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-[0.14em]">Account Number</p>
+                <p className="text-[10px] text-muted-foreground uppercase">Account Number</p>
                 <div className="flex items-center gap-2">
                   <p className="text-xl font-semibold font-mono text-foreground tabular-nums">{paymentInfo.accountNumber}</p>
                   <button
@@ -79,7 +79,7 @@ export function CompletionStep({ wizard }: CompletionStepProps) {
                 </div>
               </div>
               <div>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-[0.14em]">Account Name</p>
+                <p className="text-[10px] text-muted-foreground uppercase">Account Name</p>
                 <p className="text-sm font-semibold text-foreground">{paymentInfo.accountName || formatAccountName(placedOrder.customerName)}</p>
               </div>
             </div>
@@ -101,7 +101,7 @@ export function CompletionStep({ wizard }: CompletionStepProps) {
                 <Mail className="size-4" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-foreground">Invoice Email</p>
+                <p className="text-sm font-normal text-foreground">Invoice Email</p>
                 <p className="text-xs text-muted-foreground">
                   {paymentInfo?.emailSent ? `Sent to ${placedOrder.customerEmail}` : 'No email on file - skipped'}
                 </p>
@@ -117,7 +117,7 @@ export function CompletionStep({ wizard }: CompletionStepProps) {
                 <Phone className="size-4" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-foreground">Order Summary SMS</p>
+                <p className="text-sm font-normal text-foreground">Order Summary SMS</p>
                 <p className="text-xs text-muted-foreground">
                   {paymentInfo?.smsSent ? `Sent to ${placedOrder.customerPhone}` : 'SMS not sent'}
                 </p>
@@ -136,7 +136,7 @@ export function CompletionStep({ wizard }: CompletionStepProps) {
       <div className="max-w-2xl mx-auto border rounded-xl divide-y divide-border">
         <div className="p-4 flex items-center gap-2">
           <Package className="size-4 text-primary" />
-          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em]">Order Summary</span>
+          <span className="text-xs font-semibold text-muted-foreground uppercase">Order Summary</span>
         </div>
         <div className="p-4 grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
           <div>

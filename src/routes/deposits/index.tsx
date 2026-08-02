@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { StatCard, StatCardGrid } from '#/components/ui/stat-card'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Button } from '#/components/ui/button'
@@ -127,18 +128,21 @@ function DepositsDashboard() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">Deposits Management</h1>
-          <p className="text-muted-foreground">View and record customer deposit transactions.</p>
-        </div>
-        <Button
+      <PageHeader
+      eyebrow="Finance"
+      title="Deposits Management"
+      description="View and record customer deposit transactions."
+      actions={
+        <>
+          <Button
           className="gap-2"
           onClick={() => navigate({ to: '/deposits/manual-deposit' as any })}
- >
+          >
           <Plus className="size-4" /> Record Manual Deposit
-        </Button>
-      </div>
+          </Button>
+        </>
+      }
+    />
 
       <StatCardGrid count={statsCards.length}>
         {!isLoading && !isError && statsCards.map((card) => (
@@ -187,7 +191,7 @@ function DepositsDashboard() {
 
             {/* Time Filter Buttons */}
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
-              <span className="text-xs font-medium text-muted-foreground flex items-center gap-1 mr-1 shrink-0">
+              <span className="text-xs font-normal text-muted-foreground flex items-center gap-1 mr-1 shrink-0">
                 <Filter className="size-3" /> Range:
               </span>
               {(['all', 'today', 'week', 'month'] as const).map((t) => (
@@ -210,7 +214,7 @@ function DepositsDashboard() {
               <Button
                 variant={filterType === 'all' ? 'default' : 'ghost'}
                 size="sm"
-                className="h-8 gap-2 text-xs font-medium"
+                className="h-8 gap-2 text-xs font-normal"
                 onClick={() => setFilterType('all')}
  >
                 All Deposits
@@ -222,7 +226,7 @@ function DepositsDashboard() {
               <Button
                 variant={filterType === 'manual' ? 'default' : 'ghost'}
                 size="sm"
-                className={`h-8 gap-2 text-xs font-medium ${filterType === 'manual' ? '' : 'hover:bg-warning/10 hover:text-warning'}`}
+                className={`h-8 gap-2 text-xs font-normal ${filterType === 'manual' ? '' : 'hover:bg-warning/10 hover:text-warning'}`}
                 onClick={() => setFilterType('manual')}
  >
                 <Landmark className={cn('size-3.5', filterType === 'manual' ? 'text-primary-foreground' : 'text-warning')} />
@@ -235,7 +239,7 @@ function DepositsDashboard() {
               <Button
                 variant={filterType === 'paystack' ? 'default' : 'ghost'}
                 size="sm"
-                className={`h-8 gap-2 text-xs font-medium ${filterType === 'paystack' ? '' : 'hover:bg-muted/10 hover:text-muted-foreground'}`}
+                className={`h-8 gap-2 text-xs font-normal ${filterType === 'paystack' ? '' : 'hover:bg-muted/10 hover:text-muted-foreground'}`}
                 onClick={() => setFilterType('paystack')}
  >
                 <ArrowRightLeft className={cn('size-3.5', filterType === 'paystack' ? 'text-primary-foreground' : 'text-muted-foreground')} />
@@ -331,7 +335,7 @@ function DepositsDashboard() {
                               ? `${deposit.recorderFirstName} ${deposit.recorderSurname || ''}`
                               : isPs ? 'Paystack' : '—'}
                           </TableCell>
-                          <TableCell className="text-right font-mono text-sm font-medium whitespace-nowrap">
+                          <TableCell className="text-right font-mono text-sm font-normal whitespace-nowrap">
                             {formatCurrency(toNum(deposit.balanceAfter || 0))}
                           </TableCell>
                           <TableCell>

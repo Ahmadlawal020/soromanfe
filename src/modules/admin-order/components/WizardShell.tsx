@@ -41,7 +41,7 @@ export function WizardShell({
   return (
     <section className={cn(PANEL, 'mx-auto w-full max-w-3xl')}>
       <div className="border-b border-foreground/15 px-6 py-5">
-        <h2 className="text-base font-medium tracking-tight">{title}</h2>
+        <h2 className="text-base font-normal tracking-tight">{title}</h2>
         {description && (
           <p className="mt-1 text-sm text-muted-foreground">{description}</p>
         )}
@@ -50,7 +50,7 @@ export function WizardShell({
       {error && (
         <div
           role="alert"
-          className="flex items-center gap-2 border-b border-destructive/25 bg-destructive/10 px-6 py-3 text-sm font-medium text-destructive"
+          className="flex items-center gap-2 border-b border-destructive/25 bg-destructive/10 px-6 py-3 text-sm font-normal text-destructive"
         >
           <AlertCircle className="size-4 shrink-0" />
           <span>{error}</span>

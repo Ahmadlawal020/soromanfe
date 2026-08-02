@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { StatCard } from '#/components/ui/stat-card'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
@@ -52,13 +53,16 @@ function DepotsDashboard() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">Depots & Hubs Management</h1>
-          <p className="text-muted-foreground">Manage depots and organize regional cargo logistics.</p>
-        </div>
-        <Button size="sm"  onClick={() => navigate({ to: '/depots/form' })}><Plus className="size-4 mr-2" />Create New Depot</Button>
-      </div>
+      <PageHeader
+      eyebrow="Operations"
+      title="Depots & Hubs Management"
+      description="Manage depots and organize regional cargo logistics."
+      actions={
+        <>
+          <Button size="sm"  onClick={() => navigate({ to: '/depots/form' })}><Plus className="size-4 mr-2" />Create New Depot</Button>
+        </>
+      }
+    />
 
       {!isLoading && !isError && (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

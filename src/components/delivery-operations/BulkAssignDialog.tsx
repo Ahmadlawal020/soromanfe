@@ -42,7 +42,7 @@ export function BulkAssignDialog({
 
         <div className="space-y-4 py-2">
           <div className="space-y-1.5">
-            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em]">
+            <Label className="text-xs font-semibold text-muted-foreground uppercase">
               Allocation Code
             </Label>
             <select
@@ -60,7 +60,7 @@ export function BulkAssignDialog({
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em]">
+            <Label className="text-xs font-semibold text-muted-foreground uppercase">
               PFI
             </Label>
             <select

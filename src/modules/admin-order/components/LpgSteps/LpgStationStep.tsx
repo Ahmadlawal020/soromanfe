@@ -84,7 +84,7 @@ export function LpgStationStep({ wizard }: LpgStationStepProps) {
               <div className="inline-flex size-12 items-center justify-center rounded-xl bg-muted border border-border mb-1">
                 <Flame className="size-5 text-muted-foreground" />
               </div>
-              <p className="text-sm font-medium text-foreground">
+              <p className="text-sm font-normal text-foreground">
                 No active LPG stations in {selectedLga ? `${selectedLga}, ` : ''}{selectedState}
               </p>
               <p className="text-xs text-muted-foreground">Please select a different {selectedLga ? 'LGA or ' : ''}state.</p>
@@ -119,7 +119,7 @@ export function LpgStationStep({ wizard }: LpgStationStepProps) {
                       </p>
                     )}
                     {Number(s.pricePerKg) > 0 && (
-                      <p className="text-xs font-medium text-primary mt-1">
+                      <p className="text-xs font-normal text-primary mt-1">
                         ₦{Number(s.pricePerKg).toLocaleString()} / Kg
                       </p>
                     )}

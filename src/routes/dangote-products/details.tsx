@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
@@ -84,15 +85,11 @@ function DangoteProductDetailPage() {
       <Breadcrumbs items={[{ label: 'Dangote Products', href: '/dangote-products' }, { label: product.name || 'Details' }]} />
 
       <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" onClick={handleBack}>
-            <ArrowLeft className="size-4" />
-          </Button>
-          <div>
-            <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">{product.name}</h1>
-            <p className="text-muted-foreground">Dangote product details and specifications</p>
-          </div>
-        </div>
+        <PageHeader
+      eyebrow="Dangote Delivery"
+      title={product.name}
+      description="Dangote product details and specifications"
+    />
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={() => navigate({ to: '/dangote-products/form', search: { id: product._id } } as any)}>
             <Edit className="size-4" /> Edit Product
@@ -142,7 +139,7 @@ function DangoteProductDetailPage() {
                 <row.icon className="size-4 text-muted-foreground shrink-0" />
                 <div className="flex-1">
                   <p className="text-xs text-muted-foreground">{row.label}</p>
-                  <p className="text-sm font-medium text-foreground">{row.value}</p>
+                  <p className="text-sm font-normal text-foreground">{row.value}</p>
                 </div>
               </div>
             ))}
@@ -167,7 +164,7 @@ function DangoteProductDetailPage() {
                 <row.icon className="size-4 text-muted-foreground shrink-0" />
                 <div className="flex-1">
                   <p className="text-xs text-muted-foreground">{row.label}</p>
-                  <p className="text-sm font-medium text-foreground">{row.value}</p>
+                  <p className="text-sm font-normal text-foreground">{row.value}</p>
                 </div>
               </div>
             ))}

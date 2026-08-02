@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { StatCard, StatCardGrid } from '#/components/ui/stat-card'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Card, CardHeader, CardTitle, CardContent } from '#/components/ui/card'
@@ -269,30 +270,31 @@ function DeliveryCustomerListRoute() {
   return (
     <div className="space-y-6">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Delivery Customers Database</h1>
-          <p className="text-muted-foreground text-sm">
-            Comprehensive customer profiles, credit limit tracking, and auto-dormancy monitoring.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
+      <PageHeader
+      eyebrow="Truck Sales"
+      title="Delivery Customers Database"
+      description="Comprehensive customer profiles, credit limit tracking, and auto-dormancy monitoring."
+      actions={
+        <>
+          <div className="flex items-center gap-2">
           <Button
-            variant="outline"
-            onClick={handleExportCSV}
-            disabled={filteredCustomers.length === 0}
-            className="cursor-pointer"
- >
-            <Download className="size-4 mr-2" /> Export CSV
+          variant="outline"
+          onClick={handleExportCSV}
+          disabled={filteredCustomers.length === 0}
+          className="cursor-pointer"
+          >
+          <Download className="size-4 mr-2" /> Export CSV
           </Button>
           <Button
-            onClick={() => navigate({ to: '/delivery-customer/form' as any })}
-            className="cursor-pointer"
- >
-            <Plus className="size-4 mr-2" /> Add Delivery Customer
+          onClick={() => navigate({ to: '/delivery-customer/form' as any })}
+          className="cursor-pointer"
+          >
+          <Plus className="size-4 mr-2" /> Add Delivery Customer
           </Button>
-        </div>
-      </div>
+          </div>
+        </>
+      }
+    />
 
       {/* Metric Summary Cards */}
       <StatCardGrid count={4}>
@@ -324,7 +326,7 @@ function DeliveryCustomerListRoute() {
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value as any)}
-              className="h-8 rounded-lg border border-border bg-card px-2.5 text-xs font-medium outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+              className="h-8 rounded-lg border border-border bg-card px-2.5 text-xs font-normal outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
  >
               <option value="all">All Classifications</option>
               <option value="customer">Regular Customers</option>
@@ -335,7 +337,7 @@ function DeliveryCustomerListRoute() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as any)}
-              className="h-8 rounded-lg border border-border bg-card px-2.5 text-xs font-medium outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+              className="h-8 rounded-lg border border-border bg-card px-2.5 text-xs font-normal outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
  >
               <option value="all">All Statuses</option>
               <option value="active">Active</option>
@@ -350,7 +352,7 @@ function DeliveryCustomerListRoute() {
       {/* Directory Table */}
       <Card>
         <CardHeader className="py-4">
-          <CardTitle className="text-base font-medium">
+          <CardTitle className="text-base font-normal">
             Directory Entries ({filteredCustomers.length})
           </CardTitle>
         </CardHeader>
@@ -398,7 +400,7 @@ function DeliveryCustomerListRoute() {
                           <Badge variant="outline" className="font-mono text-xs uppercase">
                             {c.customerCode || (isStation ? 'STATION' : 'CUSTOMER')}
                           </Badge>
-                          <Badge className={`text-xs border capitalize font-medium flex items-center gap-1 ${statusInfo.cls}`}>
+                          <Badge className={`text-xs border capitalize font-normal flex items-center gap-1 ${statusInfo.cls}`}>
                             <StatusIcon className="size-3" /> {statusInfo.label}
                           </Badge>
                           {c._autoDormant && (
@@ -562,7 +564,7 @@ function DeliveryCustomerListRoute() {
 
               {/* Financial Summary */}
               <div className="bg-muted/30 p-3 rounded-xl space-y-2">
-                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em] mb-1 flex items-center gap-1">
+                <div className="text-xs font-semibold text-muted-foreground uppercase mb-1 flex items-center gap-1">
                   <Wallet className="size-3" /> Financial Summary
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-xs">
@@ -595,7 +597,7 @@ function DeliveryCustomerListRoute() {
 
               {/* Primary Address */}
               <div className="bg-muted/30 p-3 rounded-xl space-y-1">
-                <span className="text-muted-foreground text-xs block font-medium">Primary Address</span>
+                <span className="text-muted-foreground text-xs block font-normal">Primary Address</span>
                 <span className="text-xs font-semibold">
                   {selectedCustomer.stationAddress || selectedCustomer.homeAddress || selectedCustomer.officeAddress || 'N/A'}
                 </span>
@@ -604,7 +606,7 @@ function DeliveryCustomerListRoute() {
               {/* Notes */}
               {selectedCustomer.notes && (
                 <div className="bg-muted/30 p-3 rounded-xl space-y-1">
-                  <span className="text-muted-foreground text-xs block font-medium">Remarks / Notes</span>
+                  <span className="text-muted-foreground text-xs block font-normal">Remarks / Notes</span>
                   <span className="text-xs text-foreground font-normal">{selectedCustomer.notes}</span>
                 </div>
               )}

@@ -34,7 +34,7 @@ function Row({
         <p className="text-sm text-muted-foreground">{label}</p>
         {hint && <p className="text-[0.7rem] leading-tight text-muted-foreground/60">{hint}</p>}
       </div>
-      <p className={cn('shrink-0 text-sm font-medium tabular-nums', tone)}>{value}</p>
+      <p className={cn('shrink-0 text-sm font-normal tabular-nums', tone)}>{value}</p>
     </div>
   )
 }
@@ -135,7 +135,7 @@ export function PfiDetailDialog({
                 <div className="flex items-start gap-2.5 rounded-lg border border-destructive/25 bg-destructive/5 p-3">
                   <TriangleAlert className="mt-0.5 size-4 shrink-0 text-destructive" />
                   <div className="min-w-0 text-sm">
-                    <p className="font-medium text-destructive">
+                    <p className="font-normal text-destructive">
                       Deficit of {litres(Math.abs(f.surplusDeficitLitres ?? 0))} — {naira(f.deficitCost)}
                     </p>
                     <p className="text-muted-foreground">
@@ -188,13 +188,13 @@ export function PfiDetailDialog({
                 <div className="flex items-start gap-2.5 rounded-lg border border-warning/30 bg-warning/5 p-3">
                   <Info className="mt-0.5 size-4 shrink-0 text-warning" />
                   <div className="min-w-0 text-sm">
-                    <p className="font-medium text-warning">Profit is not meaningful yet</p>
+                    <p className="font-normal text-warning">Profit is not meaningful yet</p>
                     <p className="text-muted-foreground">{caveat}</p>
                     {f.costOfSold != null && (
                       <p className="mt-1.5 text-muted-foreground">
-                        Cost of the portion actually sold: <span className="font-medium">{naira(f.costOfSold)}</span>
+                        Cost of the portion actually sold: <span className="font-normal">{naira(f.costOfSold)}</span>
                         {f.marginOnSold != null && (
-                          <> · margin on that portion <span className={cn('font-medium', moneyTone(f.marginOnSold))}>{pct(f.marginOnSold)}</span></>
+                          <> · margin on that portion <span className={cn('font-normal', moneyTone(f.marginOnSold))}>{pct(f.marginOnSold)}</span></>
                         )}
                       </p>
                     )}
@@ -260,7 +260,7 @@ export function PfiDetailDialog({
                           </p>
                         </div>
                         <div className="flex shrink-0 items-center gap-1">
-                          <span className="text-sm font-medium tabular-nums">{naira(Number(e.amount))}</span>
+                          <span className="text-sm font-normal tabular-nums">{naira(Number(e.amount))}</span>
                           <Button
                             variant="ghost" size="icon-sm"
                             disabled={deleteExpense.isPending}
@@ -335,7 +335,7 @@ export function PfiDetailDialog({
                               .filter(Boolean).join(' · ')}
                           </p>
                         </div>
-                        <span className="shrink-0 text-sm font-medium tabular-nums">
+                        <span className="shrink-0 text-sm font-normal tabular-nums">
                           {litres(m.qty_litres)}
                         </span>
                       </li>
@@ -350,7 +350,7 @@ export function PfiDetailDialog({
                 <div className="flex items-start gap-2.5 rounded-lg border border-warning/30 bg-warning/5 p-3">
                   <AlertTriangle className="mt-0.5 size-4 shrink-0 text-warning" />
                   <p className="text-sm text-muted-foreground">
-                    This batch is closed but <span className="font-medium text-foreground">{litres(f.remaining)}</span>{' '}
+                    This batch is closed but <span className="font-normal text-foreground">{litres(f.remaining)}</span>{' '}
                     still shows as remaining. Either that stock is genuinely unsold, or movements were
                     never recorded against it — worth checking before the loss is reported upward.
                   </p>

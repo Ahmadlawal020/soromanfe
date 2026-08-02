@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { StatCard } from '#/components/ui/stat-card'
 import { StatusChip } from '#/components/ui/status-chip'
 import { useAdminList, useDeleteAdmin } from '#/lib/hooks/useAdmin'
@@ -163,22 +164,22 @@ function StaffManagement() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header Section */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl md:text-2xl font-semibold tracking-tight text-foreground text-balance">Staff Management</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Create, edit, and manage staff access across the dashboard.
-          </p>
-        </div>
-        <Button
+      <PageHeader
+      eyebrow="Admin"
+      title="Staff Management"
+      description="Create, edit, and manage staff access across the dashboard."
+      actions={
+        <>
+          <Button
           size="sm"
-          
           onClick={() => navigate({ to: '/admin/form' })}
- >
+          >
           <Plus className="size-4 mr-2" />
           Add Staff
-        </Button>
-      </div>
+          </Button>
+        </>
+      }
+    />
 
       {/* Metrics Grid */}
       {!isLoading && !isError && (
@@ -312,11 +313,11 @@ function StaffManagement() {
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-3">
-                              <div className="size-9 rounded-full bg-primary/10 text-primary font-medium flex items-center justify-center text-xs shrink-0 ring-2 ring-primary/5">
+                              <div className="size-9 rounded-full bg-primary/10 text-primary font-normal flex items-center justify-center text-xs shrink-0 ring-2 ring-primary/5">
                                 {getInitials(staff.full_name)}
                               </div>
                               <div className="min-w-0">
-                                <p className="text-xs font-medium text-foreground truncate">{staff.full_name}</p>
+                                <p className="text-xs font-normal text-foreground truncate">{staff.full_name}</p>
                                 <p className="text-[11px] text-muted-foreground truncate">{staff.email}</p>
                               </div>
                             </div>

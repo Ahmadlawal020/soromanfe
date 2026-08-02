@@ -79,7 +79,7 @@ export function OrderSearch({
         {picked ? (
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-sm font-medium text-accent">{picked.orderNumber}</p>
+              <p className="text-sm font-normal text-accent">{picked.orderNumber}</p>
               <p className="mt-0.5 truncate text-xs text-muted-foreground">
                 {picked.customerName} · {picked.depotName || picked.state} · {picked.productName}
               </p>
@@ -116,7 +116,7 @@ export function OrderSearch({
                           className="flex w-full items-center justify-between gap-3 px-3.5 py-3 text-left transition-colors duration-250 ease-luxe outline-none hover:bg-muted/60 focus-visible:bg-muted/60"
                         >
                           <span className="min-w-0">
-                            <span className="block truncate text-sm font-medium">{o.orderNumber}</span>
+                            <span className="block truncate text-sm font-normal">{o.orderNumber}</span>
                             <span className="block truncate text-xs text-muted-foreground">
                               {o.customerName} · {o.depotName || o.state}
                             </span>
@@ -155,7 +155,7 @@ export function TruckCard({
     <div className={cn(PANEL, 'p-4')}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-sm font-medium">
+          <p className="text-sm font-normal">
             Truck {load.truckIndex} — <span className="font-mono">{load.truckNumber}</span>
           </p>
           <p className="mt-0.5 truncate text-xs text-muted-foreground">
@@ -169,7 +169,7 @@ export function TruckCard({
         <div className="flex flex-col items-end gap-2">
           {exited ? (
             <>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-accent px-2.5 py-0.5 text-[0.65rem] tracking-[0.14em] whitespace-nowrap text-accent-foreground uppercase">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-accent px-2.5 py-0.5 text-[0.65rem] whitespace-nowrap text-accent-foreground uppercase">
                 Exited
               </span>
               {(load.gantry || load.loaderName) && (

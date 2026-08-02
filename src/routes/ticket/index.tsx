@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute } from '@tanstack/react-router'
 import { format, isWithinInterval } from 'date-fns'
 import {
@@ -169,21 +170,19 @@ function LoadingTicketsPage() {
 
   return (
     <div className="animate-fade-in space-y-6">
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-        <div>
-          <p className={cn(MICRO, 'mb-1.5 text-muted-foreground')}>Operations</p>
-          <h1 className="text-xl font-semibold tracking-tight text-balance md:text-2xl">
-            Loading Tickets
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Generate loading tickets for paid orders, capture truck details, and export reports.
-          </p>
-        </div>
-        <Button variant="outline" size="sm" onClick={downloadReport} disabled={exporting}>
+      <PageHeader
+      eyebrow="Operations"
+      title="Loading Tickets"
+      description="Generate loading tickets for paid orders, capture truck details, and export reports."
+      actions={
+        <>
+          <Button variant="outline" size="sm" onClick={downloadReport} disabled={exporting}>
           {exporting ? <Loader2 className="animate-spin" /> : <FileSpreadsheet data-icon="inline-start" />}
           Download Report
-        </Button>
-      </div>
+          </Button>
+        </>
+      }
+    />
 
       {isLoading ? (
         <PageLoader message="Loading orders…" />
@@ -408,7 +407,7 @@ function OrderRow({
   return (
     <TableRow>
       <TableCell className="text-muted-foreground tabular-nums">{sn}</TableCell>
-      <TableCell className="font-medium text-accent">{order.orderNumber}</TableCell>
+      <TableCell className="font-normal text-accent">{order.orderNumber}</TableCell>
       <TableCell className="text-muted-foreground tabular-nums">
         {order.loadingStartedAt ? format(new Date(order.loadingStartedAt), 'd MMM yyyy') : '—'}
       </TableCell>

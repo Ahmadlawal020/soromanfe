@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
+import { PageHeader } from '#/components/PageHeader'
 import { useState } from 'react'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
@@ -126,15 +127,11 @@ function TruckDetailPage() {
       <Breadcrumbs items={[{ label: 'Trucks', href: '/trucks' }, { label: truck?.plateNumber || 'Details' }]} />
 
       <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" onClick={handleBack}>
-            <ArrowLeft className="size-4" />
-          </Button>
-          <div>
-            <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">Truck Profile Details</h1>
-            <p className="text-muted-foreground">Fleet status, active operator, and compliance schedules</p>
-          </div>
-        </div>
+        <PageHeader
+      eyebrow="Transport"
+      title="Truck Profile Details"
+      description="Fleet status, active operator, and compliance schedules"
+    />
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={() => navigate({ to: '/trucks/form', state: { truck, isEdit: true } as any })}>
             <Edit className="size-4" /> Edit Profile
@@ -185,11 +182,11 @@ function TruckDetailPage() {
           <CardContent className="space-y-5 pt-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Current Mileage</p>
+                <p className="text-xs text-muted-foreground font-normal uppercase">Current Mileage</p>
                 <p className="text-2xl font-semibold text-foreground mt-1 tabular-nums">{truck.mileage}</p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Fuel Capacity Status</p>
+                <p className="text-xs text-muted-foreground font-normal uppercase">Fuel Capacity Status</p>
                 <div className={`inline-flex items-center gap-1.5 mt-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${getFuelColor(truck.fuelLevel)}`}>
                   <Fuel className="size-3" /> {truck.fuelLevel}%
                 </div>
@@ -207,7 +204,7 @@ function TruckDetailPage() {
             <div className="border-t pt-4">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Maintenance Service Threshold</p>
+                  <p className="text-xs text-muted-foreground font-normal uppercase">Maintenance Service Threshold</p>
                   <p className="text-sm font-semibold text-foreground mt-1">Due at: {truck.nextServiceMileage?.toLocaleString() || '15,000'} km</p>
                 </div>
                 {isServiceDue ? (
@@ -315,7 +312,7 @@ function TruckDetailPage() {
               {(insuranceStatus.alert || registrationStatus.alert) && (
                 <div className="mt-2 p-3 bg-destructive/5 border border-destructive/10 rounded flex items-start gap-2">
                   <ShieldAlert className="size-4 text-destructive shrink-0 mt-0.5" />
-                  <p className="text-xs text-destructive-foreground font-medium">
+                  <p className="text-xs text-destructive-foreground font-normal">
                     Attention: Vehicle is not in full compliance. Please update credentials immediately.
                   </p>
                 </div>
@@ -352,12 +349,12 @@ function TruckDetailPage() {
                         {record.driverRef ? (
                           <button
                             onClick={() => navigate({ to: '/drivers/details' as any, search: { id: record.driverRef._id || record.driverRef } as any, state: { id: record.driverRef._id || record.driverRef } } as any)}
-                            className="font-medium text-sm text-foreground hover:text-primary transition-colors text-left block duration-250 ease-luxe"
+                            className="font-normal text-sm text-foreground hover:text-primary transition-colors text-left block duration-250 ease-luxe"
                           >
                             {record.driverName}
                           </button>
                         ) : (
-                          <span className="font-medium text-sm text-foreground">{record.driverName}</span>
+                          <span className="font-normal text-sm text-foreground">{record.driverName}</span>
                         )}
                         <p className="text-xs text-muted-foreground">Assigned on: {new Date(record.assignedAt).toLocaleDateString()}</p>
                       </div>

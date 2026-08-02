@@ -61,7 +61,7 @@ export function OrderStatusBadge({ status }: { status?: string }) {
     <span
       className={cn(
         'inline-flex w-fit shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-0.5',
-        'text-[0.65rem] tracking-[0.14em] whitespace-nowrap uppercase',
+        'text-[0.65rem] whitespace-nowrap uppercase',
         entry?.className ?? 'border-foreground/15 text-muted-foreground/60',
       )}
     >
@@ -77,7 +77,7 @@ export function PaymentBadge({ paymentStatus }: { paymentStatus?: string }) {
     <span
       className={cn(
         'inline-flex w-fit shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-0.5',
-        'text-[0.65rem] tracking-[0.14em] whitespace-nowrap uppercase',
+        'text-[0.65rem] whitespace-nowrap uppercase',
         paid
           ? 'border-accent/40 bg-accent/10 text-accent'
           : 'border-warning/40 bg-warning/10 text-warning',

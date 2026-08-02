@@ -54,7 +54,7 @@ export function OffloadDialog({ target, date, setDate, onClose, onConfirm, loadi
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em]">
+            <label className="text-xs font-semibold text-muted-foreground uppercase">
               Date Sold / Offloaded
             </label>
             <Input

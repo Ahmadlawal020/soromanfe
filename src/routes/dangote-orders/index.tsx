@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { StatCard } from '#/components/ui/stat-card'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
@@ -113,16 +114,19 @@ function DangoteOrdersDashboard() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">Dangote Delivery Orders</h1>
-          <p className="text-muted-foreground">View and track all Dangote delivery orders, payment, and collection status.</p>
-        </div>
-        <Button size="sm" onClick={() => navigate({ to: '/admin-order' as any })}>
+      <PageHeader
+      eyebrow="Dangote Delivery"
+      title="Dangote Delivery Orders"
+      description="View and track all Dangote delivery orders, payment, and collection status."
+      actions={
+        <>
+          <Button size="sm" onClick={() => navigate({ to: '/admin-order' as any })}>
           <Plus data-icon="inline-start" />
           Place Dangote order
-        </Button>
-      </div>
+          </Button>
+        </>
+      }
+    />
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -224,7 +228,7 @@ function DangoteOrdersDashboard() {
                         </TableCell>
                         <TableCell>
                           <div className="space-y-0.5">
-                            <p className="font-medium text-foreground">{req.customerName}</p>
+                            <p className="font-normal text-foreground">{req.customerName}</p>
                             {req.deliveryState && (
                               <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                 <MapPin className="size-3" />
@@ -234,12 +238,12 @@ function DangoteOrdersDashboard() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-1.5 text-sm font-medium">
+                          <div className="flex items-center gap-1.5 text-sm font-normal">
                             <Package className="size-3.5 text-muted-foreground" />
                             <span>{req.product}</span>
                           </div>
                         </TableCell>
-                        <TableCell className="font-medium">
+                        <TableCell className="font-normal">
                           {Number(req.quantity).toLocaleString()} {req.quantityUnit}
                         </TableCell>
                         <TableCell className="font-semibold text-foreground">

@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { StatCard, StatCardGrid } from '#/components/ui/stat-card'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
@@ -607,28 +608,21 @@ function AllocationDetailsPage() {
             >
               <ArrowLeft className="size-4" />
             </Button>
-            <div>
-              <div className="flex items-center gap-2.5 flex-wrap">
-                <h1 className="text-2xl font-semibold tracking-tight text-foreground font-mono">
-                  {normalizedCode || 'Unassigned Allocation'}
-                </h1>
-                {normalizedCode && theme && (
-                  <span className={cn('inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border', theme.badge)}>
-                    <Tag className="size-3" /> {normalizedCode}
-                  </span>
-                )}
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-accent/10 text-accent border border-accent/40">
-                  {soldPercent}% Sold
-                </span>
-              </div>
-              <p className="text-muted-foreground text-xs mt-1 flex items-center gap-2">
-                <span>{stats.truckCount} {stats.truckCount === 1 ? 'truck' : 'trucks'} allocated</span>
-                <span>•</span>
-                <span>{pfiBreakdown.length} {pfiBreakdown.length === 1 ? 'PFI' : 'PFIs'} attached</span>
-                <span>•</span>
-                <span>{fmtQty(stats.totalQty)} Litres Total</span>
-              </p>
-            </div>
+            <PageHeader
+      eyebrow="Truck Sales"
+      title={normalizedCode || 'Unassigned Allocation'}
+      actions={
+        <>
+          <p className="text-muted-foreground text-xs mt-1 flex items-center gap-2">
+          <span>{stats.truckCount} {stats.truckCount === 1 ? 'truck' : 'trucks'} allocated</span>
+          <span>•</span>
+          <span>{pfiBreakdown.length} {pfiBreakdown.length === 1 ? 'PFI' : 'PFIs'} attached</span>
+          <span>•</span>
+          <span>{fmtQty(stats.totalQty)} Litres Total</span>
+          </p>
+        </>
+      }
+    />
           </div>
 
           <div className="flex items-center gap-2">
@@ -729,14 +723,14 @@ function AllocationDetailsPage() {
                         {pfiPercent}% of allocation
                       </span>
                     </div>
-                    <div className="text-xs text-muted-foreground font-medium">{p.product}</div>
+                    <div className="text-xs text-muted-foreground font-normal">{p.product}</div>
 
                     <div className="w-full bg-muted h-1.5 rounded-full overflow-hidden">
                       <div className="bg-accent h-full rounded-full" style={{ width: `${pfiPercent}%` }} />
                     </div>
 
                     <div className="flex justify-between items-center text-xs pt-1">
-                      <span className="text-muted-foreground font-medium">{p.truckCount} {p.truckCount === 1 ? 'truck' : 'trucks'}</span>
+                      <span className="text-muted-foreground font-normal">{p.truckCount} {p.truckCount === 1 ? 'truck' : 'trucks'}</span>
                       <span className="font-semibold text-foreground">{fmtQty(p.qty)} {p.unit}</span>
                     </div>
                   </div>
@@ -762,25 +756,25 @@ function AllocationDetailsPage() {
           </CardHeader>
           <CardContent className="p-4 grid grid-cols-2 gap-x-6 gap-y-2 text-xs">
             <div className="flex justify-between py-1.5 border-b border-border/60 col-span-1">
-              <span className="text-muted-foreground font-medium">Volume Sold</span>
+              <span className="text-muted-foreground font-normal">Volume Sold</span>
               <span className="font-semibold text-foreground">{salesSummary.totalQty > 0 ? `${fmtQty(salesSummary.totalQty)} L` : '—'}</span>
             </div>
             <div className="flex justify-between py-1.5 border-b border-border/60 col-span-1">
-              <span className="text-muted-foreground font-medium">Expected Revenue</span>
+              <span className="text-muted-foreground font-normal">Expected Revenue</span>
               <span className="font-semibold text-foreground">{salesSummary.totalValue > 0 ? fmtMoney(salesSummary.totalValue) : '—'}</span>
             </div>
             <div className="flex justify-between py-1.5 border-b border-border/60 col-span-1">
-              <span className="text-muted-foreground font-medium">Total Deposits</span>
+              <span className="text-muted-foreground font-normal">Total Deposits</span>
               <span className="font-semibold text-accent">{salesSummary.totalPaid > 0 ? fmtMoney(salesSummary.totalPaid) : '—'}</span>
             </div>
             <div className="flex justify-between py-1.5 border-b border-border/60 col-span-1">
-              <span className="text-muted-foreground font-medium">Expenses</span>
+              <span className="text-muted-foreground font-normal">Expenses</span>
               <span className="font-semibold text-warning">{salesSummary.totalExpenses > 0 ? fmtMoney(salesSummary.totalExpenses) : '—'}</span>
             </div>
             <div className="flex justify-between items-center py-2 pt-2 col-span-2 bg-muted/60 p-2.5 rounded-lg border border-border">
               <span className="text-foreground font-semibold">Outstanding Balance</span>
               <span className={cn(
-                'font-black text-sm',
+                'font-semibold text-sm',
                 salesSummary.balance === 0 ? 'text-accent' : salesSummary.balance > 0 ? 'text-destructive' : 'text-muted-foreground'
               )}>
                 {salesSummary.balance === 0 ? '✓ ₦0.00' : salesSummary.balance > 0 ? fmtMoney(salesSummary.balance) : `+${fmtMoney(Math.abs(salesSummary.balance))}`}
@@ -798,7 +792,7 @@ function AllocationDetailsPage() {
             <span className="text-xs font-semibold bg-accent text-foreground px-2 py-0.5 rounded-md">
               {selectedRowIds.size}
             </span>
-            <span className="text-xs font-medium text-muted-foreground">
+            <span className="text-xs font-normal text-muted-foreground">
               truck record{selectedRowIds.size !== 1 ? 's' : ''} selected
             </span>
             <div className="flex-1" />
@@ -835,7 +829,7 @@ function AllocationDetailsPage() {
                 <Truck className="size-4 text-accent" />
                 Truck Records ({truckRecords.length})
               </CardTitle>
-              <span className="text-xs text-muted-foreground font-medium">
+              <span className="text-xs text-muted-foreground font-normal">
                 {stats.loadedCount} in transit · {stats.soldCount} sold
               </span>
             </div>
@@ -857,18 +851,18 @@ function AllocationDetailsPage() {
                         }}
                       />
                     </TableHead>
-                    <TableHead className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground w-[35px] text-center">#</TableHead>
-                    <TableHead className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground min-w-[110px]">Truck</TableHead>
-                    <TableHead className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground min-w-[100px]">Quantity</TableHead>
-                    <TableHead className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground min-w-[100px]">Depot</TableHead>
-                    <TableHead className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground min-w-[90px]">Product</TableHead>
-                    <TableHead className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground min-w-[130px]">Customer</TableHead>
-                    <TableHead className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground min-w-[90px]">Rate(s)</TableHead>
-                    <TableHead className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground min-w-[120px]">Destination</TableHead>
-                    <TableHead className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground min-w-[95px]">Status</TableHead>
-                    <TableHead className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground min-w-[90px]">Date Loaded</TableHead>
-                    <TableHead className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground min-w-[90px]">Date Sold</TableHead>
-                    <TableHead className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground min-w-[160px] text-right">Actions</TableHead>
+                    <TableHead className="text-[11px] font-semibold uppercase text-muted-foreground w-[35px] text-center">#</TableHead>
+                    <TableHead className="text-[11px] font-semibold uppercase text-muted-foreground min-w-[110px]">Truck</TableHead>
+                    <TableHead className="text-[11px] font-semibold uppercase text-muted-foreground min-w-[100px]">Quantity</TableHead>
+                    <TableHead className="text-[11px] font-semibold uppercase text-muted-foreground min-w-[100px]">Depot</TableHead>
+                    <TableHead className="text-[11px] font-semibold uppercase text-muted-foreground min-w-[90px]">Product</TableHead>
+                    <TableHead className="text-[11px] font-semibold uppercase text-muted-foreground min-w-[130px]">Customer</TableHead>
+                    <TableHead className="text-[11px] font-semibold uppercase text-muted-foreground min-w-[90px]">Rate(s)</TableHead>
+                    <TableHead className="text-[11px] font-semibold uppercase text-muted-foreground min-w-[120px]">Destination</TableHead>
+                    <TableHead className="text-[11px] font-semibold uppercase text-muted-foreground min-w-[95px]">Status</TableHead>
+                    <TableHead className="text-[11px] font-semibold uppercase text-muted-foreground min-w-[90px]">Date Loaded</TableHead>
+                    <TableHead className="text-[11px] font-semibold uppercase text-muted-foreground min-w-[90px]">Date Sold</TableHead>
+                    <TableHead className="text-[11px] font-semibold uppercase text-muted-foreground min-w-[160px] text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -900,7 +894,7 @@ function AllocationDetailsPage() {
                             className="size-4 rounded border-border accent-primary cursor-pointer"
                           />
                         </TableCell>
-                        <TableCell className="text-muted-foreground text-center font-medium">{idx + 1}</TableCell>
+                        <TableCell className="text-muted-foreground text-center font-normal">{idx + 1}</TableCell>
 
                         {/* Truck Plate */}
                         <TableCell>
@@ -923,7 +917,7 @@ function AllocationDetailsPage() {
                         </TableCell>
 
                         {/* Depot */}
-                        <TableCell className="text-muted-foreground font-medium">{r.depotDisplay || '—'}</TableCell>
+                        <TableCell className="text-muted-foreground font-normal">{r.depotDisplay || '—'}</TableCell>
 
                         {/* Product */}
                         <TableCell>
@@ -940,7 +934,7 @@ function AllocationDetailsPage() {
                             <div className="flex flex-col gap-1 py-0.5">
                               {salesEntries.map(e => (
                                 <div key={e.customerId || 'none'} className="flex items-center gap-1.5">
-                                  <span className="text-xs text-foreground font-medium capitalize truncate">
+                                  <span className="text-xs text-foreground font-normal capitalize truncate">
                                     {e.customerName || `Cust #${e.customerId}`}
                                   </span>
                                   {e.qty > 0 && (
@@ -952,7 +946,7 @@ function AllocationDetailsPage() {
                               ))}
                             </div>
                           ) : r.custName ? (
-                            <span className="text-xs text-foreground font-medium capitalize truncate">{r.custName}</span>
+                            <span className="text-xs text-foreground font-normal capitalize truncate">{r.custName}</span>
                           ) : <span className="text-muted-foreground">—</span>}
                         </TableCell>
 
@@ -962,7 +956,7 @@ function AllocationDetailsPage() {
                             <div className="flex flex-col gap-1 py-0.5">
                               {salesEntries.map((e, i) => (
                                 <div key={e.customerId || i} className="flex items-center">
-                                  <span className="text-xs text-foreground font-medium font-mono">
+                                  <span className="text-xs text-foreground font-normal font-mono">
                                     {e.rates.size > 0
                                       ? [...e.rates].map(rate => `₦${rate.toLocaleString()}`).join(', ')
                                       : '—'}
@@ -971,7 +965,7 @@ function AllocationDetailsPage() {
                               ))}
                             </div>
                           ) : toNum(r.rate) > 0 ? (
-                            <span className="text-xs text-foreground font-medium font-mono">
+                            <span className="text-xs text-foreground font-normal font-mono">
                               ₦{toNum(r.rate).toLocaleString()}
                             </span>
                           ) : <span className="text-muted-foreground">—</span>}
@@ -1005,12 +999,12 @@ function AllocationDetailsPage() {
                         </TableCell>
 
                         {/* Date Loaded */}
-                        <TableCell className="whitespace-nowrap text-foreground text-xs font-medium">
+                        <TableCell className="whitespace-nowrap text-foreground text-xs font-normal">
                           {r.dateAllocated ? (() => { try { return format(parseISO(r.dateAllocated), 'dd MMM yyyy') } catch { return r.dateAllocated } })() : '—'}
                         </TableCell>
 
                         {/* Date Sold */}
-                        <TableCell className="whitespace-nowrap text-foreground text-xs font-medium">
+                        <TableCell className="whitespace-nowrap text-foreground text-xs font-normal">
                           {r.dateOffloaded ? (() => { try { return format(parseISO(r.dateOffloaded), 'dd MMM yyyy') } catch { return r.dateOffloaded } })() : '—'}
                         </TableCell>
 

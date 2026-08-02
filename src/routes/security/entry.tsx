@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute } from '@tanstack/react-router'
 import { LogIn } from 'lucide-react'
 
@@ -48,74 +49,67 @@ function SecurityEntryPage() {
   const awaiting = loads.filter((l) => !l.securityEnteredAt)
 
   return (
-    <div className="animate-fade-in space-y-6">
-      <div>
-        <p className={cn(MICRO, 'mb-1.5 text-muted-foreground')}>Security</p>
-        <h1 className="text-xl font-semibold tracking-tight text-balance md:text-2xl">
-          Gate entry
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Find the order, then record each truck as it arrives at the gate.
-        </p>
-      </div>
-
-      <OrderSearch {...lookup} placeholder="Search by order reference, truck, or customer…" />
-
-      {picked && (
-        loads.length === 0 ? (
+    <PageHeader
+      eyebrow="Security"
+      title="Gate entry"
+      description="Find the order, then record each truck as it arrives at the gate."
+      actions={
+        <>
+          <OrderSearch {...lookup} placeholder="Search by order reference, truck, or customer…" />
+          {picked && (
+          loads.length === 0 ? (
           <PageEmpty
-            title="No tickets on this order"
-            description="Tickets are generated at the loading desk before a truck can be cleared."
+          title="No tickets on this order"
+          description="Tickets are generated at the loading desk before a truck can be cleared."
           />
-        ) : (
+          ) : (
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className={cn(MICRO, 'text-muted-foreground')}>
-                {loads.length} truck{loads.length === 1 ? '' : 's'}
-              </span>
-              <span className="text-xs text-muted-foreground">
-                {awaiting.length} awaiting entry
-              </span>
-            </div>
-
-            {loads.map((l) => (
-              <TruckCard key={l.id} load={l} unit={unit}>
-                {!l.securityEnteredAt ? (
-                  <Button size="sm" onClick={() => openFor(l)}>
-                    <LogIn data-icon="inline-start" />
-                    Confirm entry
-                  </Button>
-                ) : (
-                  <span className="text-[0.65rem] text-muted-foreground tabular-nums">
-                    {gateTime(l.securityEnteredAt)}
-                  </span>
-                )}
-              </TruckCard>
-            ))}
+          <div className="flex items-center justify-between">
+          <span className={cn(MICRO, 'text-muted-foreground')}>
+          {loads.length} truck{loads.length === 1 ? '' : 's'}
+          </span>
+          <span className="text-xs text-muted-foreground">
+          {awaiting.length} awaiting entry
+          </span>
           </div>
-        )
-      )}
-
-      {!picked && (
-        <p className="pt-2 text-center text-sm text-muted-foreground">
+          {loads.map((l) => (
+          <TruckCard key={l.id} load={l} unit={unit}>
+          {!l.securityEnteredAt ? (
+          <Button size="sm" onClick={() => openFor(l)}>
+          <LogIn data-icon="inline-start" />
+          Confirm entry
+          </Button>
+          ) : (
+          <span className="text-[0.65rem] text-muted-foreground tabular-nums">
+          {gateTime(l.securityEnteredAt)}
+          </span>
+          )}
+          </TruckCard>
+          ))}
+          </div>
+          )
+          )}
+          {!picked && (
+          <p className="pt-2 text-center text-sm text-muted-foreground">
           Search for an order to begin.
-        </p>
-      )}
-
-      <GateDialog
-        title={target ? `Confirm entry — Truck ${target.truckIndex}` : 'Confirm entry'}
-        description={target ? `${target.truckNumber} · ${picked?.orderNumber}` : ''}
-        open={target !== null}
-        onOpenChange={(o) => { if (!o) setTarget(null) }}
-        pending={pending}
-        submitLabel="Confirm entry"
-        onSubmit={submit}
-        fields={[
+          </p>
+          )}
+          <GateDialog
+          title={target ? `Confirm entry — Truck ${target.truckIndex}` : 'Confirm entry'}
+          description={target ? `${target.truckNumber} · ${picked?.orderNumber}` : ''}
+          open={target !== null}
+          onOpenChange={(o) => { if (!o) setTarget(null) }}
+          pending={pending}
+          submitLabel="Confirm entry"
+          onSubmit={submit}
+          fields={[
           { key: 'entered-at', label: 'Entry time', value: enteredAt, set: setEnteredAt, type: 'datetime-local' },
           { key: 'driver-name', label: "Driver's name", value: driverName, set: setDriverName, placeholder: 'As presented at the gate' },
           { key: 'driver-phone', label: "Driver's phone", value: driverPhone, set: setDriverPhone },
-        ]}
-      />
-    </div>
+          ]}
+          />
+        </>
+      }
+    />
   )
 }

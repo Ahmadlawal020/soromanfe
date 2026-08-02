@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { StatCard } from '#/components/ui/stat-card'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
@@ -54,13 +55,16 @@ function LpgStationsDashboard() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">LPG Stations Management</h1>
-          <p className="text-muted-foreground">Manage LPG stations for home delivery operations.</p>
-        </div>
-        <Button size="sm" onClick={() => navigate({ to: '/lpg-stations/form' })}><Plus className="size-4 mr-2" />Create New Station</Button>
-      </div>
+      <PageHeader
+      eyebrow="LPG Home Delivery"
+      title="LPG Stations Management"
+      description="Manage LPG stations for home delivery operations."
+      actions={
+        <>
+          <Button size="sm" onClick={() => navigate({ to: '/lpg-stations/form' })}><Plus className="size-4 mr-2" />Create New Station</Button>
+        </>
+      }
+    />
 
       {!isLoading && !isError && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -121,7 +125,7 @@ function LpgStationsDashboard() {
                       </div>
                       <div className="space-y-2 text-sm">
                         <div className="flex items-start gap-2"><MapPin className="size-4 text-muted-foreground shrink-0 mt-0.5" /><span className="text-xs text-muted-foreground line-clamp-2">{station.address}, {station.city}, {station.state} {station.postcode}, {station.country}</span></div>
-                        <div className="flex items-center gap-2"><Flame className="size-4 text-primary shrink-0" /><span className="text-xs font-medium text-foreground">{station.lpgCapacityKg?.toLocaleString()} Kg Capacity</span></div>
+                        <div className="flex items-center gap-2"><Flame className="size-4 text-primary shrink-0" /><span className="text-xs font-normal text-foreground">{station.lpgCapacityKg?.toLocaleString()} Kg Capacity</span></div>
                         <div className="flex items-center gap-2"><Layers className="size-4 text-muted-foreground shrink-0" /><span className="text-xs text-muted-foreground">{(station.cylinders || []).reduce((sum: number, c: any) => sum + (Number(c.quantity) || 0), 0).toLocaleString()} Cylinders ({(station.cylinders || []).length} sizes)</span></div>
                       </div>
                       <div className="flex gap-2 pt-4 mt-4 border-t border-border">

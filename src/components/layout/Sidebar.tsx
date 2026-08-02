@@ -155,7 +155,7 @@ function NavGroup({
       {/* Group labels sit on the tracking ladder at 0.22em — the rung between
           panel headers (0.25em) and stepper labels (0.2em). */}
       {label && expanded && (
-        <div className="px-3 py-2 text-[0.65rem] tracking-[0.22em] uppercase text-muted-foreground/70 select-none">
+        <div className="px-3 py-2 text-[0.65rem] uppercase text-muted-foreground/70 select-none">
           {label}
         </div>
       )}
@@ -178,7 +178,7 @@ function NavGroup({
               expanded ? "gap-3 px-3" : "justify-center px-0",
               // Emerald marks the active item; everything else stays neutral.
               isActive
-                ? "bg-sidebar-accent font-medium text-sidebar-primary"
+                ? "bg-sidebar-accent font-normal text-sidebar-primary"
                 : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground",
             )}
             aria-current={isActive ? "page" : undefined}
@@ -274,7 +274,7 @@ export default function Sidebar() {
               className="size-6 shrink-0"
             />
             {expanded && (
-              <span className="min-w-0 truncate text-sm font-medium tracking-tight">
+              <span className="min-w-0 truncate text-sm font-normal tracking-tight">
                 Soroman
               </span>
             )}
@@ -303,12 +303,12 @@ export default function Sidebar() {
           {expanded ? (
             <div className="mb-2 flex items-center gap-2.5 rounded-lg px-1 py-1.5">
               <Avatar>
-                <AvatarFallback className="text-xs font-medium">
+                <AvatarFallback className="text-xs font-normal">
                   {initials}
                 </AvatarFallback>
               </Avatar>
               <div className="min-w-0">
-                <div className="truncate text-sm font-medium">{displayName}</div>
+                <div className="truncate text-sm font-normal">{displayName}</div>
                 <div className="truncate text-xs text-muted-foreground">
                   {user?.email || "admin"}
                 </div>
@@ -317,7 +317,7 @@ export default function Sidebar() {
           ) : (
             <div className="mb-2 flex justify-center">
               <Avatar>
-                <AvatarFallback className="text-xs font-medium">
+                <AvatarFallback className="text-xs font-normal">
                   {initials}
                 </AvatarFallback>
               </Avatar>
@@ -328,7 +328,7 @@ export default function Sidebar() {
           <button
             type="button"
             className={cn(
-              "flex h-8 w-full cursor-pointer items-center rounded-lg text-sm font-medium",
+              "flex h-8 w-full cursor-pointer items-center rounded-lg text-sm font-normal",
               "text-destructive transition-colors duration-250 ease-luxe outline-none",
               "hover:bg-destructive/10 focus-visible:ring-3 focus-visible:ring-destructive/20",
               expanded ? "justify-start gap-2 px-3" : "justify-center px-0",

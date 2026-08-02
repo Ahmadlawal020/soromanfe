@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate, useRouterState } from '@tanstack/react-router'
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '#/components/ui/card'
 import { Button } from '#/components/ui/button'
@@ -181,24 +182,17 @@ function DeliveryOperationDetailsView() {
           >
             <ArrowLeft className="size-4" />
           </Button>
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-2xl font-semibold tracking-tight text-foreground">{record.truckPlate}</h1>
-              {record.code && (
-                <Badge variant="outline" className="font-mono text-xs uppercase">
-                  {record.code}
-                </Badge>
-              )}
-              {badge && Icon && (
-                <Badge className={`text-xs border flex items-center gap-1 ${badge.cls}`}>
-                  <Icon className="size-3" /> {badge.label}
-                </Badge>
-              )}
-            </div>
-            <p className="text-muted-foreground text-sm mt-0.5">
-              {record.product || 'N/A'} · {record.depotDisplay || 'N/A'}
-            </p>
-          </div>
+          <PageHeader
+      eyebrow="Truck Sales"
+      title={record.truckPlate}
+      actions={
+        <>
+          <p className="text-muted-foreground text-sm mt-0.5">
+          {record.product || 'N/A'} · {record.depotDisplay || 'N/A'}
+          </p>
+        </>
+      }
+    />
         </div>
 
         <div className="flex gap-2">
@@ -218,7 +212,7 @@ function DeliveryOperationDetailsView() {
         <Card>
           <CardContent className="p-4 flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground font-medium">Quantity Allocated</div>
+              <div className="text-xs text-muted-foreground font-normal">Quantity Allocated</div>
               <div className="text-xl font-semibold text-foreground mt-0.5 tabular-nums">
                 {record.qty > 0 ? `${fmtQty(record.qty)} ${record.unitLabel}` : '—'}
               </div>
@@ -232,7 +226,7 @@ function DeliveryOperationDetailsView() {
         <Card>
           <CardContent className="p-4 flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground font-medium">PFI Number</div>
+              <div className="text-xs text-muted-foreground font-normal">PFI Number</div>
               <div className="text-lg font-semibold text-foreground mt-0.5 truncate max-w-[140px]">
                 {record.pfiLabel || '—'}
               </div>
@@ -246,7 +240,7 @@ function DeliveryOperationDetailsView() {
         <Card>
           <CardContent className="p-4 flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground font-medium">Rate (per litre)</div>
+              <div className="text-xs text-muted-foreground font-normal">Rate (per litre)</div>
               <div className="text-xl font-semibold text-foreground mt-0.5 tabular-nums">
                 {toNum(record.rate) > 0 ? `₦${toNum(record.rate).toLocaleString()}` : '—'}
               </div>
@@ -260,7 +254,7 @@ function DeliveryOperationDetailsView() {
         <Card>
           <CardContent className="p-4 flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground font-medium">Date Loaded</div>
+              <div className="text-xs text-muted-foreground font-normal">Date Loaded</div>
               <div className="text-sm font-semibold text-foreground mt-0.5">
                 {record.dateAllocated ? (() => { try { return format(parseISO(record.dateAllocated), 'dd MMM yyyy') } catch { return record.dateAllocated } })() : '—'}
               </div>
@@ -274,7 +268,7 @@ function DeliveryOperationDetailsView() {
         <Card>
           <CardContent className="p-4 flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground font-medium">Status</div>
+              <div className="text-xs text-muted-foreground font-normal">Status</div>
               <div className="text-sm font-semibold text-foreground mt-0.5">
                 {badge?.label || '—'}
               </div>
@@ -299,28 +293,28 @@ function DeliveryOperationDetailsView() {
                 <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl">
                   <Truck className="size-5 text-primary shrink-0" />
                   <div>
-                    <div className="text-xs text-muted-foreground font-medium">Truck Plate</div>
+                    <div className="text-xs text-muted-foreground font-normal">Truck Plate</div>
                     <div className="font-semibold">{record.truckPlate}</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl">
                   <Package className="size-5 text-primary shrink-0" />
                   <div>
-                    <div className="text-xs text-muted-foreground font-medium">Product</div>
+                    <div className="text-xs text-muted-foreground font-normal">Product</div>
                     <div className="font-semibold">{record.product || 'N/A'}</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl">
                   <Building2 className="size-5 text-warning shrink-0" />
                   <div>
-                    <div className="text-xs text-muted-foreground font-medium">Depot</div>
+                    <div className="text-xs text-muted-foreground font-normal">Depot</div>
                     <div className="font-semibold">{record.depotDisplay || 'N/A'}</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl">
                   <MapPin className="size-5 text-muted-foreground shrink-0" />
                   <div>
-                    <div className="text-xs text-muted-foreground font-medium">Destination</div>
+                    <div className="text-xs text-muted-foreground font-normal">Destination</div>
                     <div className="font-semibold">{record.location || 'N/A'}</div>
                   </div>
                 </div>
@@ -331,7 +325,7 @@ function DeliveryOperationDetailsView() {
                   <div className="flex items-center gap-3 p-3 bg-accent/60 rounded-xl">
                     <CheckCircle2 className="size-5 text-accent shrink-0" />
                     <div>
-                      <div className="text-xs text-muted-foreground font-medium">Date Sold / Offloaded</div>
+                      <div className="text-xs text-muted-foreground font-normal">Date Sold / Offloaded</div>
                       <div className="font-semibold">
                         {(() => { try { return format(parseISO(record.dateOffloaded), 'dd MMM yyyy') } catch { return record.dateOffloaded } })()}
                       </div>
@@ -373,17 +367,17 @@ function DeliveryOperationDetailsView() {
                         return (
                           <TableRow key={entry._id || entry.id || idx} className="hover:bg-muted/30">
                             <TableCell className="px-4 text-muted-foreground">{idx + 1}</TableCell>
-                            <TableCell className="whitespace-nowrap font-medium text-muted-foreground">
+                            <TableCell className="whitespace-nowrap font-normal text-muted-foreground">
                               {entryDate ? (() => { try { return format(parseISO(entryDate), 'dd MMM yy') } catch { return entryDate } })() : '—'}
                             </TableCell>
-                            <TableCell className="text-foreground font-medium">{entry.customerName || '—'}</TableCell>
+                            <TableCell className="text-foreground font-normal">{entry.customerName || '—'}</TableCell>
                             <TableCell className="text-right font-semibold text-foreground">
                               {toNum(entry.quantity) > 0 ? `${fmtQty(toNum(entry.quantity))} L` : '—'}
                             </TableCell>
                             <TableCell className="text-right text-muted-foreground">
                               {toNum(entry.rate) > 0 ? `₦${toNum(entry.rate).toLocaleString()}` : '—'}
                             </TableCell>
-                            <TableCell className="text-right text-foreground font-medium">
+                            <TableCell className="text-right text-foreground font-normal">
                               {toNum(entry.salesValue) > 0 ? fmtMoney(toNum(entry.salesValue)) : '—'}
                             </TableCell>
                             <TableCell className="text-right font-semibold text-accent">
@@ -429,7 +423,7 @@ function DeliveryOperationDetailsView() {
                 <span className="font-semibold text-warning">{salesSummary.totalExpenses > 0 ? fmtMoney(salesSummary.totalExpenses) : '—'}</span>
               </div>
               <div className="flex justify-between py-1">
-                <span className="text-muted-foreground font-medium">Balance</span>
+                <span className="text-muted-foreground font-normal">Balance</span>
                 <span className={`font-semibold ${salesSummary.balance === 0 ? 'text-accent' : salesSummary.balance > 0 ? 'text-destructive' : 'text-muted-foreground'}`}>
                   {salesSummary.balance === 0 ? '✓ Settled' : salesSummary.balance > 0 ? fmtMoney(salesSummary.balance) : `+${fmtMoney(Math.abs(salesSummary.balance))}`}
                 </span>

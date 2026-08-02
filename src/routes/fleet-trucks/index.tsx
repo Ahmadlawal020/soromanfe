@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute } from '@tanstack/react-router'
 import { isWithinInterval } from 'date-fns'
 import {
@@ -162,25 +163,25 @@ function FleetDirectoryPage() {
 
   return (
     <div className="animate-fade-in space-y-6">
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-        <div>
-          <p className={cn(MICRO, 'mb-1.5 text-muted-foreground')}>Transport</p>
-          <h1 className="text-xl font-semibold tracking-tight text-balance md:text-2xl">Fleet</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            At-a-glance truck performance — debits, credits, and balance per truck for any period.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
+      <PageHeader
+      eyebrow="Transport"
+      title="Fleet"
+      description="At-a-glance truck performance — debits, credits, and balance per truck for any period."
+      actions={
+        <>
+          <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm" onClick={exportSummary} disabled={!rows.length}>
-            <FileSpreadsheet data-icon="inline-start" />
-            Export summary
+          <FileSpreadsheet data-icon="inline-start" />
+          Export summary
           </Button>
           <Button size="sm" onClick={() => setEditing('new')}>
-            <Plus data-icon="inline-start" />
-            Add truck
+          <Plus data-icon="inline-start" />
+          Add truck
           </Button>
-        </div>
-      </div>
+          </div>
+        </>
+      }
+    />
 
       <StatCardGrid count={3}>
         <StatCard icon={<Truck />} label="Total trucks" value={totals.trucks} />
@@ -272,7 +273,7 @@ function FleetDirectoryPage() {
                   return (
                     <TableRow key={r.truck.id}>
                       <TableCell className="text-muted-foreground tabular-nums">{i + 1}</TableCell>
-                      <TableCell className="font-mono font-medium">
+                      <TableCell className="font-mono font-normal">
                         {r.truck.plateNumber}
                         {!r.truck.isActive && (
                           <span className="ml-1.5 text-[0.65rem] text-muted-foreground">retired</span>

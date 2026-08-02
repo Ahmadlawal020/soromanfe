@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
@@ -131,7 +132,7 @@ function DriverSearchSelect({ value, onChange, editingTruck }: DriverSearchSelec
                   }}
  >
                   <div className="flex flex-col min-w-0">
-                    <span className="font-medium truncate">{driver.name}</span>
+                    <span className="font-normal truncate">{driver.name}</span>
                     <span className="text-xs text-muted-foreground truncate">
                       {driver.licenseNumber} • {driver.status}
                     </span>
@@ -305,16 +306,11 @@ function TruckForm() {
 
   return (
     <div className="space-y-6">
-      <header className="flex items-center justify-between">
-        <div>
-          <Button variant="ghost" size="sm" onClick={() => navigate({ to: '/trucks/' as any })} className="mb-2">
-            <ArrowLeft className="size-4 mr-2" />Back to Trucks
-          </Button>
-          <h1 className="text-xl md:text-2xl font-semibold tracking-tight text-balance">{isEdit ? 'Edit Truck' : 'Register New Truck'}</h1>
-          <p className="text-muted-foreground">{isEdit ? 'Modify vehicle specifications and operator credentials' : 'Register a new heavy-duty truck to your company fleet'}</p>
-          {errors.form && <p className="text-sm text-destructive mt-1 flex items-center gap-1.5"><AlertCircle className="size-3.5" />{errors.form}</p>}
-        </div>
-      </header>
+      <PageHeader
+      eyebrow="Transport"
+      title={isEdit ? 'Edit Truck' : 'Register New Truck'}
+      description={isEdit ? 'Modify vehicle specifications and operator credentials' : 'Register a new heavy-duty truck to your company fleet'}
+    />
 
       <form onSubmit={handleSubmit} noValidate className="space-y-6">
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

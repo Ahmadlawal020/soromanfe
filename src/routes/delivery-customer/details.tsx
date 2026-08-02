@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate, useRouterState } from '@tanstack/react-router'
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '#/components/ui/card'
 import { Button } from '#/components/ui/button'
@@ -127,38 +128,18 @@ function DeliveryCustomerDetailsView() {
           >
             <ArrowLeft className="size-4" />
           </Button>
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-2xl font-semibold tracking-tight text-foreground">{customer.name}</h1>
-              <Badge variant="outline" className="font-mono text-xs uppercase">
-                {customer.customerCode || (isStation ? 'STN-ENTRY' : 'CUST-ENTRY')}
-              </Badge>
-              <Badge
-                className={
-                  isStation
-                    ? 'bg-warning/10 text-warning border-warning/20 flex items-center gap-1'
-                    : 'bg-primary/10 text-primary border-primary/20 flex items-center gap-1'
-                }
-              >
-                {isStation ? <><Fuel className="size-3" /> Filling Station</> : <><User className="size-3" /> Individual Customer</>}
-              </Badge>
-              <Badge
-                className={
-                  customer.status === 'active'
-                    ? 'bg-accent/10 text-accent border-accent/20 capitalize'
-                    : customer.status === 'suspended'
-                    ? 'bg-destructive/10 text-destructive border-destructive/20 capitalize'
-                    : 'bg-warning/10 text-warning border-warning/20 capitalize'
-                }
-              >
-                {customer.status}
-              </Badge>
-            </div>
-            <p className="text-muted-foreground text-sm mt-0.5">
-              Phone: <a href={`tel:${customer.phoneNumber}`} className="text-primary hover:underline font-semibold">{customer.phoneNumber}</a>
-              {customer.email && ` • ${customer.email}`}
-            </p>
-          </div>
+          <PageHeader
+      eyebrow="Truck Sales"
+      title={customer.name}
+      actions={
+        <>
+          <p className="text-muted-foreground text-sm mt-0.5">
+          Phone: <a href={`tel:${customer.phoneNumber}`} className="text-primary hover:underline font-semibold">{customer.phoneNumber}</a>
+          {customer.email && ` • ${customer.email}`}
+          </p>
+        </>
+      }
+    />
         </div>
 
         <div className="flex gap-2">
@@ -219,14 +200,14 @@ function DeliveryCustomerDetailsView() {
                     alt={customer.name}
                     className="size-24 rounded-xl object-cover border-2 border-primary/20 transition-transform group-hover:scale-105 duration-250 ease-luxe"
                   />
-                  <div className="absolute inset-0 bg-black/40 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-medium pointer-events-none duration-250 ease-luxe">
+                  <div className="absolute inset-0 bg-black/40 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-normal pointer-events-none duration-250 ease-luxe">
                     Passport
                   </div>
                 </div>
               ) : (
                 <div className="size-24 rounded-xl border-2 border-dashed border-border bg-muted/30 flex flex-col items-center justify-center text-muted-foreground">
                   <Camera className="size-7" />
-                  <span className="text-[10px] mt-1 font-medium">No Photo</span>
+                  <span className="text-[10px] mt-1 font-normal">No Photo</span>
                 </div>
               )}
             </div>
@@ -245,7 +226,7 @@ function DeliveryCustomerDetailsView() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-sm pt-1">
                 <div>
-                  <span className="text-xs text-muted-foreground block font-medium">Primary Phone</span>
+                  <span className="text-xs text-muted-foreground block font-normal">Primary Phone</span>
                   <a href={`tel:${customer.phoneNumber}`} className="font-semibold text-primary hover:underline">
                     {customer.phoneNumber || 'N/A'}
                   </a>
@@ -253,7 +234,7 @@ function DeliveryCustomerDetailsView() {
 
                 {customer.altPhoneNumber && (
                   <div>
-                    <span className="text-xs text-muted-foreground block font-medium">Alt Phone</span>
+                    <span className="text-xs text-muted-foreground block font-normal">Alt Phone</span>
                     <a href={`tel:${customer.altPhoneNumber}`} className="font-semibold text-primary hover:underline">
                       {customer.altPhoneNumber}
                     </a>
@@ -262,7 +243,7 @@ function DeliveryCustomerDetailsView() {
 
                 {customer.email && (
                   <div>
-                    <span className="text-xs text-muted-foreground block font-medium">Email Address</span>
+                    <span className="text-xs text-muted-foreground block font-normal">Email Address</span>
                     <span className="font-semibold text-foreground truncate block">{customer.email}</span>
                   </div>
                 )}
@@ -277,7 +258,7 @@ function DeliveryCustomerDetailsView() {
         <Card className="bg-card/60 backdrop-blur-sm">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground font-medium">Credit Limit</div>
+              <div className="text-xs text-muted-foreground font-normal">Credit Limit</div>
               <div className="text-xl font-semibold text-foreground mt-0.5 tabular-nums">
                 {hasCreditLimit ? `₦${formatMoney(customer.creditLimit)}` : 'No Limit'}
               </div>
@@ -291,7 +272,7 @@ function DeliveryCustomerDetailsView() {
         <Card className="bg-card/60 backdrop-blur-sm">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground font-medium">Outstanding Balance</div>
+              <div className="text-xs text-muted-foreground font-normal">Outstanding Balance</div>
               <div className={`text-xl font-semibold mt-0.5 flex items-center gap-1 ${isOverLimit ? 'text-destructive' : isNearLimit ? 'text-warning' : 'text-foreground'}`}>
                 ₦{formatMoney(customer.outstanding)}
                 {isOverLimit && <ShieldAlert className="size-4 text-destructive" />}
@@ -307,7 +288,7 @@ function DeliveryCustomerDetailsView() {
         <Card className="bg-card/60 backdrop-blur-sm">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground font-medium">Total Quantity Sold</div>
+              <div className="text-xs text-muted-foreground font-normal">Total Quantity Sold</div>
               <div className="text-xl font-semibold text-foreground mt-0.5 tabular-nums">
                 {formatQty(customer.totalQty)} Litres
               </div>
@@ -321,7 +302,7 @@ function DeliveryCustomerDetailsView() {
         <Card className="bg-card/60 backdrop-blur-sm">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground font-medium">Last Activity</div>
+              <div className="text-xs text-muted-foreground font-normal">Last Activity</div>
               <div className="text-sm font-semibold text-foreground mt-0.5">
                 {customer.lastTransactionDate
                   ? new Date(customer.lastTransactionDate).toLocaleDateString()
@@ -352,7 +333,7 @@ function DeliveryCustomerDetailsView() {
                 <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl">
                   <User className="size-5 text-warning shrink-0" />
                   <div>
-                    <div className="text-xs text-muted-foreground font-medium">Manager's Name</div>
+                    <div className="text-xs text-muted-foreground font-normal">Manager's Name</div>
                     <div className="font-semibold text-foreground">{customer.contactPerson || 'N/A'}</div>
                   </div>
                 </div>
@@ -360,7 +341,7 @@ function DeliveryCustomerDetailsView() {
                 <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl">
                   <Phone className="size-5 text-warning shrink-0" />
                   <div>
-                    <div className="text-xs text-muted-foreground font-medium">Manager's Phone</div>
+                    <div className="text-xs text-muted-foreground font-normal">Manager's Phone</div>
                     {customer.contactPersonPhone ? (
                       <a href={`tel:${customer.contactPersonPhone}`} className="font-semibold text-primary hover:underline">
                         {customer.contactPersonPhone}
@@ -374,7 +355,7 @@ function DeliveryCustomerDetailsView() {
                 <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl">
                   <Fuel className="size-5 text-warning shrink-0" />
                   <div>
-                    <div className="text-xs text-muted-foreground font-medium">Tank Storage Capacity</div>
+                    <div className="text-xs text-muted-foreground font-normal">Tank Storage Capacity</div>
                     <div className="font-semibold text-foreground">{formatQty(customer.tankCapacity)} Litres</div>
                   </div>
                 </div>
@@ -382,7 +363,7 @@ function DeliveryCustomerDetailsView() {
                 <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl">
                   <Building2 className="size-5 text-warning shrink-0" />
                   <div>
-                    <div className="text-xs text-muted-foreground font-medium">Dispensing Pumps</div>
+                    <div className="text-xs text-muted-foreground font-normal">Dispensing Pumps</div>
                     <div className="font-semibold text-foreground">{customer.pumpCount || 1} Pumps</div>
                   </div>
                 </div>
@@ -433,7 +414,7 @@ function DeliveryCustomerDetailsView() {
                 <div className="flex items-start gap-3 p-3 bg-muted/30 rounded-xl">
                   <MapPin className="size-5 text-warning shrink-0 mt-0.5" />
                   <div>
-                    <div className="text-xs text-muted-foreground font-medium">Station Address</div>
+                    <div className="text-xs text-muted-foreground font-normal">Station Address</div>
                     <div className="font-semibold text-foreground">{customer.stationAddress || 'No station address specified'}</div>
                   </div>
                 </div>
@@ -442,7 +423,7 @@ function DeliveryCustomerDetailsView() {
                   <div className="flex items-start gap-3 p-3 bg-muted/30 rounded-xl">
                     <MapPin className="size-5 text-primary shrink-0 mt-0.5" />
                     <div>
-                      <div className="text-xs text-muted-foreground font-medium">Home Address</div>
+                      <div className="text-xs text-muted-foreground font-normal">Home Address</div>
                       <div className="font-semibold text-foreground">{customer.homeAddress || 'No home address specified'}</div>
                     </div>
                   </div>
@@ -450,7 +431,7 @@ function DeliveryCustomerDetailsView() {
                   <div className="flex items-start gap-3 p-3 bg-muted/30 rounded-xl">
                     <Building2 className="size-5 text-muted-foreground shrink-0 mt-0.5" />
                     <div>
-                      <div className="text-xs text-muted-foreground font-medium">Office Address</div>
+                      <div className="text-xs text-muted-foreground font-normal">Office Address</div>
                       <div className="font-semibold text-foreground">{customer.officeAddress || 'No office address specified'}</div>
                     </div>
                   </div>
@@ -473,17 +454,17 @@ function DeliveryCustomerDetailsView() {
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
               <div className="p-3 bg-muted/30 rounded-xl space-y-1">
-                <span className="text-xs text-muted-foreground font-medium">Bank Name</span>
+                <span className="text-xs text-muted-foreground font-normal">Bank Name</span>
                 <div className="font-semibold text-foreground">{customer.bankName || 'Not specified'}</div>
               </div>
 
               <div className="p-3 bg-muted/30 rounded-xl space-y-1">
-                <span className="text-xs text-muted-foreground font-medium">Account Number</span>
+                <span className="text-xs text-muted-foreground font-normal">Account Number</span>
                 <div className="font-semibold font-mono text-foreground">{customer.accountNumber || 'Not specified'}</div>
               </div>
 
               <div className="p-3 bg-muted/30 rounded-xl space-y-1">
-                <span className="text-xs text-muted-foreground font-medium">Account Name</span>
+                <span className="text-xs text-muted-foreground font-normal">Account Name</span>
                 <div className="font-semibold text-foreground">{customer.accountName || 'Not specified'}</div>
               </div>
             </CardContent>

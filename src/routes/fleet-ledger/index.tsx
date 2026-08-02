@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute } from '@tanstack/react-router'
 import { format, isWithinInterval } from 'date-fns'
 import { Plus, Pencil, Trash2, Search, Loader2 } from 'lucide-react'
@@ -74,21 +75,19 @@ function FleetLedgerPage() {
 
   return (
     <div className="animate-fade-in space-y-6">
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-        <div>
-          <p className={cn(MICRO, 'mb-1.5 text-muted-foreground')}>Transport</p>
-          <h1 className="text-xl font-semibold tracking-tight text-balance md:text-2xl">
-            Trucks Ledger
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Add, edit, and manage all truck expense and income entries.
-          </p>
-        </div>
-        <Button size="sm" onClick={() => setEditing('new')}>
+      <PageHeader
+      eyebrow="Transport"
+      title="Trucks Ledger"
+      description="Add, edit, and manage all truck expense and income entries."
+      actions={
+        <>
+          <Button size="sm" onClick={() => setEditing('new')}>
           <Plus data-icon="inline-start" />
           Add entry
-        </Button>
-      </div>
+          </Button>
+        </>
+      }
+    />
 
       {/* Summary cards are deliberately not rendered here — the Directory is
           where the per-truck money view lives. */}

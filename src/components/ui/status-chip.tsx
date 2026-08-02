@@ -16,7 +16,7 @@ import { cn } from "#/lib/utils"
  * Sits at 0.6rem by default; 0.65rem when it sits in a panel header rail.
  */
 const statusChipVariants = cva(
-  "inline-flex w-fit shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-0.5 tracking-[0.14em] whitespace-nowrap uppercase [&>svg]:size-3",
+  "inline-flex w-fit shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-0.5 whitespace-nowrap uppercase [&>svg]:size-3",
   {
     variants: {
       tone: {

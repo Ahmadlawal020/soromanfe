@@ -37,7 +37,7 @@ function FieldLabel({ className, ...props }: React.ComponentProps<"label">) {
     <label
       data-slot="field-label"
       className={cn(
-        "flex items-center gap-2 text-sm leading-none font-medium select-none",
+        "flex items-center gap-2 text-sm leading-none font-normal select-none",
         "group-data-[disabled=true]/field:opacity-50",
         "has-[[data-slot=field]]:rounded-lg has-[[data-slot=field]]:border has-[[data-slot=field]]:p-4",
         "has-[[data-slot=field]]:has-[[data-state=checked]]:border-primary/30 has-[[data-slot=field]]:has-[[data-state=checked]]:bg-primary/5",

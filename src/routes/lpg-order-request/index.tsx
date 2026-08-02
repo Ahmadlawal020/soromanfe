@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
@@ -76,21 +77,11 @@ function LpgOrderRequestPage() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-xl md:text-2xl font-semibold tracking-tight text-foreground flex items-center gap-2 text-balance">
-            <Flame className="size-7 text-primary" />
-            LPG Cooking Gas Order Requests
-          </h1>
-          <p className="text-muted-foreground text-sm">
-            Review and manage customer LPG cooking gas home delivery order requests
-          </p>
-        </div>
-        <Button variant="outline" size="sm" onClick={() => refetch()} className="gap-2 self-start sm:self-auto">
-          <RefreshCw className="size-4" />
-          Refresh
-        </Button>
-      </div>
+      <PageHeader
+      eyebrow="LPG Home Delivery"
+      title="LPG Cooking Gas Order Requests"
+      description="Review and manage customer LPG cooking gas home delivery order requests"
+    />
 
       <Card>
         <CardHeader className="border-b border-border p-4 sm:p-6">

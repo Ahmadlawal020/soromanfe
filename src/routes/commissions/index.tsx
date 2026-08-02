@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { StatCard } from '#/components/ui/stat-card'
 import { createFileRoute } from '@tanstack/react-router'
 import { Button } from '#/components/ui/button'
@@ -120,22 +121,16 @@ function CommissionsPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-xl md:text-2xl font-semibold tracking-tight text-foreground flex items-center gap-2 text-balance">
-            <DollarSign className="size-7 text-primary" />
-            Commissions
-          </h1>
-          <p className="text-muted-foreground text-sm">
-            Manage facilitator commissions per depot and product
-          </p>
-        </div>
-      </div>
+      <PageHeader
+      eyebrow="Finance"
+      title="Commissions"
+      description="Manage facilitator commissions per depot and product"
+    />
 
       {/* Tab Bar */}
       <div className="flex gap-1 p-1 bg-muted rounded-lg w-fit">
         <button
-          className={`px-4 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer ${
+          className={`px-4 py-2 text-sm font-normal rounded-md transition-colors cursor-pointer ${
  activeTab === 'commissions'
  ? 'bg-background text-foreground '
  : 'text-muted-foreground hover:text-foreground'
@@ -148,7 +143,7 @@ function CommissionsPage() {
           </span>
         </button>
         <button
-          className={`px-4 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer ${
+          className={`px-4 py-2 text-sm font-normal rounded-md transition-colors cursor-pointer ${
  activeTab === 'rates'
  ? 'bg-background text-foreground '
  : 'text-muted-foreground hover:text-foreground'
@@ -1160,7 +1155,7 @@ function RatesTab() {
             <div>
               <Label className="text-xs">Commission Rate (₦ per Litre)</Label>
               <div className="relative mt-1">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-mono font-medium">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-mono font-normal">
                   ₦
                 </span>
                 <CommaInput

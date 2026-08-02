@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import {
   Search, Plus, Package, Banknote, Droplets, TriangleAlert,
@@ -118,24 +119,25 @@ function PFIDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">PFI Tracking</h1>
-          <p className="text-sm text-muted-foreground">
-            One cargo batch each — what it cost, what you spent moving it, and what it sold for.
-          </p>
-        </div>
-        <div className="flex gap-2">
+      <PageHeader
+      eyebrow="Admin"
+      title="PFI Tracking"
+      description="One cargo batch each — what it cost, what you spent moving it, and what it sold for."
+      actions={
+        <>
+          <div className="flex gap-2">
           <Button variant="outline" onClick={() => downloadMasterReport(pfis)} disabled={pfis.length === 0}>
-            <Download data-icon="inline-start" />
-            Master report
+          <Download data-icon="inline-start" />
+          Master report
           </Button>
           <Button onClick={() => navigate({ to: '/pfi/form' })}>
-            <Plus data-icon="inline-start" />
-            New PFI
+          <Plus data-icon="inline-start" />
+          New PFI
           </Button>
-        </div>
-      </div>
+          </div>
+        </>
+      }
+    />
 
       <StatCardGrid count={4}>
         <StatCard
@@ -172,7 +174,7 @@ function PFIDashboard() {
         <div className="flex items-start gap-2.5 rounded-lg border border-destructive/25 bg-destructive/5 p-3">
           <TriangleAlert className="mt-0.5 size-4 shrink-0 text-destructive" />
           <p className="text-sm text-muted-foreground">
-            <span className="font-medium text-destructive">{naira(stats.deficitCost)}</span> across this
+            <span className="font-normal text-destructive">{naira(stats.deficitCost)}</span> across this
             portfolio was paid for product that never landed — cargo billed on the BL quantity that did
             not measure into the tank. It is already inside the loss figures, but nothing else names it.
           </p>
@@ -245,7 +247,7 @@ function PFIDashboard() {
                     >
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <span className="font-medium">{p.pfiNumber}</span>
+                          <span className="font-normal">{p.pfiNumber}</span>
                           <Badge variant={p.status === 'active' ? 'default' : 'secondary'} className="shrink-0">
                             {p.status === 'active' ? 'Active' : 'Finished'}
                           </Badge>

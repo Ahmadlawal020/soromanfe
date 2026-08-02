@@ -12,9 +12,9 @@ import { depotPhones, truckSuffix } from '#/lib/depot-contacts'
  * one surface in the app that ignores dark mode.
  */
 
-const LABEL = 'text-[9px] font-medium uppercase tracking-[0.08em] text-neutral-500'
+const LABEL = 'text-[9px] font-normal uppercase text-neutral-500'
 const VALUE = 'mt-0.5 text-[13px] font-semibold text-black'
-const HINT = 'text-[8px] uppercase tracking-[0.08em] text-neutral-300'
+const HINT = 'text-[8px] uppercase text-neutral-300'
 
 function Cell({
   label,
@@ -81,7 +81,7 @@ export function WaybillSheet({ data }: { data: Record<string, any> }) {
                 Soroman Energy
               </span>
             </div>
-            <p className="mt-1.5 text-[13px] font-bold text-[#007a55]">
+            <p className="mt-1.5 text-[13px] font-semibold text-[#007a55]">
               {data.location || '—'}
             </p>
           </div>
@@ -95,7 +95,7 @@ export function WaybillSheet({ data }: { data: Record<string, any> }) {
 
         {/* Banner */}
         <div className="mt-5 bg-[#00563c] px-4 py-2.5 text-center">
-          <p className="text-[13px] font-semibold tracking-[0.12em] text-white uppercase">
+          <p className="text-[13px] font-semibold text-white uppercase">
             Waybill &amp; Payment Receipt
           </p>
         </div>
@@ -136,7 +136,7 @@ export function WaybillSheet({ data }: { data: Record<string, any> }) {
                   {['S/N', 'Quantity', 'Ullage'].map((h) => (
                     <th
                       key={h}
-                      className="border border-neutral-300 px-2 py-1 text-left text-[9px] font-medium tracking-[0.08em] text-neutral-500 uppercase"
+                      className="border border-neutral-300 px-2 py-1 text-left text-[9px] font-normal text-neutral-500 uppercase"
                     >
                       {h}
                     </th>
@@ -146,7 +146,7 @@ export function WaybillSheet({ data }: { data: Record<string, any> }) {
               <tbody>
                 {[1, 2, 3, 4, 5].map((n) => (
                   <tr key={n}>
-                    <td className="border border-neutral-300 px-2 py-1.5 text-[11px] font-medium">
+                    <td className="border border-neutral-300 px-2 py-1.5 text-[11px] font-normal">
                       {n}
                     </td>
                     <td className="border border-neutral-300 px-2 py-1.5" />

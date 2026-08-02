@@ -75,7 +75,7 @@ function StatCard({
           {action}
         </div>
 
-        <div className="mt-5 text-xs font-medium tracking-[0.05em] uppercase text-muted-foreground">
+        <div className="mt-5 text-xs font-normal uppercase text-muted-foreground">
           {label}
         </div>
 
@@ -83,7 +83,7 @@ function StatCard({
             card rather than blow the grid column out. */}
         <div
           className={cn(
-            "text-[28px] leading-[1.05] font-bold tracking-[-0.02em] break-all tabular-nums",
+            "text-[28px] leading-[1.05] font-semibold tracking-[-0.02em] break-all tabular-nums",
             valueClassName ?? "text-foreground",
           )}
         >

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute } from '@tanstack/react-router'
 import { format } from 'date-fns'
 import {
@@ -208,24 +209,25 @@ function ExpensesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Expenses</h1>
-          <p className="text-sm text-muted-foreground">
-            Costs booked to a category. A PFI category is what attaches the line to a batch.
-          </p>
-        </div>
-        <div className="flex gap-2">
+      <PageHeader
+      eyebrow="Finance"
+      title="Expenses"
+      description="Costs booked to a category. A PFI category is what attaches the line to a batch."
+      actions={
+        <>
+          <div className="flex gap-2">
           <Button variant="outline" onClick={exportCsv} disabled={rows.length === 0}>
-            <Download data-icon="inline-start" />
-            Export CSV
+          <Download data-icon="inline-start" />
+          Export CSV
           </Button>
           <Button onClick={openNew}>
-            <Plus data-icon="inline-start" />
-            Record expense
+          <Plus data-icon="inline-start" />
+          Record expense
           </Button>
-        </div>
-      </div>
+          </div>
+        </>
+      }
+    />
 
       <StatCardGrid count={3}>
         <StatCard
@@ -321,7 +323,7 @@ function ExpensesPage() {
                     <TableCell className="hidden md:table-cell text-muted-foreground">{e.vendor || '—'}</TableCell>
                     <TableCell className="hidden lg:table-cell text-muted-foreground">{e.bank_paid_from || '—'}</TableCell>
                     <TableCell className="hidden lg:table-cell text-muted-foreground">{e.entered_by || '—'}</TableCell>
-                    <TableCell className="text-right font-medium tabular-nums">{naira(Number(e.amount))}</TableCell>
+                    <TableCell className="text-right font-normal tabular-nums">{naira(Number(e.amount))}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-0.5">
                         <Button variant="ghost" size="icon-sm" onClick={() => openEdit(e)} title="Edit">

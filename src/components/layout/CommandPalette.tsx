@@ -175,7 +175,7 @@ export default function CommandPalette({ open, onOpenChange }: CommandPalettePro
                     onMouseEnter={() => setSelectedIndex(index)}
                     className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs sm:text-sm text-left transition-colors cursor-pointer ${
  isSelected
- ? 'bg-primary text-primary-foreground font-medium '
+ ? 'bg-primary text-primary-foreground font-normal '
  : 'hover:bg-muted text-foreground'
  }`}
                   >
@@ -190,7 +190,7 @@ export default function CommandPalette({ open, onOpenChange }: CommandPalettePro
                         <Icon className="size-4" />
                       </div>
                       <div className="min-w-0 truncate">
-                        <div className="font-medium truncate">{item.title}</div>
+                        <div className="font-normal truncate">{item.title}</div>
                         <div
                           className={`text-[11px] truncate ${
  isSelected ? 'text-primary-foreground/80' : 'text-muted-foreground'

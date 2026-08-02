@@ -60,7 +60,7 @@ export function EditRecordDialog({
 
         <div className="space-y-4 py-2">
           <div className="space-y-1.5">
-            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em]">
+            <Label className="text-xs font-semibold text-muted-foreground uppercase">
               Allocation Code
             </Label>
             <div className="flex gap-2">
@@ -85,7 +85,7 @@ export function EditRecordDialog({
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em]">
+            <Label className="text-xs font-semibold text-muted-foreground uppercase">
               PFI
             </Label>
             <select
@@ -107,7 +107,7 @@ export function EditRecordDialog({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em]">
+              <Label className="text-xs font-semibold text-muted-foreground uppercase">
                 Depot
               </Label>
               <Input
@@ -118,7 +118,7 @@ export function EditRecordDialog({
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em]">
+              <Label className="text-xs font-semibold text-muted-foreground uppercase">
                 Date Loaded
               </Label>
               <Input
@@ -132,7 +132,7 @@ export function EditRecordDialog({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em]">
+              <Label className="text-xs font-semibold text-muted-foreground uppercase">
                 Destination / Location
               </Label>
               <Input
@@ -143,7 +143,7 @@ export function EditRecordDialog({
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em] flex items-center gap-1">
+              <Label className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1">
                 <DollarSign className="size-3.5" /> Rate (per litre)
               </Label>
               <Input

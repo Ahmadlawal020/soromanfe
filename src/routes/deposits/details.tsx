@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
+import { PageHeader } from '#/components/PageHeader'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '#/components/ui/card'
@@ -74,19 +75,11 @@ function DepositDetailPage() {
       <Breadcrumbs items={[{ label: 'Deposits', href: '/deposits' }, { label: 'Deposit Details' }]} />
 
       <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" onClick={handleBack}>
-            <ArrowLeft className="size-4" />
-          </Button>
-          <div>
-            <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">Deposit Details</h1>
-            <p className="text-muted-foreground">
-              {isPaystack
-                ? 'Paystack automated transaction details and customer information'
-                : 'Manual bank deposit details and customer information'}
-            </p>
-          </div>
-        </div>
+        <PageHeader
+      eyebrow="Finance"
+      title="Deposit Details"
+      description={`{isPaystack ? 'Paystack automated transaction details and customer information' : 'Manual bank deposit details and customer information'}`}
+    />
       </header>
 
       <Card className="card-hover">
@@ -104,11 +97,11 @@ function DepositDetailPage() {
                   <Badge variant="outline" className="font-mono text-xs">Ref: {deposit.reference}</Badge>
                 )}
                 {isPaystack ? (
-                  <Badge className="bg-muted/15 text-foreground dark:text-muted-foreground border-border/30 font-medium text-xs capitalize">
+                  <Badge className="bg-muted/15 text-foreground dark:text-muted-foreground border-border/30 font-normal text-xs capitalize">
                     Paystack {ps?.channel ? `(${String(ps.channel).replace(/_/g, ' ')})` : ''}
                   </Badge>
                 ) : (
-                  <Badge className="bg-warning/15 text-warning border-warning/30 font-medium text-xs">
+                  <Badge className="bg-warning/15 text-warning border-warning/30 font-normal text-xs">
                     Manual Bank Transfer
                   </Badge>
                 )}
@@ -142,7 +135,7 @@ function DepositDetailPage() {
           </CardHeader>
           <CardContent className="space-y-4 pt-6">
             <div>
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Date & Time</p>
+              <p className="text-xs text-muted-foreground font-normal uppercase">Date & Time</p>
               <p className="text-sm text-foreground mt-0.5 flex items-center gap-1.5">
                 <Clock className="size-3.5 text-muted-foreground" />
                 {deposit.createdAt
@@ -157,7 +150,7 @@ function DepositDetailPage() {
               </p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Transaction Type</p>
+              <p className="text-xs text-muted-foreground font-normal uppercase">Transaction Type</p>
               <div className="mt-1">
                 <Badge className="bg-success text-success-foreground gap-1">
                   <ArrowDownLeft className="size-3" /> Deposit (Credit)
@@ -165,21 +158,21 @@ function DepositDetailPage() {
               </div>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Payment Method</p>
-              <p className="text-sm text-foreground mt-0.5 flex items-center gap-1.5 font-medium">
+              <p className="text-xs text-muted-foreground font-normal uppercase">Payment Method</p>
+              <p className="text-sm text-foreground mt-0.5 flex items-center gap-1.5 font-normal">
                 <Landmark className="size-3.5 text-muted-foreground" />
                 {isPaystack ? 'Paystack Gateway' : 'Manual Bank Transfer'}
               </p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Reference</p>
+              <p className="text-xs text-muted-foreground font-normal uppercase">Reference</p>
               <p className="text-sm text-foreground mt-0.5 font-mono flex items-center gap-1.5">
                 <Hash className="size-3.5 text-muted-foreground" />
                 {deposit.reference || 'No reference provided'}
               </p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Recorded By</p>
+              <p className="text-xs text-muted-foreground font-normal uppercase">Recorded By</p>
               <p className="text-sm text-foreground mt-0.5 flex items-center gap-1.5">
                 <User className="size-3.5 text-muted-foreground" />
                 {deposit.recorderFirstName
@@ -204,21 +197,21 @@ function DepositDetailPage() {
           </CardHeader>
           <CardContent className="space-y-4 pt-6">
             <div>
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Customer Name</p>
+              <p className="text-xs text-muted-foreground font-normal uppercase">Customer Name</p>
               <p className="text-sm text-foreground mt-0.5 flex items-center gap-1.5">
                 <User className="size-3.5 text-muted-foreground" />
                 {deposit.customerName || 'Unknown Customer'}
               </p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Phone</p>
+              <p className="text-xs text-muted-foreground font-normal uppercase">Phone</p>
               <p className="text-sm text-foreground mt-0.5 flex items-center gap-1.5">
                 <Phone className="size-3.5 text-muted-foreground" />
                 {deposit.customerPhone || '—'}
               </p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Company</p>
+              <p className="text-xs text-muted-foreground font-normal uppercase">Company</p>
               <p className="text-sm text-foreground mt-0.5 flex items-center gap-1.5">
                 <Building2 className="size-3.5 text-muted-foreground" />
                 {deposit.customerCompanyName || '—'}
@@ -241,13 +234,13 @@ function DepositDetailPage() {
           </CardHeader>
           <CardContent className="space-y-4 pt-6">
             <div>
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Amount</p>
+              <p className="text-xs text-muted-foreground font-normal uppercase">Amount</p>
               <p className="text-2xl font-semibold mt-1 text-success tabular-nums">
                 +{formatCurrency(toNum(deposit.amount))}
               </p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Balance After</p>
+              <p className="text-xs text-muted-foreground font-normal uppercase">Balance After</p>
               <p className="text-lg font-semibold text-foreground mt-0.5 font-mono">
                 {formatCurrency(toNum(deposit.balanceAfter || 0))}
               </p>
@@ -269,11 +262,11 @@ function DepositDetailPage() {
           </CardHeader>
           <CardContent className="space-y-4 pt-6">
             <div>
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Deposit ID</p>
+              <p className="text-xs text-muted-foreground font-normal uppercase">Deposit ID</p>
               <p className="text-xs font-mono text-muted-foreground mt-0.5 truncate select-all">{deposit._id}</p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Last Updated</p>
+              <p className="text-xs text-muted-foreground font-normal uppercase">Last Updated</p>
               <p className="text-sm text-foreground mt-0.5 flex items-center gap-1.5">
                 <Clock className="size-3.5 text-muted-foreground" />
                 {deposit.updatedAt
@@ -332,7 +325,7 @@ function DepositDetailPage() {
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {/* Depositor / Payer Name */}
                 <div className="space-y-1">
-                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em] flex items-center gap-1.5">
+                  <p className="text-xs text-muted-foreground font-normal uppercase flex items-center gap-1.5">
                     <User className="size-3" /> Depositor / Payer Name
                   </p>
                   <p className="text-sm font-semibold text-foreground">
@@ -342,7 +335,7 @@ function DepositDetailPage() {
 
                 {/* Receiving Bank Name */}
                 <div className="space-y-1">
-                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em] flex items-center gap-1.5">
+                  <p className="text-xs text-muted-foreground font-normal uppercase flex items-center gap-1.5">
                     <Landmark className="size-3" /> Receiving Bank
                   </p>
                   <p className="text-sm font-semibold text-foreground">
@@ -352,7 +345,7 @@ function DepositDetailPage() {
 
                 {/* Receiving Account Name */}
                 <div className="space-y-1">
-                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em] flex items-center gap-1.5">
+                  <p className="text-xs text-muted-foreground font-normal uppercase flex items-center gap-1.5">
                     <User className="size-3" /> Receiving Account Name
                   </p>
                   <p className="text-sm font-semibold text-foreground">
@@ -362,7 +355,7 @@ function DepositDetailPage() {
 
                 {/* Receiving Account Number */}
                 <div className="space-y-1">
-                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em] flex items-center gap-1.5">
+                  <p className="text-xs text-muted-foreground font-normal uppercase flex items-center gap-1.5">
                     <CreditCard className="size-3" /> Receiving Account Number
                   </p>
                   <p className="text-sm font-mono font-semibold text-foreground">
@@ -372,7 +365,7 @@ function DepositDetailPage() {
 
                 {/* Payment Date / Paid At */}
                 <div className="space-y-1">
-                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em] flex items-center gap-1.5">
+                  <p className="text-xs text-muted-foreground font-normal uppercase flex items-center gap-1.5">
                     <Clock className="size-3" /> Payment Date
                   </p>
                   <p className="text-sm text-foreground">
@@ -398,7 +391,7 @@ function DepositDetailPage() {
 
                 {/* Channel / Source */}
                 <div className="space-y-1">
-                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em] flex items-center gap-1.5">
+                  <p className="text-xs text-muted-foreground font-normal uppercase flex items-center gap-1.5">
                     <ArrowRightLeft className="size-3" /> Payment Type
                   </p>
                   <Badge variant="outline" className="font-mono text-xs capitalize mt-0.5">
@@ -430,7 +423,7 @@ function DepositDetailPage() {
                 {/* Sender Name */}
                 {ps.senderName && (
                   <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em] flex items-center gap-1.5">
+                    <p className="text-xs text-muted-foreground font-normal uppercase flex items-center gap-1.5">
                       <Send className="size-3" /> Sender Name
                     </p>
                     <p className="text-sm font-semibold text-foreground">{String(ps.senderName)}</p>
@@ -440,7 +433,7 @@ function DepositDetailPage() {
                 {/* Sender Bank */}
                 {ps.senderBankName && (
                   <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em] flex items-center gap-1.5">
+                    <p className="text-xs text-muted-foreground font-normal uppercase flex items-center gap-1.5">
                       <Landmark className="size-3" /> Sender Bank
                     </p>
                     <p className="text-sm font-semibold text-foreground">{String(ps.senderBankName)}</p>
@@ -450,7 +443,7 @@ function DepositDetailPage() {
                 {/* Sender Account Number */}
                 {ps.senderAccountNumber && (
                   <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em] flex items-center gap-1.5">
+                    <p className="text-xs text-muted-foreground font-normal uppercase flex items-center gap-1.5">
                       <CreditCard className="size-3" /> Sender Account
                     </p>
                     <p className="text-sm font-mono font-semibold text-foreground">
@@ -464,7 +457,7 @@ function DepositDetailPage() {
                 {/* Receiver Bank */}
                 {ps.receiverBankName && (
                   <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em] flex items-center gap-1.5">
+                    <p className="text-xs text-muted-foreground font-normal uppercase flex items-center gap-1.5">
                       <Landmark className="size-3" /> Receiver Bank
                     </p>
                     <p className="text-sm font-semibold text-foreground">{String(ps.receiverBankName)}</p>
@@ -474,7 +467,7 @@ function DepositDetailPage() {
                 {/* Receiver Account Number */}
                 {ps.receiverAccountNumber && (
                   <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em] flex items-center gap-1.5">
+                    <p className="text-xs text-muted-foreground font-normal uppercase flex items-center gap-1.5">
                       <CreditCard className="size-3" /> Receiver Account
                     </p>
                     <p className="text-sm font-mono font-semibold text-foreground">{String(ps.receiverAccountNumber)}</p>
@@ -484,7 +477,7 @@ function DepositDetailPage() {
                 {/* Receiver Account Name */}
                 {ps.receiverAccountName && (
                   <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em] flex items-center gap-1.5">
+                    <p className="text-xs text-muted-foreground font-normal uppercase flex items-center gap-1.5">
                       <User className="size-3" /> Receiver Account Name
                     </p>
                     <p className="text-sm font-semibold text-foreground">{String(ps.receiverAccountName)}</p>
@@ -494,7 +487,7 @@ function DepositDetailPage() {
                 {/* Channel */}
                 {ps.channel && (
                   <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em] flex items-center gap-1.5">
+                    <p className="text-xs text-muted-foreground font-normal uppercase flex items-center gap-1.5">
                       <ArrowRightLeft className="size-3" /> Payment Channel
                     </p>
                     <Badge variant="outline" className="font-mono text-xs capitalize mt-0.5">
@@ -506,7 +499,7 @@ function DepositDetailPage() {
                 {/* Currency */}
                 {ps.currency && (
                   <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em] flex items-center gap-1.5">
+                    <p className="text-xs text-muted-foreground font-normal uppercase flex items-center gap-1.5">
                       <Banknote className="size-3" /> Currency
                     </p>
                     <p className="text-sm font-semibold text-foreground">{String(ps.currency)}</p>
@@ -516,7 +509,7 @@ function DepositDetailPage() {
                 {/* Fees */}
                 {ps.fees != null && (
                   <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em] flex items-center gap-1.5">
+                    <p className="text-xs text-muted-foreground font-normal uppercase flex items-center gap-1.5">
                       <DollarSign className="size-3" /> Paystack Fees
                     </p>
                     <p className="text-sm font-semibold text-foreground">{formatCurrency(Number(ps.fees))}</p>
@@ -526,7 +519,7 @@ function DepositDetailPage() {
                 {/* Gateway Response */}
                 {ps.gatewayResponse && (
                   <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em] flex items-center gap-1.5">
+                    <p className="text-xs text-muted-foreground font-normal uppercase flex items-center gap-1.5">
                       <ShieldCheck className="size-3" /> Gateway Response
                     </p>
                     <Badge
@@ -544,7 +537,7 @@ function DepositDetailPage() {
                 {/* Transaction Status */}
                 {ps.status && (
                   <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em] flex items-center gap-1.5">
+                    <p className="text-xs text-muted-foreground font-normal uppercase flex items-center gap-1.5">
                       <Info className="size-3" /> Transaction Status
                     </p>
                     <Badge
@@ -562,7 +555,7 @@ function DepositDetailPage() {
                 {/* Sender Country */}
                 {ps.senderCountry && (
                   <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em] flex items-center gap-1.5">
+                    <p className="text-xs text-muted-foreground font-normal uppercase flex items-center gap-1.5">
                       <Globe className="size-3" /> Sender Country
                     </p>
                     <p className="text-sm font-semibold text-foreground">{String(ps.senderCountry)}</p>
@@ -572,7 +565,7 @@ function DepositDetailPage() {
                 {/* Sender Narration */}
                 {ps.senderNarration && (
                   <div className="space-y-1 sm:col-span-2 lg:col-span-3">
-                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em] flex items-center gap-1.5">
+                    <p className="text-xs text-muted-foreground font-normal uppercase flex items-center gap-1.5">
                       <FileText className="size-3" /> Sender Narration
                     </p>
                     <p className="text-sm text-foreground">{String(ps.senderNarration)}</p>
@@ -582,7 +575,7 @@ function DepositDetailPage() {
                 {/* Paystack Transaction ID */}
                 {ps.transactionId && (
                   <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em] flex items-center gap-1.5">
+                    <p className="text-xs text-muted-foreground font-normal uppercase flex items-center gap-1.5">
                       <Hash className="size-3" /> Paystack Transaction ID
                     </p>
                     <p className="text-xs font-mono text-muted-foreground select-all">{String(ps.transactionId)}</p>
@@ -592,7 +585,7 @@ function DepositDetailPage() {
                 {/* Paystack Customer Code */}
                 {ps.paystackCustomerCode && (
                   <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em] flex items-center gap-1.5">
+                    <p className="text-xs text-muted-foreground font-normal uppercase flex items-center gap-1.5">
                       <Hash className="size-3" /> Paystack Customer Code
                     </p>
                     <p className="text-xs font-mono text-muted-foreground select-all">{String(ps.paystackCustomerCode)}</p>
@@ -602,7 +595,7 @@ function DepositDetailPage() {
                 {/* Paid At */}
                 {ps.paidAt && (
                   <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em] flex items-center gap-1.5">
+                    <p className="text-xs text-muted-foreground font-normal uppercase flex items-center gap-1.5">
                       <Clock className="size-3" /> Paid At
                     </p>
                     <p className="text-sm text-foreground">
@@ -620,7 +613,7 @@ function DepositDetailPage() {
                 {/* IP Address */}
                 {ps.ipAddress && (
                   <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em] flex items-center gap-1.5">
+                    <p className="text-xs text-muted-foreground font-normal uppercase flex items-center gap-1.5">
                       <Globe className="size-3" /> IP Address
                     </p>
                     <p className="text-xs font-mono text-muted-foreground select-all">{String(ps.ipAddress)}</p>
@@ -630,7 +623,7 @@ function DepositDetailPage() {
                 {/* Domain */}
                 {ps.domain && (
                   <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em] flex items-center gap-1.5">
+                    <p className="text-xs text-muted-foreground font-normal uppercase flex items-center gap-1.5">
                       <Info className="size-3" /> Domain
                     </p>
                     <Badge variant="outline" className="text-xs capitalize">{String(ps.domain)}</Badge>
