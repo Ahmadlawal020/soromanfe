@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate, useLocation } from '@tanstack/react-router'
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '#/components/ui/select'
-import { ArrowLeft, Warehouse, MapPin, Activity, CheckCircle, Loader2, AlertCircle, Trash2, Plus, Layers, Users, Search, X, UserCheck } from 'lucide-react'
+import { Warehouse, MapPin, Activity, CheckCircle, Loader2, AlertCircle, Trash2, Plus, Layers, Users, Search, X, UserCheck } from 'lucide-react'
 import type { DepotItem } from './index'
 import { useCreateDepot, useUpdateDepot, useDepotDetails } from '#/lib/hooks/useDepots'
 import { useProductList } from '#/lib/hooks/useProducts'
@@ -326,19 +327,16 @@ function DepotForm() {
 
   return (
     <div className="space-y-6">
-      <header className="flex items-center justify-between">
-        <div>
-          <Button variant="ghost" size="sm" onClick={() => navigate({ to: '/depots/' as any })} className="mb-2"><ArrowLeft className="size-4 mr-2" />Back to Depots</Button>
-          <h1 className="text-xl md:text-2xl font-semibold tracking-tight text-balance">{isEdit ? 'Edit Depot' : 'Register New Depot'}</h1>
-          <p className="text-muted-foreground">{isEdit ? 'Modify details of this operational logistics hub' : 'Fill in the details to add a new hub to the logistics network'}</p>
-          {errors.form && <p className="text-sm text-destructive mt-1 flex items-center gap-1.5"><AlertCircle className="size-3.5" />{errors.form}</p>}
-        </div>
-      </header>
+      <PageHeader
+      eyebrow="Operations"
+      title={isEdit ? 'Edit Depot' : 'Register New Depot'}
+      description={isEdit ? 'Modify details of this operational logistics hub' : 'Fill in the details to add a new hub to the logistics network'}
+    />
 
       <form onSubmit={handleSubmit} noValidate className="space-y-6">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-4 border rounded-lg p-4">
-            <div className="flex items-center space-x-2"><Warehouse className="size-5 text-primary" /><h2 className="text-lg font-medium">Depot Identity</h2></div>
+            <div className="flex items-center space-x-2"><Warehouse className="size-5 text-primary" /><h2 className="text-lg font-normal">Depot Identity</h2></div>
             <div className="space-y-3">
               <div><Label>Depot / Hub Name*</Label><Input value={formData.name} onChange={(e) => handleInputChange('name', e.target.value)} placeholder="e.g. Lagos Port Depot" className={errors.name ? 'border-destructive' : ''} />{errors.name && <p className="text-sm text-destructive mt-1">{errors.name}</p>}</div>
               <div><Label>Depot Code*</Label><Input value={formData.code} onChange={(e) => handleInputChange('code', e.target.value)} placeholder="e.g. DP-LOS-01" className={errors.code ? 'border-destructive' : ''} />{errors.code && <p className="text-sm text-destructive mt-1">{errors.code}</p>}</div>
@@ -347,7 +345,7 @@ function DepotForm() {
           </div>
 
           <div className="space-y-4 border rounded-lg p-4">
-            <div className="flex items-center space-x-2"><MapPin className="size-5 text-primary" /><h2 className="text-lg font-medium">Location Details</h2></div>
+            <div className="flex items-center space-x-2"><MapPin className="size-5 text-primary" /><h2 className="text-lg font-normal">Location Details</h2></div>
             <div className="space-y-3">
               <div>
                 <Label>Physical Address*</Label>
@@ -440,7 +438,7 @@ function DepotForm() {
           </div>
 
           <div className="space-y-4 border rounded-lg p-4">
-            <div className="flex items-center space-x-2"><Activity className="size-5 text-primary" /><h2 className="text-lg font-medium">Hub Status</h2></div>
+            <div className="flex items-center space-x-2"><Activity className="size-5 text-primary" /><h2 className="text-lg font-normal">Hub Status</h2></div>
             <div className="space-y-3">
               <div>
                 <Label>Hub Status</Label>
@@ -463,7 +461,7 @@ function DepotForm() {
           </div>
 
           <div className="space-y-4 border rounded-lg p-4">
-            <div className="flex items-center space-x-2"><Users className="size-5 text-primary" /><h2 className="text-lg font-medium">Assign Staff</h2></div>
+            <div className="flex items-center space-x-2"><Users className="size-5 text-primary" /><h2 className="text-lg font-normal">Assign Staff</h2></div>
             <div className="space-y-3">
               {selectedStaffIds.length > 0 && (
                 <div className="space-y-2">
@@ -473,7 +471,7 @@ function DepotForm() {
                       const staff = getStaffDetails(staffId)
                       return (
                         <div key={staffId} className="flex items-center gap-2 bg-secondary px-3 py-1 rounded-full text-sm">
-                          <div className="size-6 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-semibold text-primary">
+                          <div className="size-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-semibold text-primary">
                             {staff ? (staff.full_name?.charAt(0) || '?') : '?'}
                           </div>
                           <span>{staff?.full_name || 'Unknown'}</span>
@@ -511,7 +509,7 @@ function DepotForm() {
                             {staff.full_name?.charAt(0) || '?'}
                           </div>
                           <div className="ml-4 space-y-1">
-                            <p className="text-sm font-medium leading-none">{staff.full_name}</p>
+                            <p className="text-sm font-normal leading-none">{staff.full_name}</p>
                             <p className="text-sm text-muted-foreground">{staff.email}</p>
                           </div>
                           {isSelected && (
@@ -535,7 +533,7 @@ function DepotForm() {
           <div className="flex items-center space-x-2 border-b pb-3">
             <Layers className="size-5 text-primary" />
             <div>
-              <h2 className="text-lg font-medium">Product Holding Capacities*</h2>
+              <h2 className="text-lg font-normal">Product Holding Capacities*</h2>
               <p className="text-xs text-muted-foreground">Map products directly from the database to their storage capacities at this depot (at least 1 required)</p>
               {errors.productCapacities && <p className="text-sm text-destructive flex items-center gap-1.5 mt-1.5"><AlertCircle className="size-3.5" />{errors.productCapacities}</p>}
             </div>

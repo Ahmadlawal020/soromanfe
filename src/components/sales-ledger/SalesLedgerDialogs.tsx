@@ -57,8 +57,6 @@ export const bankStringToId = (bankStr: string): string => {
 
 // Helpers (imported from lib/sales-ledger-utils)
 
-
-
 // ═══════════════════════════════════════════════════════════════════════════
 // Types
 // ═══════════════════════════════════════════════════════════════════════════
@@ -348,7 +346,7 @@ export function RecordPaymentDialog({
 
         <div className="space-y-4 py-2">
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-foreground flex items-center gap-1.5">
+            <Label className="text-sm font-normal text-foreground flex items-center gap-1.5">
               <Truck className="size-4 text-muted-foreground" /> Select Loaded Truck <span className="text-destructive">*</span>
             </Label>
             <select
@@ -382,11 +380,11 @@ export function RecordPaymentDialog({
                 </div>
                 <div>
                   <span className="text-muted-foreground text-xs">Depot:</span>{' '}
-                  <span className="font-medium text-foreground">{depot || '—'}</span>
+                  <span className="font-normal text-foreground">{depot || '—'}</span>
                 </div>
                 <div>
                   <span className="text-muted-foreground text-xs">Date Loaded:</span>{' '}
-                  <span className="font-medium text-foreground">
+                  <span className="font-normal text-foreground">
                     {dateLoaded ? (() => { try { return format(parseISO(dateLoaded), 'dd MMM yyyy') } catch { return dateLoaded } })() : '—'}
                   </span>
                 </div>
@@ -396,7 +394,7 @@ export function RecordPaymentDialog({
 
           {truckNumber && tripCodes.length > 0 && (
             <div className="space-y-1.5">
-              <Label className="text-sm font-medium text-foreground flex items-center gap-1.5">
+              <Label className="text-sm font-normal text-foreground flex items-center gap-1.5">
                 <Tag className="size-3.5 text-muted-foreground" /> Allocation Code
               </Label>
               <select
@@ -416,7 +414,7 @@ export function RecordPaymentDialog({
           {truckNumber && (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em]">
+                <p className="text-xs font-semibold text-muted-foreground uppercase">
                   Customer ({saleRows.length})
                 </p>
                 <Button type="button" variant="outline" size="sm" className="gap-1.5 text-xs h-8" onClick={addSaleRow}>
@@ -432,10 +430,10 @@ export function RecordPaymentDialog({
                 return (
                   <div key={row.uid} className={`border rounded-lg p-3 space-y-3 relative ${hasError ? 'border-destructive/40 bg-destructive/30' : isFS ? 'border-warning/40 bg-warning/30' : 'border-border bg-muted/50'}`}>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em] flex items-center gap-1.5">
+                      <span className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1.5">
                         {isFS ? <Fuel className="size-3 text-warning" /> : null}
                         Customer #{idx + 1}
-                        {isFS && <span className="ml-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-warning/10 text-warning border border-warning/40 normal-case tracking-normal">Filling Station</span>}
+                        {isFS && <span className="ml-1 px-1.5 py-0.5 rounded text-xs font-semibold bg-warning/10 text-warning border border-warning/40 normal-case tracking-normal">Filling Station</span>}
                       </span>
                       {saleRows.length > 1 && (
                         <button type="button" onClick={() => removeSaleRow(row.uid)} className="text-muted-foreground hover:text-destructive transition-colors p-0.5 rounded duration-250 ease-luxe" title="Remove row">
@@ -463,12 +461,12 @@ export function RecordPaymentDialog({
                             <option key={c._id || c.id} value={c._id || c.id || ''}>{c.name}</option>
                           ))}
                         </select>
-                        {rowErrors[row.uid]?.customer && <p className="text-[11px] text-destructive">{rowErrors[row.uid].customer}</p>}
+                        {rowErrors[row.uid]?.customer && <p className="text-xs text-destructive">{rowErrors[row.uid].customer}</p>}
                       </div>
                       <div className="space-y-1">
                         <Label className="text-xs text-muted-foreground">Destination <span className="text-destructive">*</span></Label>
                         <Input placeholder="e.g. Kano, Abuja…" className={`h-9 text-sm ${rowErrors[row.uid]?.location ? 'border-destructive bg-destructive/10' : ''}`} value={row.location} onChange={e => updateSaleRow(row.uid, 'location', e.target.value)} />
-                        {rowErrors[row.uid]?.location && <p className="text-[11px] text-destructive">{rowErrors[row.uid].location}</p>}
+                        {rowErrors[row.uid]?.location && <p className="text-xs text-destructive">{rowErrors[row.uid].location}</p>}
                       </div>
                       <div className="space-y-1">
                         <Label className="text-xs text-muted-foreground">Quantity (L)</Label>
@@ -491,10 +489,10 @@ export function RecordPaymentDialog({
                           <div className="space-y-1">
                             <Label className="text-xs text-muted-foreground flex items-center gap-1">
                               Rate (₦/L) <span className="text-destructive">*</span>
-                              {row.rateLocked && <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-warning/10 text-warning border border-warning/40"><FileText className="size-2.5" /> Locked</span>}
+                              {row.rateLocked && <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs font-semibold bg-warning/10 text-warning border border-warning/40"><FileText className="size-2.5" /> Locked</span>}
                             </Label>
                             <Input type="text" inputMode="decimal" placeholder="e.g. 1,210" className={`h-9 text-sm ${row.rateLocked ? 'bg-warning/10 text-warning font-semibold cursor-not-allowed' : rowErrors[row.uid]?.rate ? 'border-destructive bg-destructive/10' : ''}`} value={row.rate} readOnly={row.rateLocked} onChange={e => updateSaleRow(row.uid, 'rate', e.target.value)} />
-                            {rowErrors[row.uid]?.rate && <p className="text-[11px] text-destructive">{rowErrors[row.uid].rate}</p>}
+                            {rowErrors[row.uid]?.rate && <p className="text-xs text-destructive">{rowErrors[row.uid].rate}</p>}
                           </div>
                           <div className="space-y-1">
                             <Label className="text-xs text-muted-foreground">Expected (₦)</Label>
@@ -633,11 +631,11 @@ export function QuickPaymentDialog({ open, onOpenChange, target, customerMap: _c
             <div className="bg-muted border border-border rounded-lg p-3 text-sm space-y-2">
               <div className="grid grid-cols-2 gap-3 pb-2 border-b border-dashed border-border">
                 <div>
-                  <p className="text-xs text-muted-foreground font-medium">Expected</p>
+                  <p className="text-xs text-muted-foreground font-normal">Expected</p>
                   <p className="font-semibold text-foreground mt-0.5">{target.expected > 0 ? fmt(target.expected) : '—'}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground font-medium">Current Balance</p>
+                  <p className="text-xs text-muted-foreground font-normal">Current Balance</p>
                   <p className={`font-semibold mt-0.5 ${target.balance > 0 ? 'text-destructive' : 'text-accent'}`}>
                     {target.expected > 0 ? (target.balance > 0 ? fmt(target.balance) : 'Fully Paid') : '—'}
                   </p>
@@ -650,7 +648,7 @@ export function QuickPaymentDialog({ open, onOpenChange, target, customerMap: _c
                     <p className="font-semibold text-muted-foreground mt-0.5">{fmt(amountTyped)}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground font-medium">New Balance</p>
+                    <p className="text-xs text-muted-foreground font-normal">New Balance</p>
                     <p className={`font-semibold mt-0.5 ${remainingBalance === 0 ? 'text-accent' : remainingBalance > 0 ? 'text-destructive' : 'text-muted-foreground'}`}>
                       {remainingBalance === 0 ? 'Fully Settled' : remainingBalance > 0 ? fmt(remainingBalance) : `+${fmt(Math.abs(remainingBalance))} Overpaid`}
                     </p>
@@ -681,7 +679,6 @@ export function QuickPaymentDialog({ open, onOpenChange, target, customerMap: _c
               <Input value={form.phone_number} onChange={e => setForm(prev => ({ ...prev, phone_number: e.target.value }))} />
             </div>
           </div>
-
 
         </div>
 

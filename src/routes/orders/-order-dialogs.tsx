@@ -18,7 +18,7 @@ import { OrderStatusBadge, PaymentBadge } from './-order-status'
 function Row({ label, value }: { label: string; value?: React.ReactNode }) {
   return (
     <div className="min-w-0">
-      <p className={cn(MICRO, 'text-[0.6rem] text-muted-foreground')}>{label}</p>
+      <p className={cn(MICRO, 'text-xs text-muted-foreground')}>{label}</p>
       <p className="mt-1 truncate text-sm">{value ?? '—'}</p>
     </div>
   )
@@ -211,7 +211,7 @@ export function OrderEditDialog({
           </Button>
         </DialogFooter>
         {!changed && (
-          <p className="text-right text-[0.65rem] text-muted-foreground/70">
+          <p className="text-right text-xs text-muted-foreground/70">
             Nothing changed yet
           </p>
         )}

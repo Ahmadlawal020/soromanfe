@@ -51,12 +51,12 @@ export function SalesLedgerDetails() {
   const customers: DeliveryCustomer[] = useMemo(() => {
     if (!rawCustomers) return []
     if (Array.isArray(rawCustomers)) return rawCustomers
-    return rawCustomers.customers || rawCustomers.data || []
+    return rawCustomers.customers || []
   }, [rawCustomers])
   const pfis: Pfi[] = useMemo(() => {
     if (!rawPfis) return []
     if (Array.isArray(rawPfis)) return rawPfis
-    return rawPfis.pfis || rawPfis.data || []
+    return rawPfis.pfis || []
   }, [rawPfis])
 
   // ── Maps ────────────────────────────────────────────────────────────────
@@ -216,7 +216,7 @@ export function SalesLedgerDetails() {
         <nav className="flex items-center gap-1.5 text-sm">
           <button
             onClick={() => navigate({ to: '/sales-ledger' })}
-            className="text-muted-foreground hover:text-foreground font-medium transition-colors duration-250 ease-luxe"
+            className="text-muted-foreground hover:text-foreground font-normal transition-colors duration-250 ease-luxe"
           >
             Sales Ledger
           </button>
@@ -225,7 +225,7 @@ export function SalesLedgerDetails() {
           {targetGroup.code && (
             <>
               <ChevronRight className="size-3.5 text-muted-foreground/40" />
-              <span className="text-foreground dark:text-muted-foreground font-medium uppercase text-xs">{targetGroup.code}</span>
+              <span className="text-foreground dark:text-muted-foreground font-normal uppercase text-xs">{targetGroup.code}</span>
             </>
           )}
         </nav>
@@ -267,7 +267,7 @@ export function SalesLedgerDetails() {
                   </Badge>
                 ) : null}
               </div>
-              <p className="text-muted-foreground text-sm mt-0.5 uppercase font-medium">
+              <p className="text-muted-foreground text-sm mt-0.5 uppercase font-normal">
                 {cycleGroups.map(g => g.customerName || 'Unassigned').join(', ') || 'Unassigned'} · {targetGroup.location || '—'}
               </p>
             </div>
@@ -303,11 +303,11 @@ export function SalesLedgerDetails() {
         <Card className="bg-card border-border">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground font-medium">Quantity Loaded</div>
+              <div className="text-xs text-muted-foreground font-normal">Quantity Loaded</div>
               <div className="text-xl font-semibold text-foreground mt-0.5 tabular-nums">
                 {targetGroup.quantity > 0 ? `${fmtQty(targetGroup.quantity)} L` : '—'}
               </div>
-              <div className="text-[11px] text-muted-foreground mt-0.5">
+              <div className="text-xs text-muted-foreground mt-0.5">
                 Rate: {targetGroup.rate > 0 ? fmt(targetGroup.rate) : '—'}
               </div>
             </div>
@@ -320,11 +320,11 @@ export function SalesLedgerDetails() {
         <Card className="bg-card border-border">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground font-medium">Expected Revenue</div>
+              <div className="text-xs text-muted-foreground font-normal">Expected Revenue</div>
               <div className="text-xl font-semibold text-foreground mt-0.5 tabular-nums">
                 {targetGroup.expected > 0 ? fmt(targetGroup.expected) : '—'}
               </div>
-              <div className="text-[11px] text-muted-foreground mt-0.5">
+              <div className="text-xs text-muted-foreground mt-0.5">
                 Qty × Rate
               </div>
             </div>
@@ -341,7 +341,7 @@ export function SalesLedgerDetails() {
               <div className="text-xl font-semibold text-accent mt-0.5 tabular-nums">
                 {fmt(targetGroup.totalPaid)}
               </div>
-              <div className="text-[11px] text-muted-foreground mt-0.5">
+              <div className="text-xs text-muted-foreground mt-0.5">
                 {targetGroup.payments.length} payment{targetGroup.payments.length !== 1 ? 's' : ''}
               </div>
             </div>
@@ -362,7 +362,7 @@ export function SalesLedgerDetails() {
                   ? (targetGroup.balance === 0 ? '₦0.00' : targetGroup.balance > 0 ? fmt(targetGroup.balance) : `+${fmt(Math.abs(targetGroup.balance))}`)
                   : '₦0.00'}
               </div>
-              <div className="text-[11px] text-muted-foreground mt-0.5">
+              <div className="text-xs text-muted-foreground mt-0.5">
                 {targetGroup.balance === 0 ? 'Fully Settled' : targetGroup.balance > 0 ? 'Outstanding' : 'Overpaid'}
               </div>
             </div>
@@ -417,7 +417,7 @@ export function SalesLedgerDetails() {
                   <div key={i} className="flex items-center gap-3 p-3 bg-muted/60 rounded-xl border border-border">
                     {item.icon}
                     <div className="min-w-0">
-                      <div className="text-[11px] text-muted-foreground font-medium">{item.label}</div>
+                      <div className="text-xs text-muted-foreground font-normal">{item.label}</div>
                       <div className="font-semibold text-foreground text-sm truncate uppercase">{item.value}</div>
                     </div>
                   </div>
@@ -474,8 +474,8 @@ export function SalesLedgerDetails() {
 
                           return (
                             <TableRow key={payment._id || payment.id || idx} className="hover:bg-muted/50 border-b border-border transition-colors duration-250 ease-luxe">
-                              <TableCell className="text-muted-foreground text-center font-medium">{idx + 1}</TableCell>
-                              <TableCell className="font-medium text-foreground whitespace-nowrap">
+                              <TableCell className="text-muted-foreground text-center font-normal">{idx + 1}</TableCell>
+                              <TableCell className="font-normal text-foreground whitespace-nowrap">
                                 {safeFormatDate(payment.dateOfPayment)}
                               </TableCell>
                               <TableCell className="text-right font-semibold text-accent whitespace-nowrap tabular-nums">
@@ -484,11 +484,11 @@ export function SalesLedgerDetails() {
                               <TableCell className={`text-right font-semibold whitespace-nowrap tabular-nums ${balanceAfter > 0 ? 'text-destructive' : balanceAfter < 0 ? 'text-muted-foreground' : targetGroup.expected > 0 ? 'text-accent' : 'text-muted-foreground'}`}>
                                 {targetGroup.expected > 0 ? (balanceAfter === 0 ? '₦0.00' : balanceAfter > 0 ? fmt(balanceAfter) : `+${fmt(Math.abs(balanceAfter))}`) : '—'}
                               </TableCell>
-                              <TableCell className="text-foreground font-medium whitespace-nowrap">
+                              <TableCell className="text-foreground font-normal whitespace-nowrap">
                                 {payment.payerName ? (
                                   <div>
                                     <p className="uppercase">{payment.payerName}</p>
-                                    {payment.phoneNumber && <p className="text-[11px] text-muted-foreground">{payment.phoneNumber}</p>}
+                                    {payment.phoneNumber && <p className="text-xs text-muted-foreground">{payment.phoneNumber}</p>}
                                   </div>
                                 ) : payment.phoneNumber ? (
                                   <span className="text-muted-foreground">{payment.phoneNumber}</span>
@@ -498,7 +498,7 @@ export function SalesLedgerDetails() {
                                 {bankAcct ? (
                                   <div>
                                     <p className="font-semibold text-foreground">{bankAcct.account_name}</p>
-                                    <p className="text-[11px] text-muted-foreground">{bankAcct.bank_name} ({bankAcct.account_number})</p>
+                                    <p className="text-xs text-muted-foreground">{bankAcct.bank_name} ({bankAcct.account_number})</p>
                                   </div>
                                 ) : payment.bank ? (
                                   <span className="text-xs text-muted-foreground">{payment.bank}</span>
@@ -580,11 +580,11 @@ export function SalesLedgerDetails() {
                           {cg.customerName || 'Unassigned Customer'}
                         </span>
                         {cg.isFillingStation ? (
-                          <Badge className="text-[10px] bg-warning/20 text-warning border-warning/30 px-1.5 py-0">
+                          <Badge className="text-xs bg-warning/20 text-warning border-warning/30 px-1.5 py-0">
                             FS
                           </Badge>
                         ) : (
-                          <Badge variant="outline" className="text-[10px] text-muted-foreground border-border px-1.5 py-0">
+                          <Badge variant="outline" className="text-xs text-muted-foreground border-border px-1.5 py-0">
                             Normal
                           </Badge>
                         )}
@@ -592,17 +592,17 @@ export function SalesLedgerDetails() {
 
                       <div className="grid grid-cols-2 gap-2 text-xs pt-1 border-t border-border">
                         <div>
-                          <span className="text-muted-foreground font-medium">Qty:</span>{' '}
+                          <span className="text-muted-foreground font-normal">Qty:</span>{' '}
                           <strong className="text-foreground">{cg.quantity > 0 ? `${fmtQty(cg.quantity)} L` : '—'}</strong>
                         </div>
                         <div>
-                          <span className="text-muted-foreground font-medium">Dest:</span>{' '}
+                          <span className="text-muted-foreground font-normal">Dest:</span>{' '}
                           <strong className="text-foreground uppercase">{cg.location || '—'}</strong>
                         </div>
                       </div>
 
                       {(cgCustObj?.phoneNumber || cgCustObj?.contactPersonPhone) && (
-                        <div className="text-[11px] text-muted-foreground flex items-center gap-1">
+                        <div className="text-xs text-muted-foreground flex items-center gap-1">
                           <Phone className="size-2.5 text-muted-foreground" />
                           {cgCustObj.contactPersonPhone || cgCustObj.phoneNumber}
                         </div>
@@ -630,7 +630,7 @@ export function SalesLedgerDetails() {
                 { label: 'Total Paid', value: fmt(targetGroup.totalPaid), className: 'text-accent font-semibold' },
               ].map((row, i) => (
                 <div key={i} className="flex justify-between py-1 border-b border-border">
-                  <span className="text-muted-foreground font-medium">{row.label}</span>
+                  <span className="text-muted-foreground font-normal">{row.label}</span>
                   <span className={`font-${row.bold ? 'bold' : 'semibold'} text-foreground ${row.className || ''}`}>{row.value}</span>
                 </div>
               ))}

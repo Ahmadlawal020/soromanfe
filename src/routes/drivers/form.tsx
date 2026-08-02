@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '#/components/ui/select'
-import { ArrowLeft, Contact, CheckCircle, Loader2, AlertCircle, Truck, FileText } from 'lucide-react'
+import { Contact, CheckCircle, Loader2, Truck, FileText } from 'lucide-react'
 import { useCreateDriver, useUpdateDriver } from '#/lib/hooks/useDrivers'
 
 export const Route = createFileRoute('/drivers/form')({
@@ -146,16 +147,11 @@ function DriverForm() {
 
   return (
     <div className="space-y-6">
-      <header className="flex items-center justify-between">
-        <div>
-          <Button variant="ghost" size="sm" onClick={() => navigate({ to: '/drivers/' as any })} className="mb-2">
-            <ArrowLeft className="size-4 mr-2" />Back to Drivers
-          </Button>
-          <h1 className="text-xl md:text-2xl font-semibold tracking-tight text-balance">{isEdit ? 'Edit Driver' : 'Register New Driver'}</h1>
-          <p className="text-muted-foreground">{isEdit ? 'Modify driver credentials, license details, and truck assignment' : 'Add a new driver to your fleet workforce'}</p>
-          {errors.form && <p className="text-sm text-destructive mt-1 flex items-center gap-1.5"><AlertCircle className="size-3.5" />{errors.form}</p>}
-        </div>
-      </header>
+      <PageHeader
+      eyebrow="Transport"
+      title={isEdit ? 'Edit Driver' : 'Register New Driver'}
+      description={isEdit ? 'Modify driver credentials, license details, and truck assignment' : 'Add a new driver to your fleet workforce'}
+    />
 
       <form onSubmit={handleSubmit} noValidate className="space-y-6">
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

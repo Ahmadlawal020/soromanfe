@@ -279,7 +279,7 @@ export function CustomerLicenses({ customerId }: CustomerLicensesProps) {
                 <div className="p-3 border rounded-lg bg-background flex items-center justify-between text-sm mt-1">
                   <div className="flex items-center gap-2">
                     <FileText className="size-5 text-primary" />
-                    <span className="font-medium text-muted-foreground">PDF Document</span>
+                    <span className="font-normal text-muted-foreground">PDF Document</span>
                   </div>
                   <Button
                     variant="link"

@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '#/components/ui/select'
-import { ArrowLeft, Users, CheckCircle, Loader2, AlertCircle, Building2 } from 'lucide-react'
+import { Users, CheckCircle, Loader2, Building2 } from 'lucide-react'
 import { useCreateCustomer, useUpdateCustomer } from '#/lib/hooks/useCustomers'
 import { CustomerLicenses } from '#/components/CustomerLicenses'
 
@@ -137,16 +138,11 @@ function CustomerForm() {
 
   return (
     <div className="space-y-6">
-      <header className="flex items-center justify-between">
-        <div>
-          <Button variant="ghost" size="sm" onClick={() => navigate({ to: '/customers/' as any })} className="mb-2">
-            <ArrowLeft className="size-4 mr-2" />Back to Customers
-          </Button>
-          <h1 className="text-xl md:text-2xl font-semibold tracking-tight text-balance">{isEdit ? 'Edit Customer' : 'Add New Customer'}</h1>
-          <p className="text-muted-foreground">{isEdit ? 'Modify customer information and account details' : 'Register a new customer to your company directory'}</p>
-          {errors.form && <p className="text-sm text-destructive mt-1 flex items-center gap-1.5"><AlertCircle className="size-3.5" />{errors.form}</p>}
-        </div>
-      </header>
+      <PageHeader
+      eyebrow="Orders"
+      title={isEdit ? 'Edit Customer' : 'Add New Customer'}
+      description={isEdit ? 'Modify customer information and account details' : 'Register a new customer to your company directory'}
+    />
 
       <form onSubmit={handleSubmit} noValidate className="space-y-6">
         <div className="grid gap-6 md:grid-cols-2">

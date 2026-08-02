@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
+import { FilterBar } from '#/components/FilterBar'
+import { PageHeader } from '#/components/PageHeader'
 import { StatCard } from '#/components/ui/stat-card'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '#/components/ui/card'
+import { Card, CardContent } from '#/components/ui/card'
 import { Input } from '#/components/ui/input'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '#/components/ui/table'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '#/components/ui/select'
@@ -59,13 +61,16 @@ function DriversDashboard() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">Drivers Directory</h1>
-          <p className="text-muted-foreground">Manage driver profiles, license records, safety scores, and schedule status.</p>
-        </div>
-        <Button size="sm"  onClick={() => navigate({ to: '/drivers/form' })}><Plus className="size-4 mr-2" />Register New Driver</Button>
-      </div>
+      <PageHeader
+      eyebrow="Transport"
+      title="Drivers Directory"
+      description="Manage driver profiles, license records, safety scores, and schedule status."
+      actions={
+        <>
+          <Button size="sm"  onClick={() => navigate({ to: '/drivers/form' })}><Plus className="size-4 mr-2" />Register New Driver</Button>
+        </>
+      }
+    />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard icon={<Contact />} label="Total Drivers" value={stats.total} />
@@ -74,35 +79,34 @@ function DriversDashboard() {
         <StatCard tone="amber" icon={<UserX />} label="Off Duty" value={stats.offDuty} />
       </div>
 
+      <FilterBar>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <div className="relative flex-1 sm:w-64">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground size-4" />
+        <Input type="text" placeholder="Search driver by name, DL..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
+        {searchTerm && <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 size-5 rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground flex items-center justify-center cursor-pointer transition-colors duration-250 ease-luxe" aria-label="Clear search"><X className="size-2.5" /></button>}
+        </div>
+        <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+        <SelectTrigger className="w-full sm:w-[180px]"><SelectValue placeholder="All Statuses" /></SelectTrigger>
+        <SelectContent>
+        <SelectItem value="all">All Statuses</SelectItem>
+        <SelectItem value="Active">Available (Standby)</SelectItem>
+        <SelectItem value="On Trip">On Trip</SelectItem>
+        <SelectItem value="Off Duty">Off Duty</SelectItem>
+        </SelectContent>
+        </Select>
+        </div>
+      </FilterBar>
+
       <Card>
-        <CardHeader className="border-b border-border">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div><CardTitle>Drivers Profiles</CardTitle><CardDescription>Monitor active driving logs, safety points, and contact info</CardDescription></div>
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-              <div className="relative flex-1 sm:w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground size-4" />
-                <Input type="text" placeholder="Search driver by name, DL..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
-                {searchTerm && <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 size-5 rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground flex items-center justify-center cursor-pointer transition-colors duration-250 ease-luxe" aria-label="Clear search"><X className="size-2.5" /></button>}
-              </div>
-              <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                <SelectTrigger className="w-full sm:w-[180px]"><SelectValue placeholder="All Statuses" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="Active">Available (Standby)</SelectItem>
-                  <SelectItem value="On Trip">On Trip</SelectItem>
-                  <SelectItem value="Off Duty">Off Duty</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </CardHeader>
+        
         <CardContent>
           {isLoading ? (
             <div className="flex items-center justify-center py-16"><Loader2 className="size-6 animate-spin text-muted-foreground" /></div>
           ) : drivers.length === 0 ? (
             <div className="p-16 text-center">
               <div className="inline-flex size-14 items-center justify-center rounded-xl bg-muted border border-border mb-4"><SearchX className="size-6 text-muted-foreground" /></div>
-              <p className="text-sm font-medium text-foreground">No drivers found</p>
+              <p className="text-sm font-normal text-foreground">No drivers found</p>
               <p className="text-xs text-muted-foreground mt-1">Try adjusting your search or filter criteria.</p>
               <Button variant="ghost" size="sm" onClick={() => { setSearchTerm(''); setSelectedStatus('all') }} className="mt-4 text-primary"><X className="size-3.5" /> Clear filters</Button>
             </div>
@@ -116,11 +120,11 @@ function DriversDashboard() {
                       <TableRow key={driver._id} className="cursor-pointer hover:bg-muted transition" onClick={() => navigate({ to: '/drivers/details' as any, search: { id: driver._id || driver.id } as any, state: { driver } } as any)}>
                         <TableCell>
                           <div className="flex items-center gap-3">
-                            <div className="size-10 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-medium">{getInitials(driver.name)}</div>
-                            <p className="font-medium">{driver.name}</p>
+                            <div className="size-10 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-normal">{getInitials(driver.name)}</div>
+                            <p className="font-normal">{driver.name}</p>
                           </div>
                         </TableCell>
-                        <TableCell><div className="space-y-0.5"><div className="flex items-center gap-1 font-medium"><FileText className="size-3 text-muted-foreground" />{driver.licenseNumber}</div><div className="text-xs text-muted-foreground">{driver.licenseClass}</div></div></TableCell>
+                        <TableCell><div className="space-y-0.5"><div className="flex items-center gap-1 font-normal"><FileText className="size-3 text-muted-foreground" />{driver.licenseNumber}</div><div className="text-xs text-muted-foreground">{driver.licenseClass}</div></div></TableCell>
                         <TableCell className="hidden lg:table-cell">
                           <div className="flex items-center gap-1.5 font-semibold">
                             <Truck className="size-3.5 text-muted-foreground shrink-0" />
@@ -129,7 +133,7 @@ function DriversDashboard() {
                             </span>
                           </div>
                         </TableCell>
-                        <TableCell><div className="flex items-center gap-1.5"><Star className="size-3.5 text-warning fill-warning" /><span className="font-semibold">{driver.rating}</span><span className={`text-xs font-medium ${getSafetyColor(driver.safetyScore)}`}>{driver.safetyScore}%</span></div></TableCell>
+                        <TableCell><div className="flex items-center gap-1.5"><Star className="size-3.5 text-warning fill-warning" /><span className="font-semibold">{driver.rating}</span><span className={`text-xs font-normal ${getSafetyColor(driver.safetyScore)}`}>{driver.safetyScore}%</span></div></TableCell>
                         <TableCell className="text-xs text-muted-foreground hidden md:table-cell"><div className="flex items-center gap-1"><Mail className="size-3" /><span className="truncate max-w-[160px]">{driver.email || '—'}</span></div><div className="flex items-center gap-1 mt-0.5"><Phone className="size-3" />{driver.phone}</div></TableCell>
                         <TableCell>{getStatusBadge(driver.status)}</TableCell>
                       </TableRow>

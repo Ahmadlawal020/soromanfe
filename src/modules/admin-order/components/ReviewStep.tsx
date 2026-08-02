@@ -35,7 +35,7 @@ export function ReviewStep({ wizard }: ReviewStepProps) {
         <div className="p-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <User className="size-4 text-primary" />
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em]">Customer</span>
+            <span className="text-xs font-semibold text-muted-foreground uppercase">Customer</span>
           </div>
           <Button variant="ghost" size="sm" className="h-7 text-xs text-primary" onClick={() => goToStep(1)}>
             <Pencil className="size-3 mr-1" /> Edit
@@ -58,7 +58,7 @@ export function ReviewStep({ wizard }: ReviewStepProps) {
         {(selectedCustomer?.balance || 0) < 0 && (
           <div className="px-4 py-2 bg-destructive/5 flex items-center gap-2">
             <AlertCircle className="size-3.5 text-destructive" />
-            <span className="text-xs text-destructive font-medium">Customer has a negative balance of {formatCurrency(selectedCustomer.balance)}</span>
+            <span className="text-xs text-destructive font-normal">Customer has a negative balance of {formatCurrency(selectedCustomer.balance)}</span>
           </div>
         )}
       </div>
@@ -68,7 +68,7 @@ export function ReviewStep({ wizard }: ReviewStepProps) {
         <div className="p-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <MapPin className="size-4 text-primary" />
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em]">Location & Depot</span>
+            <span className="text-xs font-semibold text-muted-foreground uppercase">Location & Depot</span>
           </div>
           <Button variant="ghost" size="sm" className="h-7 text-xs text-primary" onClick={() => goToStep(2)}>
             <Pencil className="size-3 mr-1" /> Edit
@@ -95,7 +95,7 @@ export function ReviewStep({ wizard }: ReviewStepProps) {
         <div className="p-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Package className="size-4 text-primary" />
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em]">Product & Quantity</span>
+            <span className="text-xs font-semibold text-muted-foreground uppercase">Product & Quantity</span>
           </div>
           <Button variant="ghost" size="sm" className="h-7 text-xs text-primary" onClick={() => goToStep(3)}>
             <Pencil className="size-3 mr-1" /> Edit
@@ -126,7 +126,7 @@ export function ReviewStep({ wizard }: ReviewStepProps) {
         <div className="p-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Truck className="size-4 text-primary" />
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em]">Delivery Method</span>
+            <span className="text-xs font-semibold text-muted-foreground uppercase">Delivery Method</span>
           </div>
           <Button variant="ghost" size="sm" className="h-7 text-xs text-primary" onClick={() => goToStep(4)}>
             <Pencil className="size-3 mr-1" /> Edit

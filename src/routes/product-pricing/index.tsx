@@ -1,4 +1,6 @@
 import { useState, useMemo } from 'react'
+import { FilterBar } from '#/components/FilterBar'
+import { PageHeader } from '#/components/PageHeader'
 import { StatCard } from '#/components/ui/stat-card'
 import { createFileRoute } from '@tanstack/react-router'
 import { Button } from '#/components/ui/button'
@@ -6,7 +8,7 @@ import { Input } from '#/components/ui/input'
 import { CommaInput } from '#/components/ui/comma-input'
 import { Label } from '#/components/ui/label'
 import { Badge } from '#/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '#/components/ui/card'
+import { Card, CardContent } from '#/components/ui/card'
 import {
   Table,
   TableBody,
@@ -23,18 +25,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '#/components/ui/dialog'
-import {
-  Search,
-  Pencil,
-  Power,
-  Loader2,
-  CheckCircle,
-  Fuel,
-  Warehouse,
-  Tag,
-  X,
-  RefreshCw,
-} from 'lucide-react'
+import { Search, Pencil, Power, Loader2, CheckCircle, Fuel, Warehouse, Tag, X } from 'lucide-react'
 import { useDepots, useUpdateDepotProductPrices, useToggleDepotStatus } from '#/lib/hooks/useDepots'
 import { useProductList } from '#/lib/hooks/useProducts'
 import { PageLoader } from '#/components/PageLoader'
@@ -189,21 +180,11 @@ function ProductPricingPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-xl md:text-2xl font-semibold tracking-tight text-foreground flex items-center gap-2 text-balance">
-            <Fuel className="size-7 text-primary" />
-            Depot Product Pricing
-          </h1>
-          <p className="text-muted-foreground text-sm">
-            View and manage real-time fuel and product prices across all depot hubs.
-          </p>
-        </div>
-        <Button variant="outline" size="sm" onClick={() => refetch()} className="gap-2 self-start sm:self-auto">
-          <RefreshCw className="size-4" />
-          Refresh Data
-        </Button>
-      </div>
+      <PageHeader
+      eyebrow="Operations"
+      title="Depot Product Pricing"
+      description="View and manage real-time fuel and product prices across all depot hubs."
+    />
 
       {/* Stats Cards */}
       {!isLoading && !isError && (
@@ -217,34 +198,29 @@ function ProductPricingPage() {
       )}
 
       {/* Main Pricing Table Container */}
-      <Card>
-        <CardHeader className="border-b border-border p-4 sm:p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <CardTitle className="text-lg">Depot Pricing Directory</CardTitle>
-              <CardDescription>Product prices per liter / unit by depot location</CardDescription>
-            </div>
+      <FilterBar>
+        {/* Search Input */}
+        <div className="relative w-full sm:w-80">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+        <Input
+        placeholder="Search depot or location…"
+        className="pl-9 pr-9"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        {searchQuery && (
+        <button
+        onClick={() => setSearchQuery('')}
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+        >
+        <X className="size-4" />
+        </button>
+        )}
+        </div>
+      </FilterBar>
 
-            {/* Search Input */}
-            <div className="relative w-full sm:w-80">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-              <Input
-                placeholder="Search depot or location…"
-                className="pl-9 pr-9"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  <X className="size-4" />
-                </button>
-              )}
-            </div>
-          </div>
-        </CardHeader>
+      <Card>
+        
 
         <CardContent className="p-0">
           {isLoading ? (
@@ -279,7 +255,7 @@ function ProductPricingPage() {
                     {allProducts.map((prod) => (
                       <TableHead key={prod.id} className="text-right min-w-[130px]">
                         <span className="font-semibold text-foreground">{prod.name}</span>
-                        {prod.sku && <span className="block text-[10px] text-muted-foreground font-normal">SKU: {prod.sku}</span>}
+                        {prod.sku && <span className="block text-xs text-muted-foreground font-normal">SKU: {prod.sku}</span>}
                       </TableHead>
                     ))}
 
@@ -421,7 +397,7 @@ function ProductPricingPage() {
                   </div>
 
                   <div className="relative w-40">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-mono font-medium">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-mono font-normal">
                       ₦
                     </span>
                     <CommaInput

@@ -57,12 +57,12 @@ function SalesLedgerDashboard() {
   const customers: DeliveryCustomer[] = useMemo(() => {
     if (!rawCustomers) return []
     if (Array.isArray(rawCustomers)) return rawCustomers
-    return rawCustomers.customers || rawCustomers.data || []
+    return rawCustomers.customers || []
   }, [rawCustomers])
   const pfis: Pfi[] = useMemo(() => {
     if (!rawPfis) return []
     if (Array.isArray(rawPfis)) return rawPfis
-    return rawPfis.pfis || rawPfis.data || []
+    return rawPfis.pfis || []
   }, [rawPfis])
 
   // ── Lookup Maps ────────────────────────────────────────────────────
@@ -152,7 +152,7 @@ function SalesLedgerDashboard() {
       <div className="border-t border-border bg-muted/50 px-4 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
           <div className="flex items-center gap-2">
-            <span className="text-muted-foreground font-medium">Rows per page:</span>
+            <span className="text-muted-foreground font-normal">Rows per page:</span>
             <Select
               value={pageSize.toString()}
               onValueChange={(val) => {
@@ -173,10 +173,10 @@ function SalesLedgerDashboard() {
             </Select>
           </div>
           <span>
-            Showing <strong className="text-foreground">{startItem}</strong>–<strong className="text-foreground">{endItem}</strong> of <strong className="text-foreground">{totalCount}</strong> {itemLabel} · <span className="font-medium text-muted-foreground">{periodLabel}</span>
+            Showing <strong className="text-foreground">{startItem}</strong>–<strong className="text-foreground">{endItem}</strong> of <strong className="text-foreground">{totalCount}</strong> {itemLabel} · <span className="font-normal text-muted-foreground">{periodLabel}</span>
           </span>
           <span className="hidden sm:inline text-muted-foreground/40">|</span>
-          <span className="font-medium">
+          <span className="font-normal">
             Total Paid: <strong className="text-accent">{fmt(totalPaidSum)}</strong>
           </span>
         </div>
@@ -477,7 +477,7 @@ function SalesLedgerDashboard() {
                 key={tp}
                 type="button"
                 onClick={() => handlePresetChange(tp)}
-                className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all ${timePreset === tp
+                className={`px-3 py-1.5 text-xs font-normal rounded-lg border transition-all ${timePreset === tp
  ? 'bg-primary text-primary-foreground border-primary '
  : 'bg-card text-muted-foreground border-border hover:border-foreground/40 hover:bg-muted'
  }`}
@@ -504,7 +504,7 @@ function SalesLedgerDashboard() {
               <SlidersHorizontal className="size-3.5" />
               Advanced Filters
               {hasActiveFilters && (
-                <Badge className="ml-1 h-5 px-1.5 text-[10px] bg-primary text-primary-foreground">
+                <Badge className="ml-1 h-5 px-1.5 text-xs bg-primary text-primary-foreground">
                   Active
                 </Badge>
               )}
@@ -516,7 +516,7 @@ function SalesLedgerDashboard() {
           {showAdvancedFilters && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
               <div className="space-y-1.5">
-                <Label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                <Label className="flex items-center gap-1.5 text-xs font-normal text-muted-foreground">
                   <Truck className="size-3 text-muted-foreground" /> Truck
                 </Label>
                 <Select value={truckFilter} onValueChange={setTruckFilter}>
@@ -531,7 +531,7 @@ function SalesLedgerDashboard() {
               </div>
 
               <div className="space-y-1.5">
-                <Label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                <Label className="flex items-center gap-1.5 text-xs font-normal text-muted-foreground">
                   <Users className="size-3 text-muted-foreground" /> Customer
                 </Label>
                 <Select value={customerFilter} onValueChange={setCustomerFilter}>
@@ -546,7 +546,7 @@ function SalesLedgerDashboard() {
               </div>
 
               <div className="space-y-1.5">
-                <Label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                <Label className="flex items-center gap-1.5 text-xs font-normal text-muted-foreground">
                   <Building2 className="size-3 text-muted-foreground" /> Customer Type
                 </Label>
                 <Select value={customerTypeFilter} onValueChange={(v) => setCustomerTypeFilter(v as any)}>
@@ -563,7 +563,7 @@ function SalesLedgerDashboard() {
 
               {tripCodes.length > 0 && (
                 <div className="space-y-1.5">
-                  <Label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                  <Label className="flex items-center gap-1.5 text-xs font-normal text-muted-foreground">
                     <Tag className="size-3 text-muted-foreground" /> PFI Code
                   </Label>
                   <Select value={tripCodeFilter} onValueChange={setTripCodeFilter}>
@@ -584,36 +584,36 @@ function SalesLedgerDashboard() {
           {hasActiveFilters && (
             <div className="flex flex-wrap items-center gap-2">
               {truckFilter !== 'all' && (
-                <Badge variant="outline" className="gap-1 pr-1 text-xs font-medium">
+                <Badge variant="outline" className="gap-1 pr-1 text-xs font-normal">
                   Truck: {truckFilter}
                   <button onClick={() => setTruckFilter('all')} className="ml-0.5 hover:text-destructive transition-colors duration-250 ease-luxe"><X className="size-2.5" /></button>
                 </Badge>
               )}
               {customerFilter !== 'all' && (
-                <Badge variant="outline" className="gap-1 pr-1 text-xs font-medium">
+                <Badge variant="outline" className="gap-1 pr-1 text-xs font-normal">
                   Customer: {uniqueCustomerOptions.find(c => c.id === customerFilter)?.name || customerFilter}
                   <button onClick={() => setCustomerFilter('all')} className="ml-0.5 hover:text-destructive transition-colors duration-250 ease-luxe"><X className="size-2.5" /></button>
                 </Badge>
               )}
               {customerTypeFilter !== 'all' && (
-                <Badge variant="outline" className="gap-1 pr-1 text-xs font-medium">
+                <Badge variant="outline" className="gap-1 pr-1 text-xs font-normal">
                   Type: {customerTypeFilter === 'filling_station' ? 'Filling Station' : 'Normal'}
                   <button onClick={() => setCustomerTypeFilter('all')} className="ml-0.5 hover:text-destructive transition-colors duration-250 ease-luxe"><X className="size-2.5" /></button>
                 </Badge>
               )}
               {tripCodeFilter !== 'all' && (
-                <Badge variant="outline" className="gap-1 pr-1 text-xs font-medium">
+                <Badge variant="outline" className="gap-1 pr-1 text-xs font-normal">
                   Code: {tripCodeFilter}
                   <button onClick={() => setTripCodeFilter('all')} className="ml-0.5 hover:text-destructive transition-colors duration-250 ease-luxe"><X className="size-2.5" /></button>
                 </Badge>
               )}
               {searchQuery && (
-                <Badge variant="outline" className="gap-1 pr-1 text-xs font-medium">
+                <Badge variant="outline" className="gap-1 pr-1 text-xs font-normal">
                   Search: "{searchQuery}"
                   <button onClick={() => setSearchQuery('')} className="ml-0.5 hover:text-destructive transition-colors duration-250 ease-luxe"><X className="size-2.5" /></button>
                 </Badge>
               )}
-              <button onClick={clearAllFilters} className="text-xs text-muted-foreground hover:text-destructive font-medium transition-colors underline underline-offset-2 duration-250 ease-luxe">
+              <button onClick={clearAllFilters} className="text-xs text-muted-foreground hover:text-destructive font-normal transition-colors underline underline-offset-2 duration-250 ease-luxe">
                 Clear all
               </button>
             </div>
@@ -691,7 +691,7 @@ function SalesLedgerDashboard() {
         >
           <CalendarIcon className="size-3.5" /> Daily Payments
           {filteredSales.length > 0 && (
-            <span className={`ml-0.5 px-1.5 py-0.5 rounded-full text-[11px] font-semibold leading-none ${activeView === 'daily' ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-muted text-muted-foreground'
+            <span className={`ml-0.5 px-1.5 py-0.5 rounded-full text-xs font-semibold leading-none ${activeView === 'daily' ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-muted text-muted-foreground'
  }`}>
               {filteredSales.length}
             </span>
@@ -867,7 +867,7 @@ function SalesLedgerDashboard() {
                                 <Truck className="size-3.5 text-warning" />
                                 {group.truckNumber || '—'}
                                 {isFirstInMultiGroup && (
-                                  <span className="ml-0.5 text-[10px] font-semibold text-muted-foreground bg-muted/10 px-1.5 py-0.5 rounded-full border border-border/20 whitespace-nowrap">
+                                  <span className="ml-0.5 text-xs font-semibold text-muted-foreground bg-muted/10 px-1.5 py-0.5 rounded-full border border-border/20 whitespace-nowrap">
                                     {multiCustCounts.get(group.loadingId!)} customers
                                   </span>
                                 )}
@@ -878,22 +878,22 @@ function SalesLedgerDashboard() {
                           <TableCell className="text-muted-foreground text-xs uppercase whitespace-nowrap">{group.location || '—'}</TableCell>
                           <TableCell className="text-right text-muted-foreground whitespace-nowrap tabular-nums text-xs">{group.quantity > 0 ? `${fmtQty(group.quantity)} L` : '—'}</TableCell>
                           <TableCell className="text-right text-muted-foreground whitespace-nowrap tabular-nums text-xs">{group.rate > 0 ? fmt(group.rate) : '—'}</TableCell>
-                          <TableCell className="text-right font-medium text-foreground whitespace-nowrap tabular-nums text-xs">{group.expected > 0 ? fmt(group.expected) : '—'}</TableCell>
+                          <TableCell className="text-right font-normal text-foreground whitespace-nowrap tabular-nums text-xs">{group.expected > 0 ? fmt(group.expected) : '—'}</TableCell>
                           <TableCell className="text-right font-semibold text-accent whitespace-nowrap tabular-nums text-xs">{fmt(toNum(group.totalPaid))}</TableCell>
                           <TableCell className={`text-right font-semibold whitespace-nowrap tabular-nums text-xs ${group.balance > 0 ? 'text-destructive' : group.balance < 0 ? 'text-muted-foreground' : group.expected > 0 ? 'text-accent' : 'text-muted-foreground'}`}>
                             {group.expected > 0 ? (group.balance === 0 ? '₦0' : group.balance > 0 ? fmt(group.balance) : `+${fmt(Math.abs(group.balance))}`) : '—'}
                           </TableCell>
                           <TableCell className="whitespace-nowrap text-center">
                             {group.payments.length === 0 ? (
-                              <Badge variant="outline" className="text-[11px] font-semibold text-warning bg-warning/10 border-warning/20">
+                              <Badge variant="outline" className="text-xs font-semibold text-warning bg-warning/10 border-warning/20">
                                 No payment
                               </Badge>
                             ) : isFullyPaid ? (
-                              <Badge className="text-[11px] font-semibold bg-accent/10 text-accent border-accent/20">
+                              <Badge className="text-xs font-semibold bg-accent/10 text-accent border-accent/20">
                                 Fully Paid
                               </Badge>
                             ) : (
-                              <Badge className="text-[11px] font-semibold bg-destructive/10 text-destructive border-destructive/20">
+                              <Badge className="text-xs font-semibold bg-destructive/10 text-destructive border-destructive/20">
                                 Pending
                               </Badge>
                             )}
@@ -983,7 +983,7 @@ function SalesLedgerDashboard() {
                               {sale.truckNumber || '—'}
                             </div>
                           </TableCell>
-                          <TableCell className="font-medium text-foreground uppercase whitespace-nowrap text-xs">{customerName}</TableCell>
+                          <TableCell className="font-normal text-foreground uppercase whitespace-nowrap text-xs">{customerName}</TableCell>
                           <TableCell className="text-muted-foreground uppercase whitespace-nowrap text-xs">{sale.location || '—'}</TableCell>
                           <TableCell className="text-right text-muted-foreground whitespace-nowrap tabular-nums text-xs">{toNum(sale.quantity) > 0 ? fmtQty(toNum(sale.quantity)) : '—'}</TableCell>
                           <TableCell className="text-right text-muted-foreground whitespace-nowrap tabular-nums text-xs">{toNum(sale.rate) > 0 ? fmt(toNum(sale.rate)) : '—'}</TableCell>

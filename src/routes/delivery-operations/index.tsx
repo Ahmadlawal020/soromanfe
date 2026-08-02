@@ -14,7 +14,7 @@ import {
 import { format, parseISO, isWithinInterval, startOfDay, endOfDay } from 'date-fns'
 import { useDeliveryInventoryList, useCreateDeliveryInventory, useUpdateDeliveryInventory } from '#/lib/hooks/useDeliveryInventory'
 import { usePfiList, useUpdatePfi } from '#/lib/hooks/usePfis'
-import { useTruckList } from '#/lib/hooks/useTrucks'
+import { useAllocatableTrucks } from '#/lib/hooks/useFleet'
 import { useDeliveryCustomerList } from '#/lib/hooks/useDeliveryCustomers'
 import { useToast } from '#/lib/hooks/useToast'
 import { cn } from '#/lib/utils'
@@ -94,17 +94,17 @@ function DeliveryOperationsPage() {
   // ── Queries ─────────────────────────────────────────────────────────────
   const { data: rawInventory = [], isLoading: isLoadingInventory } = useDeliveryInventoryList()
   const { data: pfisData } = usePfiList()
-  const { data: trucksData } = useTruckList()
+  const { data: trucksData } = useAllocatableTrucks()
   const { data: customersData = [] } = useDeliveryCustomerList()
 
   const allPfis: Pfi[] = useMemo(() => {
     if (!pfisData) return []
-    return Array.isArray(pfisData) ? pfisData : (pfisData.pfis || pfisData.data || [])
+    return Array.isArray(pfisData) ? pfisData : (pfisData.pfis || [])
   }, [pfisData])
 
   const allTrucks = useMemo(() => {
     if (!trucksData) return []
-    return Array.isArray(trucksData) ? trucksData : (trucksData.trucks || trucksData.data || [])
+    return Array.isArray(trucksData) ? trucksData : (trucksData.trucks || [])
   }, [trucksData])
 
   const allEntries = useMemo((): DeliveryInventory[] => {
@@ -114,7 +114,7 @@ function DeliveryOperationsPage() {
 
   const allCustomers: DeliveryCustomer[] = useMemo(() => {
     if (!customersData) return []
-    return Array.isArray(customersData) ? customersData : (customersData.customers || customersData.data || [])
+    return Array.isArray(customersData) ? customersData : (customersData.customers || [])
   }, [customersData])
 
   // ── Mutations ───────────────────────────────────────────────────────────
@@ -603,7 +603,7 @@ function DeliveryOperationsPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 pt-2 border-t border-border">
           <div className="flex flex-col gap-1">
-            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em]">Status</label>
+            <label className="text-xs font-semibold text-muted-foreground uppercase">Status</label>
             <select aria-label="Filter by status" value={statusFilter}
               onChange={e => setStatusFilter(e.target.value as StatusFilter)}
               className="h-8 rounded-md border border-border bg-background text-foreground px-2 text-xs">
@@ -614,7 +614,7 @@ function DeliveryOperationsPage() {
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em]">Truck</label>
+            <label className="text-xs font-semibold text-muted-foreground uppercase">Truck</label>
             <select aria-label="Filter by truck" value={truckFilter}
               onChange={e => setTruckFilter(e.target.value)}
               className="h-8 rounded-md border border-border bg-background text-foreground px-2 text-xs">
@@ -626,7 +626,7 @@ function DeliveryOperationsPage() {
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em]">Customer</label>
+            <label className="text-xs font-semibold text-muted-foreground uppercase">Customer</label>
             <select aria-label="Filter by customer" value={customerFilter}
               onChange={e => setCustomerFilter(e.target.value)}
               className="h-8 rounded-md border border-border bg-background text-foreground px-2 text-xs">
@@ -638,7 +638,7 @@ function DeliveryOperationsPage() {
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em]">Customer Type</label>
+            <label className="text-xs font-semibold text-muted-foreground uppercase">Customer Type</label>
             <select aria-label="Filter by Customer Type" value={customerTypeFilter}
               onChange={e => setCustomerTypeFilter(e.target.value as any)}
               className="h-8 rounded-md border border-border bg-background text-foreground px-2 text-xs">
@@ -649,10 +649,10 @@ function DeliveryOperationsPage() {
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em]">Allocation Code</label>
+            <label className="text-xs font-semibold text-muted-foreground uppercase">Allocation Code</label>
             <select aria-label="Filter by allocation code" value={codeFilter}
               onChange={e => setCodeFilter(e.target.value)}
-              className="h-8 rounded-md border border-border bg-background text-foreground px-2 text-xs font-medium">
+              className="h-8 rounded-md border border-border bg-background text-foreground px-2 text-xs font-normal">
               <option value="">All Codes</option>
               {distinctAllocationCodes.map(code => (
                 <option key={code} value={code}>{code}</option>
@@ -680,7 +680,7 @@ function DeliveryOperationsPage() {
                 codeFilter && { label: `Code: ${codeFilter}`, clear: () => setCodeFilter('') },
                 searchQuery && { label: `Search: "${searchQuery}"`, clear: () => setSearchQuery('') },
               ].filter((x): x is { label: string; clear: () => void } => !!x).map(chip => (
-                <span key={chip.label} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-foreground text-background">
+                <span key={chip.label} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-normal bg-foreground text-background">
                   {chip.label}
                   <button title={`Remove: ${chip.label}`} onClick={chip.clear} className="hover:text-muted-foreground ml-0.5">
                     <X className="size-2.5" />
@@ -702,7 +702,7 @@ function DeliveryOperationsPage() {
       ) : filtered.length === 0 ? (
         <div className="bg-card rounded-xl border border-border p-16 text-center">
           <Truck className="size-10 mx-auto text-muted-foreground mb-3" />
-          <p className="text-muted-foreground font-medium">
+          <p className="text-muted-foreground font-normal">
             {hasAnyFilter ? 'No records match your filters' : 'No truck records yet'}
           </p>
           <p className="text-sm text-muted-foreground/70 mt-1">
@@ -771,12 +771,12 @@ function DeliveryOperationsPage() {
                     {(distinctProducts.length > 0 || distinctDepots.length > 0) && (
                       <div className="flex items-center justify-between gap-2 text-xs pt-0.5">
                         {distinctProducts.length > 0 && (
-                          <span className="font-semibold text-accent bg-accent/80 dark:bg-accent/60 px-2 py-0.5 rounded text-[11px]">
+                          <span className="font-semibold text-accent bg-accent/80 dark:bg-accent/60 px-2 py-0.5 rounded text-xs">
                             {distinctProducts.join(', ')}
                           </span>
                         )}
                         {distinctDepots.length > 0 && (
-                          <span className="truncate text-muted-foreground font-medium text-[11px]">
+                          <span className="truncate text-muted-foreground font-normal text-xs">
                             📍 {distinctDepots.join(', ')}
                           </span>
                         )}
@@ -785,7 +785,7 @@ function DeliveryOperationsPage() {
 
                     {/* PFI Reference */}
                     <div>
-                      <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1">PFI Reference</div>
+                      <div className="text-xs font-semibold text-muted-foreground uppercase mb-1">PFI Reference</div>
                       {distinctPfis.length > 0 ? (
                         <div className="flex flex-wrap gap-1.5">
                           {distinctPfis.slice(0, 3).map(pfi => (
@@ -804,7 +804,7 @@ function DeliveryOperationsPage() {
 
                     {/* Total Quantity / Volume */}
                     <div className="flex items-center justify-between bg-muted/80 dark:bg-foreground/60 p-2.5 rounded-lg border border-border/70 dark:border-border">
-                      <span className="text-xs font-medium text-muted-foreground">Total Volume</span>
+                      <span className="text-xs font-normal text-muted-foreground">Total Volume</span>
                       <span className="flex items-center gap-1.5 text-sm font-semibold text-foreground dark:text-muted-foreground">
                         <Droplets className="size-3.5 text-muted-foreground" />
                         {fmtQty(totalQty)} {unit}
@@ -814,12 +814,12 @@ function DeliveryOperationsPage() {
                     {/* Status Badges */}
                     <div className="flex items-center gap-2 flex-wrap">
                       {loadedCount > 0 && (
-                        <span className="text-[11px] font-medium text-warning bg-warning/10 px-2 py-0.5 rounded-full border border-warning/40 dark:border-warning/20">
+                        <span className="text-xs font-normal text-warning bg-warning/10 px-2 py-0.5 rounded-full border border-warning/40 dark:border-warning/20">
                           {loadedCount} in transit ({fmtQty(loadedQty)} L)
                         </span>
                       )}
                       {soldCount > 0 && (
-                        <span className="text-[11px] font-medium text-accent bg-accent/10 px-2 py-0.5 rounded-full border border-accent/40 dark:border-accent/20">
+                        <span className="text-xs font-normal text-accent bg-accent/10 px-2 py-0.5 rounded-full border border-accent/40 dark:border-accent/20">
                           {soldCount} sold ({fmtQty(soldQty)} L)
                         </span>
                       )}
@@ -833,7 +833,7 @@ function DeliveryOperationsPage() {
                           {(() => { try { return format(parseISO(latestDate), 'dd MMM yyyy') } catch { return latestDate } })()}
                         </span>
                         {distinctDestinations.length > 0 && (
-                          <span className="truncate max-w-[140px] text-[11px] text-muted-foreground/80 font-medium" title={distinctDestinations.join(', ')}>
+                          <span className="truncate max-w-[140px] text-xs text-muted-foreground/80 font-normal" title={distinctDestinations.join(', ')}>
                             To: {distinctDestinations[0]} {distinctDestinations.length > 1 ? `+${distinctDestinations.length - 1}` : ''}
                           </span>
                         )}

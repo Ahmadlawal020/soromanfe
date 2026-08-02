@@ -43,19 +43,19 @@ export function LpgReviewStep({ wizard }: LpgReviewStepProps) {
           <div className="grid grid-cols-2 gap-3 text-xs">
             <div>
               <span className="text-muted-foreground block">Name</span>
-              <span className="font-medium">{selectedCustomer?.name}</span>
+              <span className="font-normal">{selectedCustomer?.name}</span>
             </div>
             <div>
               <span className="text-muted-foreground block">Company</span>
-              <span className="font-medium">{selectedCustomer?.companyName || '—'}</span>
+              <span className="font-normal">{selectedCustomer?.companyName || '—'}</span>
             </div>
             <div>
               <span className="text-muted-foreground block">Phone</span>
-              <span className="font-medium">{selectedCustomer?.phone}</span>
+              <span className="font-normal">{selectedCustomer?.phone}</span>
             </div>
             <div>
               <span className="text-muted-foreground block">Email</span>
-              <span className="font-medium">{selectedCustomer?.email || '—'}</span>
+              <span className="font-normal">{selectedCustomer?.email || '—'}</span>
             </div>
           </div>
         </div>
@@ -69,15 +69,15 @@ export function LpgReviewStep({ wizard }: LpgReviewStepProps) {
           <div className="grid grid-cols-2 gap-3 text-xs">
             <div>
               <span className="text-muted-foreground block">Station Name</span>
-              <span className="font-medium">{selectedStation?.name}</span>
+              <span className="font-normal">{selectedStation?.name}</span>
             </div>
             <div>
               <span className="text-muted-foreground block">Station Code</span>
-              <span className="font-medium font-mono">{selectedStation?.code}</span>
+              <span className="font-normal font-mono">{selectedStation?.code}</span>
             </div>
             <div className="sm:col-span-2">
               <span className="text-muted-foreground block">Location</span>
-              <span className="font-medium">{selectedStation?.address}, {selectedStation?.city}, {selectedStation?.state}</span>
+              <span className="font-normal">{selectedStation?.address}, {selectedStation?.city}, {selectedStation?.state}</span>
             </div>
             {pricePerKg > 0 && (
               <div className="sm:col-span-2">
@@ -135,7 +135,7 @@ export function LpgReviewStep({ wizard }: LpgReviewStepProps) {
           </div>
           <div className="text-xs">
             <span className="text-muted-foreground block">Address</span>
-            <span className="font-medium">{deliveryAddress}</span>
+            <span className="font-normal">{deliveryAddress}</span>
             {(deliveryState || deliveryLga) && (
               <p className="text-muted-foreground mt-1">
                 {deliveryState}{deliveryLga ? `, ${deliveryLga}` : ''}

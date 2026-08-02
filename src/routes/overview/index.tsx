@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { PageHeader } from '#/components/PageHeader'
 import { Button } from '#/components/ui/button'
 import { StatusChip, LiveDot } from '#/components/ui/status-chip'
 import { StatCard, StatCardGrid } from '#/components/ui/stat-card'
@@ -64,21 +65,19 @@ function OverviewDashboard() {
 
   return (
     <div className="animate-fade-in space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <p className={cn(MICRO, 'mb-1.5 text-muted-foreground')}>Overview</p>
-          <h1 className="text-xl font-semibold tracking-tight text-balance md:text-2xl">
-            Dashboard
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Welcome back, {user?.firstName || 'Admin'}. Here&apos;s what&apos;s happening today.
-          </p>
-        </div>
-        <Button variant="outline" size="sm" onClick={() => navigate({ to: '/trucks/' as any })}>
+      <PageHeader
+      eyebrow="Overview"
+      title="Dashboard"
+      description={`Welcome back, {user?.firstName || 'Admin'}. Here&apos;s what&apos;s happening today.`}
+      actions={
+        <>
+          <Button variant="outline" size="sm" onClick={() => navigate({ to: '/fleet-trucks' as any })}>
           <Users data-icon="inline-start" />
           View fleet
-        </Button>
-      </div>
+          </Button>
+        </>
+      }
+    />
 
       <StatCardGrid count={4}>
         <StatCard icon={<Users />} label="Total trucks" value={truckStats.total} description={<Meta trend text={`${truckStats.inTransit} in transit`} />} />
@@ -123,7 +122,7 @@ function OverviewDashboard() {
             <span className="text-xs text-muted-foreground">
               Total: <span className="font-semibold text-foreground tabular-nums">{truckStats.total}</span> trucks
             </span>
-            <HoverArrowLink to={'/trucks/' as any}>View details</HoverArrowLink>
+            <HoverArrowLink to={'/fleet-trucks' as any}>View details</HoverArrowLink>
           </div>
         </section>
 

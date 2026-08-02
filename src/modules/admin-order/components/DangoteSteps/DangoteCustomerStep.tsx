@@ -68,15 +68,15 @@ export function DangoteCustomerStep({ wizard }: DangoteCustomerStepProps) {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
                 <div>
                   <span className="text-muted-foreground block">Full Name</span>
-                  <span className="font-medium">{selectedCustomer.name}</span>
+                  <span className="font-normal">{selectedCustomer.name}</span>
                 </div>
                 <div>
                   <span className="text-muted-foreground block">Company</span>
-                  <span className="font-medium">{selectedCustomer.companyName || '—'}</span>
+                  <span className="font-normal">{selectedCustomer.companyName || '—'}</span>
                 </div>
                 <div>
                   <span className="text-muted-foreground block">Phone</span>
-                  <span className="font-medium">{selectedCustomer.phone}</span>
+                  <span className="font-normal">{selectedCustomer.phone}</span>
                 </div>
                 <div>
                   <span className="text-muted-foreground block">Account Balance</span>
@@ -117,7 +117,7 @@ export function DangoteCustomerStep({ wizard }: DangoteCustomerStepProps) {
                   <div className="inline-flex size-12 items-center justify-center rounded-xl bg-muted border border-border mb-3">
                     <Search className="size-5 text-muted-foreground" />
                   </div>
-                  <p className="text-sm font-medium text-foreground">Search for a customer</p>
+                  <p className="text-sm font-normal text-foreground">Search for a customer</p>
                   <p className="text-xs text-muted-foreground mt-1">Type at least 2 characters to search by name, email, phone, or company.</p>
                 </div>
               ) : customerSearch.trim().length < 2 ? (
@@ -125,7 +125,7 @@ export function DangoteCustomerStep({ wizard }: DangoteCustomerStepProps) {
                   <div className="inline-flex size-12 items-center justify-center rounded-xl bg-muted border border-border mb-3">
                     <Search className="size-5 text-muted-foreground" />
                   </div>
-                  <p className="text-sm font-medium text-foreground">Keep typing...</p>
+                  <p className="text-sm font-normal text-foreground">Keep typing...</p>
                   <p className="text-xs text-muted-foreground mt-1">Enter at least 2 characters to start searching.</p>
                 </div>
               ) : isSearchingCustomers && searchPage === 1 ? (
@@ -137,7 +137,7 @@ export function DangoteCustomerStep({ wizard }: DangoteCustomerStepProps) {
                   <div className="inline-flex size-12 items-center justify-center rounded-xl bg-muted border border-border mb-3">
                     <User className="size-5 text-muted-foreground" />
                   </div>
-                  <p className="text-sm font-medium text-foreground">No customer matches found</p>
+                  <p className="text-sm font-normal text-foreground">No customer matches found</p>
                   <p className="text-xs text-muted-foreground mt-1">Try a different search or register a new customer.</p>
                   <Button variant="ghost" size="sm" onClick={() => setIsRegisteringCustomer(true)} className="mt-3 text-primary">
                     <Plus className="size-3.5 mr-1" /> Register "{customerSearch}"
@@ -162,7 +162,7 @@ export function DangoteCustomerStep({ wizard }: DangoteCustomerStepProps) {
                           </p>
                         </div>
                         <div className="text-right shrink-0">
-                          <span className="text-[10px] text-muted-foreground block">Balance</span>
+                          <span className="text-xs text-muted-foreground block">Balance</span>
                           <span className={`font-semibold text-sm ${(c.balance || 0) < 0 ? 'text-destructive' : 'text-foreground'}`}>
                             {formatCurrency(c.balance || 0)}
                           </span>

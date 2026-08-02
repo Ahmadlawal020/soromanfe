@@ -21,7 +21,10 @@ import {
   PlusCircle,
   DollarSign,
   FileSpreadsheet,
+  LogIn,
+  ClipboardList,
   Flame,
+  Percent,
 } from "lucide-react";
 import { useAuthStore, useAdminLogout } from "#/modules/auth";
 import { useLayoutStore } from "#/stores/layoutStore";
@@ -43,36 +46,16 @@ const navCategories: NavCategory[] = [
     category: "", // Overview
     items: [{ title: "Overview", icon: GaugeIcon, path: "/overview" }],
   },
-  {
-    category: "LPG Home Delivery",
-    items: [
-      { title: "LPG Stations", icon: Flame, path: "/lpg-stations" },
-      { title: "LPG Orders", icon: ShoppingBag, path: "/lpg-orders" },
-      { title: "Payable Orders", icon: DollarSign, path: "/lpg-payable-orders" },
-      { title: "Order Requests", icon: FileText, path: "/lpg-order-request" },
-    ],
-  },
+  // Ordered by how much of the day is spent in each: the core order desk
+  // first, then the floor, then money, then the side businesses. LPG is a
+  // newer, smaller line, so it sits below the established ones.
   {
     category: "Orders",
     items: [
       { title: "Orders", icon: ShoppingBag, path: "/orders" },
-      { title: "Payable Orders", icon: DollarSign, path: "/payable-orders" },
       { title: "Create Order", icon: PlusCircle, path: "/admin-order" },
+      { title: "Payable Orders", icon: DollarSign, path: "/payable-orders" },
       { title: "Our Customers", icon: Building2, path: "/customers" },
-    ],
-  },
-
-  {
-    category: "Dangote Delivery",
-    items: [
-      { title: "Dangote Orders", icon: ShoppingBag, path: "/dangote-orders" },
-      { title: "Payable Orders", icon: DollarSign, path: "/dangote-payable-orders" },
-      {
-        title: "Order Requests",
-        icon: FileText,
-        path: "/dangote-order-request",
-      },
-      { title: "Dangote Products", icon: Package, path: "/dangote-products" },
     ],
   },
   {
@@ -80,46 +63,70 @@ const navCategories: NavCategory[] = [
     items: [
       { title: "Loading Tickets", icon: Ticket, path: "/ticket" },
       { title: "Depots", icon: Warehouse, path: "/depots" },
-      { title: "Product Pricing", icon: Fuel, path: "/product-pricing" },
       { title: "Products", icon: Package, path: "/products" },
+      { title: "Product Pricing", icon: Fuel, path: "/product-pricing" },
+    ],
+  },
+  {
+    category: "Security",
+    items: [
+      { title: "Gate Entry", icon: LogIn, path: "/security/entry" },
+      { title: "Gate Exit", icon: LogOut, path: "/security/exit" },
+      { title: "Security Report", icon: ClipboardList, path: "/security-report" },
     ],
   },
   {
     category: "Finance",
     items: [
+      { title: "PFI Tracking", icon: FileText, path: "/pfi" },
+      { title: "Expenses", icon: Receipt, path: "/expenses" },
       { title: "Deposits", icon: Receipt, path: "/deposits" },
+      { title: "Customer Commissions", icon: DollarSign, path: "/commissions" },
+      { title: "Commission Rates", icon: Percent, path: "/commission-rates" },
       { title: "Bank Accounts", icon: Landmark, path: "/bank-accounts" },
       { title: "Bank Statements", icon: FileSpreadsheet, path: "/bank-statements" },
-      { title: "Commissions", icon: DollarSign, path: "/commissions" },
     ],
   },
   {
     category: "Transport",
     items: [
-      { title: "Fleet Directory", icon: Truck, path: "/trucks" },
+      { title: "Fleet", icon: Truck, path: "/fleet-trucks" },
+      { title: "Trucks Ledger", icon: BarChart3, path: "/fleet-ledger" },
       { title: "Drivers Directory", icon: Contact, path: "/drivers" },
+    ],
+  },
+  {
+    category: "Dangote Delivery",
+    items: [
+      { title: "Dangote Orders", icon: ShoppingBag, path: "/dangote-orders" },
+      { title: "Order Requests", icon: FileText, path: "/dangote-order-request" },
+      { title: "Payable Orders", icon: DollarSign, path: "/dangote-payable-orders" },
+      { title: "Dangote Products", icon: Package, path: "/dangote-products" },
     ],
   },
   {
     category: "Truck Sales",
     items: [
-      {
-        title: "Delivery Operations",
-        icon: Truck,
-        path: "/delivery-operations",
-      },
+      { title: "Delivery Operations", icon: Truck, path: "/delivery-operations" },
       { title: "Sales Ledger", icon: BarChart3, path: "/sales-ledger" },
       { title: "Filling Stations", icon: Fuel, path: "/filing-stations" },
       { title: "Delivery Customers", icon: Users, path: "/delivery-customer" },
     ],
   },
-
   {
-    category: "Admin",
+    category: "LPG Home Delivery",
     items: [
-      { title: "PFI Tracking", icon: FileText, path: "/pfi" },
+      { title: "LPG Orders", icon: ShoppingBag, path: "/lpg-orders" },
+      { title: "Order Requests", icon: FileText, path: "/lpg-order-request" },
+      { title: "Payable Orders", icon: DollarSign, path: "/lpg-payable-orders" },
+      { title: "LPG Stations", icon: Flame, path: "/lpg-stations" },
+    ],
+  },
+  {
+    category: "Administration",
+    items: [
+      { title: "User Management", icon: Users, path: "/admin" },
       { title: "Licence Verification", icon: ShieldCheck, path: "/licence-verification" },
-      { title: "Admin Settings", icon: ShieldCheck, path: "/admin" },
     ],
   },
 ];
@@ -139,10 +146,8 @@ function NavGroup({
 }) {
   return (
     <div className="mb-2">
-      {/* Group labels sit on the tracking ladder at 0.22em — the rung between
-          panel headers (0.25em) and stepper labels (0.2em). */}
       {label && expanded && (
-        <div className="px-3 py-2 text-[0.65rem] tracking-[0.22em] uppercase text-muted-foreground/70 select-none">
+        <div className="px-3 py-2 text-xs uppercase text-muted-foreground/70 select-none">
           {label}
         </div>
       )}
@@ -165,7 +170,7 @@ function NavGroup({
               expanded ? "gap-3 px-3" : "justify-center px-0",
               // Emerald marks the active item; everything else stays neutral.
               isActive
-                ? "bg-sidebar-accent font-medium text-sidebar-primary"
+                ? "bg-sidebar-accent font-normal text-sidebar-primary"
                 : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground",
             )}
             aria-current={isActive ? "page" : undefined}
@@ -261,7 +266,7 @@ export default function Sidebar() {
               className="size-6 shrink-0"
             />
             {expanded && (
-              <span className="min-w-0 truncate text-sm font-medium tracking-tight">
+              <span className="min-w-0 truncate text-sm font-normal tracking-tight">
                 Soroman
               </span>
             )}
@@ -290,12 +295,12 @@ export default function Sidebar() {
           {expanded ? (
             <div className="mb-2 flex items-center gap-2.5 rounded-lg px-1 py-1.5">
               <Avatar>
-                <AvatarFallback className="text-xs font-medium">
+                <AvatarFallback className="text-xs font-normal">
                   {initials}
                 </AvatarFallback>
               </Avatar>
               <div className="min-w-0">
-                <div className="truncate text-sm font-medium">{displayName}</div>
+                <div className="truncate text-sm font-normal">{displayName}</div>
                 <div className="truncate text-xs text-muted-foreground">
                   {user?.email || "admin"}
                 </div>
@@ -304,7 +309,7 @@ export default function Sidebar() {
           ) : (
             <div className="mb-2 flex justify-center">
               <Avatar>
-                <AvatarFallback className="text-xs font-medium">
+                <AvatarFallback className="text-xs font-normal">
                   {initials}
                 </AvatarFallback>
               </Avatar>
@@ -315,7 +320,7 @@ export default function Sidebar() {
           <button
             type="button"
             className={cn(
-              "flex h-8 w-full cursor-pointer items-center rounded-lg text-sm font-medium",
+              "flex h-8 w-full cursor-pointer items-center rounded-lg text-sm font-normal",
               "text-destructive transition-colors duration-250 ease-luxe outline-none",
               "hover:bg-destructive/10 focus-visible:ring-3 focus-visible:ring-destructive/20",
               expanded ? "justify-start gap-2 px-3" : "justify-center px-0",

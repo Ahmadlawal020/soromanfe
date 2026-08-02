@@ -38,7 +38,7 @@ export function LpgCylinderStep({ wizard }: LpgCylinderStepProps) {
             <Flame className="text-primary size-4" />
             <span className="font-semibold text-sm">Selected Station</span>
           </div>
-          <p className="text-sm font-medium text-foreground">{selectedStation.name}</p>
+          <p className="text-sm font-normal text-foreground">{selectedStation.name}</p>
           <p className="text-xs text-muted-foreground">{selectedStation.address}, {selectedStation.city}, {selectedStation.state}</p>
           {pricePerKg > 0 && (
             <div className="flex items-center gap-1.5 mt-2">
@@ -60,7 +60,7 @@ export function LpgCylinderStep({ wizard }: LpgCylinderStepProps) {
             <div className="inline-flex size-12 items-center justify-center rounded-xl bg-muted border border-border mb-1">
               <Package className="size-5 text-muted-foreground" />
             </div>
-            <p className="text-sm font-medium text-foreground">No cylinders available</p>
+            <p className="text-sm font-normal text-foreground">No cylinders available</p>
             <p className="text-xs text-muted-foreground">This station has no cylinder inventory configured.</p>
           </div>
         ) : (
@@ -86,7 +86,7 @@ export function LpgCylinderStep({ wizard }: LpgCylinderStepProps) {
                     {c.quantity?.toLocaleString()} units available
                   </p>
                   {pricePerKg > 0 && (
-                    <p className="text-xs font-medium text-primary mt-0.5">
+                    <p className="text-xs font-normal text-primary mt-0.5">
                       {formatCurrency(pricePerKg * c.cylinderSizeKg)} per cylinder
                     </p>
                   )}
@@ -110,7 +110,7 @@ export function LpgCylinderStep({ wizard }: LpgCylinderStepProps) {
           <div className="text-xs text-muted-foreground space-y-1">
             <p>Total weight: {totalWeightKg.toLocaleString()} Kg</p>
             {pricePerKg > 0 && Number(cylinderQuantity) > 0 && (
-              <p className="font-medium text-foreground">
+              <p className="font-normal text-foreground">
                 Estimated subtotal: {formatCurrency(subtotal)} (delivery price set during review)
               </p>
             )}

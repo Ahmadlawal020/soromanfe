@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate, useLocation } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
@@ -33,7 +34,7 @@ export const Route = createFileRoute('/bank-accounts/details')({
 function getStatusBadge(status: string) {
   switch (status) {
     case 'Active':
-      return <Badge className="bg-accent/15 text-accent border-accent/30 font-medium px-3 py-1">{status}</Badge>
+      return <Badge className="bg-accent/15 text-accent border-accent/30 font-normal px-3 py-1">{status}</Badge>
     case 'Inactive':
       return <Badge variant="outline" className="text-muted-foreground px-3 py-1">{status}</Badge>
     case 'Suspended':
@@ -123,15 +124,11 @@ function BankAccountDetails() {
       <Breadcrumbs items={[{ label: 'Bank Accounts', href: '/bank-accounts' }, { label: account?.accountName || 'Details' }]} />
       {/* Top Header Navigation */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" onClick={() => navigate({ to: '/bank-accounts' })}>
-            <ArrowLeft className="size-4" />
-          </Button>
-          <div>
-            <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">Bank Account Details</h1>
-            <p className="text-muted-foreground">View account information and linked depots</p>
-          </div>
-        </div>
+        <PageHeader
+      eyebrow="Finance"
+      title="Bank Account Details"
+      description="View account information and linked depots"
+    />
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
@@ -167,7 +164,7 @@ function BankAccountDetails() {
               </div>
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h1 className="text-2xl md:text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">{account.bankName}</h1>
+                  <h2 className="text-2xl font-semibold text-foreground tracking-tight text-balance">{account.bankName}</h2>
                   {account.isDefault && (
                     <Badge className="bg-warning/15 text-warning border-warning/30 gap-1 px-2.5 py-0.5 text-xs font-semibold">
                       <Star className="size-3.5 fill-warning" /> Default Account
@@ -187,7 +184,7 @@ function BankAccountDetails() {
             {/* Large Account Number Card */}
             <div className="bg-muted/40 border border-border/60 rounded-xl p-4 md:px-6 md:py-4 flex items-center justify-between gap-6 shrink-0">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                <p className="text-xs font-semibold uppercase text-muted-foreground">
                   Account Number ({account.currency})
                 </p>
                 <p className="text-2xl md:text-3xl font-mono font-semibold text-foreground mt-0.5 tabular-nums">
@@ -219,40 +216,40 @@ function BankAccountDetails() {
           </CardHeader>
           <CardContent className="pt-4 space-y-4 text-sm">
             <div>
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Bank Name</p>
+              <p className="text-xs text-muted-foreground font-normal uppercase">Bank Name</p>
               <p className="text-foreground font-semibold mt-0.5">{account.bankName}</p>
             </div>
 
             <div>
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Account Name</p>
+              <p className="text-xs text-muted-foreground font-normal uppercase">Account Name</p>
               <p className="text-foreground font-semibold mt-0.5">{account.accountName}</p>
             </div>
 
             <div>
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Account Number</p>
+              <p className="text-xs text-muted-foreground font-normal uppercase">Account Number</p>
               <p className="text-foreground font-mono font-semibold mt-0.5">{account.accountNumber}</p>
             </div>
 
             {account.bankCode && (
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Bank Code / Sort Code</p>
-                <p className="text-foreground font-mono font-medium mt-0.5">{account.bankCode}</p>
+                <p className="text-xs text-muted-foreground font-normal uppercase">Bank Code / Sort Code</p>
+                <p className="text-foreground font-mono font-normal mt-0.5">{account.bankCode}</p>
               </div>
             )}
 
             <div>
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Currency</p>
-              <p className="text-foreground font-medium mt-0.5">{account.currency}</p>
+              <p className="text-xs text-muted-foreground font-normal uppercase">Currency</p>
+              <p className="text-foreground font-normal mt-0.5">{account.currency}</p>
             </div>
 
             <div>
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Operational Status</p>
+              <p className="text-xs text-muted-foreground font-normal uppercase">Operational Status</p>
               <div className="mt-1">{getStatusBadge(account.status)}</div>
             </div>
 
             {account.createdAt && (
               <div className="pt-3 border-t border-border/40">
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em] flex items-center gap-1">
+                <p className="text-xs text-muted-foreground font-normal uppercase flex items-center gap-1">
                   <Calendar className="size-3.5" /> Date Added
                 </p>
                 <p className="text-xs text-foreground mt-0.5">
@@ -267,7 +264,7 @@ function BankAccountDetails() {
 
             {account.notes && (
               <div className="pt-3 border-t border-border/40">
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em] flex items-center gap-1">
+                <p className="text-xs text-muted-foreground font-normal uppercase flex items-center gap-1">
                   <FileText className="size-3.5" /> Notes / Remarks
                 </p>
                 <p className="text-xs text-foreground/90 mt-1 whitespace-pre-wrap rounded-lg bg-muted/30 p-2.5 border border-border/40">
@@ -290,7 +287,7 @@ function BankAccountDetails() {
               </CardDescription>
             </div>
             {isShared && (
-              <Badge className="bg-warning/10 text-warning border-warning/20 font-medium text-xs px-2.5 py-1">
+              <Badge className="bg-warning/10 text-warning border-warning/20 font-normal text-xs px-2.5 py-1">
                 Shared by {assignedDepots.length} Depots
               </Badge>
             )}
@@ -299,7 +296,7 @@ function BankAccountDetails() {
             {assignedDepots.length === 0 ? (
               <div className="p-8 text-center rounded-xl border border-dashed border-border/50 bg-muted/20">
                 <Warehouse className="size-10 text-muted-foreground mx-auto mb-2" />
-                <p className="text-sm font-medium text-foreground">No Depots Currently Linked</p>
+                <p className="text-sm font-normal text-foreground">No Depots Currently Linked</p>
                 <p className="text-xs text-muted-foreground mt-1 max-w-md mx-auto">
                   This bank account is configured as a general company account and is not assigned to specific depots.
                 </p>
@@ -340,7 +337,7 @@ function BankAccountDetails() {
                             <Warehouse className="size-4 text-primary shrink-0" />
                             {depot.name}
                           </h4>
-                          <Badge variant="outline" className="text-[10px] font-mono">
+                          <Badge variant="outline" className="text-xs font-mono">
                             {depot.code}
                           </Badge>
                         </div>
@@ -353,7 +350,7 @@ function BankAccountDetails() {
                       </div>
 
                       <div className="mt-4 pt-2 border-t border-border/30 flex items-center justify-between text-xs">
-                        <span className="text-muted-foreground">Status: <span className="font-medium text-foreground">{depot.status || 'Active'}</span></span>
+                        <span className="text-muted-foreground">Status: <span className="font-normal text-foreground">{depot.status || 'Active'}</span></span>
                         <Button
                           variant="ghost"
                           size="sm"

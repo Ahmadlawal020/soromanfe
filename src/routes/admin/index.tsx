@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react'
+import { FilterBar } from '#/components/FilterBar'
+import { PageHeader } from '#/components/PageHeader'
 import { StatCard } from '#/components/ui/stat-card'
 import { StatusChip } from '#/components/ui/status-chip'
 import { useAdminList, useDeleteAdmin } from '#/lib/hooks/useAdmin'
@@ -6,7 +8,7 @@ import { useToast } from '#/lib/hooks/useToast'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#/components/ui/card'
+import { Card, CardContent } from '#/components/ui/card'
 import { Input } from '#/components/ui/input'
 import {
   Table,
@@ -163,22 +165,22 @@ function StaffManagement() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header Section */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl md:text-2xl font-semibold tracking-tight text-foreground text-balance">Staff Management</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Create, edit, and manage staff access across the dashboard.
-          </p>
-        </div>
-        <Button
+      <PageHeader
+      eyebrow="Admin"
+      title="Staff Management"
+      description="Create, edit, and manage staff access across the dashboard."
+      actions={
+        <>
+          <Button
           size="sm"
-          
           onClick={() => navigate({ to: '/admin/form' })}
- >
+          >
           <Plus className="size-4 mr-2" />
           Add Staff
-        </Button>
-      </div>
+          </Button>
+        </>
+      }
+    />
 
       {/* Metrics Grid */}
       {!isLoading && !isError && (
@@ -213,60 +215,56 @@ function StaffManagement() {
       )}
 
       {/* Main Table Card */}
+      <FilterBar>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <div className="relative flex-1 sm:w-64">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground size-4" />
+        <Input
+        type="text"
+        placeholder="Search users..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="pl-9 pr-8 text-xs h-9"
+        />
+        {searchTerm && (
+        <button
+        onClick={() => setSearchTerm('')}
+        className="absolute right-2.5 top-1/2 -translate-y-1/2 size-4 rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground flex items-center justify-center transition-colors duration-250 ease-luxe"
+        aria-label="Clear search"
+        >
+        <X className="size-2.5" />
+        </button>
+        )}
+        </div>
+        <div className="flex items-center gap-2">
+        <Select value={roleFilter} onValueChange={setRoleFilter}>
+        <SelectTrigger className="w-full sm:w-[150px] text-xs h-9" aria-label="Filter by role">
+        <SelectValue placeholder="All Roles" />
+        </SelectTrigger>
+        <SelectContent>
+        <SelectItem value="all">All Roles</SelectItem>
+        {ROLE_GROUPS.map((group) => (
+        <SelectItem key={group.label} value={group.label}>{group.label}</SelectItem>
+        ))}
+        </SelectContent>
+        </Select>
+        <Select value={selectedLocation} onValueChange={setSelectedLocation}>
+        <SelectTrigger className="w-full sm:w-[150px] text-xs h-9" aria-label="Filter by location">
+        <SelectValue placeholder="All Locations" />
+        </SelectTrigger>
+        <SelectContent>
+        <SelectItem value="all">All Locations</SelectItem>
+        {statesList.map((s) => (
+        <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
+        ))}
+        </SelectContent>
+        </Select>
+        </div>
+        </div>
+      </FilterBar>
+
       <Card className="border border-border/60">
-        <CardHeader className="border-b border-border/60 bg-muted/20">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <CardTitle className="text-lg">Staff Directory</CardTitle>
-              <CardDescription className="text-xs">Browse and manage all system users</CardDescription>
-            </div>
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-              <div className="relative flex-1 sm:w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground size-4" />
-                <Input
-                  type="text"
-                  placeholder="Search users..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9 pr-8 text-xs h-9"
- />
-                {searchTerm && (
-                  <button
-                    onClick={() => setSearchTerm('')}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 size-4 rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground flex items-center justify-center transition-colors duration-250 ease-luxe"
-                    aria-label="Clear search"
- >
-                    <X className="size-2.5" />
-                  </button>
-                )}
-              </div>
-              <div className="flex items-center gap-2">
-                <Select value={roleFilter} onValueChange={setRoleFilter}>
-                  <SelectTrigger className="w-full sm:w-[150px] text-xs h-9" aria-label="Filter by role">
-                    <SelectValue placeholder="All Roles" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Roles</SelectItem>
-                    {ROLE_GROUPS.map((group) => (
-                      <SelectItem key={group.label} value={group.label}>{group.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select value={selectedLocation} onValueChange={setSelectedLocation}>
-                  <SelectTrigger className="w-full sm:w-[150px] text-xs h-9" aria-label="Filter by location">
-                    <SelectValue placeholder="All Locations" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Locations</SelectItem>
-                    {statesList.map((s) => (
-                      <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
-        </CardHeader>
+        
 
         <CardContent className="p-0">
           {isLoading ? (
@@ -312,12 +310,12 @@ function StaffManagement() {
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-3">
-                              <div className="size-9 rounded-full bg-primary/10 text-primary font-medium flex items-center justify-center text-xs shrink-0 ring-2 ring-primary/5">
+                              <div className="size-9 rounded-full bg-primary/10 text-primary font-normal flex items-center justify-center text-xs shrink-0 ring-2 ring-primary/5">
                                 {getInitials(staff.full_name)}
                               </div>
                               <div className="min-w-0">
-                                <p className="text-xs font-medium text-foreground truncate">{staff.full_name}</p>
-                                <p className="text-[11px] text-muted-foreground truncate">{staff.email}</p>
+                                <p className="text-xs font-normal text-foreground truncate">{staff.full_name}</p>
+                                <p className="text-xs text-muted-foreground truncate">{staff.email}</p>
                               </div>
                             </div>
                           </TableCell>
@@ -333,7 +331,7 @@ function StaffManagement() {
                             {staff.phone_number && (
                               <a
                                 href={`tel:${staff.phone_number}`}
-                                className="flex items-center gap-1.5 text-[11px] text-muted-foreground hover:text-primary transition-colors mt-0.5 duration-250 ease-luxe"
+                                className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors mt-0.5 duration-250 ease-luxe"
                                 onClick={(e) => e.stopPropagation()}
  >
                                 <Phone className="size-3 shrink-0" />
@@ -355,14 +353,14 @@ function StaffManagement() {
                                   <Badge
                                     key={r}
                                     variant="outline"
-                                    className={`text-[10px] px-2 py-0.5 font-normal ${customStyle || ''}`}
+                                    className={`text-xs px-2 py-0.5 font-normal ${customStyle || ''}`}
  >
                                     {ROLE_LABELS[r]}
                                   </Badge>
                                 )
                               })}
                               {userRoles.length > 2 && (
-                                <Badge variant="secondary" className="text-[10px] px-1.5 py-0.5 font-normal">
+                                <Badge variant="secondary" className="text-xs px-1.5 py-0.5 font-normal">
                                   +{userRoles.length - 2}
                                 </Badge>
                               )}

@@ -45,7 +45,7 @@ export function DangoteProductStep({ wizard }: DangoteProductStepProps) {
           <div className="inline-flex size-12 items-center justify-center rounded-xl bg-muted border border-border mb-3">
             <Package className="size-5 text-muted-foreground" />
           </div>
-          <p className="text-sm font-medium text-foreground">No Dangote products available</p>
+          <p className="text-sm font-normal text-foreground">No Dangote products available</p>
           <p className="text-xs text-muted-foreground mt-1">Contact admin to add Dangote products.</p>
         </div>
       ) : (
@@ -66,7 +66,7 @@ export function DangoteProductStep({ wizard }: DangoteProductStepProps) {
                 <div>
                   <div className="flex justify-between items-start">
                     <p className="font-semibold text-sm text-foreground">{product.name}</p>
-                    <Badge variant="outline" className="text-[10px] uppercase font-mono">{product.sku}</Badge>
+                    <Badge variant="outline" className="text-xs uppercase font-mono">{product.sku}</Badge>
                   </div>
                   <div className="flex items-center gap-2 mt-1.5">
                     <div className={`size-5 rounded-md ${categoryColors[product.category] || 'from-muted to-muted'} flex items-center justify-center`}>

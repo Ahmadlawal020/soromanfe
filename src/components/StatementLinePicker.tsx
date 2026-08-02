@@ -47,7 +47,7 @@ export function StatementLinePicker({
               {format(new Date(selected.txn_date), 'd MMM yyyy')}
             </span>
           </div>
-          <p className="mt-1.5 truncate text-sm font-medium">
+          <p className="mt-1.5 truncate text-sm font-normal">
             {selected.depositor || 'Unnamed depositor'}
           </p>
           <p className="mt-0.5 truncate text-xs text-muted-foreground">
@@ -103,7 +103,7 @@ export function StatementLinePicker({
                   className="flex w-full items-start justify-between gap-3 px-3.5 py-3 text-left transition-colors duration-250 ease-luxe outline-none hover:bg-muted/60 focus-visible:bg-muted/60"
                 >
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-medium">
+                    <p className="truncate text-sm font-normal">
                       {line.depositor || 'Unnamed depositor'}
                     </p>
                     <p className="mt-0.5 truncate text-xs text-muted-foreground tabular-nums">
@@ -121,7 +121,7 @@ export function StatementLinePicker({
         )}
       </div>
 
-      <p className={cn(MICRO, 'flex items-center gap-1.5 text-[0.6rem] text-muted-foreground/70')}>
+      <p className={cn(MICRO, 'flex items-center gap-1.5 text-xs text-muted-foreground/70')}>
         <Link2 className="size-3" />
         Amount search ignores commas
       </p>

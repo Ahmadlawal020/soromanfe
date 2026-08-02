@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '#/components/ui/select'
-import { ArrowLeft, Scale, Save, Loader2, Package, AlertTriangle, FileText } from 'lucide-react'
+import { Scale, Save, Loader2, Package, AlertTriangle, FileText } from 'lucide-react'
 import { useProductDetails, useCreateProduct, useUpdateProduct } from '#/lib/hooks/useProducts'
 
 export const Route = createFileRoute('/dangote-products/form')({
@@ -140,25 +141,11 @@ function DangoteProductForm() {
 
   return (
     <div className="space-y-6">
-      <header className="flex items-center justify-between">
-        <div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate({ to: '/dangote-products' })}
-            className="mb-2"
-          >
-            <ArrowLeft className="size-4 mr-2" />
-            Back to Dangote Products
-          </Button>
-          <h1 className="text-xl md:text-2xl font-semibold tracking-tight text-balance">
-            {isEdit ? 'Edit Dangote Product' : 'Register New Dangote Product'}
-          </h1>
-          <p className="text-muted-foreground">
-            {isEdit ? 'Modify details of this Dangote product listing' : 'Fill in the details to add a new Dangote product'}
-          </p>
-        </div>
-      </header>
+      <PageHeader
+      eyebrow="Dangote Delivery"
+      title={isEdit ? 'Edit Dangote Product' : 'Register New Dangote Product'}
+      description={isEdit ? 'Modify details of this Dangote product listing' : 'Fill in the details to add a new Dangote product'}
+    />
 
       {apiError && (
         <div className="bg-destructive/10 border border-destructive/30 text-destructive rounded-lg px-4 py-3 text-sm flex items-center gap-2">
@@ -173,7 +160,7 @@ function DangoteProductForm() {
           <div className="space-y-4 border rounded-lg p-4">
             <div className="flex items-center space-x-2">
               <Package className="size-5 text-primary" />
-              <h2 className="text-lg font-medium">Basic Product Details</h2>
+              <h2 className="text-lg font-normal">Basic Product Details</h2>
             </div>
 
             <div className="space-y-3">
@@ -273,7 +260,7 @@ function DangoteProductForm() {
           <div className="space-y-4 border rounded-lg p-4">
             <div className="flex items-center space-x-2">
               <Scale className="size-5 text-primary" />
-              <h2 className="text-lg font-medium">Technical Specifications</h2>
+              <h2 className="text-lg font-normal">Technical Specifications</h2>
             </div>
 
             <div className="space-y-3">
@@ -327,7 +314,7 @@ function DangoteProductForm() {
           <div className="space-y-4 border rounded-lg p-4">
             <div className="flex items-center space-x-2">
               <AlertTriangle className="size-5 text-primary" />
-              <h2 className="text-lg font-medium">Safety & Commercial</h2>
+              <h2 className="text-lg font-normal">Safety & Commercial</h2>
             </div>
 
             <div className="space-y-3">

@@ -75,15 +75,15 @@ function StatCard({
           {action}
         </div>
 
-        <div className="mt-5 text-xs font-medium tracking-[0.05em] uppercase text-muted-foreground">
+        <div className="mt-5 text-xs font-normal uppercase text-muted-foreground">
           {label}
         </div>
 
-        {/* break-all is deliberate: long naira figures must wrap inside the
+        {/* break-words is deliberate: long naira figures must wrap inside the
             card rather than blow the grid column out. */}
         <div
           className={cn(
-            "text-[28px] leading-[1.05] font-bold tracking-[-0.02em] break-all tabular-nums",
+            "text-3xl leading-[1.05] font-semibold tracking-[-0.02em] break-words tabular-nums",
             valueClassName ?? "text-foreground",
           )}
         >
@@ -91,7 +91,7 @@ function StatCard({
         </div>
 
         {description && (
-          <div className="text-[0.95rem] leading-[1.4] text-muted-foreground">
+          <div className="text-base leading-[1.4] text-muted-foreground">
             {description}
           </div>
         )}
@@ -112,12 +112,18 @@ function StatCardGrid({
   className,
   ...props
 }: React.ComponentProps<"div"> & { count: number }) {
+  // Columns follow the actual number of cards, so two tiles fill the row
+  // instead of sitting in two thirds of a three-column grid.
   const cols =
     count >= 6
       ? "grid-cols-2 sm:grid-cols-3"
       : count >= 4
         ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
-        : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+        : count === 3
+          ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+          : count === 2
+            ? "grid-cols-1 sm:grid-cols-2"
+            : "grid-cols-1"
 
   return <div className={cn("grid gap-3 sm:gap-4", className || cols)} {...props} />
 }

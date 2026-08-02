@@ -1,4 +1,5 @@
 import { Fragment, useMemo, useState } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { format, isWithinInterval } from 'date-fns'
 import {
@@ -41,7 +42,7 @@ const ALL = 'all'
 /** A removable active-filter chip. */
 function FilterChip({ label, onClear }: { label: string; onClear: () => void }) {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-foreground/15 bg-muted/40 py-0.5 pr-1 pl-2.5 text-[0.65rem] tracking-[0.12em] uppercase">
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-foreground/15 bg-muted/40 py-0.5 pr-1 pl-2.5 text-xs uppercase">
       {label}
       <button
         type="button"
@@ -59,7 +60,10 @@ function OrdersDashboard() {
   const navigate = useNavigate()
 
   const [searchTerm, setSearchTerm] = useState('')
-  const [datePreset, setDatePreset] = useState<DatePreset>('today')
+  // Opens on the month, not the day: order volume is low enough that
+  // "Today" is usually empty, which reads as a broken page rather than a
+  // quiet day. Change to 'today' if you'd rather it open narrow.
+  const [datePreset, setDatePreset] = useState<DatePreset>('month')
   const [customFrom, setCustomFrom] = useState('')
   const [customTo, setCustomTo] = useState('')
   const [statusFilter, setStatusFilter] = useState(ALL)
@@ -186,35 +190,33 @@ function OrdersDashboard() {
 
   return (
     <div className="animate-fade-in space-y-6">
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-        <div>
-          <p className={cn(MICRO, 'mb-1.5 text-muted-foreground')}>Orders</p>
-          <h1 className="text-xl font-semibold tracking-tight text-balance md:text-2xl">
-            Order register
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Every customer product order, its payment state and fulfilment status.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
+      <PageHeader
+      eyebrow="Orders"
+      title="Order register"
+      description="Every customer product order, its payment state and fulfilment status."
+      actions={
+        <>
+          <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
-            <RefreshCw className={cn(isFetching && 'animate-spin')} />
-            Refresh
+          <RefreshCw className={cn(isFetching && 'animate-spin')} />
+          Refresh
           </Button>
           <Button variant="outline" size="sm" onClick={() => runExport('excel')} disabled={exporting !== null}>
-            <FileSpreadsheet />
-            {exporting === 'excel' ? 'Exporting…' : 'Excel'}
+          <FileSpreadsheet />
+          {exporting === 'excel' ? 'Exporting…' : 'Excel'}
           </Button>
           <Button variant="outline" size="sm" onClick={() => runExport('pdf')} disabled={exporting !== null}>
-            <FileText />
-            {exporting === 'pdf' ? 'Exporting…' : 'PDF'}
+          <FileText />
+          {exporting === 'pdf' ? 'Exporting…' : 'PDF'}
           </Button>
           <Button size="sm" onClick={() => navigate({ to: '/admin-order' as any })}>
-            <Plus data-icon="inline-start" />
-            Place new order
+          <Plus data-icon="inline-start" />
+          Place new order
           </Button>
-        </div>
-      </div>
+          </div>
+        </>
+      }
+    />
 
       {isLoading ? (
         <PageLoader message="Loading orders…" />
@@ -404,7 +406,7 @@ function OrdersDashboard() {
                           return (
                             <TableRow key={o.id ?? o._id}>
                               <TableCell className="text-muted-foreground tabular-nums">{serial}</TableCell>
-                              <TableCell className="font-medium text-accent">{o.orderNumber}</TableCell>
+                              <TableCell className="font-normal text-accent">{o.orderNumber}</TableCell>
                               <TableCell className="text-muted-foreground tabular-nums">
                                 {o.createdAt ? format(new Date(o.createdAt), 'd MMM yyyy') : '—'}
                               </TableCell>
@@ -446,7 +448,7 @@ function OrdersDashboard() {
 
                         {showSubtotals && (
                           <TableRow className="bg-muted/40 hover:bg-muted/40">
-                            <TableCell colSpan={6} className={cn(MICRO, 'text-[0.6rem] text-muted-foreground')}>
+                            <TableCell colSpan={6} className={cn(MICRO, 'text-xs text-muted-foreground')}>
                               {day} · {rows.length} order{rows.length === 1 ? '' : 's'}
                             </TableCell>
                             <TableCell className="text-right font-semibold tabular-nums">

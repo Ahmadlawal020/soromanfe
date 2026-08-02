@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
@@ -6,10 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '#/com
 import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
 import { CommaInput } from '#/components/ui/comma-input'
-import {
-  ArrowLeft, Package, MapPin, DollarSign, Calendar, Clock, CheckCircle, XCircle,
-  User, FileText, Mail, Phone, Flame, AlertTriangle,
-} from 'lucide-react'
+import { ArrowLeft, Package, MapPin, DollarSign, Calendar, Clock, CheckCircle, XCircle, User, FileText, Mail, Phone, Flame } from 'lucide-react'
 import { useLpgOrderRequestDetails, useReviewLpgOrderRequest } from '#/lib/hooks/useLpgOrders'
 import { PageLoader } from '#/components/PageLoader'
 import { PageError } from '#/components/PageError'
@@ -128,18 +126,16 @@ function ReviewPage() {
         { label: request.requestNumber },
       ]} />
 
-      <div className="flex items-center gap-4">
-        <Button variant="outline" size="icon" onClick={() => navigate({ to: '/lpg-order-request' })}>
-          <ArrowLeft className="size-4" />
-        </Button>
-        <div className="flex-1">
-          <h1 className="text-2xl sm:text-xl md:text-2xl font-semibold tracking-tight text-foreground text-balance">
-            Review LPG Order Request
-          </h1>
-          <p className="text-muted-foreground text-sm">{request.requestNumber}</p>
-        </div>
-        {statusBadge(request.status)}
-      </div>
+      <PageHeader
+      eyebrow="LPG Home Delivery"
+      title="Review LPG Order Request"
+      description={`{request.requestNumber}`}
+      actions={
+        <>
+          {statusBadge(request.status)}
+        </>
+      }
+    />
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Request Details */}
@@ -170,14 +166,14 @@ function ReviewPage() {
               <Mail className="size-4 text-muted-foreground shrink-0" />
               <div>
                 <p className="text-xs text-muted-foreground">Email</p>
-                <p className="text-sm font-medium text-foreground">{request.customerEmail || 'N/A'}</p>
+                <p className="text-sm font-normal text-foreground">{request.customerEmail || 'N/A'}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <Phone className="size-4 text-muted-foreground shrink-0" />
               <div>
                 <p className="text-xs text-muted-foreground">Phone</p>
-                <p className="text-sm font-medium text-foreground">{request.customerPhone || 'N/A'}</p>
+                <p className="text-sm font-normal text-foreground">{request.customerPhone || 'N/A'}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -209,7 +205,7 @@ function ReviewPage() {
               <MapPin className="size-4 text-muted-foreground shrink-0" />
               <div>
                 <p className="text-xs text-muted-foreground">Delivery Address</p>
-                <p className="text-sm font-medium text-foreground">{request.deliveryAddress}</p>
+                <p className="text-sm font-normal text-foreground">{request.deliveryAddress}</p>
                 {request.deliveryState && (
                   <p className="text-xs text-muted-foreground">{request.deliveryState}{request.deliveryLga ? `, ${request.deliveryLga}` : ''}</p>
                 )}
@@ -219,7 +215,7 @@ function ReviewPage() {
               <Calendar className="size-4 text-muted-foreground shrink-0" />
               <div>
                 <p className="text-xs text-muted-foreground">Submitted</p>
-                <p className="text-sm font-medium text-foreground">{formatDate(request.createdAt)}</p>
+                <p className="text-sm font-normal text-foreground">{formatDate(request.createdAt)}</p>
               </div>
             </div>
           </CardContent>
@@ -338,17 +334,17 @@ function ReviewPage() {
                   {request.expectedArrivalDate && (
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Expected Arrival</span>
-                      <span className="font-medium">{request.expectedArrivalDate}</span>
+                      <span className="font-normal">{request.expectedArrivalDate}</span>
                     </div>
                   )}
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Reviewed By</span>
-                    <span className="font-medium">{reviewerName}</span>
+                    <span className="font-normal">{reviewerName}</span>
                   </div>
                   {request.reviewedAt && (
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Reviewed At</span>
-                      <span className="font-medium">{formatDate(request.reviewedAt)}</span>
+                      <span className="font-normal">{formatDate(request.reviewedAt)}</span>
                     </div>
                   )}
                 </div>

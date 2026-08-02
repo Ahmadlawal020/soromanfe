@@ -1,27 +1,15 @@
 import { useState, useMemo, useCallback } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate, Link } from '@tanstack/react-router'
 import { format } from 'date-fns'
 import { usePfiList, useUpdatePfi, type Pfi } from '#/lib/hooks/usePfis'
-import { useTruckList } from '#/lib/hooks/useTrucks'
+import { useAllocatableTrucks } from '#/lib/hooks/useFleet'
 import { useDeliveryInventoryList, useCreateDeliveryInventory } from '#/lib/hooks/useDeliveryInventory'
 import { useToast } from '#/lib/hooks/useToast'
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
-import {
-  Truck,
-  ArrowLeft,
-  Plus,
-  Search,
-  Loader2,
-  CheckCircle2,
-  Droplets,
-  Building2,
-  Calendar,
-  Tag,
-  AlertCircle,
-  X,
-} from 'lucide-react'
+import { Truck, Plus, Search, Loader2, CheckCircle2, Droplets, Building2, Calendar, Tag, AlertCircle, X } from 'lucide-react'
 
 export const Route = createFileRoute('/delivery-operations/allocate-trucks')({
   component: AllocateTrucksPage,
@@ -41,17 +29,17 @@ function AllocateTrucksPage() {
 
   // Queries
   const { data: pfisData } = usePfiList()
-  const { data: trucksData } = useTruckList()
+  const { data: trucksData } = useAllocatableTrucks()
   const { data: rawInventory = [] } = useDeliveryInventoryList()
 
   const allPfis: Pfi[] = useMemo(() => {
     if (!pfisData) return []
-    return Array.isArray(pfisData) ? pfisData : (pfisData.pfis || pfisData.data || [])
+    return Array.isArray(pfisData) ? pfisData : (pfisData.pfis || [])
   }, [pfisData])
 
   const allTrucks = useMemo(() => {
     if (!trucksData) return []
-    return Array.isArray(trucksData) ? trucksData : (trucksData.trucks || trucksData.data || [])
+    return Array.isArray(trucksData) ? trucksData : (trucksData.trucks || [])
   }, [trucksData])
 
   const allEntries = useMemo(() => {
@@ -265,23 +253,11 @@ function AllocateTrucksPage() {
     <div className="space-y-6">
       {/* Header Bar */}
       <div className="flex items-center justify-between border-b border-border pb-4">
-        <div className="flex items-center gap-3">
-          <Link
-            to="/delivery-operations"
-            className="p-2 rounded-lg border border-border hover:bg-muted dark:hover:bg-foreground transition-colors text-muted-foreground hover:text-foreground duration-250 ease-luxe"
-          >
-            <ArrowLeft className="size-4" />
-          </Link>
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground flex items-center gap-2">
-              <Truck className="size-6 text-accent" />
-              Allocate Trucks to PFI
-            </h1>
-            <p className="text-xs text-muted-foreground">
-              Select an active PFI source, specify allocation code, and assign trucks for loading.
-            </p>
-          </div>
-        </div>
+        <PageHeader
+      eyebrow="Truck Sales"
+      title="Allocate Trucks to PFI"
+      description="Select an active PFI source, specify allocation code, and assign trucks for loading."
+    />
 
         <div className="flex items-center gap-2">
           <Link to="/delivery-operations">
@@ -291,7 +267,7 @@ function AllocateTrucksPage() {
           </Link>
           <Button
             size="sm"
-            className="bg-accent hover:bg-accent/80 text-accent-foreground gap-2 cursor-pointer font-medium"
+            className="bg-accent hover:bg-accent/80 text-accent-foreground gap-2 cursor-pointer font-normal"
             onClick={handleSave}
             disabled={saving || selectedTruckIds.size === 0 || !loadPfi}
           >
@@ -320,7 +296,7 @@ function AllocateTrucksPage() {
                   const pfi = pfiMap.get(e.target.value)
                   if (pfi?.locationName) setLoadDepot(pfi.locationName)
                 }}
-                className="h-8 w-full rounded-lg border border-border bg-background text-foreground px-2.5 text-base md:text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 font-medium"
+                className="h-8 w-full rounded-lg border border-border bg-background text-foreground px-2.5 text-base md:text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 font-normal"
               >
                 <option value="">Select a PFI...</option>
                 {activePfiOptions.map(p => (
@@ -334,7 +310,7 @@ function AllocateTrucksPage() {
                 <div className="p-3.5 bg-accent/10 border border-accent/20 rounded-lg text-xs space-y-1.5">
                   <div className="flex justify-between font-semibold text-accent">
                     <span>{selectedPfi.pfiNumber}</span>
-                    <span className="bg-accent/20 text-accent px-2 py-0.5 rounded text-[10px] uppercase font-semibold">Active</span>
+                    <span className="bg-accent/20 text-accent px-2 py-0.5 rounded text-xs uppercase font-semibold">Active</span>
                   </div>
                   <div className="text-accent space-y-1">
                     <p className="flex items-center gap-1.5">
@@ -372,7 +348,7 @@ function AllocateTrucksPage() {
             <div className="space-y-3">
               {/* Allocation Code */}
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em] flex items-center gap-1">
+                <Label className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1">
                   <Tag className="size-3.5" /> Allocation Code
                 </Label>
                 {showNewCodeInput ? (
@@ -397,7 +373,7 @@ function AllocateTrucksPage() {
                       aria-label="Allocation Code"
                       value={loadCode}
                       onChange={e => setLoadCode(e.target.value)}
-                      className="h-8 flex-1 rounded-lg border border-border bg-background text-foreground px-2.5 text-base md:text-sm font-mono font-medium"
+                      className="h-8 flex-1 rounded-lg border border-border bg-background text-foreground px-2.5 text-base md:text-sm font-mono font-normal"
                     >
                       <option value="">No Code (Unassigned)</option>
                       {deliveryCodes.map(c => (
@@ -420,7 +396,7 @@ function AllocateTrucksPage() {
 
               {/* Depot Override */}
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em] flex items-center gap-1">
+                <Label className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1">
                   <Building2 className="size-3.5" /> Depot Location
                 </Label>
                 <Input
@@ -433,7 +409,7 @@ function AllocateTrucksPage() {
 
               {/* Date Allocated */}
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em] flex items-center gap-1">
+                <Label className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1">
                   <Calendar className="size-3.5" /> Date Loaded
                 </Label>
                 <Input
@@ -448,7 +424,7 @@ function AllocateTrucksPage() {
 
           {/* Allocation Summary Card */}
           <div className="bg-foreground text-background p-5 rounded-xl space-y-3">
-            <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold uppercase tracking-[0.22em]">
+            <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold uppercase">
               <span>Allocation Summary</span>
               <Truck className="size-4 text-accent" />
             </div>
@@ -473,7 +449,7 @@ function AllocateTrucksPage() {
             </div>
 
             {trucksWithNoCapacity.length > 0 && (
-              <div className="p-2 bg-warning/60 border border-warning/50 rounded text-[11px] text-warning flex items-start gap-1.5">
+              <div className="p-2 bg-warning/60 border border-warning/50 rounded text-xs text-warning flex items-start gap-1.5">
                 <AlertCircle className="size-3.5 shrink-0 mt-0.5" />
                 <span>No capacity set for: {trucksWithNoCapacity.join(', ')}</span>
               </div>
@@ -533,7 +509,7 @@ function AllocateTrucksPage() {
             {filteredTrucks.length === 0 ? (
               <div className="p-12 text-center border-2 border-dashed border-border rounded-xl">
                 <Truck className="size-9 mx-auto text-muted-foreground/40 mb-2" />
-                <p className="text-sm font-medium text-muted-foreground">
+                <p className="text-sm font-normal text-muted-foreground">
                   {availableTrucks.length === 0
                     ? 'All registered trucks are currently loaded in transit.'
                     : 'No available trucks match your search query.'}
@@ -572,7 +548,7 @@ function AllocateTrucksPage() {
                             {truck.plateNumber}
                           </span>
                           <span
-                            className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${capacity > 0
+                            className={`text-xs font-semibold px-2 py-0.5 rounded-full ${capacity > 0
  ? 'bg-accent/15 text-accent'
  : 'bg-muted text-muted-foreground'
  }`}
@@ -586,7 +562,7 @@ function AllocateTrucksPage() {
                         </p>
 
                         {truck.model && (
-                          <p className="text-[11px] text-muted-foreground truncate mt-0.5">
+                          <p className="text-xs text-muted-foreground truncate mt-0.5">
                             Model: {truck.model}
                           </p>
                         )}

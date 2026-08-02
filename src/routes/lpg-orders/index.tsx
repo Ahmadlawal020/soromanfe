@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react'
+import { FilterBar } from '#/components/FilterBar'
+import { PageHeader } from '#/components/PageHeader'
 import { StatCard } from '#/components/ui/stat-card'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '#/components/ui/card'
+import { Card, CardContent } from '#/components/ui/card'
 import { Input } from '#/components/ui/input'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '#/components/ui/select'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '#/components/ui/table'
-import { Package, Clock, CheckCircle, DollarSign, Search, Plus, X, Eye, FileText, MapPin, Truck, Flame } from 'lucide-react'
+import { Clock, CheckCircle, DollarSign, Search, Plus, X, Eye, FileText, MapPin, Truck, Flame } from 'lucide-react'
 import { useLpgOrderRequests } from '#/lib/hooks/useLpgOrders'
 import { PageLoader } from '#/components/PageLoader'
 import { PageError } from '#/components/PageError'
@@ -110,16 +112,19 @@ function LpgOrdersDashboard() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">LPG Cooking Gas Orders</h1>
-          <p className="text-muted-foreground">View and track all LPG cooking gas orders, payment, and collection status.</p>
-        </div>
-        <Button size="sm" onClick={() => navigate({ to: '/admin-order' as any })}>
+      <PageHeader
+      eyebrow="LPG Home Delivery"
+      title="LPG Cooking Gas Orders"
+      description="View and track all LPG cooking gas orders, payment, and collection status."
+      actions={
+        <>
+          <Button size="sm" onClick={() => navigate({ to: '/admin-order' as any })}>
           <Plus data-icon="inline-start" />
           Place LPG order
-        </Button>
-      </div>
+          </Button>
+        </>
+      }
+    />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard icon={<FileText />} label="Total Orders" value={totalOrders} />
@@ -128,57 +133,53 @@ function LpgOrdersDashboard() {
         <StatCard icon={<DollarSign />} label="Total Value" value={formatCurrency(totalValue)} />
       </div>
 
+      <FilterBar>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <div className="relative flex-1 sm:w-64">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground size-4" />
+        <Input
+        type="text"
+        placeholder="Search request ID, customer, station..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="pl-10"
+        />
+        {searchTerm && (
+        <button
+        onClick={() => setSearchTerm('')}
+        className="absolute right-3 top-1/2 -translate-y-1/2 size-5 rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground flex items-center justify-center cursor-pointer transition-colors duration-250 ease-luxe"
+        aria-label="Clear search"
+        >
+        <X className="size-2.5" />
+        </button>
+        )}
+        </div>
+        <Select value={paymentFilter} onValueChange={setPaymentFilter}>
+        <SelectTrigger className="w-full sm:w-[150px]">
+        <SelectValue placeholder="Payment" />
+        </SelectTrigger>
+        <SelectContent>
+        <SelectItem value="all">All Payment</SelectItem>
+        <SelectItem value="Paid">Paid</SelectItem>
+        <SelectItem value="Unpaid">Unpaid</SelectItem>
+        </SelectContent>
+        </Select>
+        <Select value={collectionFilter} onValueChange={setCollectionFilter}>
+        <SelectTrigger className="w-full sm:w-[150px]">
+        <SelectValue placeholder="Collection" />
+        </SelectTrigger>
+        <SelectContent>
+        <SelectItem value="all">All Collection</SelectItem>
+        <SelectItem value="Pending">Pending</SelectItem>
+        <SelectItem value="Dispatched">Dispatched</SelectItem>
+        <SelectItem value="Collected">Collected</SelectItem>
+        </SelectContent>
+        </Select>
+        </div>
+      </FilterBar>
+
       <Card>
-        <CardHeader className="border-b border-border">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <CardTitle>LPG Order Register</CardTitle>
-              <CardDescription>A complete log of all approved LPG cooking gas orders</CardDescription>
-            </div>
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-              <div className="relative flex-1 sm:w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground size-4" />
-                <Input
-                  type="text"
-                  placeholder="Search request ID, customer, station..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-                {searchTerm && (
-                  <button
-                    onClick={() => setSearchTerm('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 size-5 rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground flex items-center justify-center cursor-pointer transition-colors duration-250 ease-luxe"
-                    aria-label="Clear search"
-                  >
-                    <X className="size-2.5" />
-                  </button>
-                )}
-              </div>
-              <Select value={paymentFilter} onValueChange={setPaymentFilter}>
-                <SelectTrigger className="w-full sm:w-[150px]">
-                  <SelectValue placeholder="Payment" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Payment</SelectItem>
-                  <SelectItem value="Paid">Paid</SelectItem>
-                  <SelectItem value="Unpaid">Unpaid</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={collectionFilter} onValueChange={setCollectionFilter}>
-                <SelectTrigger className="w-full sm:w-[150px]">
-                  <SelectValue placeholder="Collection" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Collection</SelectItem>
-                  <SelectItem value="Pending">Pending</SelectItem>
-                  <SelectItem value="Dispatched">Dispatched</SelectItem>
-                  <SelectItem value="Collected">Collected</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </CardHeader>
+        
         <CardContent>
           {filteredRequests.length === 0 ? (
             <PageEmpty
@@ -219,7 +220,7 @@ function LpgOrdersDashboard() {
                         </TableCell>
                         <TableCell>
                           <div className="space-y-0.5">
-                            <p className="font-medium text-foreground">{req.customerName}</p>
+                            <p className="font-normal text-foreground">{req.customerName}</p>
                             {req.deliveryState && (
                               <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                 <MapPin className="size-3" />
@@ -229,12 +230,12 @@ function LpgOrdersDashboard() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-1.5 text-sm font-medium">
+                          <div className="flex items-center gap-1.5 text-sm font-normal">
                             <Flame className="size-3.5 text-muted-foreground" />
                             <span>{req.stationName}</span>
                           </div>
                         </TableCell>
-                        <TableCell className="font-medium">
+                        <TableCell className="font-normal">
                           {Number(req.cylinderQuantity).toLocaleString()} x {req.cylinderSizeKg}Kg
                         </TableCell>
                         <TableCell className="font-semibold text-foreground">

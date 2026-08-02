@@ -1,15 +1,12 @@
 import { useState, useMemo, useCallback } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate, useSearch } from '@tanstack/react-router'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '#/components/ui/card'
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
 import { Badge } from '#/components/ui/badge'
-import {
-  ArrowLeft, Truck, Calendar, Tag, Building2, UserPlus,
-  Loader2, Plus, X, Fuel, CheckCircle2, ChevronRight,
-  Users, MapPin, AlertTriangle,
-} from 'lucide-react'
+import { Truck, Calendar, Tag, Building2, UserPlus, Loader2, Plus, X, Fuel, CheckCircle2, ChevronRight, Users, MapPin, AlertTriangle } from 'lucide-react'
 import { useDeliveryInventoryList, useUpdateDeliveryInventory } from '#/lib/hooks/useDeliveryInventory'
 import { useDeliveryCustomerList } from '#/lib/hooks/useDeliveryCustomers'
 import { useDeliverySalesList, useCreateDeliverySale } from '#/lib/hooks/useDeliverySales'
@@ -89,13 +86,13 @@ function AssignCustomerPage() {
   const customers: DeliveryCustomer[] = useMemo(() => {
     if (!rawCustomers) return []
     if (Array.isArray(rawCustomers)) return rawCustomers
-    return rawCustomers.customers || rawCustomers.data || []
+    return rawCustomers.customers || []
   }, [rawCustomers])
 
   const pfis: Pfi[] = useMemo(() => {
     if (!rawPfis) return []
     if (Array.isArray(rawPfis)) return rawPfis
-    return rawPfis.pfis || rawPfis.data || []
+    return rawPfis.pfis || []
   }, [rawPfis])
 
   const pfiMap = useMemo(() => {
@@ -409,7 +406,7 @@ function AssignCustomerPage() {
     return (
       <div className="p-8 text-center max-w-md mx-auto my-12">
         <Loader2 className="mx-auto size-8 animate-spin text-warning mb-3" />
-        <p className="text-sm text-muted-foreground font-medium">Loading details...</p>
+        <p className="text-sm text-muted-foreground font-normal">Loading details...</p>
       </div>
     )
   }
@@ -418,11 +415,11 @@ function AssignCustomerPage() {
     <div className="space-y-6">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-1.5 text-sm">
-        <button onClick={() => navigate({ to: '/sales-ledger' })} className="text-muted-foreground hover:text-foreground font-medium transition-colors duration-250 ease-luxe">
+        <button onClick={() => navigate({ to: '/sales-ledger' })} className="text-muted-foreground hover:text-foreground font-normal transition-colors duration-250 ease-luxe">
           Sales Ledger
         </button>
         <ChevronRight className="size-3.5 text-muted-foreground" />
-        <button onClick={goBack} className="text-muted-foreground hover:text-foreground font-medium transition-colors duration-250 ease-luxe">
+        <button onClick={goBack} className="text-muted-foreground hover:text-foreground font-normal transition-colors duration-250 ease-luxe">
           {truckNumber || 'Details'}
         </button>
         <ChevronRight className="size-3.5 text-muted-foreground" />
@@ -431,20 +428,12 @@ function AssignCustomerPage() {
 
       {/* Header */}
       <div className="flex items-center justify-between border-b border-border pb-4">
-        <div className="flex items-center gap-3">
-          <Button variant="outline" size="sm" className="gap-1.5 text-foreground" onClick={goBack}>
-            <ArrowLeft className="size-4" /> Back
-          </Button>
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground flex items-center gap-2">
-              <UserPlus className="size-5 text-warning" />
-              Assign New Customer
-            </h1>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Link customer(s) to this truck cycle. Rates and payments can be added later.
-            </p>
-          </div>
-        </div>
+        <PageHeader
+      eyebrow="Truck Sales"
+      title="Assign New Customer"
+      description="Link customer(s) to this truck cycle. Rates and payments can be added later."
+      backAction={goBack}
+    />
       </div>
 
       {/* Truck Context Card */}
@@ -461,7 +450,7 @@ function AssignCustomerPage() {
         <CardContent className="pt-4">
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-sm">
             <div className="p-3 bg-card rounded-xl border border-warning/20">
-              <div className="text-xs text-muted-foreground font-medium flex items-center gap-1">
+              <div className="text-xs text-muted-foreground font-normal flex items-center gap-1">
                 <Truck className="size-3 text-warning" /> Truck Number
               </div>
               <div className="font-semibold text-base font-mono text-foreground mt-0.5">
@@ -469,7 +458,7 @@ function AssignCustomerPage() {
               </div>
             </div>
             <div className="p-3 bg-card rounded-xl border border-warning/20">
-              <div className="text-xs text-muted-foreground font-medium flex items-center gap-1">
+              <div className="text-xs text-muted-foreground font-normal flex items-center gap-1">
                 <Calendar className="size-3 text-muted-foreground" /> Date Loaded
               </div>
               <div className="font-semibold text-foreground mt-0.5">
@@ -477,7 +466,7 @@ function AssignCustomerPage() {
               </div>
             </div>
             <div className="p-3 bg-card rounded-xl border border-warning/20">
-              <div className="text-xs text-muted-foreground font-medium flex items-center gap-1">
+              <div className="text-xs text-muted-foreground font-normal flex items-center gap-1">
                 <Building2 className="size-3 text-warning" /> Depot
               </div>
               <div className="font-semibold text-foreground mt-0.5">
@@ -485,7 +474,7 @@ function AssignCustomerPage() {
               </div>
             </div>
             <div className="p-3 bg-card rounded-xl border border-warning/20">
-              <div className="text-xs text-muted-foreground font-medium flex items-center gap-1">
+              <div className="text-xs text-muted-foreground font-normal flex items-center gap-1">
                 <Tag className="size-3 text-muted-foreground" /> PFI Code
               </div>
               <div className="font-semibold text-foreground mt-0.5">
@@ -497,7 +486,7 @@ function AssignCustomerPage() {
               </div>
             </div>
             <div className="p-3 bg-card rounded-xl border border-warning/20">
-              <div className="text-xs text-muted-foreground font-medium flex items-center gap-1">
+              <div className="text-xs text-muted-foreground font-normal flex items-center gap-1">
                 <Fuel className="size-3 text-accent" /> Capacity
               </div>
               <div className="font-semibold text-foreground mt-0.5">
@@ -505,7 +494,7 @@ function AssignCustomerPage() {
                   <>
                     {totalTruckCapacity.toLocaleString()} L
                     {alreadyAllocatedQty > 0 && (
-                      <span className="block text-xs font-medium text-muted-foreground mt-0.5">
+                      <span className="block text-xs font-normal text-muted-foreground mt-0.5">
                         {remainingCapacity.toLocaleString()} L remaining
                       </span>
                     )}
@@ -555,7 +544,7 @@ function AssignCustomerPage() {
                           </span>
                         )}
                         {a.isFillingStation && (
-                          <Badge className="text-[10px] bg-warning/20 text-warning border-warning/30 px-1 py-0">
+                          <Badge className="text-xs bg-warning/20 text-warning border-warning/30 px-1 py-0">
                             FS
                           </Badge>
                         )}
@@ -565,7 +554,7 @@ function AssignCustomerPage() {
                   <div className="text-right shrink-0 ml-3">
                     <p className="font-semibold text-foreground text-sm">{a.quantity > 0 ? `${a.quantity.toLocaleString()} L` : '—'}</p>
                     {a.paymentCount > 0 && (
-                      <p className="text-[11px] text-accent font-medium">
+                      <p className="text-xs text-accent font-normal">
                         {a.paymentCount} payment{a.paymentCount !== 1 ? 's' : ''} · {a.totalPaid.toLocaleString()} paid
                       </p>
                     )}
@@ -575,7 +564,7 @@ function AssignCustomerPage() {
 
               {/* Summary bar */}
               <div className="flex items-center justify-between pt-2 border-t border-border text-xs">
-                <span className="text-muted-foreground font-medium">
+                <span className="text-muted-foreground font-normal">
                   Total already allocated: <strong className="text-foreground">{alreadyAllocatedQty.toLocaleString()} L</strong>
                 </span>
                 {totalTruckCapacity > 0 && (
@@ -641,11 +630,11 @@ function AssignCustomerPage() {
  }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em] flex items-center gap-1.5">
+                  <span className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1.5">
                     {isFS && <Fuel className="size-3.5 text-warning" />}
                     Customer #{idx + 1}
                     {isFS && (
-                      <Badge className="ml-1 text-[10px] font-semibold bg-warning/20 text-warning border-warning/30 px-1.5 py-0 normal-case tracking-normal">
+                      <Badge className="ml-1 text-xs font-semibold bg-warning/20 text-warning border-warning/30 px-1.5 py-0 normal-case tracking-normal">
                         Filling Station
                       </Badge>
                     )}
@@ -671,7 +660,7 @@ function AssignCustomerPage() {
                       aria-label={`Customer for row ${idx + 1}`}
                       value={row.customer}
                       onChange={e => updateSaleRow(row.uid, 'customer', e.target.value)}
-                      className={`h-10 w-full rounded-lg border bg-background text-foreground px-3 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring ${rowErrors[row.uid]?.customer ? 'border-destructive' : 'border-input'
+                      className={`h-10 w-full rounded-lg border bg-background text-foreground px-3 py-2 text-sm font-normal transition-colors focus:outline-none focus:ring-2 focus:ring-ring ${rowErrors[row.uid]?.customer ? 'border-destructive' : 'border-input'
  }`}
                     >
                       <option value="">Select customer...</option>
@@ -686,7 +675,7 @@ function AssignCustomerPage() {
                       })}
                     </select>
                     {rowErrors[row.uid]?.customer && (
-                      <p className="text-[11px] text-destructive font-medium">{rowErrors[row.uid].customer}</p>
+                      <p className="text-xs text-destructive font-normal">{rowErrors[row.uid].customer}</p>
                     )}
                   </div>
 
@@ -701,7 +690,7 @@ function AssignCustomerPage() {
                       onChange={e => updateSaleRow(row.uid, 'location', e.target.value)}
                     />
                     {rowErrors[row.uid]?.location && (
-                      <p className="text-[11px] text-destructive font-medium">{rowErrors[row.uid].location}</p>
+                      <p className="text-xs text-destructive font-normal">{rowErrors[row.uid].location}</p>
                     )}
                   </div>
 
@@ -713,12 +702,12 @@ function AssignCustomerPage() {
                       type="text"
                       inputMode="decimal"
                       placeholder={remainingCapacity > 0 ? `max ${remainingCapacity.toLocaleString()}` : 'e.g. 33,000'}
-                      className={`h-10 text-sm font-medium ${rowErrors[row.uid]?.quantity ? 'border-destructive' : ''}`}
+                      className={`h-10 text-sm font-normal ${rowErrors[row.uid]?.quantity ? 'border-destructive' : ''}`}
                       value={row.quantity}
                       onChange={e => updateSaleRow(row.uid, 'quantity', e.target.value)}
                     />
                     {rowErrors[row.uid]?.quantity && (
-                      <p className="text-[11px] text-destructive font-medium">{rowErrors[row.uid].quantity}</p>
+                      <p className="text-xs text-destructive font-normal">{rowErrors[row.uid].quantity}</p>
                     )}
                   </div>
                 </div>
@@ -774,7 +763,7 @@ function AssignCustomerPage() {
                   />
                 )}
               </div>
-              <div className="flex items-center gap-4 mt-2 text-[11px]">
+              <div className="flex items-center gap-4 mt-2 text-xs">
                 {alreadyAllocatedQty > 0 && (
                   <span className="flex items-center gap-1.5">
                     <span className="size-2 rounded-full bg-muted" />

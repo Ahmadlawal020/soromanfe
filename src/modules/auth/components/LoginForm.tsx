@@ -140,7 +140,7 @@ export function LoginForm() {
               </Label>
               <button
                 type="button"
-                className="cursor-pointer text-sm font-medium text-accent underline-offset-4 transition-colors duration-250 ease-luxe outline-none hover:underline focus-visible:underline"
+                className="cursor-pointer text-sm font-normal text-accent underline-offset-4 transition-colors duration-250 ease-luxe outline-none hover:underline focus-visible:underline"
                 onClick={() => {
                   setForgotOpen(true)
                   resetMutation.reset()
@@ -176,7 +176,7 @@ export function LoginForm() {
 
           {resetMutation.isSuccess ? (
             <div className="space-y-3 py-4 text-center">
-              <p className="font-medium text-accent">Password reset sent</p>
+              <p className="font-normal text-accent">Password reset sent</p>
               <p className="text-sm text-muted-foreground">
                 If that email is registered, a link to configure a new password has been sent to it. Check your inbox.
               </p>
