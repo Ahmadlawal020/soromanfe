@@ -15,6 +15,7 @@ import { Route as SetPasswordRouteImport } from './routes/set-password'
 import { Route as AdminOrderIndexRouteImport } from './routes/admin-order/index'
 import { Route as AdminOrderDangoteRequestFormRouteImport } from './routes/admin-order/dangote-request-form'
 import { Route as AdminOrderDepotRouteImport } from './routes/admin-order/depot'
+import { Route as AdminOrderLpgRequestFormRouteImport } from './routes/admin-order/lpg-request-form'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminDetailsRouteImport } from './routes/admin/details'
 import { Route as AdminFormRouteImport } from './routes/admin/form'
@@ -56,6 +57,14 @@ import { Route as FilingStationsDetailsRouteImport } from './routes/filing-stati
 import { Route as FilingStationsFormRouteImport } from './routes/filing-stations/form'
 import { Route as LicenceVerificationIndexRouteImport } from './routes/licence-verification/index'
 import { Route as LicenceVerificationReviewRouteImport } from './routes/licence-verification/review'
+import { Route as LpgOrderRequestIndexRouteImport } from './routes/lpg-order-request/index'
+import { Route as LpgOrderRequestReviewRouteImport } from './routes/lpg-order-request/review'
+import { Route as LpgOrdersIndexRouteImport } from './routes/lpg-orders/index'
+import { Route as LpgOrdersDetailsRouteImport } from './routes/lpg-orders/details'
+import { Route as LpgPayableOrdersIndexRouteImport } from './routes/lpg-payable-orders/index'
+import { Route as LpgStationsIndexRouteImport } from './routes/lpg-stations/index'
+import { Route as LpgStationsDetailsRouteImport } from './routes/lpg-stations/details'
+import { Route as LpgStationsFormRouteImport } from './routes/lpg-stations/form'
 import { Route as OrdersIndexRouteImport } from './routes/orders/index'
 import { Route as OrdersDetailsRouteImport } from './routes/orders/details'
 import { Route as OverviewIndexRouteImport } from './routes/overview/index'
@@ -107,6 +116,12 @@ const AdminOrderDepotRoute = AdminOrderDepotRouteImport.update({
   path: '/admin-order/depot',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminOrderLpgRequestFormRoute =
+  AdminOrderLpgRequestFormRouteImport.update({
+    id: '/admin-order/lpg-request-form',
+    path: '/admin-order/lpg-request-form',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
@@ -320,6 +335,46 @@ const LicenceVerificationReviewRoute =
     path: '/licence-verification/review',
     getParentRoute: () => rootRouteImport,
   } as any)
+const LpgOrderRequestIndexRoute = LpgOrderRequestIndexRouteImport.update({
+  id: '/lpg-order-request/',
+  path: '/lpg-order-request/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LpgOrderRequestReviewRoute = LpgOrderRequestReviewRouteImport.update({
+  id: '/lpg-order-request/review',
+  path: '/lpg-order-request/review',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LpgOrdersIndexRoute = LpgOrdersIndexRouteImport.update({
+  id: '/lpg-orders/',
+  path: '/lpg-orders/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LpgOrdersDetailsRoute = LpgOrdersDetailsRouteImport.update({
+  id: '/lpg-orders/details',
+  path: '/lpg-orders/details',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LpgPayableOrdersIndexRoute = LpgPayableOrdersIndexRouteImport.update({
+  id: '/lpg-payable-orders/',
+  path: '/lpg-payable-orders/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LpgStationsIndexRoute = LpgStationsIndexRouteImport.update({
+  id: '/lpg-stations/',
+  path: '/lpg-stations/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LpgStationsDetailsRoute = LpgStationsDetailsRouteImport.update({
+  id: '/lpg-stations/details',
+  path: '/lpg-stations/details',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LpgStationsFormRoute = LpgStationsFormRouteImport.update({
+  id: '/lpg-stations/form',
+  path: '/lpg-stations/form',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OrdersIndexRoute = OrdersIndexRouteImport.update({
   id: '/orders/',
   path: '/orders/',
@@ -423,6 +478,7 @@ export interface FileRoutesByFullPath {
   '/set-password': typeof SetPasswordRoute
   '/admin-order/dangote-request-form': typeof AdminOrderDangoteRequestFormRoute
   '/admin-order/depot': typeof AdminOrderDepotRoute
+  '/admin-order/lpg-request-form': typeof AdminOrderLpgRequestFormRoute
   '/admin/details': typeof AdminDetailsRoute
   '/admin/form': typeof AdminFormRoute
   '/admin/update': typeof AdminUpdateRoute
@@ -448,6 +504,10 @@ export interface FileRoutesByFullPath {
   '/filing-stations/details': typeof FilingStationsDetailsRoute
   '/filing-stations/form': typeof FilingStationsFormRoute
   '/licence-verification/review': typeof LicenceVerificationReviewRoute
+  '/lpg-order-request/review': typeof LpgOrderRequestReviewRoute
+  '/lpg-orders/details': typeof LpgOrdersDetailsRoute
+  '/lpg-stations/details': typeof LpgStationsDetailsRoute
+  '/lpg-stations/form': typeof LpgStationsFormRoute
   '/orders/details': typeof OrdersDetailsRoute
   '/pfi/details': typeof PfiDetailsRoute
   '/pfi/form': typeof PfiFormRoute
@@ -475,6 +535,10 @@ export interface FileRoutesByFullPath {
   '/drivers/': typeof DriversIndexRoute
   '/filing-stations/': typeof FilingStationsIndexRoute
   '/licence-verification/': typeof LicenceVerificationIndexRoute
+  '/lpg-order-request/': typeof LpgOrderRequestIndexRoute
+  '/lpg-orders/': typeof LpgOrdersIndexRoute
+  '/lpg-payable-orders/': typeof LpgPayableOrdersIndexRoute
+  '/lpg-stations/': typeof LpgStationsIndexRoute
   '/orders/': typeof OrdersIndexRoute
   '/overview/': typeof OverviewIndexRoute
   '/payable-orders/': typeof PayableOrdersIndexRoute
@@ -491,6 +555,7 @@ export interface FileRoutesByTo {
   '/set-password': typeof SetPasswordRoute
   '/admin-order/dangote-request-form': typeof AdminOrderDangoteRequestFormRoute
   '/admin-order/depot': typeof AdminOrderDepotRoute
+  '/admin-order/lpg-request-form': typeof AdminOrderLpgRequestFormRoute
   '/admin/details': typeof AdminDetailsRoute
   '/admin/form': typeof AdminFormRoute
   '/admin/update': typeof AdminUpdateRoute
@@ -516,6 +581,10 @@ export interface FileRoutesByTo {
   '/filing-stations/details': typeof FilingStationsDetailsRoute
   '/filing-stations/form': typeof FilingStationsFormRoute
   '/licence-verification/review': typeof LicenceVerificationReviewRoute
+  '/lpg-order-request/review': typeof LpgOrderRequestReviewRoute
+  '/lpg-orders/details': typeof LpgOrdersDetailsRoute
+  '/lpg-stations/details': typeof LpgStationsDetailsRoute
+  '/lpg-stations/form': typeof LpgStationsFormRoute
   '/orders/details': typeof OrdersDetailsRoute
   '/pfi/details': typeof PfiDetailsRoute
   '/pfi/form': typeof PfiFormRoute
@@ -543,6 +612,10 @@ export interface FileRoutesByTo {
   '/drivers': typeof DriversIndexRoute
   '/filing-stations': typeof FilingStationsIndexRoute
   '/licence-verification': typeof LicenceVerificationIndexRoute
+  '/lpg-order-request': typeof LpgOrderRequestIndexRoute
+  '/lpg-orders': typeof LpgOrdersIndexRoute
+  '/lpg-payable-orders': typeof LpgPayableOrdersIndexRoute
+  '/lpg-stations': typeof LpgStationsIndexRoute
   '/orders': typeof OrdersIndexRoute
   '/overview': typeof OverviewIndexRoute
   '/payable-orders': typeof PayableOrdersIndexRoute
@@ -560,6 +633,7 @@ export interface FileRoutesById {
   '/set-password': typeof SetPasswordRoute
   '/admin-order/dangote-request-form': typeof AdminOrderDangoteRequestFormRoute
   '/admin-order/depot': typeof AdminOrderDepotRoute
+  '/admin-order/lpg-request-form': typeof AdminOrderLpgRequestFormRoute
   '/admin/details': typeof AdminDetailsRoute
   '/admin/form': typeof AdminFormRoute
   '/admin/update': typeof AdminUpdateRoute
@@ -585,6 +659,10 @@ export interface FileRoutesById {
   '/filing-stations/details': typeof FilingStationsDetailsRoute
   '/filing-stations/form': typeof FilingStationsFormRoute
   '/licence-verification/review': typeof LicenceVerificationReviewRoute
+  '/lpg-order-request/review': typeof LpgOrderRequestReviewRoute
+  '/lpg-orders/details': typeof LpgOrdersDetailsRoute
+  '/lpg-stations/details': typeof LpgStationsDetailsRoute
+  '/lpg-stations/form': typeof LpgStationsFormRoute
   '/orders/details': typeof OrdersDetailsRoute
   '/pfi/details': typeof PfiDetailsRoute
   '/pfi/form': typeof PfiFormRoute
@@ -612,6 +690,10 @@ export interface FileRoutesById {
   '/drivers/': typeof DriversIndexRoute
   '/filing-stations/': typeof FilingStationsIndexRoute
   '/licence-verification/': typeof LicenceVerificationIndexRoute
+  '/lpg-order-request/': typeof LpgOrderRequestIndexRoute
+  '/lpg-orders/': typeof LpgOrdersIndexRoute
+  '/lpg-payable-orders/': typeof LpgPayableOrdersIndexRoute
+  '/lpg-stations/': typeof LpgStationsIndexRoute
   '/orders/': typeof OrdersIndexRoute
   '/overview/': typeof OverviewIndexRoute
   '/payable-orders/': typeof PayableOrdersIndexRoute
@@ -630,6 +712,7 @@ export interface FileRouteTypes {
     | '/set-password'
     | '/admin-order/dangote-request-form'
     | '/admin-order/depot'
+    | '/admin-order/lpg-request-form'
     | '/admin/details'
     | '/admin/form'
     | '/admin/update'
@@ -655,6 +738,10 @@ export interface FileRouteTypes {
     | '/filing-stations/details'
     | '/filing-stations/form'
     | '/licence-verification/review'
+    | '/lpg-order-request/review'
+    | '/lpg-orders/details'
+    | '/lpg-stations/details'
+    | '/lpg-stations/form'
     | '/orders/details'
     | '/pfi/details'
     | '/pfi/form'
@@ -682,6 +769,10 @@ export interface FileRouteTypes {
     | '/drivers/'
     | '/filing-stations/'
     | '/licence-verification/'
+    | '/lpg-order-request/'
+    | '/lpg-orders/'
+    | '/lpg-payable-orders/'
+    | '/lpg-stations/'
     | '/orders/'
     | '/overview/'
     | '/payable-orders/'
@@ -698,6 +789,7 @@ export interface FileRouteTypes {
     | '/set-password'
     | '/admin-order/dangote-request-form'
     | '/admin-order/depot'
+    | '/admin-order/lpg-request-form'
     | '/admin/details'
     | '/admin/form'
     | '/admin/update'
@@ -723,6 +815,10 @@ export interface FileRouteTypes {
     | '/filing-stations/details'
     | '/filing-stations/form'
     | '/licence-verification/review'
+    | '/lpg-order-request/review'
+    | '/lpg-orders/details'
+    | '/lpg-stations/details'
+    | '/lpg-stations/form'
     | '/orders/details'
     | '/pfi/details'
     | '/pfi/form'
@@ -750,6 +846,10 @@ export interface FileRouteTypes {
     | '/drivers'
     | '/filing-stations'
     | '/licence-verification'
+    | '/lpg-order-request'
+    | '/lpg-orders'
+    | '/lpg-payable-orders'
+    | '/lpg-stations'
     | '/orders'
     | '/overview'
     | '/payable-orders'
@@ -766,6 +866,7 @@ export interface FileRouteTypes {
     | '/set-password'
     | '/admin-order/dangote-request-form'
     | '/admin-order/depot'
+    | '/admin-order/lpg-request-form'
     | '/admin/details'
     | '/admin/form'
     | '/admin/update'
@@ -791,6 +892,10 @@ export interface FileRouteTypes {
     | '/filing-stations/details'
     | '/filing-stations/form'
     | '/licence-verification/review'
+    | '/lpg-order-request/review'
+    | '/lpg-orders/details'
+    | '/lpg-stations/details'
+    | '/lpg-stations/form'
     | '/orders/details'
     | '/pfi/details'
     | '/pfi/form'
@@ -818,6 +923,10 @@ export interface FileRouteTypes {
     | '/drivers/'
     | '/filing-stations/'
     | '/licence-verification/'
+    | '/lpg-order-request/'
+    | '/lpg-orders/'
+    | '/lpg-payable-orders/'
+    | '/lpg-stations/'
     | '/orders/'
     | '/overview/'
     | '/payable-orders/'
@@ -835,6 +944,7 @@ export interface RootRouteChildren {
   SetPasswordRoute: typeof SetPasswordRoute
   AdminOrderDangoteRequestFormRoute: typeof AdminOrderDangoteRequestFormRoute
   AdminOrderDepotRoute: typeof AdminOrderDepotRoute
+  AdminOrderLpgRequestFormRoute: typeof AdminOrderLpgRequestFormRoute
   AdminDetailsRoute: typeof AdminDetailsRoute
   AdminFormRoute: typeof AdminFormRoute
   AdminUpdateRoute: typeof AdminUpdateRoute
@@ -860,6 +970,10 @@ export interface RootRouteChildren {
   FilingStationsDetailsRoute: typeof FilingStationsDetailsRoute
   FilingStationsFormRoute: typeof FilingStationsFormRoute
   LicenceVerificationReviewRoute: typeof LicenceVerificationReviewRoute
+  LpgOrderRequestReviewRoute: typeof LpgOrderRequestReviewRoute
+  LpgOrdersDetailsRoute: typeof LpgOrdersDetailsRoute
+  LpgStationsDetailsRoute: typeof LpgStationsDetailsRoute
+  LpgStationsFormRoute: typeof LpgStationsFormRoute
   OrdersDetailsRoute: typeof OrdersDetailsRoute
   PfiDetailsRoute: typeof PfiDetailsRoute
   PfiFormRoute: typeof PfiFormRoute
@@ -887,6 +1001,10 @@ export interface RootRouteChildren {
   DriversIndexRoute: typeof DriversIndexRoute
   FilingStationsIndexRoute: typeof FilingStationsIndexRoute
   LicenceVerificationIndexRoute: typeof LicenceVerificationIndexRoute
+  LpgOrderRequestIndexRoute: typeof LpgOrderRequestIndexRoute
+  LpgOrdersIndexRoute: typeof LpgOrdersIndexRoute
+  LpgPayableOrdersIndexRoute: typeof LpgPayableOrdersIndexRoute
+  LpgStationsIndexRoute: typeof LpgStationsIndexRoute
   OrdersIndexRoute: typeof OrdersIndexRoute
   OverviewIndexRoute: typeof OverviewIndexRoute
   PayableOrdersIndexRoute: typeof PayableOrdersIndexRoute
@@ -940,6 +1058,13 @@ declare module '@tanstack/react-router' {
       path: '/admin-order/depot'
       fullPath: '/admin-order/depot'
       preLoaderRoute: typeof AdminOrderDepotRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-order/lpg-request-form': {
+      id: '/admin-order/lpg-request-form'
+      path: '/admin-order/lpg-request-form'
+      fullPath: '/admin-order/lpg-request-form'
+      preLoaderRoute: typeof AdminOrderLpgRequestFormRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -1229,6 +1354,62 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LicenceVerificationReviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lpg-order-request/': {
+      id: '/lpg-order-request/'
+      path: '/lpg-order-request'
+      fullPath: '/lpg-order-request/'
+      preLoaderRoute: typeof LpgOrderRequestIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lpg-order-request/review': {
+      id: '/lpg-order-request/review'
+      path: '/lpg-order-request/review'
+      fullPath: '/lpg-order-request/review'
+      preLoaderRoute: typeof LpgOrderRequestReviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lpg-orders/': {
+      id: '/lpg-orders/'
+      path: '/lpg-orders'
+      fullPath: '/lpg-orders/'
+      preLoaderRoute: typeof LpgOrdersIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lpg-orders/details': {
+      id: '/lpg-orders/details'
+      path: '/lpg-orders/details'
+      fullPath: '/lpg-orders/details'
+      preLoaderRoute: typeof LpgOrdersDetailsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lpg-payable-orders/': {
+      id: '/lpg-payable-orders/'
+      path: '/lpg-payable-orders'
+      fullPath: '/lpg-payable-orders/'
+      preLoaderRoute: typeof LpgPayableOrdersIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lpg-stations/': {
+      id: '/lpg-stations/'
+      path: '/lpg-stations'
+      fullPath: '/lpg-stations/'
+      preLoaderRoute: typeof LpgStationsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lpg-stations/details': {
+      id: '/lpg-stations/details'
+      path: '/lpg-stations/details'
+      fullPath: '/lpg-stations/details'
+      preLoaderRoute: typeof LpgStationsDetailsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lpg-stations/form': {
+      id: '/lpg-stations/form'
+      path: '/lpg-stations/form'
+      fullPath: '/lpg-stations/form'
+      preLoaderRoute: typeof LpgStationsFormRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/orders/': {
       id: '/orders/'
       path: '/orders'
@@ -1371,6 +1552,7 @@ const rootRouteChildren: RootRouteChildren = {
   SetPasswordRoute: SetPasswordRoute,
   AdminOrderDangoteRequestFormRoute: AdminOrderDangoteRequestFormRoute,
   AdminOrderDepotRoute: AdminOrderDepotRoute,
+  AdminOrderLpgRequestFormRoute: AdminOrderLpgRequestFormRoute,
   AdminDetailsRoute: AdminDetailsRoute,
   AdminFormRoute: AdminFormRoute,
   AdminUpdateRoute: AdminUpdateRoute,
@@ -1397,6 +1579,10 @@ const rootRouteChildren: RootRouteChildren = {
   FilingStationsDetailsRoute: FilingStationsDetailsRoute,
   FilingStationsFormRoute: FilingStationsFormRoute,
   LicenceVerificationReviewRoute: LicenceVerificationReviewRoute,
+  LpgOrderRequestReviewRoute: LpgOrderRequestReviewRoute,
+  LpgOrdersDetailsRoute: LpgOrdersDetailsRoute,
+  LpgStationsDetailsRoute: LpgStationsDetailsRoute,
+  LpgStationsFormRoute: LpgStationsFormRoute,
   OrdersDetailsRoute: OrdersDetailsRoute,
   PfiDetailsRoute: PfiDetailsRoute,
   PfiFormRoute: PfiFormRoute,
@@ -1424,6 +1610,10 @@ const rootRouteChildren: RootRouteChildren = {
   DriversIndexRoute: DriversIndexRoute,
   FilingStationsIndexRoute: FilingStationsIndexRoute,
   LicenceVerificationIndexRoute: LicenceVerificationIndexRoute,
+  LpgOrderRequestIndexRoute: LpgOrderRequestIndexRoute,
+  LpgOrdersIndexRoute: LpgOrdersIndexRoute,
+  LpgPayableOrdersIndexRoute: LpgPayableOrdersIndexRoute,
+  LpgStationsIndexRoute: LpgStationsIndexRoute,
   OrdersIndexRoute: OrdersIndexRoute,
   OverviewIndexRoute: OverviewIndexRoute,
   PayableOrdersIndexRoute: PayableOrdersIndexRoute,

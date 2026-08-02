@@ -193,6 +193,71 @@ export interface DepotItem {
   }[]
 }
 
+export interface LpgStationCylinder {
+  id?: string
+  cylinderSizeKg: number
+  quantity: number
+}
+
+export interface LpgPriceHistoryEntry {
+  id: number
+  lpgStationId: number
+  pricePerKg: string
+  setAt: string
+}
+
+export interface LpgStation {
+  _id: string
+  name: string
+  code: string
+  address: string
+  city: string
+  state: string
+  country: string
+  postcode: string
+  lpgCapacityKg: number
+  pricePerKg: number
+  status: 'Active' | 'Maintenance' | 'High Capacity'
+  establishedYear: string
+  staff: {
+    id: number
+    adminId: number
+    firstName: string | null
+    surname: string | null
+    email: string | null
+  }[]
+  pfis?: Pfi[]
+  cylinders?: LpgStationCylinder[]
+  priceHistory?: LpgPriceHistoryEntry[]
+  createdAt?: string
+  updatedAt?: string
+}
+
+export interface LpgStationItem {
+  id: string
+  name: string
+  code: string
+  address: string
+  city: string
+  state: string
+  country: string
+  postcode: string
+  lpgCapacityKg: number
+  pricePerKg: number
+  status: string
+  establishedYear: string
+  staff: {
+    id: number
+    adminId: number
+    firstName: string | null
+    surname: string | null
+    email: string | null
+  }[]
+  pfis?: Pfi[]
+  cylinders?: LpgStationCylinder[]
+  priceHistory?: LpgPriceHistoryEntry[]
+}
+
 export interface Pfi {
   _id: string
   id?: string | number
@@ -201,6 +266,7 @@ export interface Pfi {
   description?: string
   pfiDate?: string | null
   locationId?: number | null
+  lpgStationId?: number | null
   locationName?: string
   productId?: number | null
   productName?: string

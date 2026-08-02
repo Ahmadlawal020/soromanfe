@@ -21,6 +21,7 @@ import {
   PlusCircle,
   DollarSign,
   FileSpreadsheet,
+  Flame,
 } from "lucide-react";
 import { useAuthStore, useAdminLogout } from "#/modules/auth";
 import { useLayoutStore } from "#/stores/layoutStore";
@@ -41,6 +42,15 @@ const navCategories: NavCategory[] = [
   {
     category: "", // Overview
     items: [{ title: "Overview", icon: GaugeIcon, path: "/overview" }],
+  },
+  {
+    category: "LPG Home Delivery",
+    items: [
+      { title: "LPG Stations", icon: Flame, path: "/lpg-stations" },
+      { title: "LPG Orders", icon: ShoppingBag, path: "/lpg-orders" },
+      { title: "Payable Orders", icon: DollarSign, path: "/lpg-payable-orders" },
+      { title: "Order Requests", icon: FileText, path: "/lpg-order-request" },
+    ],
   },
   {
     category: "Orders",

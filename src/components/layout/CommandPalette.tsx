@@ -18,6 +18,7 @@ import {
   Moon,
   Sun,
   ArrowRight,
+  Flame,
 } from 'lucide-react'
 import {
   Dialog,
@@ -59,6 +60,7 @@ export default function CommandPalette({ open, onOpenChange }: CommandPalettePro
       { id: 'nav-dangote-payable', title: 'Payable Dangote Orders', category: 'Navigation', icon: DollarSign, path: '/dangote-payable-orders', keywords: ['dangote', 'wallet', 'pay'] },
       { id: 'nav-tickets', title: 'Loading Tickets', category: 'Navigation', icon: Ticket, path: '/ticket', keywords: ['passes', 'waybills'] },
       { id: 'nav-depots', title: 'Depots & Storage', category: 'Navigation', icon: Warehouse, path: '/depots', keywords: ['warehouses', 'tanks', 'capacity'] },
+      { id: 'nav-lpg-stations', title: 'LPG Stations', category: 'Navigation', icon: Flame, path: '/lpg-stations', keywords: ['lpg', 'gas', 'home delivery', 'station'] },
       { id: 'nav-products', title: 'Product Inventory', category: 'Navigation', icon: Package, path: '/products', keywords: ['pms', 'ago', 'dpk', 'lpg'] },
       { id: 'nav-deposits', title: 'Financial Deposits', category: 'Navigation', icon: DollarSign, path: '/deposits', keywords: ['payments', 'ledger', 'balance'] },
       { id: 'nav-trucks', title: 'Fleet Directory', category: 'Navigation', icon: Truck, path: '/trucks', keywords: ['vehicles', 'tankers'] },

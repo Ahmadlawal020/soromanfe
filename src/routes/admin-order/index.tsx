@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { ArrowLeft, Truck, Building2, Package, ClipboardCheck, User } from 'lucide-react'
+import { ArrowLeft, Truck, Building2, Package, ClipboardCheck, User, Flame } from 'lucide-react'
 
 import { Button } from '#/components/ui/button'
 import { SegmentedChoice } from '#/components/ui/segmented-choice'
@@ -9,6 +9,7 @@ import { cn } from '#/lib/utils'
 
 import { useOrderWizard } from '#/modules/admin-order/hooks/useOrderWizard'
 import { useDangoteOrderWizard } from '#/modules/admin-order/hooks/useDangoteOrderWizard'
+import { useLpgOrderWizard } from '#/modules/admin-order/hooks/useLpgOrderWizard'
 import { WizardStepper, type WizardStep } from '#/modules/admin-order/components/WizardProgressBar'
 import { WizardShell } from '#/modules/admin-order/components/WizardShell'
 import {
@@ -18,12 +19,16 @@ import {
   DangoteCustomerStep, DangoteCompanyLicenseStep, DangoteProductStep,
   DangoteQuantityStep, DangoteDeliveryStep, DangoteReviewStep, DangoteCompletionStep,
 } from '#/modules/admin-order/components/DangoteSteps'
+import {
+  LpgCustomerStep, LpgStationStep, LpgCylinderStep,
+  LpgDeliveryStep, LpgReviewStep, LpgCompletionStep,
+} from '#/modules/admin-order/components/LpgSteps'
 
 export const Route = createFileRoute('/admin-order/')({
   component: CreateOrderPage,
 })
 
-type OrderType = 'depot' | 'dangote'
+type OrderType = 'depot' | 'dangote' | 'lpg'
 
 /**
  * A screen groups several of the hook's internal steps.
@@ -78,6 +83,30 @@ const DANGOTE_GROUPS: Group[] = [
     title: 'Review', shortTitle: 'Review', icon: ClipboardCheck,
     description: 'Check everything before submitting the request.',
     steps: [6],
+  },
+]
+
+const LPG_GROUPS: Group[] = [
+  {
+    title: 'Customer', shortTitle: 'Customer', icon: User,
+    description: 'Find an existing customer or register a new one.',
+    steps: [1],
+  },
+  {
+    title: 'Station & cylinders', shortTitle: 'Station', icon: Flame,
+    description: 'Select an LPG station by location and choose your cylinders.',
+    steps: [2, 3],
+    sections: ['LPG Station', 'Cylinder selection'],
+  },
+  {
+    title: 'Delivery', shortTitle: 'Delivery', icon: Truck,
+    description: 'Enter the delivery address for the order.',
+    steps: [4],
+  },
+  {
+    title: 'Review', shortTitle: 'Review', icon: ClipboardCheck,
+    description: 'Review everything before submitting the request.',
+    steps: [5],
   },
 ]
 
@@ -232,6 +261,54 @@ function DangoteFlow() {
   )
 }
 
+function LpgFlow() {
+  const wizard = useLpgOrderWizard()
+  const { step, error, handlePlaceOrder, createLpgOrderRequestMutation } = wizard
+  const nav = useGroupNav(wizard, LPG_GROUPS)
+  const done = step > 5
+
+  if (done) {
+    return (
+      <WizardShell title="Request submitted" description="Price is confirmed after review." footer={false}>
+        <LpgCompletionStep wizard={wizard} />
+      </WizardShell>
+    )
+  }
+
+  return (
+    <div className="space-y-8">
+      <WizardStepper
+        steps={LPG_GROUPS.map((g) => ({ title: g.title, shortTitle: g.shortTitle, icon: g.icon }))}
+        step={nav.index + 1}
+        onStepClick={nav.goTo}
+      />
+
+      <WizardShell
+        title={nav.group.title}
+        description={nav.group.description}
+        error={error}
+        onBack={nav.back}
+        backDisabled={nav.index === 0}
+        onNext={nav.isLast ? handlePlaceOrder : nav.next}
+        nextLabel={nav.isLast ? 'Submit request' : 'Continue'}
+        nextPending={createLpgOrderRequestMutation?.isPending}
+      >
+        <div className="space-y-8">
+          {nav.group.steps.map((s, i) => (
+            <Section key={s} label={nav.group.sections?.[i]}>
+              {s === 1 && <LpgCustomerStep wizard={wizard} />}
+              {s === 2 && <LpgStationStep wizard={wizard} />}
+              {s === 3 && <LpgCylinderStep wizard={wizard} />}
+              {s === 4 && <LpgDeliveryStep wizard={wizard} />}
+              {s === 5 && <LpgReviewStep wizard={wizard} />}
+            </Section>
+          ))}
+        </div>
+      </WizardShell>
+    </div>
+  )
+}
+
 function CreateOrderPage() {
   const navigate = useNavigate()
   const [orderType, setOrderType] = useState<OrderType | null>(null)
@@ -269,6 +346,7 @@ function CreateOrderPage() {
           options={[
             { value: 'depot', label: 'Depot order', hint: 'Soroman depots', icon: <Truck /> },
             { value: 'dangote', label: 'Dangote delivery', hint: 'Bulk request', icon: <Building2 /> },
+            { value: 'lpg', label: 'LPG cooking gas', hint: 'Home delivery', icon: <Flame /> },
           ]}
         />
       </div>
@@ -277,6 +355,7 @@ function CreateOrderPage() {
           honest behaviour — the two flows share no fields. */}
       {orderType === 'depot' && <DepotFlow key="depot" />}
       {orderType === 'dangote' && <DangoteFlow key="dangote" />}
+      {orderType === 'lpg' && <LpgFlow key="lpg" />}
 
       {!orderType && (
         <p className="pt-2 text-center text-sm text-muted-foreground">
