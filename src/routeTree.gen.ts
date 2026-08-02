@@ -50,9 +50,12 @@ import { Route as DepotsFormRouteImport } from './routes/depots/form'
 import { Route as DriversIndexRouteImport } from './routes/drivers/index'
 import { Route as DriversDetailsRouteImport } from './routes/drivers/details'
 import { Route as DriversFormRouteImport } from './routes/drivers/form'
+import { Route as ExpensesIndexRouteImport } from './routes/expenses/index'
 import { Route as FilingStationsIndexRouteImport } from './routes/filing-stations/index'
 import { Route as FilingStationsDetailsRouteImport } from './routes/filing-stations/details'
 import { Route as FilingStationsFormRouteImport } from './routes/filing-stations/form'
+import { Route as FleetLedgerIndexRouteImport } from './routes/fleet-ledger/index'
+import { Route as FleetTrucksIndexRouteImport } from './routes/fleet-trucks/index'
 import { Route as LicenceVerificationIndexRouteImport } from './routes/licence-verification/index'
 import { Route as LicenceVerificationReviewRouteImport } from './routes/licence-verification/review'
 import { Route as OrdersIndexRouteImport } from './routes/orders/index'
@@ -68,8 +71,12 @@ import { Route as ProductsFormRouteImport } from './routes/products/form'
 import { Route as SalesLedgerIndexRouteImport } from './routes/sales-ledger/index'
 import { Route as SalesLedgerAssignCustomerRouteImport } from './routes/sales-ledger/assign-customer'
 import { Route as SalesLedgerDetailsRouteImport } from './routes/sales-ledger/details'
+import { Route as SecurityReportIndexRouteImport } from './routes/security-report/index'
+import { Route as SecurityEntryRouteImport } from './routes/security/entry'
+import { Route as SecurityExitRouteImport } from './routes/security/exit'
 import { Route as TicketIndexRouteImport } from './routes/ticket/index'
 import { Route as TicketDetailsRouteImport } from './routes/ticket/details'
+import { Route as TicketGenerateRouteImport } from './routes/ticket/generate'
 import { Route as TrucksIndexRouteImport } from './routes/trucks/index'
 import { Route as TrucksDetailsRouteImport } from './routes/trucks/details'
 import { Route as TrucksFormRouteImport } from './routes/trucks/form'
@@ -285,6 +292,11 @@ const DriversFormRoute = DriversFormRouteImport.update({
   path: '/drivers/form',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ExpensesIndexRoute = ExpensesIndexRouteImport.update({
+  id: '/expenses/',
+  path: '/expenses/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FilingStationsIndexRoute = FilingStationsIndexRouteImport.update({
   id: '/filing-stations/',
   path: '/filing-stations/',
@@ -298,6 +310,16 @@ const FilingStationsDetailsRoute = FilingStationsDetailsRouteImport.update({
 const FilingStationsFormRoute = FilingStationsFormRouteImport.update({
   id: '/filing-stations/form',
   path: '/filing-stations/form',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FleetLedgerIndexRoute = FleetLedgerIndexRouteImport.update({
+  id: '/fleet-ledger/',
+  path: '/fleet-ledger/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FleetTrucksIndexRoute = FleetTrucksIndexRouteImport.update({
+  id: '/fleet-trucks/',
+  path: '/fleet-trucks/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LicenceVerificationIndexRoute =
@@ -378,6 +400,21 @@ const SalesLedgerDetailsRoute = SalesLedgerDetailsRouteImport.update({
   path: '/sales-ledger/details',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SecurityReportIndexRoute = SecurityReportIndexRouteImport.update({
+  id: '/security-report/',
+  path: '/security-report/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SecurityEntryRoute = SecurityEntryRouteImport.update({
+  id: '/security/entry',
+  path: '/security/entry',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SecurityExitRoute = SecurityExitRouteImport.update({
+  id: '/security/exit',
+  path: '/security/exit',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TicketIndexRoute = TicketIndexRouteImport.update({
   id: '/ticket/',
   path: '/ticket/',
@@ -386,6 +423,11 @@ const TicketIndexRoute = TicketIndexRouteImport.update({
 const TicketDetailsRoute = TicketDetailsRouteImport.update({
   id: '/ticket/details',
   path: '/ticket/details',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TicketGenerateRoute = TicketGenerateRouteImport.update({
+  id: '/ticket/generate',
+  path: '/ticket/generate',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TrucksIndexRoute = TrucksIndexRouteImport.update({
@@ -442,7 +484,10 @@ export interface FileRoutesByFullPath {
   '/products/form': typeof ProductsFormRoute
   '/sales-ledger/assign-customer': typeof SalesLedgerAssignCustomerRoute
   '/sales-ledger/details': typeof SalesLedgerDetailsRoute
+  '/security/entry': typeof SecurityEntryRoute
+  '/security/exit': typeof SecurityExitRoute
   '/ticket/details': typeof TicketDetailsRoute
+  '/ticket/generate': typeof TicketGenerateRoute
   '/trucks/details': typeof TrucksDetailsRoute
   '/trucks/form': typeof TrucksFormRoute
   '/admin-order/': typeof AdminOrderIndexRoute
@@ -459,7 +504,10 @@ export interface FileRoutesByFullPath {
   '/deposits/': typeof DepositsIndexRoute
   '/depots/': typeof DepotsIndexRoute
   '/drivers/': typeof DriversIndexRoute
+  '/expenses/': typeof ExpensesIndexRoute
   '/filing-stations/': typeof FilingStationsIndexRoute
+  '/fleet-ledger/': typeof FleetLedgerIndexRoute
+  '/fleet-trucks/': typeof FleetTrucksIndexRoute
   '/licence-verification/': typeof LicenceVerificationIndexRoute
   '/orders/': typeof OrdersIndexRoute
   '/overview/': typeof OverviewIndexRoute
@@ -467,6 +515,7 @@ export interface FileRoutesByFullPath {
   '/product-pricing/': typeof ProductPricingIndexRoute
   '/products/': typeof ProductsIndexRoute
   '/sales-ledger/': typeof SalesLedgerIndexRoute
+  '/security-report/': typeof SecurityReportIndexRoute
   '/ticket/': typeof TicketIndexRoute
   '/trucks/': typeof TrucksIndexRoute
 }
@@ -508,7 +557,10 @@ export interface FileRoutesByTo {
   '/products/form': typeof ProductsFormRoute
   '/sales-ledger/assign-customer': typeof SalesLedgerAssignCustomerRoute
   '/sales-ledger/details': typeof SalesLedgerDetailsRoute
+  '/security/entry': typeof SecurityEntryRoute
+  '/security/exit': typeof SecurityExitRoute
   '/ticket/details': typeof TicketDetailsRoute
+  '/ticket/generate': typeof TicketGenerateRoute
   '/trucks/details': typeof TrucksDetailsRoute
   '/trucks/form': typeof TrucksFormRoute
   '/admin-order': typeof AdminOrderIndexRoute
@@ -525,7 +577,10 @@ export interface FileRoutesByTo {
   '/deposits': typeof DepositsIndexRoute
   '/depots': typeof DepotsIndexRoute
   '/drivers': typeof DriversIndexRoute
+  '/expenses': typeof ExpensesIndexRoute
   '/filing-stations': typeof FilingStationsIndexRoute
+  '/fleet-ledger': typeof FleetLedgerIndexRoute
+  '/fleet-trucks': typeof FleetTrucksIndexRoute
   '/licence-verification': typeof LicenceVerificationIndexRoute
   '/orders': typeof OrdersIndexRoute
   '/overview': typeof OverviewIndexRoute
@@ -533,6 +588,7 @@ export interface FileRoutesByTo {
   '/product-pricing': typeof ProductPricingIndexRoute
   '/products': typeof ProductsIndexRoute
   '/sales-ledger': typeof SalesLedgerIndexRoute
+  '/security-report': typeof SecurityReportIndexRoute
   '/ticket': typeof TicketIndexRoute
   '/trucks': typeof TrucksIndexRoute
 }
@@ -575,7 +631,10 @@ export interface FileRoutesById {
   '/products/form': typeof ProductsFormRoute
   '/sales-ledger/assign-customer': typeof SalesLedgerAssignCustomerRoute
   '/sales-ledger/details': typeof SalesLedgerDetailsRoute
+  '/security/entry': typeof SecurityEntryRoute
+  '/security/exit': typeof SecurityExitRoute
   '/ticket/details': typeof TicketDetailsRoute
+  '/ticket/generate': typeof TicketGenerateRoute
   '/trucks/details': typeof TrucksDetailsRoute
   '/trucks/form': typeof TrucksFormRoute
   '/admin-order/': typeof AdminOrderIndexRoute
@@ -592,7 +651,10 @@ export interface FileRoutesById {
   '/deposits/': typeof DepositsIndexRoute
   '/depots/': typeof DepotsIndexRoute
   '/drivers/': typeof DriversIndexRoute
+  '/expenses/': typeof ExpensesIndexRoute
   '/filing-stations/': typeof FilingStationsIndexRoute
+  '/fleet-ledger/': typeof FleetLedgerIndexRoute
+  '/fleet-trucks/': typeof FleetTrucksIndexRoute
   '/licence-verification/': typeof LicenceVerificationIndexRoute
   '/orders/': typeof OrdersIndexRoute
   '/overview/': typeof OverviewIndexRoute
@@ -600,6 +662,7 @@ export interface FileRoutesById {
   '/product-pricing/': typeof ProductPricingIndexRoute
   '/products/': typeof ProductsIndexRoute
   '/sales-ledger/': typeof SalesLedgerIndexRoute
+  '/security-report/': typeof SecurityReportIndexRoute
   '/ticket/': typeof TicketIndexRoute
   '/trucks/': typeof TrucksIndexRoute
 }
@@ -643,7 +706,10 @@ export interface FileRouteTypes {
     | '/products/form'
     | '/sales-ledger/assign-customer'
     | '/sales-ledger/details'
+    | '/security/entry'
+    | '/security/exit'
     | '/ticket/details'
+    | '/ticket/generate'
     | '/trucks/details'
     | '/trucks/form'
     | '/admin-order/'
@@ -660,7 +726,10 @@ export interface FileRouteTypes {
     | '/deposits/'
     | '/depots/'
     | '/drivers/'
+    | '/expenses/'
     | '/filing-stations/'
+    | '/fleet-ledger/'
+    | '/fleet-trucks/'
     | '/licence-verification/'
     | '/orders/'
     | '/overview/'
@@ -668,6 +737,7 @@ export interface FileRouteTypes {
     | '/product-pricing/'
     | '/products/'
     | '/sales-ledger/'
+    | '/security-report/'
     | '/ticket/'
     | '/trucks/'
   fileRoutesByTo: FileRoutesByTo
@@ -709,7 +779,10 @@ export interface FileRouteTypes {
     | '/products/form'
     | '/sales-ledger/assign-customer'
     | '/sales-ledger/details'
+    | '/security/entry'
+    | '/security/exit'
     | '/ticket/details'
+    | '/ticket/generate'
     | '/trucks/details'
     | '/trucks/form'
     | '/admin-order'
@@ -726,7 +799,10 @@ export interface FileRouteTypes {
     | '/deposits'
     | '/depots'
     | '/drivers'
+    | '/expenses'
     | '/filing-stations'
+    | '/fleet-ledger'
+    | '/fleet-trucks'
     | '/licence-verification'
     | '/orders'
     | '/overview'
@@ -734,6 +810,7 @@ export interface FileRouteTypes {
     | '/product-pricing'
     | '/products'
     | '/sales-ledger'
+    | '/security-report'
     | '/ticket'
     | '/trucks'
   id:
@@ -775,7 +852,10 @@ export interface FileRouteTypes {
     | '/products/form'
     | '/sales-ledger/assign-customer'
     | '/sales-ledger/details'
+    | '/security/entry'
+    | '/security/exit'
     | '/ticket/details'
+    | '/ticket/generate'
     | '/trucks/details'
     | '/trucks/form'
     | '/admin-order/'
@@ -792,7 +872,10 @@ export interface FileRouteTypes {
     | '/deposits/'
     | '/depots/'
     | '/drivers/'
+    | '/expenses/'
     | '/filing-stations/'
+    | '/fleet-ledger/'
+    | '/fleet-trucks/'
     | '/licence-verification/'
     | '/orders/'
     | '/overview/'
@@ -800,6 +883,7 @@ export interface FileRouteTypes {
     | '/product-pricing/'
     | '/products/'
     | '/sales-ledger/'
+    | '/security-report/'
     | '/ticket/'
     | '/trucks/'
   fileRoutesById: FileRoutesById
@@ -842,7 +926,10 @@ export interface RootRouteChildren {
   ProductsFormRoute: typeof ProductsFormRoute
   SalesLedgerAssignCustomerRoute: typeof SalesLedgerAssignCustomerRoute
   SalesLedgerDetailsRoute: typeof SalesLedgerDetailsRoute
+  SecurityEntryRoute: typeof SecurityEntryRoute
+  SecurityExitRoute: typeof SecurityExitRoute
   TicketDetailsRoute: typeof TicketDetailsRoute
+  TicketGenerateRoute: typeof TicketGenerateRoute
   TrucksDetailsRoute: typeof TrucksDetailsRoute
   TrucksFormRoute: typeof TrucksFormRoute
   AdminOrderIndexRoute: typeof AdminOrderIndexRoute
@@ -859,7 +946,10 @@ export interface RootRouteChildren {
   DepositsIndexRoute: typeof DepositsIndexRoute
   DepotsIndexRoute: typeof DepotsIndexRoute
   DriversIndexRoute: typeof DriversIndexRoute
+  ExpensesIndexRoute: typeof ExpensesIndexRoute
   FilingStationsIndexRoute: typeof FilingStationsIndexRoute
+  FleetLedgerIndexRoute: typeof FleetLedgerIndexRoute
+  FleetTrucksIndexRoute: typeof FleetTrucksIndexRoute
   LicenceVerificationIndexRoute: typeof LicenceVerificationIndexRoute
   OrdersIndexRoute: typeof OrdersIndexRoute
   OverviewIndexRoute: typeof OverviewIndexRoute
@@ -867,6 +957,7 @@ export interface RootRouteChildren {
   ProductPricingIndexRoute: typeof ProductPricingIndexRoute
   ProductsIndexRoute: typeof ProductsIndexRoute
   SalesLedgerIndexRoute: typeof SalesLedgerIndexRoute
+  SecurityReportIndexRoute: typeof SecurityReportIndexRoute
   TicketIndexRoute: typeof TicketIndexRoute
   TrucksIndexRoute: typeof TrucksIndexRoute
 }
@@ -1160,6 +1251,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DriversFormRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/expenses/': {
+      id: '/expenses/'
+      path: '/expenses'
+      fullPath: '/expenses/'
+      preLoaderRoute: typeof ExpensesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/filing-stations/': {
       id: '/filing-stations/'
       path: '/filing-stations'
@@ -1179,6 +1277,20 @@ declare module '@tanstack/react-router' {
       path: '/filing-stations/form'
       fullPath: '/filing-stations/form'
       preLoaderRoute: typeof FilingStationsFormRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fleet-ledger/': {
+      id: '/fleet-ledger/'
+      path: '/fleet-ledger'
+      fullPath: '/fleet-ledger/'
+      preLoaderRoute: typeof FleetLedgerIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fleet-trucks/': {
+      id: '/fleet-trucks/'
+      path: '/fleet-trucks'
+      fullPath: '/fleet-trucks/'
+      preLoaderRoute: typeof FleetTrucksIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/licence-verification/': {
@@ -1286,6 +1398,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SalesLedgerDetailsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/security-report/': {
+      id: '/security-report/'
+      path: '/security-report'
+      fullPath: '/security-report/'
+      preLoaderRoute: typeof SecurityReportIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/security/entry': {
+      id: '/security/entry'
+      path: '/security/entry'
+      fullPath: '/security/entry'
+      preLoaderRoute: typeof SecurityEntryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/security/exit': {
+      id: '/security/exit'
+      path: '/security/exit'
+      fullPath: '/security/exit'
+      preLoaderRoute: typeof SecurityExitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ticket/': {
       id: '/ticket/'
       path: '/ticket'
@@ -1298,6 +1431,13 @@ declare module '@tanstack/react-router' {
       path: '/ticket/details'
       fullPath: '/ticket/details'
       preLoaderRoute: typeof TicketDetailsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ticket/generate': {
+      id: '/ticket/generate'
+      path: '/ticket/generate'
+      fullPath: '/ticket/generate'
+      preLoaderRoute: typeof TicketGenerateRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/trucks/': {
@@ -1363,7 +1503,10 @@ const rootRouteChildren: RootRouteChildren = {
   ProductsFormRoute: ProductsFormRoute,
   SalesLedgerAssignCustomerRoute: SalesLedgerAssignCustomerRoute,
   SalesLedgerDetailsRoute: SalesLedgerDetailsRoute,
+  SecurityEntryRoute: SecurityEntryRoute,
+  SecurityExitRoute: SecurityExitRoute,
   TicketDetailsRoute: TicketDetailsRoute,
+  TicketGenerateRoute: TicketGenerateRoute,
   TrucksDetailsRoute: TrucksDetailsRoute,
   TrucksFormRoute: TrucksFormRoute,
   AdminOrderIndexRoute: AdminOrderIndexRoute,
@@ -1380,7 +1523,10 @@ const rootRouteChildren: RootRouteChildren = {
   DepositsIndexRoute: DepositsIndexRoute,
   DepotsIndexRoute: DepotsIndexRoute,
   DriversIndexRoute: DriversIndexRoute,
+  ExpensesIndexRoute: ExpensesIndexRoute,
   FilingStationsIndexRoute: FilingStationsIndexRoute,
+  FleetLedgerIndexRoute: FleetLedgerIndexRoute,
+  FleetTrucksIndexRoute: FleetTrucksIndexRoute,
   LicenceVerificationIndexRoute: LicenceVerificationIndexRoute,
   OrdersIndexRoute: OrdersIndexRoute,
   OverviewIndexRoute: OverviewIndexRoute,
@@ -1388,6 +1534,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProductPricingIndexRoute: ProductPricingIndexRoute,
   ProductsIndexRoute: ProductsIndexRoute,
   SalesLedgerIndexRoute: SalesLedgerIndexRoute,
+  SecurityReportIndexRoute: SecurityReportIndexRoute,
   TicketIndexRoute: TicketIndexRoute,
   TrucksIndexRoute: TrucksIndexRoute,
 }

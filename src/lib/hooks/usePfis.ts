@@ -6,12 +6,89 @@ import type { Pfi } from '#/lib/types'
 
 export type { Pfi }
 
+/**
+ * Every money figure the API computes for a batch.
+ *
+ * `null` is meaningful throughout and must be rendered as "—", never as ₦0:
+ * a batch nobody has priced yet is not a batch worth nothing. Only
+ * `totalExpenses` is always a number.
+ */
+export type PfiFinancials = {
+  /** Documented quantity from the shipping papers — what you are charged for. */
+  blQtyLitres: number | null
+  /** Measured quantity in the tank — what you can actually sell. */
+  tankQtyLitres: number
+  /** Tank − BL. Negative is a deficit. Null until BL is entered. */
+  surplusDeficitLitres: number | null
+  pricePerLitre: number | null
+  /** BL × price. Never the tank quantity. */
+  pfiValue: number | null
+  totalExpenses: number
+  totalCost: number | null
+  revenue: number
+  profitLoss: number | null
+  margin: number | null
+  sold: number
+  remaining: number
+  movementQty: number
+  allocationQty: number
+  /** The deficit priced at what you paid for it — money for product that never landed. */
+  deficitCost: number | null
+  /** 0–1. How much of the batch has actually gone out. */
+  sellThrough: number | null
+  /** False while the batch is part-sold, when profit is not yet a real number. */
+  profitIsMeaningful: boolean
+  costOfSold: number | null
+  marginOnSold: number | null
+}
+
+export type PfiWithFinancials = Pfi & {
+  financials: PfiFinancials
+  orderCount: number
+  expenseCount: number
+}
+
+export type PfiExpense = {
+  id: number
+  pfi_id: number | null
+  category_id: number
+  category_name: string
+  is_system_category?: boolean
+  pfi_number?: string | null
+  expense_date: string
+  vendor: string
+  description: string
+  amount: string
+  bank_paid_from: string
+  entered_by: string
+  deleted_at: string | null
+}
+
+export type ExpenseCategory = {
+  id: number
+  name: string
+  pfi_id: number | null
+  is_system_category: boolean
+  pfi_status?: string | null
+}
+
+export type PfiMovement = {
+  id: number
+  order_id: number | null
+  order_number: string | null
+  customer_name: string | null
+  action: string
+  qty_litres: number
+  notes: string
+  created_at: string
+}
+
 export function usePfiList(params?: { search?: string; status?: string; location?: string }) {
   return useQuery({
     queryKey: ['pfis', params],
     queryFn: async () => {
       const res = await api.get('/pfis', { params })
-      return res.data.data
+      return res.data.data as { pfis: PfiWithFinancials[]; pagination: any }
     },
   })
 }
@@ -24,6 +101,22 @@ export function usePfiDetails(id: string) {
       return res.data.data.pfi as Pfi
     },
     enabled: !!id,
+  })
+}
+
+/** The drawer needs the lines behind the totals, not just the totals. */
+export function usePfiDetail(id: number | null) {
+  return useQuery({
+    queryKey: ['pfis', 'detail', id],
+    queryFn: async () => {
+      const res = await api.get(`/pfis/${id}`)
+      return res.data.data as {
+        pfi: PfiWithFinancials
+        expenses: PfiExpense[]
+        movements: PfiMovement[]
+      }
+    },
+    enabled: id != null,
   })
 }
 
@@ -86,6 +179,117 @@ export function useDeletePfi() {
     },
   })
 }
+
+// ─── Expenses ───────────────────────────────────────────────────────────────
+// PFI and expense data cross-invalidate: booking a cost against a PFI category
+// moves that PFI's totals, so a write to either must refresh both.
+
+/** Every write here touches money on both pages. */
+function useMoneyMutation<T>(fn: (v: T) => Promise<any>, fallback: string) {
+  const queryClient = useQueryClient()
+  const toast = useToast()
+  return useMutation({
+    retry: false,
+    mutationFn: fn,
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: ['pfis'] })
+      queryClient.invalidateQueries({ queryKey: ['expenses'] })
+      toast.success(res?.message || fallback)
+    },
+    onError: (err: any) => toast.error(getErrorMessage(err)),
+  })
+}
+
+export type ExpenseFilters = {
+  search?: string
+  category?: string
+  pfi?: string
+  bank?: string
+  type?: 'pfi' | 'general' | ''
+  dateFrom?: string
+  dateTo?: string
+}
+
+export function useExpenses(filters?: ExpenseFilters) {
+  return useQuery({
+    queryKey: ['expenses', filters],
+    queryFn: async () => {
+      const res = await api.get('/expenses', { params: { ...filters, limit: 500 } })
+      return res.data.data as {
+        expenses: PfiExpense[]
+        totals: { count: number; total: number; pfiTotal: number; generalTotal: number }
+        banks: string[]
+      }
+    },
+  })
+}
+
+export function useExpenseCategories() {
+  return useQuery({
+    queryKey: ['expenses', 'categories'],
+    staleTime: 60 * 1000,
+    queryFn: async () => {
+      const res = await api.get('/expenses/categories')
+      return res.data.data as {
+        categories: ExpenseCategory[]
+        general: ExpenseCategory[]
+        pfi: ExpenseCategory[]
+      }
+    },
+  })
+}
+
+export const useSaveExpense = () =>
+  useMoneyMutation<{ id?: number; data: Record<string, any> }>(
+    async ({ id, data }) =>
+      (id ? await api.patch(`/expenses/${id}`, data) : await api.post('/expenses', data)).data,
+    'Expense saved',
+  )
+
+export const useDeleteExpense = () =>
+  useMoneyMutation<number>(async (id) => (await api.delete(`/expenses/${id}`)).data, 'Expense deleted')
+
+/** Quick-add from inside the PFI drawer; the category is resolved server-side. */
+export const useAddPfiExpense = () =>
+  useMoneyMutation<{ pfiId: number; data: Record<string, any> }>(
+    async ({ pfiId, data }) => (await api.post(`/pfis/${pfiId}/expenses`, data)).data,
+    'Expense recorded',
+  )
+
+export const useSaveCategory = () =>
+  useMoneyMutation<{ id?: number; name: string }>(
+    async ({ id, name }) =>
+      (id
+        ? await api.patch(`/expenses/categories/${id}`, { name })
+        : await api.post('/expenses/categories', { name })
+      ).data,
+    'Category saved',
+  )
+
+export const useDeleteCategory = () =>
+  useMoneyMutation<number>(
+    async (id) => (await api.delete(`/expenses/categories/${id}`)).data,
+    'Category deleted',
+  )
+
+// ─── PFI actions ────────────────────────────────────────────────────────────
+
+/**
+ * Closing returns any gap between the figures typed at closure and the ones
+ * the system computed, plus a warning when stock is still on the books.
+ */
+export const useFinishPfi = () =>
+  useMoneyMutation<{ id: number; data: Record<string, any> }>(
+    async ({ id, data }) => (await api.post(`/pfis/${id}/finish`, data)).data,
+    'PFI closed',
+  )
+
+export const useAssignOrders = () =>
+  useMoneyMutation<{ pfiId: number; orderIds: number[] }>(
+    async ({ pfiId, orderIds }) =>
+      (await api.post('/pfis/assign-orders', { pfi_id: pfiId, order_ids: orderIds })).data,
+    'Orders assigned',
+  )
 
 export function useDepotsForFilter() {
   return useQuery({

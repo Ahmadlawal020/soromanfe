@@ -52,6 +52,7 @@ function PFIForm() {
     productId: '',
     productUnit: '',
     startingQtyLitres: '',
+    blQtyLitres: '',
     qtyVolumeMt: '',
     unitPrice: '',
     auditOfficerId: '',
@@ -77,6 +78,7 @@ function PFIForm() {
         productId: String(editingPfi.productId || ''),
         productUnit: editingPfi.productUnit || '',
         startingQtyLitres: String(editingPfi.startingQtyLitres || ''),
+        blQtyLitres: (editingPfi as any).blQtyLitres != null ? String((editingPfi as any).blQtyLitres) : '',
         qtyVolumeMt: String(editingPfi.qtyVolumeMt || ''),
         unitPrice: editingPfi.unitPrice !== undefined && editingPfi.unitPrice !== null ? String(editingPfi.unitPrice) : '',
         auditOfficerId: editingPfi.auditOfficerId ? String(editingPfi.auditOfficerId) : '',
@@ -116,6 +118,9 @@ function PFIForm() {
         productId: form.productId,
         productUnit: form.productUnit || undefined,
         startingQtyLitres: Number(form.startingQtyLitres) || 0,
+        // Blank means unknown, not zero — a false 0 would make every downstream
+        // money figure compute against it instead of reading "—".
+        blQtyLitres: form.blQtyLitres === '' ? null : Number(form.blQtyLitres),
         qtyVolumeMt: form.qtyVolumeMt ? Number(form.qtyVolumeMt) : null,
         unitPrice: form.unitPrice ? Number(form.unitPrice) : 0,
         auditOfficerId: form.auditOfficerId || null,
@@ -164,6 +169,7 @@ function PFIForm() {
                 productId: '',
                 productUnit: '',
                 startingQtyLitres: '',
+                blQtyLitres: '',
                 qtyVolumeMt: '',
                 unitPrice: '',
                 auditOfficerId: '',
@@ -312,6 +318,63 @@ function PFIForm() {
                           {unitName}
                         </div>
                       </div>
+                    </div>
+
+                    {/*
+                      BL quantity — the documented figure from the shipping
+                      papers, which is what you are billed for. The quantity
+                      above is what measured into the tank, which is what you
+                      can sell. Cargo value is computed from this one, so
+                      leaving it blank is what makes a PFI read as unpriced.
+                    */}
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-normal">
+                        BL Quantity — from the shipping papers
+                      </Label>
+                      <div className="relative">
+                        <Input
+                          type="number"
+                          step="1"
+                          min="0"
+                          placeholder="e.g. 1000000"
+                          value={form.blQtyLitres}
+                          onChange={e => setForm({ ...form, blQtyLitres: e.target.value })}
+                          className="pr-16 font-medium"
+                        />
+                        <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-xs font-semibold text-muted-foreground bg-muted px-2 py-1 rounded">
+                          Litres
+                        </div>
+                      </div>
+                      {(() => {
+                        const bl = Number(form.blQtyLitres)
+                        const tank = Number(form.startingQtyLitres)
+                        if (!form.blQtyLitres || !bl || !tank) {
+                          return (
+                            <p className="text-[11px] text-muted-foreground">
+                              What you pay for. Cargo value is computed from this, not the tank
+                              quantity — leave it blank and every money figure will read “—”.
+                            </p>
+                          )
+                        }
+                        const gap = tank - bl
+                        if (gap === 0) {
+                          return <p className="text-[11px] text-muted-foreground">Tank matches the papers exactly.</p>
+                        }
+                        const price = Number(form.unitPrice) || 0
+                        const worth = price > 0
+                          ? ` — worth ₦${(Math.abs(gap) * price).toLocaleString('en-NG', { maximumFractionDigits: 0 })}`
+                          : ''
+                        return gap > 0 ? (
+                          <p className="text-[11px] text-accent">
+                            Surplus of {gap.toLocaleString()} L — more landed than the papers say.
+                          </p>
+                        ) : (
+                          <p className="text-[11px] text-destructive">
+                            Deficit of {Math.abs(gap).toLocaleString()} L{worth} — you are billed for
+                            product that never arrived.
+                          </p>
+                        )
+                      })()}
                     </div>
 
                     {/* Secondary Equivalent Input (Optional) */}

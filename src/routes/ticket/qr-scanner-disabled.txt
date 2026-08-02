@@ -1,0 +1,246 @@
+/* eslint-disable */
+// @ts-nocheck
+/*
+ * QR TICKET SCANNING — DISABLED, KEPT FOR RESTORATION
+ *
+ * Lifted out of routes/ticket/index.tsx when that page was rebuilt as the
+ * Loading Tickets desk. Nothing here is wired up; the filename is dash-
+ * prefixed so TanStack Router ignores it.
+ *
+ * To restore: put these back into the tickets page, re-add `useRef` to the
+ * react import and `QrCode, Camera` to the lucide import, and uncomment the
+ * html5-qrcode import (the package is still in package.json).
+ */
+
+import { useState, useEffect } from 'react'
+import { StatCard, StatCardGrid } from '#/components/ui/stat-card'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { Badge } from '#/components/ui/badge'
+import { Button } from '#/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '#/components/ui/card'
+import { Input } from '#/components/ui/input'
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '#/components/ui/select'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '#/components/ui/table'
+import { Truck, Search, X, ShieldCheck, Ticket, CalendarDays, CheckCircle2, AlertCircle } from 'lucide-react'
+import { PageLoader } from '#/components/PageLoader'
+import { PageError } from '#/components/PageError'
+import { PageEmpty } from '#/components/PageEmpty'
+import { Pagination } from '#/components/Pagination'
+import { useTicketList } from '#/lib/hooks/useTickets'
+// QR scanning disabled — see the disabled blocks below.
+// To restore: uncomment this import, re-add `useRef` to the react import
+// and `QrCode, Camera` to the lucide import, then uncomment the three
+// blocks marked QR SCANNING — DISABLED.
+// import { Html5QrcodeScanner } from 'html5-qrcode'
+
+export const Route = createFileRoute('/ticket/')({
+  component: TicketsDashboard,
+})
+
+function getStatusBadge(status: string) {
+  switch (status) {
+    case 'Redeemed':
+      return <Badge className="bg-success text-success-foreground">Redeemed</Badge>
+    case 'Active':
+      return <Badge className="bg-primary text-primary-foreground">Active</Badge>
+    default:
+      return <Badge variant="outline">{status}</Badge>
+  }
+}
+
+function TicketsDashboard() {
+  const navigate = useNavigate()
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedStatus, setSelectedStatus] = useState('all')
+  // QR scanning disabled.
+  // const [scanning, setScanning] = useState(false)
+  // const scannerRef = useRef<Html5QrcodeScanner | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
+
+  const { data, isLoading, isError, error, refetch } = useTicketList()
+  const tickets = data?.tickets || []
+  const hasFilters = !!(searchTerm || selectedStatus !== 'all')
+
+  const totalTickets = tickets.length
+  const activeTickets = tickets.filter((t: any) => t.status === 'Active').length
+  const redeemedTickets = tickets.filter((t: any) => t.status === 'Redeemed').length
+  const redemptionRate = totalTickets > 0 ? Math.round((redeemedTickets / totalTickets) * 100) : 0
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchTerm, selectedStatus])
+
+/* ---------------------------------------------------------------------
+ * QR SCANNING — DISABLED
+ *
+ * Camera-based ticket lookup, replaced by search and the loading-ticket desk.
+ * Kept verbatim so it can be switched back on: uncomment this block and
+ * the matching pieces in this file, then reinstate the html5-qrcode import.
+ * ------------------------------------------------------------------- */
+//   useEffect(() => {
+//     if (scanning) {
+//       // Small timeout to ensure the DOM element #reader is mounted
+//       const timer = setTimeout(() => {
+//         try {
+//           const html5QrcodeScanner = new Html5QrcodeScanner(
+//             'reader',
+//             {
+//               fps: 10,
+//               qrbox: { width: 250, height: 250 },
+//               aspectRatio: 1.0,
+//             },
+//             /* verbose= */ false
+//           )
+//
+//           html5QrcodeScanner.render(
+//             (decodedText) => {
+//               // On success, we parse the URL or take the text
+//               // If it's a URL like http://localhost:3000/ticket/details?id=..., we extract id
+//               let idOrCode = decodedText
+//               try {
+//                 if (decodedText.includes('ticket/details')) {
+//                   const urlObj = new URL(decodedText)
+//                   idOrCode = urlObj.searchParams.get('id') || decodedText
+//                 }
+//               } catch (e) {
+//                 // Ignore URL parsing errors
+//               }
+//
+//               html5QrcodeScanner.clear().then(() => {
+//                 setScanning(false)
+//                 navigate({ to: '/ticket/details' as any, search: { id: idOrCode } as any })
+//               }).catch(err => {
+//                 console.error("Failed to clear scanner:", err)
+//                 setScanning(false)
+//                 navigate({ to: '/ticket/details' as any, search: { id: idOrCode } as any })
+//               })
+//             },
+//             (_error) => {
+//               // Handled internally by library
+//             }
+//           )
+//           scannerRef.current = html5QrcodeScanner
+//         } catch (err) {
+//           console.error("Scanner setup failed:", err)
+//         }
+//       }, 300)
+//
+//       return () => {
+//         clearTimeout(timer)
+//         if (scannerRef.current) {
+//           scannerRef.current.clear().catch(err => console.error("Error clearing scanner on unmount:", err))
+//         }
+//       }
+//     }
+//   }, [scanning, navigate])
+//
+
+  const filteredTickets = tickets.filter((tkt: any) => {
+    const matchesSearch =
+      !searchTerm ||
+      (tkt.ticketNumber || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (tkt.order?.orderNumber || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (tkt.order?.customer?.name || '').toLowerCase().includes(searchTerm.toLowerCase())
+
+    const matchesStatus =
+      selectedStatus === 'all' || tkt.status === selectedStatus
+
+    return matchesSearch && matchesStatus
+  })
+
+  const totalItems = filteredTickets.length
+  const totalPages = Math.ceil(totalItems / pageSize)
+  const paginatedTickets = filteredTickets.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  )
+
+  return (
+    <div className="space-y-6 animate-fade-in">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        <div>
+          <h1 className="text-xl md:text-2xl font-semibold tracking-tight text-balance">
+            Loading tickets
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">Issue truck tickets and redeem customer orders.</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => navigate({ to: '/ticket/generate' as any })}
+        >
+          <Truck data-icon="inline-start" />
+          Generate tickets
+        </Button>
+{/*
+/* ---------------------------------------------------------------------
+ * QR SCANNING — DISABLED
+ *
+ * The Scan QR Code toggle.
+ * Kept verbatim so it can be switched back on: uncomment this block and
+ * the matching pieces in this file, then reinstate the html5-qrcode import.
+ * ------------------------------------------------------------------- *\/
+        <Button
+          size="lg"
+          className="cursor-pointer"
+          onClick={() => setScanning(!scanning)}
+ >
+          {scanning ? (
+            <>
+              <X className="size-5 mr-2" /> Stop Scanner
+            </>
+          ) : (
+            <>
+              <Camera className="size-5 mr-2" /> Scan QR Code
+            </>
+          )}
+        </Button>
+
+
+*/}
+
+/* ---------------------------------------------------------------------
+ * QR SCANNING — DISABLED
+ *
+ * The live camera reader panel.
+ * Kept verbatim so it can be switched back on: uncomment this block and
+ * the matching pieces in this file, then reinstate the html5-qrcode import.
+ * ------------------------------------------------------------------- *\/
+      {scanning && (
+        <Card className="border-2 border-primary/30 overflow-hidden transition-all duration-300 ease-luxe">
+          <CardHeader className="bg-primary/5 border-b border-primary/10">
+            <CardTitle className="text-primary flex items-center gap-2">
+              <QrCode className="animate-pulse" /> Live QR Code Reader
+            </CardTitle>
+            <CardDescription>
+              Align the customer's ticket QR code within the frame to auto-scan and load details.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-6 flex flex-col items-center justify-center bg-black/5">
+            <div className="w-full max-w-md bg-background rounded-xl overflow-hidden border border-border p-4 relative">
+              <div id="reader" className="w-full overflow-hidden rounded-xl"></div>
+              {/* Scanning visual overlay *\/}
+              <div className="absolute top-8 left-8 right-8 h-0.5 bg-primary/70 animate-bounce pointer-events-none" />
+            </div>
+            <div className="mt-4 text-xs text-muted-foreground flex items-center gap-1.5">
+              <ShieldCheck className="size-3.5 text-success" />
+              <span>Scanning is performed locally. Ensure camera access is enabled.</span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+
+*/}
+
+// QR scanning disabled — see the disabled blocks below.
+// To restore: uncomment this import, re-add `useRef` to the react import
+// and `QrCode, Camera` to the lucide import, then uncomment the three
+// blocks marked QR SCANNING — DISABLED.
+// import { Html5QrcodeScanner } from 'html5-qrcode'
+
+  // QR scanning disabled.
+  // const [scanning, setScanning] = useState(false)
+  // const scannerRef = useRef<Html5QrcodeScanner | null>(null)

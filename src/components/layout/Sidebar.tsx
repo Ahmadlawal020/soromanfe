@@ -21,6 +21,8 @@ import {
   PlusCircle,
   DollarSign,
   FileSpreadsheet,
+  LogIn,
+  ClipboardList,
 } from "lucide-react";
 import { useAuthStore, useAdminLogout } from "#/modules/auth";
 import { useLayoutStore } from "#/stores/layoutStore";
@@ -76,6 +78,7 @@ const navCategories: NavCategory[] = [
     category: "Finance",
     items: [
       { title: "Deposits", icon: Receipt, path: "/deposits" },
+      { title: "Expenses", icon: Receipt, path: "/expenses" },
       { title: "Bank Accounts", icon: Landmark, path: "/bank-accounts" },
       { title: "Bank Statements", icon: FileSpreadsheet, path: "/bank-statements" },
       { title: "Commissions", icon: DollarSign, path: "/commissions" },
@@ -86,6 +89,8 @@ const navCategories: NavCategory[] = [
     items: [
       { title: "Fleet Directory", icon: Truck, path: "/trucks" },
       { title: "Drivers Directory", icon: Contact, path: "/drivers" },
+      { title: "Fleet", icon: Truck, path: "/fleet-trucks" },
+      { title: "Trucks Ledger", icon: BarChart3, path: "/fleet-ledger" },
     ],
   },
   {
@@ -102,6 +107,14 @@ const navCategories: NavCategory[] = [
     ],
   },
 
+  {
+    category: "Security",
+    items: [
+      { title: "Gate Entry", icon: LogIn, path: "/security/entry" },
+      { title: "Gate Exit", icon: LogOut, path: "/security/exit" },
+      { title: "Security Report", icon: ClipboardList, path: "/security-report" },
+    ],
+  },
   {
     category: "Admin",
     items: [

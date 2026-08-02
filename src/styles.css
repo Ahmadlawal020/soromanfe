@@ -381,3 +381,45 @@
 ::-webkit-scrollbar-thumb:hover {
   background: var(--muted-foreground);
 }
+
+/*
+ * Printing.
+ *
+ * Waybills are rendered a second time as a top-level sibling of the app (see
+ * TicketPrintDialog), because printing the copy inside the dialog fights its
+ * fixed position, height cap and scroll container.
+ *
+ * One sheet per truck, each forced onto its own page.
+ */
+@media print {
+  body > *:not(#ticket-print-root) {
+    display: none !important;
+  }
+
+  #ticket-print-root {
+    display: block !important;
+  }
+
+  /* A hard break after every sheet but the last, so four trucks give four
+     pages rather than three and a stray. */
+  .waybill-sheet {
+    break-after: page;
+    page-break-after: always;
+  }
+  .waybill-sheet:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+
+  /* The banner and the watermark are the whole identity of the sheet; without
+     this most browsers drop both. */
+  #ticket-print-root {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  @page {
+    size: A4;
+    margin: 0;
+  }
+}

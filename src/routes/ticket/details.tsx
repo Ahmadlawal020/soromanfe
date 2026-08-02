@@ -3,7 +3,7 @@ import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '#/components/ui/card'
 import {
-  ArrowLeft, Loader2, AlertCircle, CheckCircle2, Ticket,
+  ArrowLeft, Loader2, AlertCircle, CheckCircle2, 
   Warehouse, Package, Building2, MapPin, CheckSquare, Award
 } from 'lucide-react'
 import { useTicketDetails, useRedeemTicket } from '#/lib/hooks/useTickets'
@@ -238,25 +238,34 @@ function TicketDetailsComponent() {
 
         {/* Ticket Right Column - QR Code Display */}
         <div className="space-y-6">
-          <Card className="border border-border">
-            <CardHeader className="text-center pb-2">
-              <CardTitle className="text-sm font-semibold flex items-center justify-center gap-1.5">
-                <Ticket className="size-4 text-primary" /> Ticket QR Code
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col items-center p-6 pt-2">
-              <div className="bg-white p-4 border border-border rounded-xl mb-4 w-full flex items-center justify-center max-w-[240px]">
-                <img
-                  src={ticket.qrCodeDataUrl}
-                  alt="Ticket QR Code"
-                  className="w-full h-auto object-contain max-h-[200px]"
-                />
-              </div>
-              <p className="text-[10px] text-center text-muted-foreground max-w-[180px]">
-                Present this QR code to the terminal manager. Scanner validates token and verifies product quantity.
-              </p>
-            </CardContent>
-          </Card>
+          {/* ------------------------------------------------------------------
+              QR PANEL — DISABLED
+
+              The ticket QR exists only to be scanned, and scanning is off.
+              To restore: uncomment this card and the blocks marked
+              QR SCANNING — DISABLED in routes/ticket/index.tsx.
+
+              <Card className="border border-border">
+                <CardHeader className="text-center pb-2">
+                  <CardTitle className="text-sm font-semibold flex items-center justify-center gap-1.5">
+                    <Ticket className="size-4 text-primary" /> Ticket QR Code
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-col items-center p-6 pt-2">
+                  <div className="bg-white p-4 border border-border rounded-xl mb-4 w-full flex items-center justify-center max-w-[240px]">
+                    <img
+                      src={ticket.qrCodeDataUrl}
+                      alt="Ticket QR Code"
+                      className="w-full h-auto object-contain max-h-[200px]"
+                    />
+                  </div>
+                  <p className="text-[10px] text-center text-muted-foreground max-w-[180px]">
+                    Present this QR code to the terminal manager. Scanner validates
+                    token and verifies product quantity.
+                  </p>
+                </CardContent>
+              </Card>
+          ------------------------------------------------------------------ */}
 
           {/* Customer info card */}
           <Card className="border border-border">

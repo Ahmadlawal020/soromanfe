@@ -57,12 +57,12 @@ function SalesLedgerDashboard() {
   const customers: DeliveryCustomer[] = useMemo(() => {
     if (!rawCustomers) return []
     if (Array.isArray(rawCustomers)) return rawCustomers
-    return rawCustomers.customers || rawCustomers.data || []
+    return rawCustomers.customers || []
   }, [rawCustomers])
   const pfis: Pfi[] = useMemo(() => {
     if (!rawPfis) return []
     if (Array.isArray(rawPfis)) return rawPfis
-    return rawPfis.pfis || rawPfis.data || []
+    return rawPfis.pfis || []
   }, [rawPfis])
 
   // ── Lookup Maps ────────────────────────────────────────────────────

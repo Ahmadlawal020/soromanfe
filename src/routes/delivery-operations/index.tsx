@@ -99,12 +99,12 @@ function DeliveryOperationsPage() {
 
   const allPfis: Pfi[] = useMemo(() => {
     if (!pfisData) return []
-    return Array.isArray(pfisData) ? pfisData : (pfisData.pfis || pfisData.data || [])
+    return Array.isArray(pfisData) ? pfisData : (pfisData.pfis || [])
   }, [pfisData])
 
   const allTrucks = useMemo(() => {
     if (!trucksData) return []
-    return Array.isArray(trucksData) ? trucksData : (trucksData.trucks || trucksData.data || [])
+    return Array.isArray(trucksData) ? trucksData : (trucksData.trucks || [])
   }, [trucksData])
 
   const allEntries = useMemo((): DeliveryInventory[] => {
@@ -114,7 +114,7 @@ function DeliveryOperationsPage() {
 
   const allCustomers: DeliveryCustomer[] = useMemo(() => {
     if (!customersData) return []
-    return Array.isArray(customersData) ? customersData : (customersData.customers || customersData.data || [])
+    return Array.isArray(customersData) ? customersData : (customersData.customers || [])
   }, [customersData])
 
   // ── Mutations ───────────────────────────────────────────────────────────

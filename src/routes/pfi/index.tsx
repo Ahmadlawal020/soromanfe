@@ -1,396 +1,334 @@
-import { useState, useMemo, useEffect } from 'react'
-import { StatCard, StatCardGrid } from '#/components/ui/stat-card'
+import { useState, useMemo } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import {
+  Search, Plus, Package, Banknote, Droplets, TriangleAlert,
+  ArrowUpDown, Lock, Pencil, Download, X,
+} from 'lucide-react'
+
+import { StatCard, StatCardGrid } from '#/components/ui/stat-card'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '#/components/ui/card'
 import { Input } from '#/components/ui/input'
+import { NativeSelect } from '#/components/ui/native-select'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '#/components/ui/table'
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '#/components/ui/select'
-import { FileSearch2, Search, Plus, DropletIcon, Scale, Package, Banknote, X, FileText, MapPin } from 'lucide-react'
 import { PageLoader } from '#/components/PageLoader'
 import { PageError } from '#/components/PageError'
 import { PageEmpty } from '#/components/PageEmpty'
-import { Pagination } from '#/components/Pagination'
-import { usePfiList, type Pfi } from '#/lib/hooks/usePfis'
-import { toNum } from '#/lib/utils'
-
-/** "Sold · Remaining" meta line — accent for what has moved, amber for what is left. */
-function SplitMeta({ sold, rem }: { sold: string; rem: string }) {
-  return (
-    <span className="truncate">
-      <span className="font-medium text-accent">Sold: {sold}</span>
-      <span className="mx-1 text-muted-foreground/50">·</span>
-      <span className="font-medium text-warning">Rem: {rem}</span>
-    </span>
-  )
-}
+import { PfiDetailDialog } from '#/components/PfiDetailDialog'
+import { PfiCloseDialog } from '#/components/PfiCloseDialog'
+import { MICRO, PANEL } from '#/lib/panel'
+import { cn, getErrorMessage } from '#/lib/utils'
+import { usePfiList, type PfiWithFinancials } from '#/lib/hooks/usePfis'
+import {
+  naira, litres, moneyTone, SurplusDeficit, SellThroughBar,
+} from '#/routes/pfi/-pfi-utils'
+import { downloadPfiReport, downloadMasterReport } from '#/routes/pfi/-pfi-report'
 
 export const Route = createFileRoute('/pfi/')({
   component: PFIDashboard,
 })
 
-function getStatusBadge(status: string) {
-  switch (status?.toLowerCase()) {
-    case 'active': return <Badge className="bg-success text-success-foreground">Active</Badge>
-    case 'finished': return <Badge variant="secondary">Finished</Badge>
-    default: return <Badge variant="outline">{status}</Badge>
-  }
-}
+type SortKey = 'pfiNumber' | 'cost' | 'revenue' | 'profit' | 'remaining' | 'sellThrough'
 
-function fmtQty(n: number, decimals: number = 0) {
-  return n.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
-}
+const COLUMNS: Array<{ key: SortKey; label: string; numeric?: boolean }> = [
+  { key: 'cost', label: 'Total cost', numeric: true },
+  { key: 'revenue', label: 'Revenue', numeric: true },
+  { key: 'profit', label: 'Profit / loss', numeric: true },
+]
 
-function fmtCurrency(n: number) {
-  return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)
-}
-
-function isWeightBased(pfi: Pfi): boolean {
-  const u = (pfi.productUnit || '').toLowerCase()
-  if (u.includes('mt') || u.includes('ton') || u.includes('kg') || u.includes('weight')) return true
-  if (Number(pfi.qtyVolumeMt || 0) > 0 && Number(pfi.startingQtyLitres || 0) === 0) return true
-  return false
-}
-
-function getPfiUnit(pfi: Pfi): string {
-  if (pfi.productUnit) return pfi.productUnit
-  if (isWeightBased(pfi)) return 'MT'
-  return 'Litres'
-}
-
-function getPfiQuantities(pfi: Pfi) {
-  const isWeight = isWeightBased(pfi)
-  const unit = getPfiUnit(pfi)
-  const uLower = (unit || '').toLowerCase()
-
-  let starting = Number(pfi.startingQtyLitres || 0)
-  let sold = Number(pfi.soldQtyLitres || 0)
-
-  if (isWeight && Number(pfi.qtyVolumeMt || 0) > 0 && starting === 0) {
-    starting = Number(pfi.qtyVolumeMt)
-    sold = Number(pfi.soldQtyLitres || 0)
-  }
-
-  const remaining = Math.max(0, starting - sold)
-
-  // Compute MT equivalent for weight stat calculations (1 MT = 1000 kg)
-  let startingMt = 0
-  let soldMt = 0
-  let remainingMt = 0
-
-  if (Number(pfi.qtyVolumeMt || 0) > 0) {
-    startingMt = Number(pfi.qtyVolumeMt)
-    soldMt = starting > 0 ? (sold / starting) * startingMt : 0
-    remainingMt = Math.max(0, startingMt - soldMt)
-  } else if (uLower.includes('kg') || uLower.includes('kilogram')) {
-    startingMt = starting / 1000
-    soldMt = sold / 1000
-    remainingMt = Math.max(0, startingMt - soldMt)
-  } else if (uLower.includes('mt') || uLower.includes('ton')) {
-    startingMt = starting
-    soldMt = sold
-    remainingMt = Math.max(0, startingMt - soldMt)
-  }
-
-  return { starting, sold, remaining, startingMt, soldMt, remainingMt, unit, isWeight }
-}
-
-function getPfiCosts(pfi: Pfi) {
-  const q = getPfiQuantities(pfi)
-  const unitPrice = toNum(pfi.unitPrice)
-  const totalAmount = toNum(pfi.totalAmount)
-  const purchaseCost = toNum(pfi.purchaseCost)
-
-  let totalCost = totalAmount
-  if (totalCost <= 0 && unitPrice > 0 && q.starting > 0) {
-    totalCost = q.starting * unitPrice
-  }
-  if (totalCost <= 0 && purchaseCost > 0) {
-    totalCost = purchaseCost
-  }
-
-  let soldCost = 0
-  let remainingCost = 0
-
-  if (unitPrice > 0) {
-    soldCost = q.sold * unitPrice
-    remainingCost = q.remaining * unitPrice
-  } else if (q.starting > 0 && totalCost > 0) {
-    soldCost = (q.sold / q.starting) * totalCost
-    remainingCost = (q.remaining / q.starting) * totalCost
-  }
-
-  return {
-    totalCost,
-    soldCost,
-    remainingCost,
-    unitPrice,
+/**
+ * Null for an unpriced batch, which is not the same as a low value — sorting
+ * one as if it were the worst loss in the book would put the batches nobody
+ * has costed at the top of a list about money.
+ */
+function sortValue(p: PfiWithFinancials, key: SortKey): number | string | null {
+  const f = p.financials
+  switch (key) {
+    case 'pfiNumber': return p.pfiNumber || ''
+    case 'cost': return f.totalCost
+    case 'revenue': return f.revenue
+    case 'profit': return f.profitLoss
+    case 'remaining': return f.remaining
+    case 'sellThrough': return f.sellThrough
   }
 }
 
 function PFIDashboard() {
   const navigate = useNavigate()
-  const [searchTerm, setSearchTerm] = useState('')
-  const [selectedStatus, setSelectedStatus] = useState('all')
-  const [currentPage, setCurrentPage] = useState(1)
-  const [pageSize, setPageSize] = useState(10)
+  const [search, setSearch] = useState('')
+  const [status, setStatus] = useState('all')
+  const [sort, setSort] = useState<{ key: SortKey; dir: 'asc' | 'desc' }>({ key: 'profit', dir: 'asc' })
+  const [detailId, setDetailId] = useState<number | null>(null)
+  const [closing, setClosing] = useState<PfiWithFinancials | null>(null)
 
-  const { data, isLoading, isError, error, refetch } = usePfiList({ search: searchTerm || undefined, status: selectedStatus !== 'all' ? selectedStatus : undefined })
+  const { data, isLoading, isError, error, refetch } = usePfiList({
+    search: search || undefined,
+    status: status !== 'all' ? status : undefined,
+  })
 
-  const pfis: Pfi[] = Array.isArray(data) ? data : (data?.pfis || data?.results || [])
-  const hasFilters = !!(searchTerm || selectedStatus !== 'all')
+  const pfis = (data?.pfis || []) as PfiWithFinancials[]
+  const hasFilters = !!search || status !== 'all'
 
-  useEffect(() => {
-    setCurrentPage(1)
-  }, [searchTerm, selectedStatus])
-
-  const totalItems = pfis.length
-  const totalPages = Math.ceil(totalItems / pageSize)
-  const paginatedPfis = pfis.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  )
-
-  const stats = useMemo(() => {
-    let activeCount = 0, finishedCount = 0
-    let totalStartingLitres = 0, totalSoldLitres = 0, totalRemainingLitres = 0
-    let totalStartingMt = 0, totalSoldMt = 0, totalRemainingMt = 0
-    let cumulativeCost = 0, cumulativeSoldCost = 0, cumulativeRemainingCost = 0
-
-    pfis.forEach(p => {
-      if (p.status === 'active') activeCount++
-      else finishedCount++
-
-      const q = getPfiQuantities(p)
-
-      // Add to volume inventory if product is litres/volume based
-      if (!q.isWeight) {
-        totalStartingLitres += q.starting
-        totalSoldLitres += q.sold
-        totalRemainingLitres += q.remaining
-      }
-
-      // Add to MT weight inventory (accounts for MT directly or kg / 1000)
-      totalStartingMt += q.startingMt
-      totalSoldMt += q.soldMt
-      totalRemainingMt += q.remainingMt
-
-      const c = getPfiCosts(p)
-      cumulativeCost += c.totalCost
-      cumulativeSoldCost += c.soldCost
-      cumulativeRemainingCost += c.remainingCost
+  const rows = useMemo(() => {
+    const list = [...pfis]
+    list.sort((a, b) => {
+      const av = sortValue(a, sort.key)
+      const bv = sortValue(b, sort.key)
+      // Unpriced batches sink to the bottom whichever way the column is sorted.
+      if (av == null && bv == null) return 0
+      if (av == null) return 1
+      if (bv == null) return -1
+      const cmp = typeof av === 'string' ? av.localeCompare(String(bv)) : av - (bv as number)
+      return sort.dir === 'asc' ? cmp : -cmp
     })
+    return list
+  }, [pfis, sort])
 
+  /**
+   * Portfolio totals.
+   *
+   * Cost and profit skip batches with no BL or price — adding a null in as
+   * zero would understate the portfolio cost and overstate its profit.
+   */
+  const stats = useMemo(() => {
+    let cost = 0, revenue = 0, expenses = 0, remaining = 0, deficitCost = 0
+    let costed = 0, uncosted = 0, active = 0, partSold = 0
+    for (const p of pfis) {
+      const f = p.financials
+      revenue += f.revenue
+      expenses += f.totalExpenses
+      remaining += f.remaining
+      if (f.deficitCost != null) deficitCost += f.deficitCost
+      if (f.totalCost != null) { cost += f.totalCost; costed++ } else uncosted++
+      if (p.status === 'active') active++
+      if (!f.profitIsMeaningful && f.sellThrough != null) partSold++
+    }
     return {
-      activeCount,
-      finishedCount,
-      total: pfis.length,
-      totalStartingLitres,
-      totalSoldLitres,
-      totalRemainingLitres,
-      totalStartingMt,
-      totalSoldMt,
-      totalRemainingMt,
-      cumulativeCost,
-      cumulativeSoldCost,
-      cumulativeRemainingCost,
+      cost, revenue, expenses, remaining, deficitCost, costed, uncosted, active, partSold,
+      profit: costed > 0 ? revenue - cost : null,
+      count: pfis.length,
     }
   }, [pfis])
 
+  const toggleSort = (key: SortKey) =>
+    setSort((s) => (s.key === key ? { key, dir: s.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'desc' }))
+
+  if (isLoading) return <PageLoader />
+  if (isError) return <PageError message={getErrorMessage(error)} onRetry={() => refetch()} />
+
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex justify-between items-center">
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">PFI Tracking</h1>
-          <p className="text-muted-foreground">Monitor PFIs by location and product, track weight & volume inventory, and review cumulative PFI costs.</p>
+          <h1 className="text-2xl font-semibold tracking-tight">PFI Tracking</h1>
+          <p className="text-sm text-muted-foreground">
+            One cargo batch each — what it cost, what you spent moving it, and what it sold for.
+          </p>
         </div>
-        <Button size="sm"  onClick={() => navigate({ to: '/pfi/form' })}>
-          <Plus className="size-4 mr-2" />Add PFI
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => downloadMasterReport(pfis)} disabled={pfis.length === 0}>
+            <Download data-icon="inline-start" />
+            Master report
+          </Button>
+          <Button onClick={() => navigate({ to: '/pfi/form' })}>
+            <Plus data-icon="inline-start" />
+            New PFI
+          </Button>
+        </div>
       </div>
 
-      {/* Compact Stat Cards Grid */}
-      {!isLoading && !isError && (
-        <StatCardGrid count={4}>
-          <StatCard
-            icon={<FileSearch2 />}
-            label="Status overview"
-            value={
-              <>
-                {stats.activeCount}
-                <span className="ml-1 text-xs font-normal text-muted-foreground">active</span>
-                <span className="mx-1.5 text-muted-foreground/50">·</span>
-                <span className="text-muted-foreground">{stats.finishedCount}</span>
-                <span className="ml-1 text-xs font-normal text-muted-foreground">finished</span>
-              </>
-            }
-            description={`${stats.total} total PFIs`}
-          />
+      <StatCardGrid count={4}>
+        <StatCard
+          icon={<Package />} label="Batches" value={stats.count}
+          description={`${stats.active} active · ${stats.count - stats.active} finished`}
+        />
+        <StatCard
+          icon={<Banknote />} label="Total cost" value={naira(stats.cost, { compact: true })}
+          tone="neutral"
+          description={
+            stats.uncosted > 0
+              ? `${stats.uncosted} batch${stats.uncosted === 1 ? '' : 'es'} not yet priced — excluded`
+              : `Cargo + ${naira(stats.expenses, { compact: true })} expenses`
+          }
+        />
+        <StatCard
+          icon={<Banknote />} label="Revenue" value={naira(stats.revenue, { compact: true })}
+          description="Invoiced on paid, released, loading and completed orders"
+        />
+        <StatCard
+          icon={<Droplets />} label="Stock remaining" value={litres(stats.remaining)}
+          tone={stats.remaining > 0 ? 'amber' : 'green'}
+          description={
+            stats.partSold > 0
+              ? `${stats.partSold} batch${stats.partSold === 1 ? '' : 'es'} part-sold — profit not yet real`
+              : 'Every batch fully sold'
+          }
+        />
+      </StatCardGrid>
 
-          <StatCard
-            icon={<DropletIcon />}
-            label="Volume"
-            value={
-              <>
-                {fmtQty(stats.totalStartingLitres)}
-                <span className="ml-0.5 text-xs font-normal text-muted-foreground">L</span>
-              </>
-            }
-            description={<SplitMeta sold={`${fmtQty(stats.totalSoldLitres)} L`} rem={`${fmtQty(stats.totalRemainingLitres)} L`} />}
-          />
-
-          <StatCard
-            icon={<Scale />}
-            label="Weight"
-            value={
-              <>
-                {fmtQty(stats.totalStartingMt, 2)}
-                <span className="ml-0.5 text-xs font-normal text-muted-foreground">MT</span>
-              </>
-            }
-            description={<SplitMeta sold={`${fmtQty(stats.totalSoldMt, 2)} MT`} rem={`${fmtQty(stats.totalRemainingMt, 2)} MT`} />}
-          />
-
-          <StatCard
-            icon={<Banknote />}
-            label="Cumulative PFI cost"
-            value={<span className="text-xl md:text-2xl">{fmtCurrency(stats.cumulativeCost)}</span>}
-            description={<SplitMeta sold={fmtCurrency(stats.cumulativeSoldCost)} rem={fmtCurrency(stats.cumulativeRemainingCost)} />}
-          />
-        </StatCardGrid>
+      {/* A deficit is money paid for product that never arrived, and nothing
+          else in the system reports it as a cost. */}
+      {stats.deficitCost > 0 && (
+        <div className="flex items-start gap-2.5 rounded-lg border border-destructive/25 bg-destructive/5 p-3">
+          <TriangleAlert className="mt-0.5 size-4 shrink-0 text-destructive" />
+          <p className="text-sm text-muted-foreground">
+            <span className="font-medium text-destructive">{naira(stats.deficitCost)}</span> across this
+            portfolio was paid for product that never landed — cargo billed on the BL quantity that did
+            not measure into the tank. It is already inside the loss figures, but nothing else names it.
+          </p>
+        </div>
       )}
 
-      {/* Directory Table Card */}
-      <Card>
-        <CardHeader className="border-b border-border">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <CardTitle>PFI Directory</CardTitle>
-              <CardDescription>Browse active and finished pro forma invoices by location, product, and measurement unit</CardDescription>
-            </div>
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-              <div className="relative flex-1 sm:w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground size-4" />
-                <Input type="text" placeholder="Search PFI number, product..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
-                {searchTerm && <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 size-5 rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground flex items-center justify-center cursor-pointer transition-colors duration-250 ease-luxe" aria-label="Clear search"><X className="size-2.5" /></button>}
-              </div>
-              <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                <SelectTrigger className="w-full sm:w-[180px]"><SelectValue placeholder="All Statuses" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="finished">Finished</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+      <div className={cn(PANEL)}>
+        <div className="flex flex-wrap items-center gap-2 border-b border-foreground/10 p-3">
+          <div className="relative min-w-[12rem] flex-1">
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              className="pl-8" placeholder="Search PFI number, vessel, location…"
+              value={search} onChange={(e) => setSearch(e.target.value)}
+            />
           </div>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <PageLoader message="Loading PFIs..." />
-          ) : isError ? (
-            <PageError message={(error as any)?.message || 'Failed to load'} onRetry={() => refetch()} />
-          ) : pfis.length === 0 ? (
-            <PageEmpty
-              icon={<FileText className="size-6 text-muted-foreground" />}
-              title={hasFilters ? 'No PFIs match your filters' : 'No PFIs yet'}
-              description={hasFilters ? 'Try adjusting your search or filter criteria.' : 'Create your first PFI to get started.'}
-              actionLabel="Create PFI"
-              onAction={() => navigate({ to: '/pfi/form' })}
-              hasFilters={hasFilters}
-              onClearFilters={() => { setSearchTerm(''); setSelectedStatus('all') }}
- />
-          ) : (
-            <>
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>PFI No</TableHead>
-                      <TableHead>Location</TableHead>
-                      <TableHead>Product</TableHead>
-                      <TableHead>Unit</TableHead>
-                      <TableHead>Starting Qty</TableHead>
-                      <TableHead className="text-success">Sold Qty</TableHead>
-                      <TableHead className="text-warning">Remaining Qty</TableHead>
-                      <TableHead>Total Cost (₦)</TableHead>
-                      <TableHead>Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {paginatedPfis.map((pfi: Pfi) => {
-                      const q = getPfiQuantities(pfi)
-                      const c = getPfiCosts(pfi)
-                      const decimals = q.isWeight ? 2 : 0
-
-                      return (
-                        <TableRow key={pfi._id || pfi.id} className="cursor-pointer hover:bg-muted transition" onClick={() => navigate({ to: '/pfi/details' as any, search: { id: String(pfi._id || pfi.id) } as any })}>
-                          <TableCell>
-                            <div className="flex items-center gap-3">
-                              <div className="size-10 bg-primary/10 rounded-full flex items-center justify-center text-primary font-medium shrink-0">
-                                <FileText className="size-4" />
-                              </div>
-                              <div>
-                                <p className="font-semibold text-primary">{pfi.pfiNumber}</p>
-                                <p className="text-xs text-muted-foreground">
-                                  {pfi.pfiDate ? new Date(pfi.pfiDate).toLocaleDateString() : '—'}
-                                </p>
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-1.5 text-sm">
-                              <MapPin className="size-3.5 text-muted-foreground shrink-0" />
-                              <span>{pfi.locationName || '—'}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-1.5 text-sm">
-                              <Package className="size-3.5 text-muted-foreground shrink-0" />
-                              <span>{pfi.productName || '—'}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className="font-medium text-xs">
-                              {q.isWeight ? <Scale className="size-3 mr-1 text-info inline" /> : <DropletIcon className="size-3 mr-1 text-primary inline" />}
-                              {q.unit}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="font-medium">{fmtQty(q.starting, decimals)} {q.unit}</TableCell>
-                          <TableCell className="text-success font-medium">{fmtQty(q.sold, decimals)} {q.unit}</TableCell>
-                          <TableCell className="text-warning font-medium">
-                            <div className="flex flex-col gap-1 w-full max-w-[120px]">
-                              <span>{fmtQty(q.remaining, decimals)} {q.unit}</span>
-                              {q.starting > 0 && (
-                                <div className="h-1.5 bg-muted rounded-full overflow-hidden w-full">
-                                  <div className="h-full bg-warning rounded-full" style={{ width: `${Math.min(100, (q.remaining / q.starting) * 100)}%` }} />
-                                </div>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell className="font-semibold text-primary">{fmtCurrency(c.totalCost)}</TableCell>
-                          <TableCell>{getStatusBadge(pfi.status)}</TableCell>
-                        </TableRow>
-                      )
-                    })}
-                  </TableBody>
-                </Table>
-              </div>
-
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                pageSize={pageSize}
-                totalItems={totalItems}
-                onPageChange={setCurrentPage}
-                onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1) }}
- />
-            </>
+          <NativeSelect className="w-40" value={status} onChange={(e) => setStatus(e.target.value)}>
+            <option value="all">All statuses</option>
+            <option value="active">Active</option>
+            <option value="finished">Finished</option>
+          </NativeSelect>
+          {hasFilters && (
+            <Button variant="ghost" size="sm" onClick={() => { setSearch(''); setStatus('all') }}>
+              <X data-icon="inline-start" />
+              Clear
+            </Button>
           )}
-        </CardContent>
-      </Card>
+        </div>
+
+        {rows.length === 0 ? (
+          <PageEmpty
+            icon={<Package />}
+            title={hasFilters ? 'No PFIs match those filters' : 'No PFIs yet'}
+            description={
+              hasFilters
+                ? 'Try a different search or status.'
+                : 'Create one to start tracking a cargo batch.'
+            }
+          />
+        ) : (
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>PFI</TableHead>
+                  <TableHead className="hidden lg:table-cell">BL vs tank</TableHead>
+                  <TableHead className="hidden md:table-cell">Sell-through</TableHead>
+                  {COLUMNS.map((c) => (
+                    <TableHead key={c.key} className="text-right">
+                      <button
+                        type="button"
+                        className="ml-auto inline-flex items-center gap-1 hover:text-foreground"
+                        onClick={() => toggleSort(c.key)}
+                      >
+                        {c.label}
+                        <ArrowUpDown className={cn('size-3', sort.key === c.key ? 'opacity-100' : 'opacity-30')} />
+                      </button>
+                    </TableHead>
+                  ))}
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {rows.map((p) => {
+                  const f = p.financials
+                  return (
+                    <TableRow
+                      key={p.id}
+                      className="cursor-pointer"
+                      onClick={() => setDetailId(Number(p.id))}
+                    >
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{p.pfiNumber}</span>
+                          <Badge variant={p.status === 'active' ? 'default' : 'secondary'} className="shrink-0">
+                            {p.status === 'active' ? 'Active' : 'Finished'}
+                          </Badge>
+                        </div>
+                        <p className="truncate text-xs text-muted-foreground">
+                          {[p.productName, p.locationName].filter(Boolean).join(' · ') || '—'}
+                        </p>
+                      </TableCell>
+
+                      <TableCell className="hidden lg:table-cell">
+                        <p className="text-sm tabular-nums">{litres(f.blQtyLitres)}</p>
+                        <SurplusDeficit litres={f.surplusDeficitLitres} className="text-xs" />
+                      </TableCell>
+
+                      <TableCell className="hidden md:table-cell">
+                        <SellThroughBar value={f.sellThrough} className="min-w-[7rem]" />
+                        <p className="mt-0.5 text-xs text-muted-foreground">{litres(f.remaining)} left</p>
+                      </TableCell>
+
+                      <TableCell className="text-right tabular-nums">{naira(f.totalCost, { compact: true })}</TableCell>
+                      <TableCell className="text-right tabular-nums">{naira(f.revenue, { compact: true })}</TableCell>
+                      <TableCell className={cn('text-right tabular-nums', moneyTone(f.profitLoss))}>
+                        {naira(f.profitLoss, { compact: true })}
+                        {/* A part-sold batch charges full cost against partial
+                            revenue, so the figure beside this is not yet real. */}
+                        {!f.profitIsMeaningful && f.sellThrough != null && (
+                          <span
+                            className="ml-1 cursor-help text-muted-foreground"
+                            title={`Only ${Math.round(f.sellThrough * 100)}% sold — full cargo cost is charged against partial revenue, so this is not yet a real figure.`}
+                          >
+                            *
+                          </span>
+                        )}
+                      </TableCell>
+
+                      <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-end gap-0.5">
+                          {p.status === 'active' && (
+                            <Button variant="ghost" size="icon-sm" onClick={() => setClosing(p)} title="Close PFI">
+                              <Lock /><span className="sr-only">Close</span>
+                            </Button>
+                          )}
+                          <Button
+                            variant="ghost" size="icon-sm" title="Edit"
+                            onClick={() => navigate({ to: '/pfi/form', search: { id: String(p.id) } as any })}
+                          >
+                            <Pencil /><span className="sr-only">Edit</span>
+                          </Button>
+                          <Button
+                            variant="ghost" size="icon-sm" title="Download report"
+                            onClick={() => downloadPfiReport(Number(p.id))}
+                          >
+                            <Download /><span className="sr-only">Report</span>
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+
+        {rows.length > 0 && (
+          <p className={cn(MICRO, 'border-t border-foreground/10 p-3 text-muted-foreground')}>
+            {rows.length} batch{rows.length === 1 ? '' : 'es'}
+            {stats.partSold > 0 && <> · * profit not yet meaningful on {stats.partSold}</>}
+          </p>
+        )}
+      </div>
+
+      <PfiDetailDialog
+        pfiId={detailId}
+        open={detailId != null}
+        onOpenChange={(o) => !o && setDetailId(null)}
+        onDownloadReport={downloadPfiReport}
+      />
+      <PfiCloseDialog
+        pfi={closing}
+        open={closing != null}
+        onOpenChange={(o) => !o && setClosing(null)}
+      />
     </div>
   )
 }
-
