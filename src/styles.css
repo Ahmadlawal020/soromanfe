@@ -8,7 +8,25 @@
  * optical-size axis. Subsets are unicode-range gated, so only latin is fetched.
  * Its italic is deliberately not loaded — emphasis stays weight and colour.
  */
-@import "@fontsource-variable/inter/opsz.css";
+/*
+ * General Sans, self-hosted. Two weights only — 400 and 600, nothing between.
+ * The 500 tier is deliberately absent: with no file to load, a `font-weight:500`
+ * would be synthesised, so the codebase resolves everything to one of these two.
+ */
+@font-face {
+  font-family: "General Sans";
+  src: url("./assets/fonts/GeneralSans-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "General Sans";
+  src: url("./assets/fonts/GeneralSans-Semibold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
 
 /* Dark mode is driven by a .dark class on <html> (see stores/layoutStore.ts).
    Without this, Tailwind v4 falls back to prefers-color-scheme and the app's
@@ -30,12 +48,12 @@
  */
 :root {
   --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --foreground: oklch(0 0 0);
 
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: oklch(0 0 0);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
+  --popover-foreground: oklch(0 0 0);
 
   --primary: #007a55; /* emerald-700 — white on it is 5.3:1 */
   --primary-foreground: oklch(0.985 0 0);
@@ -43,7 +61,7 @@
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
+  --muted-foreground: oklch(0.44 0 0);
 
   /* One accent, and it is the brand green — used as link/brand ink app-wide.
      NOT a neutral hover fill; hover grounds are --muted. */
@@ -154,7 +172,7 @@
 }
 
 @theme inline {
-  --font-sans: "Inter Variable", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-sans: "General Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 
   /* Cinematic timing — nothing snaps */
   --ease-luxe: cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -230,7 +248,7 @@
   h1,
   h2,
   h3 {
-    @apply font-medium tracking-tight;
+    @apply font-normal tracking-tight;
   }
 
   input,
@@ -380,4 +398,46 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--muted-foreground);
+}
+
+/*
+ * Printing.
+ *
+ * Waybills are rendered a second time as a top-level sibling of the app (see
+ * TicketPrintDialog), because printing the copy inside the dialog fights its
+ * fixed position, height cap and scroll container.
+ *
+ * One sheet per truck, each forced onto its own page.
+ */
+@media print {
+  body > *:not(#ticket-print-root) {
+    display: none !important;
+  }
+
+  #ticket-print-root {
+    display: block !important;
+  }
+
+  /* A hard break after every sheet but the last, so four trucks give four
+     pages rather than three and a stray. */
+  .waybill-sheet {
+    break-after: page;
+    page-break-after: always;
+  }
+  .waybill-sheet:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+
+  /* The banner and the watermark are the whole identity of the sheet; without
+     this most browsers drop both. */
+  #ticket-print-root {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  @page {
+    size: A4;
+    margin: 0;
+  }
 }

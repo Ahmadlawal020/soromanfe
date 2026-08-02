@@ -979,7 +979,7 @@ function FilingStationsDashboard() {
                 type="button"
                 onClick={() => handlePresetChange(tp)}
                 className={cn(
-                  'px-2.5 py-1 text-xs font-medium rounded-full border transition-colors cursor-pointer duration-250 ease-luxe',
+                  'px-2.5 py-1 text-xs font-normal rounded-full border transition-colors cursor-pointer duration-250 ease-luxe',
                   timePreset === tp
                     ? 'bg-foreground text-background border-foreground'
                     : 'bg-card text-muted-foreground border-border hover:border-foreground/40'
@@ -994,7 +994,7 @@ function FilingStationsDashboard() {
             type="button"
             onClick={() => setShowAdvancedFilters(f => !f)}
             className={cn(
-              'inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full border transition-colors cursor-pointer duration-250 ease-luxe',
+              'inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-normal rounded-full border transition-colors cursor-pointer duration-250 ease-luxe',
               showAdvancedFilters || [truckFilter, locationFilter, stationFilter, allocationCodeFilter, rateFilter, cycleFilter].some(f => f !== 'all')
                 ? 'bg-foreground text-background border-foreground'
                 : 'bg-card text-muted-foreground border-border hover:border-foreground/40'
@@ -1003,7 +1003,7 @@ function FilingStationsDashboard() {
             <Filter className="size-3" />
             Filters
             {[truckFilter, locationFilter, stationFilter, allocationCodeFilter, rateFilter, cycleFilter].filter(f => f !== 'all').length > 0 && (
-              <span className="ml-0.5 bg-background text-foreground rounded-full size-4 flex items-center justify-center text-[10px] font-semibold">
+              <span className="ml-0.5 bg-background text-foreground rounded-full size-4 flex items-center justify-center text-xs font-semibold">
                 {[truckFilter, locationFilter, stationFilter, allocationCodeFilter, rateFilter, cycleFilter].filter(f => f !== 'all').length}
               </span>
             )}
@@ -1027,7 +1027,7 @@ function FilingStationsDashboard() {
         {showAdvancedFilters && (
           <div className="border-t border-border px-4 py-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
             <div className="space-y-1">
-              <label className="flex items-center gap-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em]"><Truck className="size-2.5" /> Truck</label>
+              <label className="flex items-center gap-1 text-xs font-semibold text-muted-foreground uppercase"><Truck className="size-2.5" /> Truck</label>
               <select aria-label="Truck" value={truckFilter} onChange={e => setTruckFilter(e.target.value)}
                 className={cn('h-8 w-full rounded-md border bg-background text-foreground px-2 text-xs', truckFilter !== 'all' ? 'border-foreground font-semibold' : 'border-border text-muted-foreground')}>
                 <option value="all">All</option>
@@ -1035,7 +1035,7 @@ function FilingStationsDashboard() {
               </select>
             </div>
             <div className="space-y-1">
-              <label className="flex items-center gap-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em]"><MapPin className="size-2.5" /> Destination</label>
+              <label className="flex items-center gap-1 text-xs font-semibold text-muted-foreground uppercase"><MapPin className="size-2.5" /> Destination</label>
               <select aria-label="Destination" value={locationFilter} onChange={e => setLocationFilter(e.target.value)}
                 className={cn('h-8 w-full rounded-md border bg-background text-foreground px-2 text-xs', locationFilter !== 'all' ? 'border-foreground font-semibold' : 'border-border text-muted-foreground')}>
                 <option value="all">All</option>
@@ -1043,7 +1043,7 @@ function FilingStationsDashboard() {
               </select>
             </div>
             <div className="space-y-1">
-              <label className="flex items-center gap-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em]"><Users className="size-2.5" /> Station</label>
+              <label className="flex items-center gap-1 text-xs font-semibold text-muted-foreground uppercase"><Users className="size-2.5" /> Station</label>
               <select aria-label="Station" value={stationFilter} onChange={e => setStationFilter(e.target.value)}
                 className={cn('h-8 w-full rounded-md border bg-background text-foreground px-2 text-xs', stationFilter !== 'all' ? 'border-foreground font-semibold' : 'border-border text-muted-foreground')}>
                 <option value="all">All</option>
@@ -1052,7 +1052,7 @@ function FilingStationsDashboard() {
             </div>
             {uniqueAllocationCodes.length > 0 && (
               <div className="space-y-1">
-                <label className="flex items-center gap-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em]"><Tag className="size-2.5" /> Code</label>
+                <label className="flex items-center gap-1 text-xs font-semibold text-muted-foreground uppercase"><Tag className="size-2.5" /> Code</label>
                 <select aria-label="Code" value={allocationCodeFilter} onChange={e => setAllocationCodeFilter(e.target.value)}
                   className={cn('h-8 w-full rounded-md border bg-background text-foreground px-2 text-xs', allocationCodeFilter !== 'all' ? 'border-border font-semibold text-foreground dark:text-muted-foreground bg-muted dark:bg-foreground/40' : 'border-border text-muted-foreground')}>
                   <option value="all">All</option>
@@ -1062,7 +1062,7 @@ function FilingStationsDashboard() {
             )}
             {uniqueRates.length > 0 && (
               <div className="space-y-1">
-                <label className="flex items-center gap-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em]"><TrendingUp className="size-2.5" /> Rate (₦/L)</label>
+                <label className="flex items-center gap-1 text-xs font-semibold text-muted-foreground uppercase"><TrendingUp className="size-2.5" /> Rate (₦/L)</label>
                 <select aria-label="Rate" value={rateFilter} onChange={e => setRateFilter(e.target.value)}
                   className={cn('h-8 w-full rounded-md border bg-background text-foreground px-2 text-xs', rateFilter !== 'all' ? 'border-foreground font-semibold' : 'border-border text-muted-foreground')}>
                   <option value="all">All Rates</option>
@@ -1072,7 +1072,7 @@ function FilingStationsDashboard() {
             )}
             {uniqueCycleOptions.length > 0 && (
               <div className="space-y-1">
-                <label className="flex items-center gap-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em]"><Receipt className="size-2.5" /> Cycle</label>
+                <label className="flex items-center gap-1 text-xs font-semibold text-muted-foreground uppercase"><Receipt className="size-2.5" /> Cycle</label>
                 <select aria-label="Cycle" value={cycleFilter} onChange={e => setCycleFilter(e.target.value)}
                   className={cn('h-8 w-full rounded-md border bg-background text-foreground px-2 text-xs', cycleFilter !== 'all' ? 'border-foreground font-semibold' : 'border-border text-muted-foreground')}>
                   <option value="all">All Cycles</option>
@@ -1085,12 +1085,12 @@ function FilingStationsDashboard() {
 
         {(truckFilter !== 'all' || locationFilter !== 'all' || stationFilter !== 'all' || allocationCodeFilter !== 'all' || rateFilter !== 'all' || cycleFilter !== 'all') && (
           <div className="px-4 pb-3 flex flex-wrap gap-1.5">
-            {truckFilter !== 'all' && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted text-foreground text-xs font-medium"><Truck className="size-2.5" />{truckFilter}<button type="button" title="Remove" onClick={() => setTruckFilter('all')}><X className="size-2.5" /></button></span>}
-            {locationFilter !== 'all' && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted text-foreground text-xs font-medium"><MapPin className="size-2.5" />{locationFilter}<button type="button" title="Remove" onClick={() => setLocationFilter('all')}><X className="size-2.5" /></button></span>}
-            {stationFilter !== 'all' && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted text-foreground text-xs font-medium"><Users className="size-2.5" />{uniqueStationOptions.find(c => c.id === stationFilter)?.name || stationFilter}<button type="button" title="Remove" onClick={() => setStationFilter('all')}><X className="size-2.5" /></button></span>}
-            {allocationCodeFilter !== 'all' && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted text-foreground text-xs font-medium"><Tag className="size-2.5" />{allocationCodeFilter}<button type="button" title="Remove" onClick={() => setAllocationCodeFilter('all')}><X className="size-2.5" /></button></span>}
-            {rateFilter !== 'all' && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted text-foreground text-xs font-medium">₦{Number(rateFilter).toLocaleString()}/L<button type="button" title="Remove" onClick={() => setRateFilter('all')}><X className="size-2.5" /></button></span>}
-            {cycleFilter !== 'all' && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted text-foreground text-xs font-medium">Cycle {cycleFilter}<button type="button" title="Remove" onClick={() => setCycleFilter('all')}><X className="size-2.5" /></button></span>}
+            {truckFilter !== 'all' && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted text-foreground text-xs font-normal"><Truck className="size-2.5" />{truckFilter}<button type="button" title="Remove" onClick={() => setTruckFilter('all')}><X className="size-2.5" /></button></span>}
+            {locationFilter !== 'all' && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted text-foreground text-xs font-normal"><MapPin className="size-2.5" />{locationFilter}<button type="button" title="Remove" onClick={() => setLocationFilter('all')}><X className="size-2.5" /></button></span>}
+            {stationFilter !== 'all' && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted text-foreground text-xs font-normal"><Users className="size-2.5" />{uniqueStationOptions.find(c => c.id === stationFilter)?.name || stationFilter}<button type="button" title="Remove" onClick={() => setStationFilter('all')}><X className="size-2.5" /></button></span>}
+            {allocationCodeFilter !== 'all' && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted text-foreground text-xs font-normal"><Tag className="size-2.5" />{allocationCodeFilter}<button type="button" title="Remove" onClick={() => setAllocationCodeFilter('all')}><X className="size-2.5" /></button></span>}
+            {rateFilter !== 'all' && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted text-foreground text-xs font-normal">₦{Number(rateFilter).toLocaleString()}/L<button type="button" title="Remove" onClick={() => setRateFilter('all')}><X className="size-2.5" /></button></span>}
+            {cycleFilter !== 'all' && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted text-foreground text-xs font-normal">Cycle {cycleFilter}<button type="button" title="Remove" onClick={() => setCycleFilter('all')}><X className="size-2.5" /></button></span>}
           </div>
         )}
       </div>
@@ -1104,7 +1104,7 @@ function FilingStationsDashboard() {
         ) : filteredLedgerGroups.length === 0 ? (
           <div className="bg-white rounded-xl border border-border p-16 text-center">
             <Fuel className="size-10 mx-auto text-muted-foreground mb-3" />
-            <p className="text-muted-foreground font-medium">No filling station allocations found</p>
+            <p className="text-muted-foreground font-normal">No filling station allocations found</p>
             <p className="text-sm text-muted-foreground/70 mt-1">Assign filling stations in the inventory or create a new station first.</p>
           </div>
         ) : (
@@ -1139,25 +1139,25 @@ function FilingStationsDashboard() {
                               {group.stationName || 'Unnamed Station'}
                             </h3>
                             {group.cycleNum && (
-                              <span className="shrink-0 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-accent/10 text-accent border border-accent/20">
+                              <span className="shrink-0 px-2 py-0.5 rounded-full text-xs font-semibold bg-accent/10 text-accent border border-accent/20">
                                 Cycle {group.cycleNum}
                               </span>
                             )}
                             {group.code ? (
-                              <span className={cn('shrink-0 px-2 py-0.5 rounded-full text-[10px] font-semibold border cursor-pointer', theme ? theme.badge : 'bg-muted text-muted-foreground border-border')} onClick={() => openCodeEditDialog(group)}>
+                              <span className={cn('shrink-0 px-2 py-0.5 rounded-full text-xs font-semibold border cursor-pointer', theme ? theme.badge : 'bg-muted text-muted-foreground border-border')} onClick={() => openCodeEditDialog(group)}>
                                 {group.code}
                               </span>
                             ) : (
                               <button
                                 type="button"
                                 onClick={() => openCodeEditDialog(group)}
-                                className="text-[10px] text-muted-foreground hover:text-foreground underline decoration-dashed"
+                                className="text-xs text-muted-foreground hover:text-foreground underline decoration-dashed"
  >
                                 + Add Code
                               </button>
                             )}
                           </div>
-                          <div className="flex items-center gap-2 mt-1 text-[11px] text-muted-foreground flex-wrap">
+                          <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground flex-wrap">
                             <span className="flex items-center gap-1"><Truck className="size-3 text-warning" />{group.truckNumber || '—'}</span>
                             <span className="text-muted-foreground/40">·</span>
                             <span className="flex items-center gap-1">
@@ -1197,25 +1197,25 @@ function FilingStationsDashboard() {
                     {/* Summary Metrics */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 pt-4 border-t border-border">
                       <div className="space-y-0.5">
-                        <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-semibold">Allocated</p>
+                        <p className="text-xs uppercase text-muted-foreground font-semibold">Allocated</p>
                         <p className="text-sm font-semibold text-foreground">{group.quantity > 0 ? `${fmtQty(group.quantity)} L` : '—'}</p>
                         <div className="flex items-center gap-1.5 mt-1">
                           <div className="h-1 flex-1 bg-muted rounded-full overflow-hidden">
                             <div className={cn('h-full rounded-full', pctSold >= 100 ? 'bg-accent' : pctSold >= 60 ? 'bg-warning' : 'bg-muted-foreground/30')} style={{ width: `${pctSold}%` }} />
                           </div>
-                          <span className="text-[10px] text-muted-foreground font-semibold shrink-0">{pctSold}%</span>
+                          <span className="text-xs text-muted-foreground font-semibold shrink-0">{pctSold}%</span>
                         </div>
                       </div>
                       <div className="space-y-0.5">
-                        <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-semibold">Sold</p>
+                        <p className="text-xs uppercase text-muted-foreground font-semibold">Sold</p>
                         <p className="text-sm font-semibold text-foreground">{group.totalQtySold > 0 ? `${fmtQty(group.totalQtySold)} L` : '—'}</p>
                       </div>
                       <div className="space-y-0.5">
-                        <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-semibold">Deposited</p>
+                        <p className="text-xs uppercase text-muted-foreground font-semibold">Deposited</p>
                         <p className="text-sm font-semibold text-accent">{group.totalPaid > 0 ? fmt(group.totalPaid) : '—'}</p>
                       </div>
                       <div className="space-y-0.5">
-                        <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-semibold">Balance</p>
+                        <p className="text-xs uppercase text-muted-foreground font-semibold">Balance</p>
                         <p className={cn('text-sm font-semibold', group.balance === 0 ? 'text-accent' : group.balance > 0 ? 'text-destructive' : 'text-muted-foreground')}>
                           {group.balance === 0 ? '✓ Settled' : group.balance > 0 ? fmt(group.balance) : `+${fmt(Math.abs(group.balance))}`}
                         </p>
@@ -1226,26 +1226,26 @@ function FilingStationsDashboard() {
                       <div className="mt-3 pt-3 border-t border-border grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {group.collectionAccounts.length > 0 && (
                           <div className="rounded-lg bg-muted/60 dark:bg-foreground/40 border border-border dark:border-border/50 px-3 py-2 space-y-2">
-                            <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-semibold flex items-center gap-1">
+                            <p className="text-xs uppercase text-muted-foreground font-semibold flex items-center gap-1">
                               <Wallet className="size-2.5" /> Collection Account{group.collectionAccounts.length > 1 ? 's' : ''}
                             </p>
                             {group.collectionAccounts.map((acc, i) => (
                               <div key={i}>
                                 <p className="text-xs font-semibold text-foreground">{acc.name || '—'}</p>
-                                <p className="text-[11px] text-muted-foreground">{acc.bank}{acc.bank && acc.number ? ' · ' : ''}{acc.number}</p>
+                                <p className="text-xs text-muted-foreground">{acc.bank}{acc.bank && acc.number ? ' · ' : ''}{acc.number}</p>
                               </div>
                             ))}
                           </div>
                         )}
                         {group.remittanceAccounts.length > 0 && (
                           <div className="rounded-lg bg-muted/60 dark:bg-foreground/40 border border-border dark:border-border/50 px-3 py-2 space-y-2">
-                            <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground font-semibold flex items-center gap-1">
+                            <p className="text-xs uppercase text-muted-foreground font-semibold flex items-center gap-1">
                               <ArrowRightLeft className="size-2.5" /> Remittance Account{group.remittanceAccounts.length > 1 ? 's' : ''}
                             </p>
                             {group.remittanceAccounts.map((acc, i) => (
                               <div key={i}>
                                 <p className="text-xs font-semibold text-foreground">{acc.name || '—'}</p>
-                                <p className="text-[11px] text-muted-foreground">{acc.bank}{acc.bank && acc.number ? ' · ' : ''}{acc.number}</p>
+                                <p className="text-xs text-muted-foreground">{acc.bank}{acc.bank && acc.number ? ' · ' : ''}{acc.number}</p>
                               </div>
                             ))}
                           </div>
@@ -1305,12 +1305,12 @@ function FilingStationsDashboard() {
                                   return (
                                     <TableRow key={entryId || idx} className="hover:bg-muted/30 border-b border-border/50">
                                       <TableCell className="px-4 text-muted-foreground">{idx + 1}</TableCell>
-                                      <TableCell className="text-muted-foreground whitespace-nowrap font-medium">
+                                      <TableCell className="text-muted-foreground whitespace-nowrap font-normal">
                                         {entryDate ? (() => { try { return format(parseISO(entryDate), 'dd MMM yy') } catch { return entryDate } })() : '—'}
                                       </TableCell>
                                       <TableCell className="text-right font-semibold text-foreground">{isSale ? `${fmtQty(saleQty)} L` : '—'}</TableCell>
                                       <TableCell className="text-right text-muted-foreground">{isSale ? `₦${saleRate.toLocaleString()}` : '—'}</TableCell>
-                                      <TableCell className="text-right text-foreground font-medium">{isSale ? fmt(saleVal) : '—'}</TableCell>
+                                      <TableCell className="text-right text-foreground font-normal">{isSale ? fmt(saleVal) : '—'}</TableCell>
                                       <TableCell className="text-right font-semibold text-accent">{depositAmt > 0 ? fmt(depositAmt) : '—'}</TableCell>
                                       <TableCell className="text-muted-foreground">{entry.payerName || '—'}</TableCell>
                                       <TableCell className="text-muted-foreground">{entry.bank ? entry.bank.split(' · ')[1] || entry.bank : '—'}</TableCell>
@@ -1321,7 +1321,7 @@ function FilingStationsDashboard() {
                                             disabled={updatingStatusId === entryId}
                                             onClick={() => handleToggleDepositStatus(entry)}
                                             title="Click to toggle status (Confirmed / Pending)"
-                                            className={cn('inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold border transition-all cursor-pointer hover:opacity-80 duration-250 ease-luxe', isConfirmed ? 'bg-accent/10 text-accent border-accent/40' : 'bg-warning/10 text-warning border-warning/40')}
+                                            className={cn('inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-semibold border transition-all cursor-pointer hover:opacity-80 duration-250 ease-luxe', isConfirmed ? 'bg-accent/10 text-accent border-accent/40' : 'bg-warning/10 text-warning border-warning/40')}
  >
                                             {updatingStatusId === entryId && <Loader2 className="size-2.5 animate-spin" />}
                                             {isConfirmed ? 'Confirmed' : 'Pending'}
@@ -1369,32 +1369,32 @@ function FilingStationsDashboard() {
             {/* Totals Bar */}
             <div className="bg-foreground text-background rounded-xl px-5 sm:px-6 py-4">
               <div className="flex flex-wrap items-center justify-between gap-4">
-                <p className="text-xs uppercase tracking-[0.22em] text-background/60 font-semibold">
+                <p className="text-xs uppercase text-background/60 font-semibold">
                   Totals across {filteredLedgerGroups.length} allocation{filteredLedgerGroups.length === 1 ? '' : 's'}
                 </p>
                 <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
                   <div>
-                    <span className="text-background/50 text-[11px] uppercase tracking-[0.14em] mr-1.5">Allocated</span>
+                    <span className="text-background/50 text-xs uppercase mr-1.5">Allocated</span>
                     <span className="font-semibold">{totals.totalQtyAllocated > 0 ? `${fmtQty(totals.totalQtyAllocated)} L` : '—'}</span>
                   </div>
                   <div>
-                    <span className="text-background/50 text-[11px] uppercase tracking-[0.14em] mr-1.5">Sold</span>
+                    <span className="text-background/50 text-xs uppercase mr-1.5">Sold</span>
                     <span className="font-semibold">{totals.totalQtySold > 0 ? `${fmtQty(totals.totalQtySold)} L` : '—'}</span>
                   </div>
                   <div>
-                    <span className="text-background/50 text-[11px] uppercase tracking-[0.14em] mr-1.5">Expected</span>
+                    <span className="text-background/50 text-xs uppercase mr-1.5">Expected</span>
                     <span className="font-semibold">{fmt(totals.totalExpected)}</span>
                   </div>
                   <div>
-                    <span className="text-background/50 text-[11px] uppercase tracking-[0.14em] mr-1.5">Deposited</span>
+                    <span className="text-background/50 text-xs uppercase mr-1.5">Deposited</span>
                     <span className="font-semibold text-accent">{fmt(totals.totalPaid)}</span>
                   </div>
                   <div>
-                    <span className="text-background/50 text-[11px] uppercase tracking-[0.14em] mr-1.5">Expenses</span>
+                    <span className="text-background/50 text-xs uppercase mr-1.5">Expenses</span>
                     <span className="font-semibold text-warning">{fmt(totals.totalExpenses)}</span>
                   </div>
                   <div>
-                    <span className="text-background/50 text-[11px] uppercase tracking-[0.14em] mr-1.5">Outstanding</span>
+                    <span className="text-background/50 text-xs uppercase mr-1.5">Outstanding</span>
                     <span className={cn('font-semibold', totals.balance > 0 ? 'text-destructive' : 'text-accent')}>
                       {totals.balance === 0 ? '₦0.00 ✓' : totals.balance > 0 ? fmt(totals.balance) : `+${fmt(Math.abs(totals.balance))}`}
                     </span>

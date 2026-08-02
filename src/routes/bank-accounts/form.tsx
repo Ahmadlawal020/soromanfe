@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate, useLocation } from '@tanstack/react-router'
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
@@ -6,17 +7,7 @@ import { Label } from '#/components/ui/label'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '#/components/ui/select'
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '#/components/ui/card'
 import { Badge } from '#/components/ui/badge'
-import {
-  ArrowLeft,
-  Landmark,
-  Building2,
-  Warehouse,
-  Loader2,
-  Search,
-  Check,
-  X,
-  Star,
-} from 'lucide-react'
+import { ArrowLeft, Landmark, Warehouse, Loader2, Search, Check, X, Star } from 'lucide-react'
 import {
   useCreateBankAccount,
   useUpdateBankAccount,
@@ -196,21 +187,11 @@ function BankAccountForm() {
         </Button>
       </div>
 
-      <div className="flex items-center gap-3">
-        <div className="size-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-          <Building2 className="size-6 text-primary" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-semibold text-foreground tracking-tight">
-            {isEdit ? 'Edit Bank Account' : 'Add New Bank Account'}
-          </h1>
-          <p className="text-xs text-muted-foreground">
-            {isEdit
-              ? 'Update bank account details and depot assignments'
-              : 'Create a new corporate bank account and assign it to operational depots'}
-          </p>
-        </div>
-      </div>
+      <PageHeader
+      eyebrow="Finance"
+      title={isEdit ? 'Edit Bank Account' : 'Add New Bank Account'}
+      description={isEdit ? 'Update bank account details and depot assignments' : 'Create a new corporate bank account and assign it to operational depots'}
+    />
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Card 1: Bank & Account Info */}
@@ -434,7 +415,7 @@ function BankAccountForm() {
             {/* Selected Depot Chips */}
             {selectedDepotIds.length > 0 && (
               <div className="p-3 bg-muted/30 border border-border/40 rounded-xl">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground mb-2">
+                <p className="text-xs font-semibold uppercase text-muted-foreground mb-2">
                   Currently Assigned ({selectedDepotIds.length}):
                 </p>
                 <div className="flex flex-wrap gap-1.5">
@@ -444,7 +425,7 @@ function BankAccountForm() {
                       <Badge
                         key={id}
                         variant="secondary"
-                        className="bg-primary/15 text-primary border-primary/30 text-xs font-medium py-1 px-2.5 flex items-center gap-1.5"
+                        className="bg-primary/15 text-primary border-primary/30 text-xs font-normal py-1 px-2.5 flex items-center gap-1.5"
  >
                         <Warehouse className="size-3" />
                         {depot ? `${depot.name} (${depot.code})` : `Depot #${id}`}
@@ -491,10 +472,10 @@ function BankAccountForm() {
                           <span className={`font-semibold text-xs ${isChecked ? 'text-primary' : 'text-foreground'}`}>
                             {depot.name}
                           </span>
-                          <span className="text-[10px] font-mono opacity-80">({depot.code})</span>
+                          <span className="text-xs font-mono opacity-80">({depot.code})</span>
                         </div>
                         {depot.city && (
-                          <p className="text-[11px] text-muted-foreground truncate mt-0.5">{depot.city}, {depot.state}</p>
+                          <p className="text-xs text-muted-foreground truncate mt-0.5">{depot.city}, {depot.state}</p>
                         )}
                       </div>
 

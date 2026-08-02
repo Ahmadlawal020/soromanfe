@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
@@ -11,21 +12,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from '#/components/ui/dialog'
-import {
-  ArrowLeft,
-  ShieldCheck,
-  FileText,
-  Calendar,
-  Loader2,
-  CheckCircle,
-  XCircle,
-  User,
-  Phone,
-  Mail,
-  Building2,
-  Clock,
-  MessageSquare,
-} from 'lucide-react'
+import { ShieldCheck, FileText, Calendar, Loader2, CheckCircle, XCircle, User, Phone, Mail, Building2, Clock, MessageSquare } from 'lucide-react'
 import { useLicenseDetails, useReviewLicense } from '#/lib/hooks/useCustomerLicenses'
 import { PageLoader } from '#/components/PageLoader'
 import { PageError } from '#/components/PageError'
@@ -120,19 +107,12 @@ function LicenceReviewPage() {
       />
 
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={handleBack}>
-            <ArrowLeft className="size-5" />
-          </Button>
-          <div>
-            <h1 className="text-2xl font-semibold text-foreground">
-              License Review
-            </h1>
-            <p className="text-muted-foreground text-sm">
-              {license.companyName}
-            </p>
-          </div>
-        </div>
+        <PageHeader
+      eyebrow="Admin"
+      title="License Review"
+      description={`{license.companyName}`}
+      backAction={handleBack}
+    />
         {license.status === 'pending' && (
           <div className="flex items-center gap-2">
             <Button
@@ -216,7 +196,7 @@ function LicenceReviewPage() {
                   <span className="text-sm text-muted-foreground">
                     Reviewed by
                   </span>
-                  <span className="text-sm font-medium">
+                  <span className="text-sm font-normal">
                     {license.verifiedByName}
                   </span>
                 </div>
@@ -258,7 +238,7 @@ function LicenceReviewPage() {
                 <User className="size-4 text-muted-foreground shrink-0" />
                 <div>
                   <p className="text-xs text-muted-foreground">Name</p>
-                  <p className="text-sm font-medium">
+                  <p className="text-sm font-normal">
                     {license.customerName || `Customer #${license.customerId}`}
                   </p>
                 </div>
@@ -268,7 +248,7 @@ function LicenceReviewPage() {
                   <Building2 className="size-4 text-muted-foreground shrink-0" />
                   <div>
                     <p className="text-xs text-muted-foreground">Company</p>
-                    <p className="text-sm font-medium">
+                    <p className="text-sm font-normal">
                       {license.customerCompanyName}
                     </p>
                   </div>
@@ -279,7 +259,7 @@ function LicenceReviewPage() {
                   <Phone className="size-4 text-muted-foreground shrink-0" />
                   <div>
                     <p className="text-xs text-muted-foreground">Phone</p>
-                    <p className="text-sm font-medium">
+                    <p className="text-sm font-normal">
                       {license.customerPhone}
                     </p>
                   </div>
@@ -290,7 +270,7 @@ function LicenceReviewPage() {
                   <Mail className="size-4 text-muted-foreground shrink-0" />
                   <div>
                     <p className="text-xs text-muted-foreground">Email</p>
-                    <p className="text-sm font-medium">
+                    <p className="text-sm font-normal">
                       {license.customerEmail}
                     </p>
                   </div>
@@ -310,14 +290,14 @@ function LicenceReviewPage() {
             <CardContent className="space-y-3">
               <div>
                 <p className="text-xs text-muted-foreground">Company Name</p>
-                <p className="text-sm font-medium">{license.companyName}</p>
+                <p className="text-sm font-normal">{license.companyName}</p>
               </div>
               {license.expiryDate && (
                 <div>
                   <p className="text-xs text-muted-foreground flex items-center gap-1">
                     <Calendar className="size-3" /> Expiry Date
                   </p>
-                  <p className="text-sm font-medium">
+                  <p className="text-sm font-normal">
                     {new Date(license.expiryDate).toLocaleDateString()}
                   </p>
                 </div>

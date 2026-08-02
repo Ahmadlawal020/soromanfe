@@ -1,14 +1,10 @@
 import { useState } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '#/components/ui/card'
-import {
-  ArrowLeft, AlertCircle, Package, MapPin,
-  Calendar, Phone, Mail, Truck, FileCheck,
-  Banknote, Copy, CheckCircle, Clock, XCircle, User, CircleDollarSign,
-  Flame,
-} from 'lucide-react'
+import { ArrowLeft, AlertCircle, MapPin, Calendar, Phone, Mail, Truck, FileCheck, Banknote, Copy, CheckCircle, Clock, XCircle, User, CircleDollarSign, Flame } from 'lucide-react'
 import { useLpgOrderRequestDetails, useUpdateLpgOrderCollectionStatus } from '#/lib/hooks/useLpgOrders'
 import { Breadcrumbs } from '#/components/Breadcrumbs'
 import { ConfirmDialog } from '#/components/ConfirmDialog'
@@ -141,15 +137,11 @@ function LpgOrderDetails() {
       ]} />
 
       <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" onClick={() => navigate({ to: '/lpg-orders/' as any })}>
-            <ArrowLeft className="size-4" />
-          </Button>
-          <div>
-            <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">Order Details</h1>
-            <p className="text-muted-foreground">Detailed breakdown of the LPG cooking gas order</p>
-          </div>
-        </div>
+        <PageHeader
+      eyebrow="LPG Home Delivery"
+      title="Order Details"
+      description="Detailed breakdown of the LPG cooking gas order"
+    />
       </header>
 
       {/* Main Order Card Header */}
@@ -209,18 +201,18 @@ function LpgOrderDetails() {
             </div>
             <div className="flex justify-between items-center py-2 border-b border-border/50">
               <span className="text-sm text-muted-foreground">Total Weight</span>
-              <span className="font-mono font-medium text-foreground">{totalWeightKg.toLocaleString()} Kg</span>
+              <span className="font-mono font-normal text-foreground">{totalWeightKg.toLocaleString()} Kg</span>
             </div>
             {request.pricePerKg && (
               <div className="flex justify-between items-center py-2 border-b border-border/50">
                 <span className="text-sm text-muted-foreground">Price Per Kg</span>
-                <span className="font-mono font-medium text-foreground">{formatCurrency(Number(request.pricePerKg))}</span>
+                <span className="font-mono font-normal text-foreground">{formatCurrency(Number(request.pricePerKg))}</span>
               </div>
             )}
             {request.deliveryPrice && (
               <div className="flex justify-between items-center py-2 border-b border-border/50">
                 <span className="text-sm text-muted-foreground">Delivery Price</span>
-                <span className="font-mono font-medium text-foreground">{formatCurrency(Number(request.deliveryPrice))}</span>
+                <span className="font-mono font-normal text-foreground">{formatCurrency(Number(request.deliveryPrice))}</span>
               </div>
             )}
             <div className="flex justify-between items-center pt-2">
@@ -247,25 +239,25 @@ function LpgOrderDetails() {
           </CardHeader>
           <CardContent className="space-y-4 pt-6">
             <div>
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Client Name</p>
+              <p className="text-xs text-muted-foreground font-normal uppercase">Client Name</p>
               <p className="text-sm font-semibold text-foreground mt-0.5">{request.customerName || 'N/A'}</p>
             </div>
             {request.companyName && (
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Company</p>
+                <p className="text-xs text-muted-foreground font-normal uppercase">Company</p>
                 <p className="text-sm text-foreground mt-0.5">{request.companyName}</p>
               </div>
             )}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Email Address</p>
+                <p className="text-xs text-muted-foreground font-normal uppercase">Email Address</p>
                 <p className="text-sm text-foreground mt-0.5 flex items-center gap-1.5 truncate">
                   <Mail className="size-3.5 text-muted-foreground shrink-0" />
                   {request.customerEmail || 'N/A'}
                 </p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Phone Line</p>
+                <p className="text-xs text-muted-foreground font-normal uppercase">Phone Line</p>
                 <p className="text-sm text-foreground mt-0.5 flex items-center gap-1.5">
                   <Phone className="size-3.5 text-muted-foreground shrink-0" />
                   {request.customerPhone || 'N/A'}
@@ -290,25 +282,25 @@ function LpgOrderDetails() {
           </CardHeader>
           <CardContent className="space-y-4 pt-6">
             <div>
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Delivery Address</p>
+              <p className="text-xs text-muted-foreground font-normal uppercase">Delivery Address</p>
               <p className="text-sm font-semibold text-foreground mt-0.5">{request.deliveryAddress || 'N/A'}</p>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">State</p>
+                <p className="text-xs text-muted-foreground font-normal uppercase">State</p>
                 <p className="text-sm text-foreground mt-0.5 flex items-center gap-1">
                   <MapPin className="size-3 text-primary shrink-0" />
                   {request.deliveryState || 'N/A'}
                 </p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">LGA</p>
+                <p className="text-xs text-muted-foreground font-normal uppercase">LGA</p>
                 <p className="text-sm text-foreground mt-0.5">{request.deliveryLga || 'N/A'}</p>
               </div>
             </div>
             {request.expectedArrivalDate && (
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Expected Arrival</p>
+                <p className="text-xs text-muted-foreground font-normal uppercase">Expected Arrival</p>
                 <p className="text-sm font-semibold text-foreground mt-0.5 flex items-center gap-1.5">
                   <Calendar className="size-3.5 text-muted-foreground" />
                   {request.expectedArrivalDate}
@@ -337,12 +329,12 @@ function LpgOrderDetails() {
               {requestStatusBadge(request.status)}
             </div>
             <div>
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Reviewed By</p>
+              <p className="text-xs text-muted-foreground font-normal uppercase">Reviewed By</p>
               <p className="text-sm font-semibold text-foreground mt-0.5">{reviewerName}</p>
             </div>
             {request.reviewedAt && (
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Reviewed At</p>
+                <p className="text-xs text-muted-foreground font-normal uppercase">Reviewed At</p>
                 <p className="text-sm text-foreground mt-0.5">{formatDate(request.reviewedAt)}</p>
               </div>
             )}
@@ -371,11 +363,11 @@ function LpgOrderDetails() {
           {request.virtualAccountNumber && (
             <>
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Bank</p>
+                <p className="text-xs text-muted-foreground font-normal uppercase">Bank</p>
                 <p className="text-sm font-semibold text-foreground mt-0.5">{request.virtualAccountBank || 'N/A'}</p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Account Number</p>
+                <p className="text-xs text-muted-foreground font-normal uppercase">Account Number</p>
                 <div className="flex items-center gap-2 mt-0.5">
                   <p className="text-lg font-semibold font-mono text-foreground">{request.virtualAccountNumber}</p>
                   <button
@@ -392,7 +384,7 @@ function LpgOrderDetails() {
                 </div>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Account Name</p>
+                <p className="text-xs text-muted-foreground font-normal uppercase">Account Name</p>
                 <p className="text-sm font-semibold text-foreground mt-0.5">{request.virtualAccountName || formatAccountName(request.customerName)}</p>
               </div>
             </>
@@ -421,15 +413,15 @@ function LpgOrderDetails() {
           <div className="flex items-center gap-4 pt-4">
             <div className={`flex-1 p-3 rounded-lg border text-center transition-colors ${request.collectionStatus === 'Pending' ? 'bg-warning/10 border-warning/30' : 'bg-muted/50 border-border'}`}>
               <Clock className={`size-5 mx-auto mb-1 ${request.collectionStatus === 'Pending' ? 'text-warning' : 'text-muted-foreground'}`} />
-              <p className={`text-xs font-medium ${request.collectionStatus === 'Pending' ? 'text-warning' : 'text-muted-foreground'}`}>Pending</p>
+              <p className={`text-xs font-normal ${request.collectionStatus === 'Pending' ? 'text-warning' : 'text-muted-foreground'}`}>Pending</p>
             </div>
             <div className={`flex-1 p-3 rounded-lg border text-center transition-colors ${request.collectionStatus === 'Dispatched' ? 'bg-muted/10 border-border/30' : 'bg-muted/50 border-border'}`}>
               <Truck className={`size-5 mx-auto mb-1 ${request.collectionStatus === 'Dispatched' ? 'text-muted-foreground' : 'text-muted-foreground'}`} />
-              <p className={`text-xs font-medium ${request.collectionStatus === 'Dispatched' ? 'text-muted-foreground' : 'text-muted-foreground'}`}>Dispatched</p>
+              <p className={`text-xs font-normal ${request.collectionStatus === 'Dispatched' ? 'text-muted-foreground' : 'text-muted-foreground'}`}>Dispatched</p>
             </div>
             <div className={`flex-1 p-3 rounded-lg border text-center transition-colors ${request.collectionStatus === 'Collected' ? 'bg-accent/10 border-accent/30' : 'bg-muted/50 border-border'}`}>
               <CheckCircle className={`size-5 mx-auto mb-1 ${request.collectionStatus === 'Collected' ? 'text-accent' : 'text-muted-foreground'}`} />
-              <p className={`text-xs font-medium ${request.collectionStatus === 'Collected' ? 'text-accent' : 'text-muted-foreground'}`}>Collected</p>
+              <p className={`text-xs font-normal ${request.collectionStatus === 'Collected' ? 'text-accent' : 'text-muted-foreground'}`}>Collected</p>
             </div>
           </div>
         </CardContent>
@@ -463,7 +455,7 @@ function LpgOrderDetails() {
           )}
 
           {request.paymentStatus === 'Paid' && request.collectionStatus === 'Collected' && (
-            <span className="text-sm text-accent font-medium flex items-center gap-2">
+            <span className="text-sm text-accent font-normal flex items-center gap-2">
               <CheckCircle className="size-4" /> Order completed
             </span>
           )}

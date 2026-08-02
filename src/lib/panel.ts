@@ -32,20 +32,14 @@ export const PANEL =
   "overflow-hidden rounded-xl border border-foreground/15 bg-background";
 
 /**
- * Wide-tracked uppercase micro-label — the single most recognisable trait of
- * the design. Letter-spacing scales inversely with size; this is the panel
- * header rung of that ladder.
+ * Small uppercase label for panel headers and field captions.
  *
- *   0.3em   text-xs          hero eyebrow
- *   0.25em  text-xs          MICRO — panel header labels
- *   0.22em  text-xs/0.65rem  product codes, sidebar group labels
- *   0.2em   text-[0.65rem]   stepper labels, sub-headings inside panels
- *   0.14em  text-[0.6rem]    status chips
- *   0.12em  text-[0.6rem]    smallest meta lines
- *
- * Always uppercase at >= 0.12em. Never track body copy.
+ * Letter-spacing is normal. This used to sit on a wide-tracking ladder
+ * (0.3em down to 0.12em by size); that has been removed deliberately —
+ * spacing is uniform everywhere now, and size plus case carry the hierarchy
+ * on their own.
  */
-export const MICRO = "text-xs tracking-[0.25em] uppercase";
+export const MICRO = "text-xs uppercase";
 
 /** Panel header rail — the standard hairline + padding pairing for PANEL. */
 export const PANEL_RAIL =

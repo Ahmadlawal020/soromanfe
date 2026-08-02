@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '#/components/ui/card'
 import { Button } from '#/components/ui/button'
@@ -6,7 +7,7 @@ import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
 import { Badge } from '#/components/ui/badge'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '#/components/ui/select'
-import { ArrowLeft, Landmark, User, DollarSign, Loader2, CheckCircle2, ShieldCheck, ArrowDownLeft } from 'lucide-react'
+import { Landmark, User, DollarSign, Loader2, CheckCircle2, ShieldCheck, ArrowDownLeft } from 'lucide-react'
 import { useCustomerList } from '#/lib/hooks/useCustomers'
 import { useBankAccounts } from '#/lib/hooks/useBankAccounts'
 import { useCreateDeposit } from '#/lib/hooks/useDeposits'
@@ -167,17 +168,11 @@ function ManualDepositPage() {
 
     return (
         <div className="max-w-4xl mx-auto space-y-6 animate-fade-in pb-12">
-            <header className="flex items-center gap-4">
-                <Button variant="outline" size="icon" onClick={() => navigate({ to: '/deposits/' as any })}>
-                    <ArrowLeft className="size-4" />
-                </Button>
-                <div>
-                    <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">Record Manual Deposit</h1>
-                    <p className="text-muted-foreground">
-                        Register direct bank transfer or teller deposit to customer account.
-                    </p>
-                </div>
-            </header>
+            <PageHeader
+      eyebrow="Finance"
+      title="Record Manual Deposit"
+      description="Register direct bank transfer or teller deposit to customer account."
+    />
 
             <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2 space-y-6">
@@ -228,7 +223,7 @@ function ManualDepositPage() {
                                                 filteredCustomers.map((cust) => (
                                                     <SelectItem key={cust._id || (cust as any).id} value={String(cust._id || (cust as any).id)}>
                                                         <div className="flex items-center justify-between gap-4 w-full text-left">
-                                                            <span className="font-medium">{cust.name}</span>
+                                                            <span className="font-normal">{cust.name}</span>
                                                             {cust.companyName && (
                                                                 <span className="text-xs text-muted-foreground">({cust.companyName})</span>
                                                             )}
@@ -255,7 +250,7 @@ function ManualDepositPage() {
                                         </p>
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-xs text-muted-foreground font-medium uppercase">Current Balance</p>
+                                        <p className="text-xs text-muted-foreground font-normal uppercase">Current Balance</p>
                                         <p className="text-base font-semibold text-foreground font-mono">
                                             {formatCurrency(currentBalance)}
                                         </p>
@@ -305,7 +300,7 @@ function ManualDepositPage() {
                                             bankAccounts.map((bank) => (
                                                 <SelectItem key={bank.id} value={String(bank.id)}>
                                                     <div className="flex items-center justify-between gap-4">
-                                                        <span className="font-medium">{bank.bankName}</span>
+                                                        <span className="font-normal">{bank.bankName}</span>
                                                         <span className="text-xs text-muted-foreground font-mono">{bank.accountNumber} ({bank.accountName})</span>
                                                     </div>
                                                 </SelectItem>
@@ -487,7 +482,7 @@ function ManualDepositPage() {
 
                                 <div className="flex justify-between items-center text-muted-foreground">
                                     <span>Current Balance</span>
-                                    <span className="font-mono text-foreground font-medium">
+                                    <span className="font-mono text-foreground font-normal">
                                         {formatCurrency(currentBalance)}
                                     </span>
                                 </div>
@@ -517,7 +512,7 @@ function ManualDepositPage() {
                         <CardFooter className="border-t border-border pt-4 bg-muted/20">
                             <Button
                                 type="submit"
-                                className="w-full font-medium gap-2"
+                                className="w-full font-normal gap-2"
                                 disabled={createDepositMutation.isPending}
  >
                                 {createDepositMutation.isPending ? (

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
@@ -127,13 +128,12 @@ function RouteComponent() {
     <div className="space-y-6 animate-fade-in">
       <Breadcrumbs items={[{ label: 'Orders', href: '/orders' }, { label: order?.orderNumber || 'Details' }]} />
       <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" onClick={handleBack}><ArrowLeft className="size-4" /></Button>
-          <div>
-            <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">Order Details</h1>
-            <p className="text-muted-foreground">Detailed breakdown of the sales order and fulfillment status</p>
-          </div>
-        </div>
+        <PageHeader
+      eyebrow="Orders"
+      title="Order Details"
+      description="Detailed breakdown of the sales order and fulfillment status"
+      backAction={handleBack}
+    />
       </header>
 
       {/* Main Order Card Header */}
@@ -193,7 +193,7 @@ function RouteComponent() {
             </div>
             <div className="flex justify-between items-center py-2 border-b border-border/50">
               <span className="text-sm text-muted-foreground">Unit Price</span>
-              <span className="font-mono font-medium text-foreground">
+              <span className="font-mono font-normal text-foreground">
                 {formatCurrency(toNum(order.price))} per {(order.productUnit || order.product?.unit) === 'Liters' ? 'Liter' : 'Unit'}
               </span>
             </div>
@@ -221,12 +221,12 @@ function RouteComponent() {
           </CardHeader>
           <CardContent className="space-y-4 pt-6">
             <div>
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Client Name</p>
+              <p className="text-xs text-muted-foreground font-normal uppercase">Client Name</p>
               <p className="text-sm font-semibold text-foreground mt-0.5">{order.customerName || order.customer?.name || 'N/A'}</p>
             </div>
             {(order.customerCompanyName || order.customer?.companyName) && (
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Company</p>
+                <p className="text-xs text-muted-foreground font-normal uppercase">Company</p>
                 <p className="text-sm text-foreground mt-0.5 flex items-center gap-1.5">
                   <Building2 className="size-3.5 text-muted-foreground" />
                   {order.customerCompanyName || order.customer?.companyName}
@@ -235,14 +235,14 @@ function RouteComponent() {
             )}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Email Address</p>
+                <p className="text-xs text-muted-foreground font-normal uppercase">Email Address</p>
                 <p className="text-sm text-foreground mt-0.5 flex items-center gap-1.5 truncate">
                   <Mail className="size-3.5 text-muted-foreground shrink-0" />
                   {order.customerEmail || order.customer?.email || 'N/A'}
                 </p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Phone Line</p>
+                <p className="text-xs text-muted-foreground font-normal uppercase">Phone Line</p>
                 <p className="text-sm text-foreground mt-0.5 flex items-center gap-1.5">
                   <Phone className="size-3.5 text-muted-foreground shrink-0" />
                   {order.customerPhone || order.customer?.phone || 'N/A'}
@@ -267,18 +267,18 @@ function RouteComponent() {
           </CardHeader>
           <CardContent className="space-y-4 pt-6">
             <div>
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Product Name</p>
+              <p className="text-xs text-muted-foreground font-normal uppercase">Product Name</p>
               <p className="text-sm font-semibold text-foreground mt-0.5">{order.productName || order.product?.name || 'N/A'}</p>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Product SKU / Code</p>
+                <p className="text-xs text-muted-foreground font-normal uppercase">Product SKU / Code</p>
                 <p className="text-sm font-mono text-foreground mt-0.5 font-semibold bg-muted border border-border px-2 py-0.5 rounded w-fit text-xs">
                   {order.productSku || order.product?.sku || 'N/A'}
                 </p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Category</p>
+                <p className="text-xs text-muted-foreground font-normal uppercase">Category</p>
                 <p className="text-sm text-foreground mt-0.5">{order.productCategory || order.product?.category || 'N/A'}</p>
               </div>
             </div>
@@ -300,21 +300,21 @@ function RouteComponent() {
           </CardHeader>
           <CardContent className="space-y-4 pt-6">
             <div>
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Fulfillment Depot</p>
+              <p className="text-xs text-muted-foreground font-normal uppercase">Fulfillment Depot</p>
               <p className="text-sm font-semibold text-foreground mt-0.5 flex items-center gap-1.5">
                 {order.depotName || order.depot?.name || 'N/A'}
                 {(order.depotCode || order.depot?.code) && (
-                  <Badge variant="outline" className="font-mono text-[10px] py-0 px-1.5">{order.depotCode || order.depot?.code}</Badge>
+                  <Badge variant="outline" className="font-mono text-xs py-0 px-1.5">{order.depotCode || order.depot?.code}</Badge>
                 )}
               </p>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">LGA / City</p>
+                <p className="text-xs text-muted-foreground font-normal uppercase">LGA / City</p>
                 <p className="text-sm text-foreground mt-0.5">{order.depotCity || order.depot?.city || 'N/A'}</p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">State Region</p>
+                <p className="text-xs text-muted-foreground font-normal uppercase">State Region</p>
                 <p className="text-sm text-foreground mt-0.5 flex items-center gap-1">
                   <MapPin className="size-3 text-primary shrink-0" />
                   {order.state || order.depotState || order.depot?.state || 'N/A'}
@@ -340,27 +340,27 @@ function RouteComponent() {
             </CardHeader>
             <CardContent className="space-y-4 pt-6">
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">PFI Number</p>
+                <p className="text-xs text-muted-foreground font-normal uppercase">PFI Number</p>
                 <p className="text-sm font-semibold text-foreground mt-0.5 flex items-center gap-1.5">
                   <Badge variant="outline" className="font-mono text-xs">{order.pfiNumber}</Badge>
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Starting Qty</p>
+                  <p className="text-xs text-muted-foreground font-normal uppercase">Starting Qty</p>
                   <p className="text-sm font-mono font-semibold text-foreground mt-0.5">
                     {toNum(order.startingQtyLitres).toLocaleString()} {order.productUnit || 'Litres'}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Sold Qty</p>
+                  <p className="text-xs text-muted-foreground font-normal uppercase">Sold Qty</p>
                   <p className="text-sm font-mono font-semibold text-foreground mt-0.5">
                     {toNum(order.soldQtyLitres).toLocaleString()} {order.productUnit || 'Litres'}
                   </p>
                 </div>
               </div>
               <div className="flex justify-between items-center pt-2 border-t border-border/50">
-                <span className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">PFI Status</span>
+                <span className="text-xs text-muted-foreground font-normal uppercase">PFI Status</span>
                 <Badge className={order.pfiStatus === 'active' ? 'bg-success/10 text-success border border-success/20' : 'bg-muted text-muted-foreground border border-border'}>
                   {order.pfiStatus === 'active' ? 'Active' : 'Finished'}
                 </Badge>
@@ -394,11 +394,11 @@ function RouteComponent() {
             {order.virtualAccountNumber && (
               <>
                 <div>
-                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Bank</p>
+                  <p className="text-xs text-muted-foreground font-normal uppercase">Bank</p>
                   <p className="text-sm font-semibold text-foreground mt-0.5">{order.virtualAccountBank || 'N/A'}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Account Number</p>
+                  <p className="text-xs text-muted-foreground font-normal uppercase">Account Number</p>
                   <div className="flex items-center gap-2 mt-0.5">
                     <p className="text-lg font-semibold font-mono text-foreground">{order.virtualAccountNumber}</p>
                     <button
@@ -415,7 +415,7 @@ function RouteComponent() {
                   </div>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Account Name</p>
+                  <p className="text-xs text-muted-foreground font-normal uppercase">Account Name</p>
                   <p className="text-sm font-semibold text-foreground mt-0.5">{order.virtualAccountName || formatAccountName(order.customerName || order.customer?.name)}</p>
                 </div>
               </>
@@ -453,7 +453,7 @@ function RouteComponent() {
           )}
 
           {order.status === 'Cancelled' && (
-            <span className="text-sm text-destructive font-medium flex items-center">Order was Cancelled</span>
+            <span className="text-sm text-destructive font-normal flex items-center">Order was Cancelled</span>
           )}
 
           {(order.paymentStatus === 'Paid' || order.status === 'Completed') && (

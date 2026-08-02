@@ -36,19 +36,19 @@ export function DangoteReviewStep({ wizard }: DangoteReviewStepProps) {
           <div className="grid grid-cols-2 gap-3 text-xs">
             <div>
               <span className="text-muted-foreground block">Name</span>
-              <span className="font-medium">{selectedCustomer?.name}</span>
+              <span className="font-normal">{selectedCustomer?.name}</span>
             </div>
             <div>
               <span className="text-muted-foreground block">Company</span>
-              <span className="font-medium">{selectedCustomer?.companyName || '—'}</span>
+              <span className="font-normal">{selectedCustomer?.companyName || '—'}</span>
             </div>
             <div>
               <span className="text-muted-foreground block">Phone</span>
-              <span className="font-medium">{selectedCustomer?.phone}</span>
+              <span className="font-normal">{selectedCustomer?.phone}</span>
             </div>
             <div>
               <span className="text-muted-foreground block">Email</span>
-              <span className="font-medium">{selectedCustomer?.email || '—'}</span>
+              <span className="font-normal">{selectedCustomer?.email || '—'}</span>
             </div>
           </div>
         </div>
@@ -62,16 +62,16 @@ export function DangoteReviewStep({ wizard }: DangoteReviewStepProps) {
           <div className="grid grid-cols-2 gap-3 text-xs">
             <div>
               <span className="text-muted-foreground block">Company Name</span>
-              <span className="font-medium">{selectedLicense?.companyName || '—'}</span>
+              <span className="font-normal">{selectedLicense?.companyName || '—'}</span>
             </div>
             <div>
               <span className="text-muted-foreground block">Licence Status</span>
-              <span className="font-medium capitalize">{selectedLicense?.status || '—'}</span>
+              <span className="font-normal capitalize">{selectedLicense?.status || '—'}</span>
             </div>
             {selectedLicense?.expiryDate && (
               <div>
                 <span className="text-muted-foreground block">Expiry Date</span>
-                <span className="font-medium">{new Date(selectedLicense.expiryDate).toLocaleDateString()}</span>
+                <span className="font-normal">{new Date(selectedLicense.expiryDate).toLocaleDateString()}</span>
               </div>
             )}
           </div>
@@ -86,19 +86,19 @@ export function DangoteReviewStep({ wizard }: DangoteReviewStepProps) {
           <div className="grid grid-cols-2 gap-3 text-xs">
             <div>
               <span className="text-muted-foreground block">Product</span>
-              <span className="font-medium">{selectedProduct?.name}</span>
+              <span className="font-normal">{selectedProduct?.name}</span>
             </div>
             <div>
               <span className="text-muted-foreground block">Category</span>
-              <span className="font-medium">{selectedProduct?.category}</span>
+              <span className="font-normal">{selectedProduct?.category}</span>
             </div>
             <div>
               <span className="text-muted-foreground block">Grade</span>
-              <span className="font-medium">{selectedProduct?.gradeClass || 'N/A'}</span>
+              <span className="font-normal">{selectedProduct?.gradeClass || 'N/A'}</span>
             </div>
             <div>
               <span className="text-muted-foreground block">Supplier</span>
-              <span className="font-medium">{selectedProduct?.supplier || 'N/A'}</span>
+              <span className="font-normal">{selectedProduct?.supplier || 'N/A'}</span>
             </div>
           </div>
         </div>
@@ -126,7 +126,7 @@ export function DangoteReviewStep({ wizard }: DangoteReviewStepProps) {
           </div>
           <div className="text-xs">
             <span className="text-muted-foreground block">Address</span>
-            <span className="font-medium">{deliveryAddress}</span>
+            <span className="font-normal">{deliveryAddress}</span>
             {(deliveryState || deliveryLga) && (
               <p className="text-muted-foreground mt-1">
                 {deliveryState}{deliveryLga ? `, ${deliveryLga}` : ''}

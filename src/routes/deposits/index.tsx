@@ -1,4 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
+import { FilterBar } from '#/components/FilterBar'
+import { PageHeader } from '#/components/PageHeader'
 import { StatCard, StatCardGrid } from '#/components/ui/stat-card'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Button } from '#/components/ui/button'
@@ -127,18 +129,21 @@ function DepositsDashboard() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">Deposits Management</h1>
-          <p className="text-muted-foreground">View and record customer deposit transactions.</p>
-        </div>
-        <Button
+      <PageHeader
+      eyebrow="Finance"
+      title="Deposits Management"
+      description="View and record customer deposit transactions."
+      actions={
+        <>
+          <Button
           className="gap-2"
           onClick={() => navigate({ to: '/deposits/manual-deposit' as any })}
- >
+          >
           <Plus className="size-4" /> Record Manual Deposit
-        </Button>
-      </div>
+          </Button>
+        </>
+      }
+    />
 
       <StatCardGrid count={statsCards.length}>
         {!isLoading && !isError && statsCards.map((card) => (
@@ -153,56 +158,50 @@ function DepositsDashboard() {
         ))}
       </StatCardGrid>
 
+      <FilterBar>
+      <div className="relative flex-1 max-w-md">
+      <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+      <Input
+      type="text"
+      placeholder="Search description, reference, or customer..."
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+      className="pl-10 pr-8"
+      />
+      {searchTerm && (
+      <button
+      onClick={() => setSearchTerm('')}
+      className="absolute right-3 top-1/2 -translate-y-1/2 size-5 rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground flex items-center justify-center cursor-pointer transition-colors duration-250 ease-luxe"
+      aria-label="Clear search"
+      >
+      <X className="size-2.5" />
+      </button>
+      )}
+      </div>
+      {/* Time Filter Buttons */}
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
+      <span className="text-xs font-normal text-muted-foreground flex items-center gap-1 mr-1 shrink-0">
+      <Filter className="size-3" /> Range:
+      </span>
+      {(['all', 'today', 'week', 'month'] as const).map((t) => (
+      <Button
+      key={t}
+      variant={timeFilter === t ? 'default' : 'outline'}
+      size="sm"
+      className="h-8 text-xs capitalize whitespace-nowrap"
+      onClick={() => setTimeFilter(t)}
+      >
+      {t === 'all' ? 'All Time' : t === 'week' ? 'This Week' : t === 'month' ? 'This Month' : 'Today'}
+      </Button>
+      ))}
+      </div>
+      </FilterBar>
+
       <Card>
-        <CardHeader className="border-b border-border pb-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <CardTitle>Deposit Transactions</CardTitle>
-              <CardDescription>All recorded deposits across customers</CardDescription>
-            </div>
-          </div>
-        </CardHeader>
+
         <CardContent className="pt-6">
           {/* Top Search & Time Filter Controls */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search description, reference, or customer..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-8"
- />
-              {searchTerm && (
-                <button
-                  onClick={() => setSearchTerm('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 size-5 rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground flex items-center justify-center cursor-pointer transition-colors duration-250 ease-luxe"
-                  aria-label="Clear search"
- >
-                  <X className="size-2.5" />
-                </button>
-              )}
-            </div>
-
-            {/* Time Filter Buttons */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
-              <span className="text-xs font-medium text-muted-foreground flex items-center gap-1 mr-1 shrink-0">
-                <Filter className="size-3" /> Range:
-              </span>
-              {(['all', 'today', 'week', 'month'] as const).map((t) => (
-                <Button
-                  key={t}
-                  variant={timeFilter === t ? 'default' : 'outline'}
-                  size="sm"
-                  className="h-8 text-xs capitalize whitespace-nowrap"
-                  onClick={() => setTimeFilter(t)}
- >
-                  {t === 'all' ? 'All Time' : t === 'week' ? 'This Week' : t === 'month' ? 'This Month' : 'Today'}
-                </Button>
-              ))}
-            </div>
-          </div>
+          
 
           {/* Payment Method Tabs & Reset */}
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3 mb-6">
@@ -210,11 +209,11 @@ function DepositsDashboard() {
               <Button
                 variant={filterType === 'all' ? 'default' : 'ghost'}
                 size="sm"
-                className="h-8 gap-2 text-xs font-medium"
+                className="h-8 gap-2 text-xs font-normal"
                 onClick={() => setFilterType('all')}
  >
                 All Deposits
-                <Badge variant={filterType === 'all' ? 'secondary' : 'outline'} className="text-[10px] px-1.5 py-0 h-4">
+                <Badge variant={filterType === 'all' ? 'secondary' : 'outline'} className="text-xs px-1.5 py-0 h-4">
                   {deposits.length}
                 </Badge>
               </Button>
@@ -222,12 +221,12 @@ function DepositsDashboard() {
               <Button
                 variant={filterType === 'manual' ? 'default' : 'ghost'}
                 size="sm"
-                className={`h-8 gap-2 text-xs font-medium ${filterType === 'manual' ? '' : 'hover:bg-warning/10 hover:text-warning'}`}
+                className={`h-8 gap-2 text-xs font-normal ${filterType === 'manual' ? '' : 'hover:bg-warning/10 hover:text-warning'}`}
                 onClick={() => setFilterType('manual')}
  >
                 <Landmark className={cn('size-3.5', filterType === 'manual' ? 'text-primary-foreground' : 'text-warning')} />
                 Manual Transfers
-                <Badge variant={filterType === 'manual' ? 'secondary' : 'outline'} className="text-[10px] px-1.5 py-0 h-4">
+                <Badge variant={filterType === 'manual' ? 'secondary' : 'outline'} className="text-xs px-1.5 py-0 h-4">
                   {manualDeposits.length}
                 </Badge>
               </Button>
@@ -235,12 +234,12 @@ function DepositsDashboard() {
               <Button
                 variant={filterType === 'paystack' ? 'default' : 'ghost'}
                 size="sm"
-                className={`h-8 gap-2 text-xs font-medium ${filterType === 'paystack' ? '' : 'hover:bg-muted/10 hover:text-muted-foreground'}`}
+                className={`h-8 gap-2 text-xs font-normal ${filterType === 'paystack' ? '' : 'hover:bg-muted/10 hover:text-muted-foreground'}`}
                 onClick={() => setFilterType('paystack')}
  >
                 <ArrowRightLeft className={cn('size-3.5', filterType === 'paystack' ? 'text-primary-foreground' : 'text-muted-foreground')} />
                 Paystack
-                <Badge variant={filterType === 'paystack' ? 'secondary' : 'outline'} className="text-[10px] px-1.5 py-0 h-4">
+                <Badge variant={filterType === 'paystack' ? 'secondary' : 'outline'} className="text-xs px-1.5 py-0 h-4">
                   {paystackDeposits.length}
                 </Badge>
               </Button>
@@ -331,7 +330,7 @@ function DepositsDashboard() {
                               ? `${deposit.recorderFirstName} ${deposit.recorderSurname || ''}`
                               : isPs ? 'Paystack' : '—'}
                           </TableCell>
-                          <TableCell className="text-right font-mono text-sm font-medium whitespace-nowrap">
+                          <TableCell className="text-right font-mono text-sm font-normal whitespace-nowrap">
                             {formatCurrency(toNum(deposit.balanceAfter || 0))}
                           </TableCell>
                           <TableCell>

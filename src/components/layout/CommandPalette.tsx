@@ -63,7 +63,7 @@ export default function CommandPalette({ open, onOpenChange }: CommandPalettePro
       { id: 'nav-lpg-stations', title: 'LPG Stations', category: 'Navigation', icon: Flame, path: '/lpg-stations', keywords: ['lpg', 'gas', 'home delivery', 'station'] },
       { id: 'nav-products', title: 'Product Inventory', category: 'Navigation', icon: Package, path: '/products', keywords: ['pms', 'ago', 'dpk', 'lpg'] },
       { id: 'nav-deposits', title: 'Financial Deposits', category: 'Navigation', icon: DollarSign, path: '/deposits', keywords: ['payments', 'ledger', 'balance'] },
-      { id: 'nav-trucks', title: 'Fleet Directory', category: 'Navigation', icon: Truck, path: '/trucks', keywords: ['vehicles', 'tankers'] },
+      { id: 'nav-trucks', title: 'Fleet', category: 'Navigation', icon: Truck, path: '/fleet-trucks', keywords: ['vehicles', 'tankers'] },
       { id: 'nav-drivers', title: 'Drivers Directory', category: 'Navigation', icon: Contact, path: '/drivers', keywords: ['logistics', 'personnel'] },
       { id: 'nav-delivery-ops', title: 'Delivery Operations', category: 'Navigation', icon: Package, path: '/delivery-operations', keywords: ['dispatch', 'allocations'] },
       { id: 'nav-sales-ledger', title: 'Sales Ledger', category: 'Navigation', icon: DollarSign, path: '/sales-ledger', keywords: ['truck sales', 'filling stations'] },
@@ -151,7 +151,7 @@ export default function CommandPalette({ open, onOpenChange }: CommandPalettePro
             className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
             autoFocus
           />
-          <kbd className="hidden sm:inline-flex items-center gap-1 rounded bg-muted px-2 py-0.5 text-[10px] font-mono text-muted-foreground border border-border">
+          <kbd className="hidden sm:inline-flex items-center gap-1 rounded bg-muted px-2 py-0.5 text-xs font-mono text-muted-foreground border border-border">
             ESC
           </kbd>
         </div>
@@ -175,7 +175,7 @@ export default function CommandPalette({ open, onOpenChange }: CommandPalettePro
                     onMouseEnter={() => setSelectedIndex(index)}
                     className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs sm:text-sm text-left transition-colors cursor-pointer ${
  isSelected
- ? 'bg-primary text-primary-foreground font-medium '
+ ? 'bg-primary text-primary-foreground font-normal '
  : 'hover:bg-muted text-foreground'
  }`}
                   >
@@ -190,9 +190,9 @@ export default function CommandPalette({ open, onOpenChange }: CommandPalettePro
                         <Icon className="size-4" />
                       </div>
                       <div className="min-w-0 truncate">
-                        <div className="font-medium truncate">{item.title}</div>
+                        <div className="font-normal truncate">{item.title}</div>
                         <div
-                          className={`text-[11px] truncate ${
+                          className={`text-xs truncate ${
  isSelected ? 'text-primary-foreground/80' : 'text-muted-foreground'
  }`}
                         >
@@ -212,7 +212,7 @@ export default function CommandPalette({ open, onOpenChange }: CommandPalettePro
           )}
         </div>
 
-        <div className="border-t border-border px-4 py-2 bg-muted/30 flex items-center justify-between text-[11px] text-muted-foreground">
+        <div className="border-t border-border px-4 py-2 bg-muted/30 flex items-center justify-between text-xs text-muted-foreground">
           <div className="flex items-center gap-3">
             <span>
               <kbd className="px-1 py-0.5 rounded bg-muted border border-border">↑↓</kbd> navigate

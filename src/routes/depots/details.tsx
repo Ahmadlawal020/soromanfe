@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { StatCard, StatCardGrid } from '#/components/ui/stat-card'
+import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
@@ -28,21 +30,21 @@ function getStatusBadge(status: string) {
   switch (status) {
     case 'Active':
       return (
-        <Badge className="bg-accent/15 text-accent border-accent/30 gap-1.5 font-medium">
+        <Badge className="bg-accent/15 text-accent border-accent/30 gap-1.5 font-normal">
           <span className="size-1.5 rounded-full bg-accent animate-pulse" />
           {status}
         </Badge>
       )
     case 'High Capacity':
       return (
-        <Badge className="bg-warning/15 text-warning border-warning/30 gap-1.5 font-medium">
+        <Badge className="bg-warning/15 text-warning border-warning/30 gap-1.5 font-normal">
           <span className="size-1.5 rounded-full bg-warning animate-pulse" />
           {status}
         </Badge>
       )
     case 'Maintenance':
       return (
-        <Badge variant="destructive" className="gap-1.5 font-medium">
+        <Badge variant="destructive" className="gap-1.5 font-normal">
           <span className="size-1.5 rounded-full bg-destructive-foreground animate-pulse" />
           {status}
         </Badge>
@@ -57,7 +59,7 @@ function getPfiVolumeStats(pfi: any) {
   const soldLitres = Number(pfi.soldQtyLitres ?? pfi.sold_qty_litres ?? pfi.soldVolumeLitres ?? pfi.soldQty ?? 0)
 
   let starting = startingLitres
-  let sold = soldLitres
+  const sold = soldLitres
 
   if (starting === 0 && Number(pfi.qtyVolumeMt ?? pfi.qty_volume_mt ?? 0) > 0) {
     starting = Number(pfi.qtyVolumeMt ?? pfi.qty_volume_mt)
@@ -87,7 +89,7 @@ function OrderDepositBreakdown({ order }: { order: any }) {
   return (
     <div className="p-4 bg-muted/20 border-t space-y-3">
       <div className="flex items-center justify-between flex-wrap gap-2">
-        <div className="flex items-center gap-2 text-xs font-semibold text-foreground uppercase tracking-[0.22em]">
+        <div className="flex items-center gap-2 text-xs font-semibold text-foreground uppercase">
           <Receipt className="size-3.5 text-accent" />
           <span>Order Funding Deposits ({creditDeposits.length})</span>
         </div>
@@ -123,16 +125,16 @@ function OrderDepositBreakdown({ order }: { order: any }) {
                   <div>
                     <div className="font-semibold text-foreground flex items-center gap-2">
                       <span>₦{amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                      <Badge variant="outline" className="text-[10px] bg-accent/10 text-accent border-accent/20 font-normal">Credit Deposit</Badge>
+                      <Badge variant="outline" className="text-xs bg-accent/10 text-accent border-accent/20 font-normal">Credit Deposit</Badge>
                     </div>
-                    <div className="text-[11px] text-muted-foreground font-mono mt-0.5">
-                      Ref: <span className="text-foreground font-medium">{ref}</span> &bull; {bankName} {depositor ? `(${depositor})` : ''}
+                    <div className="text-xs text-muted-foreground font-mono mt-0.5">
+                      Ref: <span className="text-foreground font-normal">{ref}</span> &bull; {bankName} {depositor ? `(${depositor})` : ''}
                     </div>
                   </div>
                 </div>
-                <div className="text-right text-[11px] text-muted-foreground">
-                  <div className="font-medium text-foreground">{dateStr}</div>
-                  {dep.description && <div className="truncate max-w-[220px] text-muted-foreground text-[10px] mt-0.5">{dep.description}</div>}
+                <div className="text-right text-xs text-muted-foreground">
+                  <div className="font-normal text-foreground">{dateStr}</div>
+                  {dep.description && <div className="truncate max-w-[220px] text-muted-foreground text-xs mt-0.5">{dep.description}</div>}
                 </div>
               </div>
             )
@@ -337,7 +339,7 @@ function DepotDetailPage() {
     return (
       <div className="flex flex-col items-center justify-center py-28 gap-4 text-center">
         <Loader2 className="size-10 animate-spin text-primary" />
-        <p className="text-sm font-medium text-muted-foreground">Loading depot details and operational data...</p>
+        <p className="text-sm font-normal text-muted-foreground">Loading depot details and operational data...</p>
       </div>
     )
   }
@@ -364,15 +366,11 @@ function DepotDetailPage() {
 
       {/* Navigation & Breadcrumb Header */}
       <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b pb-4">
-        <div>
-          <div className="flex items-center gap-3">
-            <Button variant="outline" size="icon" className="size-8" onClick={handleBack}>
-              <ArrowLeft className="size-4" />
-            </Button>
-            <h1 className="text-2xl md:text-xl md:text-2xl font-semibold tracking-tight text-foreground text-balance">{depot.name}</h1>
-            <div className="hidden sm:block">{getStatusBadge(depot.status)}</div>
-          </div>
-        </div>
+        <PageHeader
+      eyebrow="Operations"
+      title={depot.name}
+      backAction={handleBack}
+    />
 
         {/* Action Header Buttons */}
         <div className="flex items-center gap-2 flex-wrap">
@@ -386,7 +384,7 @@ function DepotDetailPage() {
           <Button
             variant="outline"
             size="sm"
-            className="gap-1.5 text-xs font-medium"
+            className="gap-1.5 text-xs font-normal"
             onClick={() => navigate({ to: '/depots/form' as any, search: { id: activeDepotId } as any, state: { depot, isEdit: true } as any })}
           >
             <Edit className="size-4" /> Edit Depot
@@ -394,7 +392,7 @@ function DepotDetailPage() {
           <Button
             variant="destructive"
             size="sm"
-            className="gap-1.5 text-xs font-medium"
+            className="gap-1.5 text-xs font-normal"
             onClick={handleDelete}
             disabled={deleteDepot.isPending}
           >
@@ -404,130 +402,31 @@ function DepotDetailPage() {
       </header>
 
       {/* Hero Depot Card Banner */}
-      <Card className="overflow-hidden border bg-card">
-        <div className="bg-primary/10 p-6 md:p-8">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-            <div className="flex items-start gap-4">
-              <div className="size-16 rounded-xl bg-primary/15 border border-primary/20 flex items-center justify-center text-primary shrink-0">
-                <Warehouse className="size-8" />
-              </div>
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Badge variant="outline" className="font-mono text-xs bg-background/80">
-                    Code: {depot.code}
-                  </Badge>
-                  <div className="sm:hidden">{getStatusBadge(depot.status)}</div>
-                  {depot.establishedYear && (
-                    <Badge variant="secondary" className="text-xs font-normal">
-                      Est. {depot.establishedYear}
-                    </Badge>
-                  )}
-                </div>
-                <h2 className="text-xl md:text-lg md:text-xl font-semibold text-foreground tracking-tight">{depot.name}</h2>
-                <p className="text-xs md:text-sm text-muted-foreground flex items-center gap-1.5 pt-0.5">
-                  <MapPin className="size-3.5 shrink-0 text-primary" />
-                  <span>{[depot.address, depot.city, depot.state, depot.postcode, depot.country].filter(Boolean).join(', ') || 'Address N/A'}</span>
-                </p>
-              </div>
-            </div>
-
-            {/* Quick Metrics Badges in Hero */}
-            <div className="flex flex-wrap md:flex-col items-start md:items-end gap-2 text-xs border-t md:border-t-0 pt-4 md:pt-0 w-full md:w-auto">
-              <div className="flex items-center gap-2 bg-background/80 backdrop-blur px-3 py-1.5 rounded-lg border text-muted-foreground">
-                <FileText className="size-3.5 text-primary" />
-                <span><strong className="text-foreground">{pfis.length}</strong> Assigned PFI(s)</span>
-              </div>
-              <div className="flex items-center gap-2 bg-background/80 backdrop-blur px-3 py-1.5 rounded-lg border text-muted-foreground">
-                <Landmark className="size-3.5 text-accent" />
-                <span><strong className="text-foreground">{displayBankAccounts.length}</strong> Bank Account(s)</span>
-              </div>
-              <div className="flex items-center gap-2 bg-background/80 backdrop-blur px-3 py-1.5 rounded-lg border text-muted-foreground">
-                <ShoppingBag className="size-3.5 text-warning" />
-                <span><strong className="text-foreground">{ordersList.length}</strong> Orders Total</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Card>
-
       {/* Depot Key Metrics Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Total Stock Allocated */}
-        <Card className="border-l-4 border-l-primary hover:shadow transition-shadow duration-250 ease-luxe">
-          <CardContent className="p-5 flex items-center justify-between">
-            <div className="space-y-1">
-              <p className="text-xs text-muted-foreground font-semibold uppercase tracking-[0.22em]">Total Allocated Stock</p>
-              <h3 className="text-2xl font-semibold text-foreground">
-                {totalPfiStartingQty.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">L</span>
-              </h3>
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
-                <FileText className="size-3 text-primary" />
-                <span>Across {pfis.length} registered PFI(s)</span>
-              </p>
-            </div>
-            <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
-              <PackageCheck className="size-6" />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Total Volume Sold */}
-        <Card className="border-l-4 border-l-emerald-500 hover:shadow transition-shadow duration-250 ease-luxe">
-          <CardContent className="p-5 flex items-center justify-between">
-            <div className="space-y-1">
-              <p className="text-xs text-muted-foreground font-semibold uppercase tracking-[0.22em]">Total Volume Sold</p>
-              <h3 className="text-2xl font-semibold text-foreground">
-                {totalPfiSoldQty.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">L</span>
-              </h3>
-              <p className="text-xs text-accent font-medium flex items-center gap-1">
-                <TrendingUp className="size-3" />
-                <span>{Math.round(fulfillmentPct)}% of total stock sold</span>
-              </p>
-            </div>
-            <div className="size-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent shrink-0">
-              <CheckCircle2 className="size-6" />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Stock Remaining */}
-        <Card className={`border-l-4 hover:shadow transition-shadow ${isStockLow ? 'border-l-destructive' : 'border-l-amber-500'}`}>
-          <CardContent className="p-5 flex items-center justify-between">
-            <div className="space-y-1">
-              <p className="text-xs text-muted-foreground font-semibold uppercase tracking-[0.22em]">Stock Remaining</p>
-              <h3 className="text-2xl font-semibold text-foreground">
-                {totalPfiRemainingQty.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">L</span>
-              </h3>
-              <p className={`text-xs font-medium flex items-center gap-1 ${isStockLow ? 'text-destructive font-semibold' : 'text-warning'}`}>
-                <Droplets className="size-3" />
-                <span>{Math.round(remainingStockPct)}% stock available</span>
-              </p>
-            </div>
-            <div className={`size-12 rounded-xl flex items-center justify-center shrink-0 ${isStockLow ? 'bg-destructive/10 text-destructive' : 'bg-warning/10 text-warning'}`}>
-              <Droplets className="size-6" />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Total Depot Sales Revenue */}
-        <Card className="border-l-4 border-l-blue-500 hover:shadow transition-shadow duration-250 ease-luxe">
-          <CardContent className="p-5 flex items-center justify-between">
-            <div className="space-y-1">
-              <p className="text-xs text-muted-foreground font-semibold uppercase tracking-[0.22em]">Depot Order Sales</p>
-              <h3 className="text-2xl font-semibold text-foreground">
-                ₦{totalOrderRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </h3>
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
-                <ShoppingBag className="size-3 text-muted-foreground" />
-                <span>{ordersList.length} Order(s) &bull; {totalCompletedOrders} Done</span>
-              </p>
-            </div>
-            <div className="size-12 rounded-xl bg-muted/10 flex items-center justify-center text-muted-foreground shrink-0">
-              <DollarSign className="size-6" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <StatCardGrid count={4}>
+        <StatCard
+          icon={<PackageCheck />} label="Allocated stock"
+          value={<>{totalPfiStartingQty.toLocaleString()}<span className="ml-1 text-base font-normal text-muted-foreground">L</span></>}
+          description={`Across ${pfis.length} PFI${pfis.length === 1 ? '' : 's'}`}
+        />
+        <StatCard
+          icon={<CheckCircle2 />} label="Volume sold"
+          value={<>{totalPfiSoldQty.toLocaleString()}<span className="ml-1 text-base font-normal text-muted-foreground">L</span></>}
+          description={`${Math.round(fulfillmentPct)}% of allocated stock`}
+        />
+        <StatCard
+          // Goes red once the depot is running dry.
+          tone={isStockLow ? 'red' : 'amber'}
+          icon={<Droplets />} label="Stock remaining"
+          value={<>{totalPfiRemainingQty.toLocaleString()}<span className="ml-1 text-base font-normal text-muted-foreground">L</span></>}
+          description={`${Math.round(remainingStockPct)}% still available`}
+        />
+        <StatCard
+          icon={<DollarSign />} label="Order sales"
+          value={`₦${totalOrderRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+          description={`${ordersList.length} order${ordersList.length === 1 ? '' : 's'} · ${totalCompletedOrders} completed`}
+        />
+      </StatCardGrid>
 
       {/* Low Stock Warning Alert Banner */}
       {isStockLow && (
@@ -540,7 +439,7 @@ function DepotDetailPage() {
               <div>
                 <h4 className="font-semibold text-foreground text-sm flex items-center gap-2">
                   <span>Low Stock Warning &bull; Available Stock at {Math.round(remainingStockPct)}%</span>
-                  <Badge variant="destructive" className="text-[10px] uppercase font-semibold">Action Required</Badge>
+                  <Badge variant="destructive" className="text-xs uppercase font-semibold">Action Required</Badge>
                 </h4>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   Active PFI stock at {depot.name} is down to <strong>{totalPfiRemainingQty.toLocaleString()} Litres</strong> (out of {totalPfiStartingQty.toLocaleString()} L total allocated). Consider assigning a new PFI or updating capacity.
@@ -592,7 +491,7 @@ function DepotDetailPage() {
           >
             <FileText className="size-4" />
             <span>PFIs & Allocation</span>
-            <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${activeTab === 'pfis' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+            <span className={`px-1.5 py-0.2 rounded-full text-xs ${activeTab === 'pfis' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
               {pfis.length}
             </span>
           </button>
@@ -606,7 +505,7 @@ function DepotDetailPage() {
           >
             <ShoppingBag className="size-4" />
             <span>Orders & Sales</span>
-            <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${activeTab === 'orders' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+            <span className={`px-1.5 py-0.2 rounded-full text-xs ${activeTab === 'orders' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
               {ordersList.length}
             </span>
           </button>
@@ -620,7 +519,7 @@ function DepotDetailPage() {
           >
             <Activity className="size-4" />
             <span>Audit & Activity Log</span>
-            <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${activeTab === 'activity' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+            <span className={`px-1.5 py-0.2 rounded-full text-xs ${activeTab === 'activity' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
               {activityEvents.length}
             </span>
           </button>
@@ -645,31 +544,31 @@ function DepotDetailPage() {
             </CardHeader>
             <CardContent className="space-y-4 pt-4">
               <div>
-                <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-[0.14em]">Street Address</p>
-                <p className="text-sm text-foreground font-medium mt-0.5">{depot.address || 'N/A'}</p>
+                <p className="text-xs text-muted-foreground font-semibold uppercase">Street Address</p>
+                <p className="text-sm text-foreground font-normal mt-0.5">{depot.address || 'N/A'}</p>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-[0.14em]">LGA / City</p>
-                  <p className="text-sm text-foreground font-medium mt-0.5">{depot.city || 'N/A'}</p>
+                  <p className="text-xs text-muted-foreground font-semibold uppercase">LGA / City</p>
+                  <p className="text-sm text-foreground font-normal mt-0.5">{depot.city || 'N/A'}</p>
                 </div>
                 <div>
-                  <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-[0.14em]">State</p>
-                  <p className="text-sm text-foreground font-medium mt-0.5">{depot.state || 'N/A'}</p>
+                  <p className="text-xs text-muted-foreground font-semibold uppercase">State</p>
+                  <p className="text-sm text-foreground font-normal mt-0.5">{depot.state || 'N/A'}</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-[0.14em]">Country</p>
-                  <p className="text-sm text-foreground font-medium mt-0.5">{depot.country || 'Nigeria'}</p>
+                  <p className="text-xs text-muted-foreground font-semibold uppercase">Country</p>
+                  <p className="text-sm text-foreground font-normal mt-0.5">{depot.country || 'Nigeria'}</p>
                 </div>
                 <div>
-                  <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-[0.14em]">Postcode</p>
+                  <p className="text-xs text-muted-foreground font-semibold uppercase">Postcode</p>
                   <p className="text-sm text-foreground font-mono mt-0.5">{depot.postcode || 'N/A'}</p>
                 </div>
               </div>
               <div className="pt-2 border-t">
-                <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-[0.14em]">System Database ID</p>
+                <p className="text-xs text-muted-foreground font-semibold uppercase">System Database ID</p>
                 <p className="text-xs font-mono text-muted-foreground mt-0.5 truncate select-all">{activeDepotId}</p>
               </div>
             </CardContent>
@@ -690,20 +589,20 @@ function DepotDetailPage() {
             </CardHeader>
             <CardContent className="space-y-4 pt-4">
               <div>
-                <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-[0.14em]">Operating Schedule</p>
-                <p className="text-sm text-foreground font-medium mt-0.5 flex items-center gap-1.5">
+                <p className="text-xs text-muted-foreground font-semibold uppercase">Operating Schedule</p>
+                <p className="text-sm text-foreground font-normal mt-0.5 flex items-center gap-1.5">
                   <Activity className="size-3.5 text-accent" />
                   <span>24 Hours / 7 Days a week</span>
                 </p>
               </div>
 
               <div>
-                <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-[0.14em]">Hub Status</p>
+                <p className="text-xs text-muted-foreground font-semibold uppercase">Hub Status</p>
                 <div className="mt-1">{getStatusBadge(depot.status)}</div>
               </div>
 
               <div>
-                <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-[0.14em]">Assigned Staff Members ({staffList.length})</p>
+                <p className="text-xs text-muted-foreground font-semibold uppercase">Assigned Staff Members ({staffList.length})</p>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {staffList.length > 0 ? (
                     staffList.map((s) => {
@@ -713,8 +612,8 @@ function DepotDetailPage() {
                       const initials = (fn[0] || '') + (sn[0] || '')
                       const fullName = typeof s === 'object' ? (`${fn} ${sn}`.trim() || s.full_name || s.email || 'Staff') : String(s)
                       return (
-                        <div key={sId} className="flex items-center gap-2 bg-secondary px-3 py-1.5 rounded-full text-xs font-medium">
-                          <div className="size-5 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-semibold text-primary">
+                        <div key={sId} className="flex items-center gap-2 bg-secondary px-3 py-1.5 rounded-full text-xs font-normal">
+                          <div className="size-5 rounded-full bg-primary/20 flex items-center justify-center text-xs font-semibold text-primary">
                             {initials || '?'}
                           </div>
                           <span className="text-foreground">{fullName}</span>
@@ -763,7 +662,7 @@ function DepotDetailPage() {
                       <div key={accId} className="flex flex-col justify-between p-4 border rounded-xl bg-card hover:border-primary/50 transition-colors duration-250 ease-luxe">
                         <div className="flex items-start justify-between gap-2">
                           <div>
-                            <Badge variant="outline" className="text-[10px] font-mono mb-1.5 bg-primary/5 text-primary border-primary/20">
+                            <Badge variant="outline" className="text-xs font-mono mb-1.5 bg-primary/5 text-primary border-primary/20">
                               {acc.bankCode ? `${acc.bankName} (${acc.bankCode})` : acc.bankName}
                             </Badge>
                             <h4 className="text-sm font-semibold text-foreground">{acc.accountName}</h4>
@@ -775,7 +674,7 @@ function DepotDetailPage() {
 
                         <div className="mt-4 pt-3 border-t flex items-center justify-between">
                           <div>
-                            <p className="text-[10px] text-muted-foreground uppercase font-semibold tracking-[0.14em]">Account Number</p>
+                            <p className="text-xs text-muted-foreground uppercase font-semibold">Account Number</p>
                             <p className="text-lg font-mono font-semibold text-primary">{acc.accountNumber}</p>
                           </div>
                           <Button
@@ -1013,7 +912,7 @@ function DepotDetailPage() {
 
                           {isHistoryOpen && history.length > 0 && (
                             <div className="border-t border-border/50 bg-muted/30 px-4 py-3">
-                              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em] mb-2 flex items-center gap-1.5">
+                              <p className="text-xs font-semibold text-muted-foreground uppercase mb-2 flex items-center gap-1.5">
                                 <Clock className="size-3" /> Price Modification History
                               </p>
                               <div className="space-y-1.5 max-h-48 overflow-y-auto">
@@ -1084,7 +983,7 @@ function DepotDetailPage() {
             ) : pfis.length === 0 ? (
               <div className="text-center py-10 space-y-3">
                 <FileText className="size-9 mx-auto text-muted-foreground/40" />
-                <p className="text-sm font-medium text-foreground">No PFIs currently assigned</p>
+                <p className="text-sm font-normal text-foreground">No PFIs currently assigned</p>
                 <p className="text-xs text-muted-foreground max-w-sm mx-auto">There are no Proforma Invoices associated with this depot. Register a PFI to allocate stock capacity.</p>
                 <Button
                   size="sm"
@@ -1120,7 +1019,7 @@ function DepotDetailPage() {
                                 {pfi.pfiNumber || pfi.pfi_number}
                               </span>
                               {pfiDateStr && (
-                                <span className="text-[10px] text-muted-foreground font-mono">
+                                <span className="text-xs text-muted-foreground font-mono">
                                   {pfiDateStr}
                                 </span>
                               )}
@@ -1136,7 +1035,7 @@ function DepotDetailPage() {
                         </div>
 
                         <div className="mt-4 space-y-1.5">
-                          <div className="flex justify-between text-xs text-muted-foreground font-medium">
+                          <div className="flex justify-between text-xs text-muted-foreground font-normal">
                             <span>Sold: <strong>{stats.sold.toLocaleString()}</strong> / {stats.starting.toLocaleString()} {unit}</span>
                             <span className="font-mono font-semibold text-foreground">{Math.round(progressPct)}%</span>
                           </div>
@@ -1150,10 +1049,10 @@ function DepotDetailPage() {
                       </div>
 
                       {(pfi.vesselName || pfi.vessel_name) && (
-                        <div className="mt-4 pt-3 border-t border-dashed flex justify-between items-center text-[11px] text-muted-foreground">
+                        <div className="mt-4 pt-3 border-t border-dashed flex justify-between items-center text-xs text-muted-foreground">
                           <span className="truncate max-w-[55%]">Vessel: <strong className="text-foreground">{pfi.vesselName || pfi.vessel_name}</strong></span>
                           {(pfi.unitPrice || pfi.unit_price) && (
-                            <span className="font-mono font-medium text-foreground">₦{Number(pfi.unitPrice || pfi.unit_price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} / L</span>
+                            <span className="font-mono font-normal text-foreground">₦{Number(pfi.unitPrice || pfi.unit_price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} / L</span>
                           )}
                         </div>
                       )}
@@ -1194,13 +1093,13 @@ function DepotDetailPage() {
                     <button
                       key={st}
                       onClick={() => setStatusFilter(st)}
-                      className={`px-3 py-1 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer ${isActive
+                      className={`px-3 py-1 rounded-full text-xs font-normal transition-all flex items-center gap-1.5 cursor-pointer ${isActive
  ? 'bg-primary text-primary-foreground font-semibold'
  : 'bg-secondary text-secondary-foreground hover:bg-muted'
  }`}
                     >
                       <span>{st}</span>
-                      <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${isActive ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-muted text-muted-foreground'
+                      <span className={`px-1.5 py-0.2 rounded-full text-xs ${isActive ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-muted text-muted-foreground'
  }`}>
                         {count}
                       </span>
@@ -1219,7 +1118,7 @@ function DepotDetailPage() {
             ) : filteredOrders.length === 0 ? (
               <div className="text-center py-12 space-y-2">
                 <ShoppingBag className="size-9 mx-auto text-muted-foreground/40" />
-                <p className="text-sm font-medium text-foreground">No orders found</p>
+                <p className="text-sm font-normal text-foreground">No orders found</p>
                 <p className="text-xs text-muted-foreground">There are currently no orders under {depot.name} matching status "{statusFilter}".</p>
               </div>
             ) : (
@@ -1262,7 +1161,7 @@ function DepotDetailPage() {
                             >
                               {order.status}
                             </Badge>
-                            <Badge variant="outline" className="capitalize text-[10px] font-mono">
+                            <Badge variant="outline" className="capitalize text-xs font-mono">
                               {order.deliveryType || order.delivery_type || 'pickup'}
                             </Badge>
                           </div>
@@ -1281,7 +1180,7 @@ function DepotDetailPage() {
                             <div className="text-sm font-semibold text-foreground">
                               ₦{Number(order.totalAmount ?? order.total_amount ?? order.amount ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </div>
-                            <div className="text-[10px] text-muted-foreground font-mono">
+                            <div className="text-xs text-muted-foreground font-mono">
                               {ordDateStr}
                             </div>
                           </div>
@@ -1351,19 +1250,19 @@ function DepotDetailPage() {
                   const IconComp = evt.icon
                   return (
                     <div key={evt.id} className="relative flex items-start justify-between gap-4 group">
-                      <div className="absolute -left-6 top-1 size-5 rounded-full bg-background border-2 border-primary flex items-center justify-center text-primary text-[10px]">
+                      <div className="absolute -left-6 top-1 size-5 rounded-full bg-background border-2 border-primary flex items-center justify-center text-primary text-xs">
                         <IconComp className="size-2.5" />
                       </div>
                       <div className="space-y-0.5">
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-semibold text-foreground">{evt.title}</span>
-                          <Badge variant="outline" className={`text-[10px] ${evt.badgeColor}`}>
+                          <Badge variant="outline" className={`text-xs ${evt.badgeColor}`}>
                             {evt.type.toUpperCase()}
                           </Badge>
                         </div>
                         <p className="text-xs text-muted-foreground">{evt.description}</p>
                       </div>
-                      <span className="text-[11px] text-muted-foreground font-mono shrink-0">
+                      <span className="text-xs text-muted-foreground font-mono shrink-0">
                         {evt.date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}{' '}
                         {evt.date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
                       </span>

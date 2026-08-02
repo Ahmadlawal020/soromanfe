@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useCustomerList, useCreateCustomer } from '#/lib/hooks/useCustomers'
 import { useLpgStations } from '#/lib/hooks/useLpgStations'
 import { useCreateLpgOrderRequest } from '#/lib/hooks/useLpgOrders'
-import { nigeriaStates, nigeriaLgas } from '#/lib/nigeria-data'
+import { nigeriaLgas } from '#/lib/nigeria-data'
 
 export function useLpgOrderWizard() {
   const createCustomerMutation = useCreateCustomer()

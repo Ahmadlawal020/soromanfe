@@ -32,9 +32,8 @@ export const Route = createRootRoute({
         title: 'Soroman Admin Dashboard',
       },
     ],
-    // Inter Variable is self-hosted via @fontsource-variable/inter/opsz.css,
-    // imported from styles.css — no CDN round-trip, and the optical-size axis
-    // survives (the plain index.css entry ships wght only).
+    // General Sans is self-hosted from src/assets/fonts and declared in
+    // styles.css — no CDN round-trip. Two static weights only, 400 and 600.
     links: [
       {
         rel: 'stylesheet',

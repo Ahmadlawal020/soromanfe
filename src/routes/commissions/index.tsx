@@ -1,11 +1,13 @@
 import { useState, useMemo, useCallback } from 'react'
-import { StatCard } from '#/components/ui/stat-card'
+import { FilterBar } from '#/components/FilterBar'
+import { PageHeader } from '#/components/PageHeader'
+
 import { createFileRoute } from '@tanstack/react-router'
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
 import { CommaInput } from '#/components/ui/comma-input'
 import { Label } from '#/components/ui/label'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '#/components/ui/card'
+import { Card, CardContent } from '#/components/ui/card'
 import {
   Select,
   SelectContent,
@@ -30,32 +32,10 @@ import {
   DialogDescription,
 } from '#/components/ui/dialog'
 import { ConfirmDialog } from '#/components/ConfirmDialog'
-import {
-  DollarSign,
-  Search,
-  X,
-  RefreshCw,
-  CheckCircle,
-  Fuel,
-  FileText,
-  Download,
-  BarChart3,
-  Pencil,
-  Plus,
-  Loader2,
-  Banknote,
-  Package,
-  TrendingUp,
-} from 'lucide-react'
-import {
-  useCommissions,
-  useCommissionSummary,
-  useConfirmCommissionPayment,
-  useCommissionRates,
-  useUpsertCommissionRate,
-} from '#/lib/hooks/useCommissions'
+import { DollarSign, Search, X, RefreshCw, CheckCircle, Fuel, FileText, Download, Loader2, Banknote, Package } from 'lucide-react'
+import { useCommissions, useCommissionSummary, useConfirmCommissionPayment } from '#/lib/hooks/useCommissions'
 import { useDepots } from '#/lib/hooks/useDepots'
-import { useProductList } from '#/lib/hooks/useProducts'
+
 import { SummaryCards, type SummaryCard } from '#/components/SummaryCards'
 import { PageLoader } from '#/components/PageLoader'
 import { PageError } from '#/components/PageError'
@@ -71,8 +51,6 @@ export const Route = createFileRoute('/commissions/')({
 function formatNaira(amount: number) {
   return `₦${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 }
-
-
 
 const QUICK_DATES = [
   { label: 'Today', value: 'today' },
@@ -115,54 +93,16 @@ function getDateRange(preset: string): { dateFrom: string; dateTo: string } {
 // ─── Main Component ──────────────────────────────────────────────────────────
 
 function CommissionsPage() {
-  const [activeTab, setActiveTab] = useState<'commissions' | 'rates'>('commissions')
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-xl md:text-2xl font-semibold tracking-tight text-foreground flex items-center gap-2 text-balance">
-            <DollarSign className="size-7 text-primary" />
-            Commissions
-          </h1>
-          <p className="text-muted-foreground text-sm">
-            Manage facilitator commissions per depot and product
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        eyebrow="Finance"
+        title="Customer commissions"
+        description="Commission earned per facilitator, by depot and product."
+      />
 
-      {/* Tab Bar */}
-      <div className="flex gap-1 p-1 bg-muted rounded-lg w-fit">
-        <button
-          className={`px-4 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer ${
- activeTab === 'commissions'
- ? 'bg-background text-foreground '
- : 'text-muted-foreground hover:text-foreground'
- }`}
-          onClick={() => setActiveTab('commissions')}
-        >
-          <span className="flex items-center gap-2">
-            <DollarSign className="size-4" />
-            Commissions
-          </span>
-        </button>
-        <button
-          className={`px-4 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer ${
- activeTab === 'rates'
- ? 'bg-background text-foreground '
- : 'text-muted-foreground hover:text-foreground'
- }`}
-          onClick={() => setActiveTab('rates')}
-        >
-          <span className="flex items-center gap-2">
-            <TrendingUp className="size-4" />
-            Rate Management
-          </span>
-        </button>
-      </div>
-
-      {activeTab === 'commissions' ? <CommissionsTab /> : <RatesTab />}
+      <CommissionsTab />
     </div>
   )
 }
@@ -396,115 +336,107 @@ function CommissionsTab() {
       <SummaryCards cards={summaryCards} />
 
       {/* Filters */}
+      <FilterBar>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-2 flex-wrap">
+        <Button variant="outline" size="sm" onClick={() => setShowDailyReport(true)} className="gap-2">
+        <FileText className="size-4" />
+        Daily Report
+        </Button>
+        <Button variant="outline" size="sm" onClick={handleExportExcel} className="gap-2">
+        <Download className="size-4" />
+        Excel
+        </Button>
+        <Button variant="outline" size="sm" onClick={handleExportPDF} className="gap-2">
+        <Download className="size-4" />
+        PDF
+        </Button>
+        <Button variant="outline" size="sm" onClick={() => refetch()} className="gap-2">
+        <RefreshCw className="size-4" />
+        Refresh
+        </Button>
+        </div>
+        </div>
+        {/* Search + Filter Row */}
+        <div className="flex flex-col lg:flex-row gap-3">
+        <div className="relative flex-1 max-w-sm">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+        <Input
+        placeholder="Search ref, customer, truck, PFI…"
+        className="pl-9 pr-9"
+        value={searchQuery}
+        onChange={(e) => { setSearchQuery(e.target.value); setPage(1) }}
+        />
+        {searchQuery && (
+        <button
+        onClick={() => { setSearchQuery(''); setPage(1) }}
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
+        >
+        <X className="size-4" />
+        </button>
+        )}
+        </div>
+        <div className="flex flex-wrap gap-2 items-center">
+        {/* Date Quick Filters */}
+        <div className="flex gap-1 flex-wrap">
+        {QUICK_DATES.map((d) => (
+        <Button
+        key={d.value}
+        variant={datePreset === d.value ? 'default' : 'outline'}
+        size="sm"
+        className="h-8 text-xs"
+        onClick={() => { setDatePreset(d.value); setPage(1) }}
+        >
+        {d.label}
+        </Button>
+        ))}
+        <Button
+        variant={datePreset === 'custom' ? 'default' : 'outline'}
+        size="sm"
+        className="h-8 text-xs"
+        onClick={() => setDatePreset('custom')}
+        >
+        Custom
+        </Button>
+        </div>
+        {/* Custom Date Range */}
+        {datePreset === 'custom' && (
+        <div className="flex gap-2 items-center">
+        <Input
+        type="date"
+        className="h-8 w-36 text-xs"
+        value={customDateFrom}
+        onChange={(e) => { setCustomDateFrom(e.target.value); setPage(1) }}
+        />
+        <span className="text-xs text-muted-foreground">to</span>
+        <Input
+        type="date"
+        className="h-8 w-36 text-xs"
+        value={customDateTo}
+        onChange={(e) => { setCustomDateTo(e.target.value); setPage(1) }}
+        />
+        </div>
+        )}
+        {/* Depot Filter */}
+        <Select value={depotFilter} onValueChange={(v) => { setDepotFilter(v); setPage(1) }}>
+        <SelectTrigger className="h-8 w-40 text-xs">
+        <SelectValue placeholder="All Depots" />
+        </SelectTrigger>
+        <SelectContent>
+        <SelectItem value="all">All Depots</SelectItem>
+        {(depots as any[]).map((d) => (
+        <SelectItem key={d.id} value={String(d.id)}>
+        {d.name}
+        </SelectItem>
+        ))}
+        </SelectContent>
+        </Select>
+        </div>
+        </div>
+      </FilterBar>
+
       <Card>
-        <CardHeader className="border-b border-border p-4 sm:p-6">
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <CardTitle className="text-lg">Commission Records</CardTitle>
-                <CardDescription>Orders eligible for commission with payment tracking</CardDescription>
-              </div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <Button variant="outline" size="sm" onClick={() => setShowDailyReport(true)} className="gap-2">
-                  <FileText className="size-4" />
-                  Daily Report
-                </Button>
-                <Button variant="outline" size="sm" onClick={handleExportExcel} className="gap-2">
-                  <Download className="size-4" />
-                  Excel
-                </Button>
-                <Button variant="outline" size="sm" onClick={handleExportPDF} className="gap-2">
-                  <Download className="size-4" />
-                  PDF
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => refetch()} className="gap-2">
-                  <RefreshCw className="size-4" />
-                  Refresh
-                </Button>
-              </div>
-            </div>
-
-            {/* Search + Filter Row */}
-            <div className="flex flex-col lg:flex-row gap-3">
-              <div className="relative flex-1 max-w-sm">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search ref, customer, truck, PFI…"
-                  className="pl-9 pr-9"
-                  value={searchQuery}
-                  onChange={(e) => { setSearchQuery(e.target.value); setPage(1) }}
-                />
-                {searchQuery && (
-                  <button
-                    onClick={() => { setSearchQuery(''); setPage(1) }}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
-                  >
-                    <X className="size-4" />
-                  </button>
-                )}
-              </div>
-
-              <div className="flex flex-wrap gap-2 items-center">
-                {/* Date Quick Filters */}
-                <div className="flex gap-1 flex-wrap">
-                  {QUICK_DATES.map((d) => (
-                    <Button
-                      key={d.value}
-                      variant={datePreset === d.value ? 'default' : 'outline'}
-                      size="sm"
-                      className="h-8 text-xs"
-                      onClick={() => { setDatePreset(d.value); setPage(1) }}
-                    >
-                      {d.label}
-                    </Button>
-                  ))}
-                  <Button
-                    variant={datePreset === 'custom' ? 'default' : 'outline'}
-                    size="sm"
-                    className="h-8 text-xs"
-                    onClick={() => setDatePreset('custom')}
-                  >
-                    Custom
-                  </Button>
-                </div>
-
-                {/* Custom Date Range */}
-                {datePreset === 'custom' && (
-                  <div className="flex gap-2 items-center">
-                    <Input
-                      type="date"
-                      className="h-8 w-36 text-xs"
-                      value={customDateFrom}
-                      onChange={(e) => { setCustomDateFrom(e.target.value); setPage(1) }}
-                    />
-                    <span className="text-xs text-muted-foreground">to</span>
-                    <Input
-                      type="date"
-                      className="h-8 w-36 text-xs"
-                      value={customDateTo}
-                      onChange={(e) => { setCustomDateTo(e.target.value); setPage(1) }}
-                    />
-                  </div>
-                )}
-
-                {/* Depot Filter */}
-                <Select value={depotFilter} onValueChange={(v) => { setDepotFilter(v); setPage(1) }}>
-                  <SelectTrigger className="h-8 w-40 text-xs">
-                    <SelectValue placeholder="All Depots" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Depots</SelectItem>
-                    {(depots as any[]).map((d) => (
-                      <SelectItem key={d.id} value={String(d.id)}>
-                        {d.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
-        </CardHeader>
+        
 
         <CardContent className="p-0">
           {isLoading ? (
@@ -601,7 +533,7 @@ function CommissionsTab() {
                           <div className="font-mono text-sm font-semibold text-foreground">
                             {formatNaira(c.commissionAmount)}
                           </div>
-                          <div className="text-[10px] text-muted-foreground">
+                          <div className="text-xs text-muted-foreground">
                             ₦{c.commissionRate}/L
                           </div>
                         </TableCell>
@@ -944,250 +876,3 @@ function DailyReportDialog({
 }
 
 // ─── Rate Management Tab ─────────────────────────────────────────────────────
-
-function RatesTab() {
-  const { data: rates = [], isLoading, isError, error, refetch } = useCommissionRates()
-  const { data: depots = [] } = useDepots()
-  const { data: productsResponse } = useProductList()
-  const upsertMutation = useUpsertCommissionRate()
-
-  const products = (productsResponse as any)?.products || []
-
-  const [showEditDialog, setShowEditDialog] = useState(false)
-  const [editingRate, setEditingRate] = useState<CommissionRate | null>(null)
-  const [editForm, setEditForm] = useState({ depotId: '', productId: '', commissionRate: '' })
-  const [saving, setSaving] = useState(false)
-
-  const openAddNew = () => {
-    setEditingRate(null)
-    setEditForm({ depotId: '', productId: '', commissionRate: '' })
-    setShowEditDialog(true)
-  }
-
-  const openEdit = (rate: CommissionRate) => {
-    setEditingRate(rate)
-    setEditForm({
-      depotId: String(rate.depotId),
-      productId: String(rate.productId),
-      commissionRate: String(rate.commissionRate),
-    })
-    setShowEditDialog(true)
-  }
-
-  const handleSave = async () => {
-    if (!editForm.depotId || !editForm.productId || !editForm.commissionRate) return
-    setSaving(true)
-    try {
-      await upsertMutation.mutateAsync({
-        depotId: editForm.depotId,
-        productId: editForm.productId,
-        commissionRate: parseFloat(editForm.commissionRate) || 0,
-      })
-      setShowEditDialog(false)
-    } catch {
-      // error handled by mutation
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const depotsArr = depots as any[]
-
-  return (
-    <div className="space-y-6">
-      {/* Rate Summary */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <StatCard icon={<TrendingUp />} label="Rates Configured" value={rates.length} description="Depot × Product combinations" />
-        <StatCard icon={<BarChart3 />} label="Depots Covered" value={new Set(rates.map((r) => r.depotId)).size} description="With commission rates set" />
-      </div>
-
-      {/* Rates Table */}
-      <Card>
-        <CardHeader className="border-b border-border p-4 sm:p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <CardTitle className="text-lg">Commission Rate Directory</CardTitle>
-              <CardDescription>Set the commission rate (₦/L) for each depot and product combination</CardDescription>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={() => refetch()} className="gap-2">
-                <RefreshCw className="size-4" />
-                Refresh
-              </Button>
-              <Button size="sm" onClick={openAddNew} className="gap-2">
-                <Plus className="size-4" />
-                Add Rate
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
-
-        <CardContent className="p-0">
-          {isLoading ? (
-            <div className="p-8">
-              <PageLoader message="Loading commission rates…" />
-            </div>
-          ) : isError ? (
-            <div className="p-8">
-              <PageError message={(error as any)?.message || 'Failed to load rates'} onRetry={() => refetch()} />
-            </div>
-          ) : rates.length === 0 ? (
-            <div className="p-8">
-              <PageEmpty
-                icon={<TrendingUp className="size-8 text-muted-foreground" />}
-                title="No commission rates configured"
-                description="Add commission rates per depot and product to start tracking commissions."
-                actionLabel="Add First Rate"
-                onAction={openAddNew}
-              />
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/50 text-xs uppercase font-semibold text-muted-foreground">
-                    <TableHead className="w-12 text-center">#</TableHead>
-                    <TableHead>Depot</TableHead>
-                    <TableHead>Location</TableHead>
-                    <TableHead>Product</TableHead>
-                    <TableHead className="text-right">Commission Rate</TableHead>
-                    <TableHead>Last Updated</TableHead>
-                    <TableHead className="text-center">Action</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {rates.map((rate, idx) => (
-                    <TableRow key={rate.id} className="hover:bg-muted/40 transition-colors duration-250 ease-luxe">
-                      <TableCell className="text-center text-xs text-muted-foreground font-mono">
-                        {idx + 1}
-                      </TableCell>
-                      <TableCell>
-                        <div className="font-semibold text-foreground">{rate.depotName}</div>
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {rate.depotCity}{rate.depotCity && rate.depotState ? ', ' : ''}{rate.depotState}
-                      </TableCell>
-                      <TableCell>
-                        <div className="font-semibold text-sm">{rate.productName}</div>
-                        {rate.productSku && (
-                          <div className="text-xs text-muted-foreground font-mono">SKU: {rate.productSku}</div>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <span className="font-mono text-sm font-semibold text-foreground">
-                          ₦{rate.commissionRate.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/L
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {rate.updatedAt ? new Date(rate.updatedAt).toLocaleDateString() : '—'}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 px-2 text-primary hover:text-primary/80 hover:bg-primary/10 gap-1 text-xs"
-                          onClick={() => openEdit(rate)}
-                        >
-                          <Pencil className="size-3.5" />
-                          Edit
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Add/Edit Rate Dialog */}
-      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-lg">
-              <TrendingUp className="size-5 text-primary" />
-              {editingRate ? 'Edit Commission Rate' : 'Add Commission Rate'}
-            </DialogTitle>
-            <DialogDescription>
-              {editingRate
-                ? `Update the commission rate for ${editingRate.productName} at ${editingRate.depotName}`
-                : 'Set a commission rate for a depot and product combination'}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 py-3">
-            <div>
-              <Label className="text-xs">Depot</Label>
-              <Select
-                value={editForm.depotId}
-                onValueChange={(v) => setEditForm((p) => ({ ...p, depotId: v }))}
-                disabled={!!editingRate}
-              >
-                <SelectTrigger className="h-9 mt-1">
-                  <SelectValue placeholder="Select depot" />
-                </SelectTrigger>
-                <SelectContent>
-                  {depotsArr.map((d) => (
-                    <SelectItem key={d.id} value={String(d.id)}>
-                      {d.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label className="text-xs">Product</Label>
-              <Select
-                value={editForm.productId}
-                onValueChange={(v) => setEditForm((p) => ({ ...p, productId: v }))}
-                disabled={!!editingRate}
-              >
-                <SelectTrigger className="h-9 mt-1">
-                  <SelectValue placeholder="Select product" />
-                </SelectTrigger>
-                <SelectContent>
-                  {products.map((p: any) => (
-                    <SelectItem key={p.id || p._id} value={String(p.id || p._id)}>
-                      {p.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label className="text-xs">Commission Rate (₦ per Litre)</Label>
-              <div className="relative mt-1">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-mono font-medium">
-                  ₦
-                </span>
-                <CommaInput
-                  className="pl-8 h-10 text-right font-mono font-semibold text-base"
-                  placeholder="0.00"
-                  value={editForm.commissionRate}
-                  onValueChange={(val) => setEditForm((p) => ({ ...p, commissionRate: val }))}
-                />
-              </div>
-            </div>
-          </div>
-
-          <DialogFooter className="gap-2 sm:gap-0 pt-2 border-t border-border">
-            <Button variant="outline" onClick={() => setShowEditDialog(false)} disabled={saving}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSave}
-              disabled={saving || !editForm.depotId || !editForm.productId || !editForm.commissionRate}
-              className="gap-2"
-            >
-              {saving ? <Loader2 className="size-4 animate-spin" /> : <CheckCircle className="size-4" />}
-              {saving ? 'Saving…' : 'Save Rate'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
-  )
-}

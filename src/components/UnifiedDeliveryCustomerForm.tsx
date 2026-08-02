@@ -232,7 +232,7 @@ export function UnifiedDeliveryCustomerForm({
                 <User className="size-5" />
               </div>
               <div>
-                <div className="text-sm font-medium">Individual Customer</div>
+                <div className="text-sm font-normal">Individual Customer</div>
                 <div className="text-xs text-muted-foreground font-normal">Regular individual or private client</div>
               </div>
             </button>
@@ -250,7 +250,7 @@ export function UnifiedDeliveryCustomerForm({
                 <Building2 className="size-5" />
               </div>
               <div>
-                <div className="text-sm font-medium">Filling Station</div>
+                <div className="text-sm font-normal">Filling Station</div>
                 <div className="text-xs text-muted-foreground font-normal">Commercial filling station outlet</div>
               </div>
             </button>

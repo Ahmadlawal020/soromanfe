@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
@@ -143,18 +144,16 @@ function ReviewPage() {
       ]} />
 
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button variant="outline" size="icon" onClick={() => navigate({ to: '/dangote-order-request' })}>
-          <ArrowLeft className="size-4" />
-        </Button>
-        <div className="flex-1">
-          <h1 className="text-2xl sm:text-xl md:text-2xl font-semibold tracking-tight text-foreground text-balance">
-            Review Delivery Order Request
-          </h1>
-          <p className="text-muted-foreground text-sm">{request.requestNumber}</p>
-        </div>
-        {statusBadge(request.status)}
-      </div>
+      <PageHeader
+      eyebrow="Dangote Delivery"
+      title="Review Delivery Order Request"
+      description={`{request.requestNumber}`}
+      actions={
+        <>
+          {statusBadge(request.status)}
+        </>
+      }
+    />
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Request Details */}
@@ -185,14 +184,14 @@ function ReviewPage() {
               <Mail className="size-4 text-muted-foreground shrink-0" />
               <div>
                 <p className="text-xs text-muted-foreground">Email</p>
-                <p className="text-sm font-medium text-foreground">{request.customerEmail || 'N/A'}</p>
+                <p className="text-sm font-normal text-foreground">{request.customerEmail || 'N/A'}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <Phone className="size-4 text-muted-foreground shrink-0" />
               <div>
                 <p className="text-xs text-muted-foreground">Phone</p>
-                <p className="text-sm font-medium text-foreground">{request.customerPhone || 'N/A'}</p>
+                <p className="text-sm font-normal text-foreground">{request.customerPhone || 'N/A'}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -213,7 +212,7 @@ function ReviewPage() {
               <MapPin className="size-4 text-muted-foreground shrink-0" />
               <div>
                 <p className="text-xs text-muted-foreground">Delivery Address</p>
-                <p className="text-sm font-medium text-foreground">{request.deliveryAddress}</p>
+                <p className="text-sm font-normal text-foreground">{request.deliveryAddress}</p>
                 {request.deliveryState && (
                   <p className="text-xs text-muted-foreground">{request.deliveryState}{request.deliveryLga ? `, ${request.deliveryLga}` : ''}</p>
                 )}
@@ -223,7 +222,7 @@ function ReviewPage() {
               <Calendar className="size-4 text-muted-foreground shrink-0" />
               <div>
                 <p className="text-xs text-muted-foreground">Submitted</p>
-                <p className="text-sm font-medium text-foreground">{formatDate(request.createdAt)}</p>
+                <p className="text-sm font-normal text-foreground">{formatDate(request.createdAt)}</p>
               </div>
             </div>
 
@@ -244,7 +243,7 @@ function ReviewPage() {
                       <div className="p-4 flex items-center gap-3">
                         <FileText className="size-8 text-primary shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-foreground">PDF Document</p>
+                          <p className="text-sm font-normal text-foreground">PDF Document</p>
                           <p className="text-xs text-muted-foreground truncate">{request.licenseUrl}</p>
                         </div>
                         <a
@@ -398,17 +397,17 @@ function ReviewPage() {
                   {request.expectedArrivalDate && (
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Expected Arrival</span>
-                      <span className="font-medium">{request.expectedArrivalDate}</span>
+                      <span className="font-normal">{request.expectedArrivalDate}</span>
                     </div>
                   )}
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Reviewed By</span>
-                    <span className="font-medium">{reviewerName}</span>
+                    <span className="font-normal">{reviewerName}</span>
                   </div>
                   {request.reviewedAt && (
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Reviewed At</span>
-                      <span className="font-medium">{formatDate(request.reviewedAt)}</span>
+                      <span className="font-normal">{formatDate(request.reviewedAt)}</span>
                     </div>
                   )}
                 </div>

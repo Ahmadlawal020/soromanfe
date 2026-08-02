@@ -114,7 +114,7 @@ export default function Navbar() {
               <Search className="size-3.5 shrink-0" />
               <span className="truncate">Search dashboard…</span>
             </span>
-            <kbd className="pointer-events-none inline-flex h-5 items-center gap-0.5 rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium select-none">
+            <kbd className="pointer-events-none inline-flex h-5 items-center gap-0.5 rounded border border-border bg-muted px-1.5 font-mono text-xs font-normal select-none">
               {navigator.platform?.includes('Mac') ? '⌘' : 'Ctrl+'}K
             </kbd>
           </button>
@@ -210,7 +210,7 @@ export default function Navbar() {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon-sm" className="rounded-full">
                 <Avatar size="sm">
-                  <AvatarFallback className="text-[0.65rem] font-medium">
+                  <AvatarFallback className="text-xs font-normal">
                     {initials}
                   </AvatarFallback>
                 </Avatar>
@@ -219,7 +219,7 @@ export default function Navbar() {
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end">
               <div className="px-2 py-1.5">
-                <p className="truncate text-sm font-medium">{displayName}</p>
+                <p className="truncate text-sm font-normal">{displayName}</p>
                 <p className="truncate text-xs text-muted-foreground">
                   {displayEmail}
                 </p>

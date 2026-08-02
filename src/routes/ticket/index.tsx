@@ -1,344 +1,431 @@
-import { useState, useEffect, useRef } from 'react'
-import { StatCard, StatCardGrid } from '#/components/ui/stat-card'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Badge } from '#/components/ui/badge'
+import { useMemo, useState } from 'react'
+import { PageHeader } from '#/components/PageHeader'
+import { createFileRoute } from '@tanstack/react-router'
+import { format, isWithinInterval } from 'date-fns'
+import {
+  Search, Droplets, PackageCheck, Truck, CircleDashed, FileSpreadsheet, Loader2,
+} from 'lucide-react'
+
 import { Button } from '#/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '#/components/ui/card'
 import { Input } from '#/components/ui/input'
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '#/components/ui/select'
+import { StatCard, StatCardGrid } from '#/components/ui/stat-card'
+import {
+  Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
+} from '#/components/ui/select'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '#/components/ui/table'
-import { Search, X, QrCode, Camera, ShieldCheck, Ticket, CalendarDays, CheckCircle2, AlertCircle } from 'lucide-react'
 import { PageLoader } from '#/components/PageLoader'
 import { PageError } from '#/components/PageError'
 import { PageEmpty } from '#/components/PageEmpty'
 import { Pagination } from '#/components/Pagination'
-import { useTicketList } from '#/lib/hooks/useTickets'
-import { Html5QrcodeScanner } from 'html5-qrcode'
+import { TicketGenerateDialog } from '#/components/TicketGenerateDialog'
+import { TicketPrintDialog } from '#/components/TicketPrintDialog'
+import { PANEL, MICRO, PANEL_RAIL } from '#/lib/panel'
+import { cn } from '#/lib/utils'
+import { useAllOrders } from '#/lib/hooks/useOrders'
+import { useOrderForTicketing, type TruckLoad } from '#/lib/hooks/useTickets'
+import {
+  DATE_PRESETS, resolveRange, toNumber, formatQty, type DatePreset,
+} from '#/routes/orders/-orders-utils'
+
+// QR ticket scanning used to live on this page. It is disabled but kept
+// verbatim in ./qr-scanner-disabled.txt.
 
 export const Route = createFileRoute('/ticket/')({
-  component: TicketsDashboard,
+  component: LoadingTicketsPage,
 })
 
-function getStatusBadge(status: string) {
-  switch (status) {
-    case 'Redeemed':
-      return <Badge className="bg-success text-success-foreground">Redeemed</Badge>
-    case 'Active':
-      return <Badge className="bg-primary text-primary-foreground">Active</Badge>
-    default:
-      return <Badge variant="outline">{status}</Badge>
-  }
-}
+const ALL = 'all'
+const PAGE_SIZE = 100
 
-function TicketsDashboard() {
-  const navigate = useNavigate()
-  const [searchTerm, setSearchTerm] = useState('')
-  const [selectedStatus, setSelectedStatus] = useState('all')
-  const [scanning, setScanning] = useState(false)
-  const scannerRef = useRef<Html5QrcodeScanner | null>(null)
-  const [currentPage, setCurrentPage] = useState(1)
-  const [pageSize, setPageSize] = useState(10)
+function LoadingTicketsPage() {
+  const [search, setSearch] = useState('')
+  // Opens on the month, not the day: order volume is low enough that
+  // "Today" is usually empty, which reads as a broken page rather than a
+  // quiet day. Change to 'today' if you'd rather it open narrow.
+  const [datePreset, setDatePreset] = useState<DatePreset>('month')
+  const [customFrom, setCustomFrom] = useState('')
+  const [customTo, setCustomTo] = useState('')
+  const [productFilter, setProductFilter] = useState(ALL)
+  const [locationFilter, setLocationFilter] = useState(ALL)
+  const [statusFilter, setStatusFilter] = useState(ALL)
+  const [pfiFilter, setPfiFilter] = useState(ALL)
+  const [page, setPage] = useState(1)
 
-  const { data, isLoading, isError, error, refetch } = useTicketList()
-  const tickets = data?.tickets || []
-  const hasFilters = !!(searchTerm || selectedStatus !== 'all')
+  const [ticketOrder, setTicketOrder] = useState<any | null>(null)
+  const [printOrderId, setPrintOrderId] = useState<number | null>(null)
+  const [exporting, setExporting] = useState(false)
 
-  const totalTickets = tickets.length
-  const activeTickets = tickets.filter((t: any) => t.status === 'Active').length
-  const redeemedTickets = tickets.filter((t: any) => t.status === 'Redeemed').length
-  const redemptionRate = totalTickets > 0 ? Math.round((redeemedTickets / totalTickets) * 100) : 0
+  const { data, isLoading, isError, error, refetch } = useAllOrders()
+  const orders: any[] = data?.orders || []
 
-  useEffect(() => {
-    setCurrentPage(1)
-  }, [searchTerm, selectedStatus])
+  // Loads for whichever order currently has a dialog open.
+  const { data: openOrder } = useOrderForTicketing(ticketOrder?.id ?? printOrderId ?? undefined)
+  const openLoads: TruckLoad[] = openOrder?.trucks || []
 
-  useEffect(() => {
-    if (scanning) {
-      // Small timeout to ensure the DOM element #reader is mounted
-      const timer = setTimeout(() => {
-        try {
-          const html5QrcodeScanner = new Html5QrcodeScanner(
-            'reader',
-            {
-              fps: 10,
-              qrbox: { width: 250, height: 250 },
-              aspectRatio: 1.0,
-            },
-            /* verbose= */ false
-          )
-
-          html5QrcodeScanner.render(
-            (decodedText) => {
-              // On success, we parse the URL or take the text
-              // If it's a URL like http://localhost:3000/ticket/details?id=..., we extract id
-              let idOrCode = decodedText
-              try {
-                if (decodedText.includes('ticket/details')) {
-                  const urlObj = new URL(decodedText)
-                  idOrCode = urlObj.searchParams.get('id') || decodedText
-                }
-              } catch (e) {
-                // Ignore URL parsing errors
-              }
-
-              html5QrcodeScanner.clear().then(() => {
-                setScanning(false)
-                navigate({ to: '/ticket/details' as any, search: { id: idOrCode } as any })
-              }).catch(err => {
-                console.error("Failed to clear scanner:", err)
-                setScanning(false)
-                navigate({ to: '/ticket/details' as any, search: { id: idOrCode } as any })
-              })
-            },
-            (_error) => {
-              // Handled internally by library
-            }
-          )
-          scannerRef.current = html5QrcodeScanner
-        } catch (err) {
-          console.error("Scanner setup failed:", err)
-        }
-      }, 300)
-
-      return () => {
-        clearTimeout(timer)
-        if (scannerRef.current) {
-          scannerRef.current.clear().catch(err => console.error("Error clearing scanner on unmount:", err))
-        }
-      }
+  const options = useMemo(() => {
+    const uniq = (v: (string | null | undefined)[]) =>
+      [...new Set(v.filter((x): x is string => Boolean(x)))].sort()
+    return {
+      products: uniq(orders.map((o) => o.productName)),
+      locations: uniq(orders.map((o) => o.depotName || o.state)),
+      statuses: uniq(orders.map((o) => o.status)),
+      pfis: uniq(orders.map((o) => o.pfiNumber)),
     }
-  }, [scanning, navigate])
+  }, [orders])
 
-  const filteredTickets = tickets.filter((tkt: any) => {
-    const matchesSearch =
-      !searchTerm ||
-      (tkt.ticketNumber || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (tkt.order?.orderNumber || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (tkt.order?.customer?.name || '').toLowerCase().includes(searchTerm.toLowerCase())
-
-    const matchesStatus =
-      selectedStatus === 'all' || tkt.status === selectedStatus
-
-    return matchesSearch && matchesStatus
-  })
-
-  const totalItems = filteredTickets.length
-  const totalPages = Math.ceil(totalItems / pageSize)
-  const paginatedTickets = filteredTickets.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
+  const range = useMemo(
+    () => resolveRange(datePreset, {
+      from: customFrom ? new Date(customFrom) : undefined,
+      to: customTo ? new Date(customTo) : undefined,
+    }),
+    [datePreset, customFrom, customTo],
   )
 
+  // Only paid-or-beyond orders reach the loading desk.
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    return orders.filter((o) => {
+      if (!['Paid', 'Released', 'Loading', 'Completed'].includes(String(o.status))) return false
+      if (range) {
+        if (!o.createdAt) return false
+        if (!isWithinInterval(new Date(o.createdAt), { start: range.from, end: range.to })) return false
+      }
+      if (productFilter !== ALL && o.productName !== productFilter) return false
+      if (locationFilter !== ALL && (o.depotName || o.state) !== locationFilter) return false
+      if (statusFilter !== ALL && o.status !== statusFilter) return false
+      if (pfiFilter !== ALL && o.pfiNumber !== pfiFilter) return false
+      if (!q) return true
+      return [o.orderNumber, o.customerName, o.depotName, o.state, o.productName, o.pfiNumber]
+        .some((f) => String(f ?? '').toLowerCase().includes(q))
+    })
+  }, [orders, range, productFilter, locationFilter, statusFilter, pfiFilter, search])
+
+  const totals = useMemo(() => {
+    // Sold counts every order on the desk, loaded or not.
+    const sold = filtered.reduce((s, o) => s + toNumber(o.quantity), 0)
+    const loadedOrders = filtered.filter((o) => ['Loading', 'Completed'].includes(String(o.status)))
+    const loaded = loadedOrders.reduce((s, o) => s + toNumber(o.quantity), 0)
+    const awaiting = filtered.filter((o) => ['Paid', 'Released'].includes(String(o.status))).length
+    return { sold, loaded, shortfall: sold - loaded, trucksLoaded: loadedOrders.length, awaiting }
+  }, [filtered])
+
+  const clearAll = () => {
+    setSearch(''); setDatePreset('all'); setProductFilter(ALL)
+    setLocationFilter(ALL); setStatusFilter(ALL); setPfiFilter(ALL)
+    setCustomFrom(''); setCustomTo(''); setPage(1)
+  }
+
+  const totalPages = Math.max(Math.ceil(filtered.length / PAGE_SIZE), 1)
+  const current = Math.min(page, totalPages)
+  const rows = filtered.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE)
+
+  const downloadReport = async () => {
+    setExporting(true)
+    try {
+      const ExcelJS = (await import('exceljs')).default
+      const wb = new ExcelJS.Workbook()
+      const ws = wb.addWorksheet('Loading tickets')
+      ws.columns = [
+        { header: 'S/N', key: 'sn', width: 6 },
+        { header: 'Reference', key: 'ref', width: 20 },
+        { header: 'Date Loaded', key: 'date', width: 18 },
+        { header: 'Customer', key: 'customer', width: 26 },
+        { header: 'Location', key: 'location', width: 22 },
+        { header: 'Product', key: 'product', width: 22 },
+        { header: 'Quantity', key: 'qty', width: 14 },
+        { header: 'PFI', key: 'pfi', width: 16 },
+        { header: 'Status', key: 'status', width: 14 },
+      ]
+      ws.getRow(1).font = { bold: true }
+      filtered.forEach((o, i) => {
+        ws.addRow({
+          sn: i + 1,
+          ref: o.orderNumber,
+          date: o.loadingStartedAt ? format(new Date(o.loadingStartedAt), 'yyyy-MM-dd HH:mm') : '',
+          customer: o.customerName ?? '',
+          location: o.depotName ?? o.state ?? '',
+          product: o.productName ?? '',
+          qty: toNumber(o.quantity),
+          pfi: o.pfiNumber ?? '',
+          status: o.status,
+        })
+      })
+      const buf = await wb.xlsx.writeBuffer()
+      const url = URL.createObjectURL(
+        new Blob([buf], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        }),
+      )
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `loading-tickets_${format(new Date(), 'yyyy-MM-dd')}.xlsx`
+      a.click()
+      URL.revokeObjectURL(url)
+    } finally {
+      setExporting(false)
+    }
+  }
+
+  let sn = (current - 1) * PAGE_SIZE
+
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-        <div>
-          <h1 className="text-xl md:text-2xl font-semibold text-foreground flex items-center gap-2 tracking-tight text-balance">
-            <Ticket className="size-8 text-primary" /> Tickets
-          </h1>
-          <p className="text-muted-foreground">Manage automatic receipts, scan QR codes, and redeem customer orders.</p>
-        </div>
-        <Button
-          size="lg"
-          className="cursor-pointer"
-          onClick={() => setScanning(!scanning)}
- >
-          {scanning ? (
-            <>
-              <X className="size-5 mr-2" /> Stop Scanner
-            </>
-          ) : (
-            <>
-              <Camera className="size-5 mr-2" /> Scan QR Code
-            </>
-          )}
-        </Button>
-      </div>
+    <div className="animate-fade-in space-y-6">
+      <PageHeader
+      eyebrow="Operations"
+      title="Loading Tickets"
+      description="Generate loading tickets for paid orders, capture truck details, and export reports."
+      actions={
+        <>
+          <Button variant="outline" size="sm" onClick={downloadReport} disabled={exporting}>
+          {exporting ? <Loader2 className="animate-spin" /> : <FileSpreadsheet data-icon="inline-start" />}
+          Download Report
+          </Button>
+        </>
+      }
+    />
 
-      {/* Statistics Cards */}
-      {!isLoading && !isError && (
-        <StatCardGrid count={4}>
-          <StatCard
-            icon={<Ticket />}
-            label="Total tickets"
-            value={totalTickets}
-            description="All generated tickets"
-          />
-          <StatCard
-            tone="amber"
-            icon={<AlertCircle />}
-            label="Active tickets"
-            value={activeTickets}
-            description="Pending pickup / redemption"
-          />
-          <StatCard
-            icon={<CheckCircle2 />}
-            label="Redeemed"
-            value={redeemedTickets}
-            description="Successfully claimed orders"
-          />
-          <StatCard
-            icon={<ShieldCheck />}
-            label="Redemption rate"
-            value={`${redemptionRate}%`}
-            description={
-              <span className="block">
-                <span className="mt-1 block h-1 w-full overflow-hidden rounded-full bg-muted">
-                  <span
-                    className="block h-full rounded-full bg-accent transition-[width] duration-500 ease-luxe"
-                    style={{ width: `${redemptionRate}%` }}
-                  />
-                </span>
-              </span>
-            }
-          />
-        </StatCardGrid>
-      )}
+      {isLoading ? (
+        <PageLoader message="Loading orders…" />
+      ) : isError ? (
+        <PageError message={(error as any)?.message || 'Could not load orders.'} onRetry={() => refetch()} />
+      ) : (
+        <>
+          <StatCardGrid count={4}>
+            <StatCard
+              icon={<Droplets />} label="Quantity sold" value={formatQty(totals.sold)}
+              description="Ordered, loaded or not"
+            />
+            <StatCard
+              // Amber while short, green once everything is out.
+              tone={totals.shortfall > 0 ? 'amber' : 'green'}
+              icon={<PackageCheck />} label="Quantity loaded" value={formatQty(totals.loaded)}
+              description={
+                totals.shortfall > 0
+                  ? `${formatQty(totals.shortfall)} litres not yet loaded`
+                  : 'All loaded'
+              }
+            />
+            <StatCard icon={<Truck />} label="Trucks loaded" value={formatQty(totals.trucksLoaded)} />
+            <StatCard
+              tone={totals.awaiting > 0 ? 'amber' : 'green'}
+              icon={<CircleDashed />} label="Trucks awaiting tickets"
+              value={formatQty(totals.awaiting)}
+            />
+          </StatCardGrid>
 
-      {/* QR Code Scanner Interface */}
-      {scanning && (
-        <Card className="border-2 border-primary/30 overflow-hidden transition-all duration-300 ease-luxe">
-          <CardHeader className="bg-primary/5 border-b border-primary/10">
-            <CardTitle className="text-primary flex items-center gap-2">
-              <QrCode className="animate-pulse" /> Live QR Code Reader
-            </CardTitle>
-            <CardDescription>
-              Align the customer's ticket QR code within the frame to auto-scan and load details.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-6 flex flex-col items-center justify-center bg-black/5">
-            <div className="w-full max-w-md bg-background rounded-xl overflow-hidden border border-border p-4 relative">
-              <div id="reader" className="w-full overflow-hidden rounded-xl"></div>
-              {/* Scanning visual overlay */}
-              <div className="absolute top-8 left-8 right-8 h-0.5 bg-primary/70 animate-bounce pointer-events-none" />
+          <section className={PANEL}>
+            <div className={PANEL_RAIL}>
+              <span className={MICRO}>Filters</span>
+              <button
+                type="button" onClick={clearAll}
+                className="text-xs text-accent underline-offset-4 outline-none hover:underline focus-visible:underline"
+              >
+                Clear all
+              </button>
             </div>
-            <div className="mt-4 text-xs text-muted-foreground flex items-center gap-1.5">
-              <ShieldCheck className="size-3.5 text-success" />
-              <span>Scanning is performed locally. Ensure camera access is enabled.</span>
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
-      {/* Tickets List */}
-      <Card>
-        <CardHeader className="border-b border-border">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <CardTitle>Ticket Directory</CardTitle>
-              <CardDescription>Search and manage customer pickup tickets and verify redemptions</CardDescription>
-            </div>
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-              <div className="relative flex-1 sm:w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground size-4" />
+            <div className="space-y-4 px-6 pt-5 pb-6">
+              <div className="relative">
+                <Search className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  type="text"
-                  placeholder="Search Ticket, Order, Customer..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
- />
-                {searchTerm && (
-                  <button
-                    onClick={() => setSearchTerm('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 size-5 rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground flex items-center justify-center cursor-pointer transition-colors duration-250 ease-luxe"
- >
-                    <X className="size-2.5" />
-                  </button>
-                )}
+                  value={search}
+                  onChange={(e) => { setSearch(e.target.value); setPage(1) }}
+                  placeholder="Search reference, customer, location, product or PFI…"
+                  className="pl-9"
+                />
               </div>
-              <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                <SelectTrigger className="w-full sm:w-[180px]"><SelectValue placeholder="All Statuses" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="Active">Active (Ready)</SelectItem>
-                  <SelectItem value="Redeemed">Redeemed</SelectItem>
-                </SelectContent>
-              </Select>
+
+              <div className="flex flex-wrap items-center gap-2">
+                {DATE_PRESETS.map((p) => (
+                  <button
+                    key={p.value} type="button"
+                    onClick={() => { setDatePreset(p.value); setPage(1) }}
+                    className={cn(
+                      'rounded-full border px-3 py-1 text-xs transition-colors duration-250 ease-luxe outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
+                      datePreset === p.value
+                        ? 'border-accent/40 bg-accent/10 text-accent'
+                        : 'border-border text-muted-foreground hover:bg-muted hover:text-foreground',
+                    )}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+                <div className="flex items-center gap-1.5">
+                  <Input
+                    type="date" value={customFrom} aria-label="Custom range start"
+                    onChange={(e) => { setCustomFrom(e.target.value); setDatePreset('custom'); setPage(1) }}
+                    className="h-7 w-[9.5rem] text-xs"
+                  />
+                  <span className="text-xs text-muted-foreground">to</span>
+                  <Input
+                    type="date" value={customTo} aria-label="Custom range end"
+                    onChange={(e) => { setCustomTo(e.target.value); setDatePreset('custom'); setPage(1) }}
+                    className="h-7 w-[9.5rem] text-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                {([
+                  ['All products', productFilter, setProductFilter, options.products],
+                  ['All locations', locationFilter, setLocationFilter, options.locations],
+                  ['All statuses', statusFilter, setStatusFilter, options.statuses],
+                  ['All PFIs', pfiFilter, setPfiFilter, options.pfis],
+                ] as const).map(([label, value, setter, list]) => (
+                  <Select
+                    key={label} value={value}
+                    onValueChange={(v) => { (setter as (s: string) => void)(v); setPage(1) }}
+                  >
+                    <SelectTrigger><SelectValue placeholder={label} /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={ALL}>{label}</SelectItem>
+                      {list.map((v) => <SelectItem key={v} value={v}>{v}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                ))}
+              </div>
             </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <PageLoader message="Loading tickets..." />
-          ) : isError ? (
-            <PageError message={(error as any)?.message || 'Failed to load'} onRetry={() => refetch()} />
-          ) : filteredTickets.length === 0 ? (
-            <PageEmpty
-              icon={<Ticket className="size-6 text-muted-foreground" />}
-              title={hasFilters ? 'No tickets match your filters' : 'No tickets yet'}
-              description="Paid or completed orders will automatically generate tickets here."
-              hasFilters={hasFilters}
-              onClearFilters={() => { setSearchTerm(''); setSelectedStatus('all') }}
- />
-          ) : (
-            <>
-              <div className="overflow-x-auto">
+          </section>
+
+          <section className={PANEL}>
+            <div className={PANEL_RAIL}>
+              <span className={MICRO}>
+                {formatQty(filtered.length)} order{filtered.length === 1 ? '' : 's'}
+              </span>
+            </div>
+
+            {filtered.length === 0 ? (
+              <PageEmpty
+                title="No orders match these filters"
+                description="Widen the date range or clear a filter to see more."
+                hasFilters
+                onClearFilters={clearAll}
+              />
+            ) : (
+              <div className="px-2 pb-2">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Ticket No.</TableHead>
-                      <TableHead>Order Info</TableHead>
+                      <TableHead className="w-12">S/N</TableHead>
+                      <TableHead>Reference</TableHead>
+                      <TableHead>Date Loaded</TableHead>
                       <TableHead>Customer</TableHead>
-                      <TableHead>Product / Qty</TableHead>
-                      <TableHead>Date Generated</TableHead>
-                      <TableHead>Redemption Status</TableHead>
+                      <TableHead>Location</TableHead>
+                      <TableHead>Product</TableHead>
+                      <TableHead className="text-right">Quantity</TableHead>
+                      <TableHead>PFI</TableHead>
+                      {/* Truck No., Driver, Tickets and Status columns are
+                          deliberately not rendered — they belong to the ticket
+                          rather than the order, and the row would not fit. */}
+                      <TableHead className="text-right">Action</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {paginatedTickets.map((tkt: any) => (
-                      <TableRow
-                        key={tkt._id || tkt.id}
-                        className="hover:bg-muted/50 transition cursor-pointer"
-                        onClick={() => navigate({ to: '/ticket/details' as any, search: { id: tkt._id || tkt.id } as any })}
- >
-                        <TableCell className="font-mono font-semibold text-primary">
-                          {tkt.ticketNumber}
-                        </TableCell>
-                        <TableCell>
-                          <span className="font-mono text-sm text-foreground">{tkt.order?.orderNumber || 'N/A'}</span>
-                        </TableCell>
-                        <TableCell>
-                          <div className="space-y-0.5">
-                            <p className="font-medium text-foreground">{tkt.order?.customer?.name || 'Unknown'}</p>
-                            {tkt.order?.customer?.companyName && (
-                              <p className="text-xs text-muted-foreground">{tkt.order.customer.companyName}</p>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="space-y-0.5">
-                            <p className="font-medium text-sm">{tkt.order?.product?.name || 'Unknown'}</p>
-                            <p className="text-xs text-muted-foreground font-mono">
-                              {tkt.order?.quantity?.toLocaleString()} {tkt.order?.product?.unit || 'Liters'}
-                            </p>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-sm">
-                          <div className="flex items-center gap-1 text-muted-foreground">
-                            <CalendarDays className="size-3.5" />
-                            <span>{tkt.createdAt ? new Date(tkt.createdAt).toLocaleDateString() : 'N/A'}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>{getStatusBadge(tkt.status)}</TableCell>
-                      </TableRow>
-                    ))}
+                    {rows.map((o) => {
+                      sn += 1
+                      return (
+                        <OrderRow
+                          key={o.id}
+                          sn={sn}
+                          order={o}
+                          onGenerate={() => setTicketOrder(o)}
+                          onView={() => setPrintOrderId(o.id)}
+                        />
+                      )
+                    })}
                   </TableBody>
                 </Table>
-              </div>
 
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                pageSize={pageSize}
-                totalItems={totalItems}
-                onPageChange={setCurrentPage}
-                onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1) }}
- />
-            </>
-          )}
-        </CardContent>
-      </Card>
+                <div className="px-4">
+                  <Pagination
+                    currentPage={current}
+                    totalPages={totalPages}
+                    pageSize={PAGE_SIZE}
+                    totalItems={filtered.length}
+                    onPageChange={setPage}
+                    onPageSizeChange={() => {}}
+                  />
+                </div>
+              </div>
+            )}
+          </section>
+        </>
+      )}
+
+      <TicketGenerateDialog
+        order={ticketOrder}
+        loads={ticketOrder ? openLoads : []}
+        open={ticketOrder !== null}
+        onOpenChange={(o) => { if (!o) setTicketOrder(null) }}
+        onGenerated={(id) => setPrintOrderId(id)}
+      />
+
+      <TicketPrintDialog
+        orderId={printOrderId ?? undefined}
+        loadId={openLoads[0]?.id ?? null}
+        loadIds={openLoads.map((l) => l.id)}
+        open={printOrderId !== null}
+        onOpenChange={(o) => { if (!o) setPrintOrderId(null) }}
+      />
     </div>
+  )
+}
+
+/**
+ * One order row.
+ *
+ * The action keys off **ticketed quantity, never order status**. An order
+ * flips to Loading the moment the first ticket exists, so status alone would
+ * lock out the remaining trucks on a 90,000 L order with only 45,000 L
+ * ticketed. `allocated >= releasable` is the honest test.
+ */
+function OrderRow({
+  sn, order, onGenerate, onView,
+}: {
+  sn: number
+  order: any
+  onGenerate: () => void
+  onView: () => void
+}) {
+  const { data } = useOrderForTicketing(order.id)
+  const loads: TruckLoad[] = data?.trucks || []
+  const allocated = loads.reduce((s, l) => s + toNumber(l.quantity), 0)
+  const releasable = toNumber(order.quantity)
+
+  const fullyTicketed = releasable > 0 && allocated >= releasable
+  const departed = loads.length > 0 && loads.every((l) => l.status === 'gated_out')
+
+  const action =
+    allocated === 0
+      ? { label: 'Generate Ticket', onClick: onGenerate, variant: 'default' as const }
+      : !fullyTicketed
+        ? { label: 'Add Ticket', onClick: onGenerate, variant: 'outline' as const }
+        : departed
+          ? { label: 'View Ticket', onClick: onView, variant: 'outline' as const }
+          : { label: 'Edit Ticket', onClick: onView, variant: 'outline' as const }
+
+  return (
+    <TableRow>
+      <TableCell className="text-muted-foreground tabular-nums">{sn}</TableCell>
+      <TableCell className="font-normal text-accent">{order.orderNumber}</TableCell>
+      <TableCell className="text-muted-foreground tabular-nums">
+        {order.loadingStartedAt ? format(new Date(order.loadingStartedAt), 'd MMM yyyy') : '—'}
+      </TableCell>
+      <TableCell className="max-w-[14rem] truncate">{order.customerName || '—'}</TableCell>
+      <TableCell>{order.depotName || order.state || '—'}</TableCell>
+      <TableCell className="max-w-[12rem] truncate">{order.productName || '—'}</TableCell>
+      <TableCell className="text-right tabular-nums">
+        {formatQty(releasable)}
+        {allocated > 0 && allocated < releasable && (
+          <span className="ml-1 text-xs text-warning">({formatQty(allocated)} out)</span>
+        )}
+      </TableCell>
+      <TableCell className="text-muted-foreground">{order.pfiNumber || '—'}</TableCell>
+      <TableCell className="text-right">
+        <Button variant={action.variant} size="sm" onClick={action.onClick}>
+          {action.label}
+        </Button>
+      </TableCell>
+    </TableRow>
   )
 }

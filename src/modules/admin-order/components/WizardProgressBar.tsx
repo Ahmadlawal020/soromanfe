@@ -69,7 +69,7 @@ export function WizardStepper({
 
               <span
                 className={cn(
-                  'max-w-16 text-center text-[0.65rem] leading-tight font-medium sm:max-w-20 sm:text-xs',
+                  'max-w-16 text-center text-xs leading-tight font-normal sm:max-w-20 sm:text-xs',
                   active && 'text-primary underline decoration-2 underline-offset-4',
                   done && 'text-muted-foreground',
                   !active && !done && 'text-muted-foreground/50',

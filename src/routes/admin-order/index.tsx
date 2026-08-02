@@ -1,8 +1,8 @@
 import { useState } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { ArrowLeft, Truck, Building2, Package, ClipboardCheck, User, Flame } from 'lucide-react'
+import { Truck, Building2, Package, ClipboardCheck, User, Flame } from 'lucide-react'
 
-import { Button } from '#/components/ui/button'
 import { SegmentedChoice } from '#/components/ui/segmented-choice'
 import { MICRO } from '#/lib/panel'
 import { cn } from '#/lib/utils'
@@ -315,27 +315,11 @@ function CreateOrderPage() {
 
   return (
     <div className="animate-fade-in mx-auto w-full max-w-3xl space-y-8 py-2">
-      <div>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="mb-3 -ml-2 text-muted-foreground hover:text-foreground"
-          onClick={() => navigate({ to: '/orders' as any })}
-        >
-          <ArrowLeft data-icon="inline-start" />
-          Back to orders
-        </Button>
-
-        <div className="text-center">
-          <p className={cn(MICRO, 'mb-2 text-muted-foreground')}>New order</p>
-          <h1 className="text-xl font-semibold tracking-tight text-balance md:text-2xl">
-            Place a customer order
-          </h1>
-          <p className="mx-auto mt-1 max-w-lg text-sm text-muted-foreground">
-            Choose where the order is lifted from — the steps appear below.
-          </p>
-        </div>
-      </div>
+      <PageHeader
+      eyebrow="Orders"
+      title="Place a customer order"
+      description="Choose where the order is lifted from — the steps appear below."
+    />
 
       <div className="space-y-2">
         <p className={cn(MICRO, 'text-muted-foreground')}>Order type</p>

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { StatCard } from '#/components/ui/stat-card'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
@@ -60,10 +61,16 @@ function DangoteProductsDashboard() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex justify-between items-center">
-        <div><h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">Dangote Products</h1><p className="text-muted-foreground">Manage Dangote product listings, grades, and distribution categories.</p></div>
-        <Button size="sm"  onClick={() => navigate({ to: '/dangote-products/form', search: { id: '' } })}><Plus className="size-4 mr-2" />Register New Product</Button>
-      </div>
+      <PageHeader
+      eyebrow="Dangote Delivery"
+      title="Dangote Products"
+      description="Manage Dangote product listings, grades, and distribution categories."
+      actions={
+        <>
+          <Button size="sm"  onClick={() => navigate({ to: '/dangote-products/form', search: { id: '' } })}><Plus className="size-4 mr-2" />Register New Product</Button>
+        </>
+      }
+    />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {!isLoading && !isError && statsCards.map((card) => (

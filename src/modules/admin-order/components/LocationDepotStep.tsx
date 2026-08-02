@@ -58,7 +58,7 @@ export function LocationDepotStep({ wizard }: LocationDepotStepProps) {
               <div className="inline-flex size-12 items-center justify-center rounded-xl bg-muted border border-border mb-1">
                 <Warehouse className="size-5 text-muted-foreground" />
               </div>
-              <p className="text-sm font-medium text-foreground">No active depots in {selectedState}</p>
+              <p className="text-sm font-normal text-foreground">No active depots in {selectedState}</p>
               <p className="text-xs text-muted-foreground">Please select a different state.</p>
             </div>
           ) : (

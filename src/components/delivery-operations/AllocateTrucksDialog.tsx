@@ -102,7 +102,7 @@ export function AllocateTrucksDialog({
         <div className="space-y-5 py-2">
           {/* PFI Selector */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em]">
+            <Label className="text-xs font-semibold text-muted-foreground uppercase">
               PFI Source <span className="text-destructive">*</span>
             </Label>
             <select
@@ -121,7 +121,7 @@ export function AllocateTrucksDialog({
               ))}
             </select>
             {selectedPfi && (
-              <p className="text-[11px] text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 Product: <strong>{selectedPfi.productName || 'N/A'}</strong> ·
                 Depot: <strong>{selectedPfi.locationName || 'N/A'}</strong> ·
                 Remaining: <strong>{(toNum(selectedPfi.startingQtyLitres) - toNum(selectedPfi.soldQtyLitres)).toLocaleString()} L</strong>
@@ -132,7 +132,7 @@ export function AllocateTrucksDialog({
           {/* Allocation Code + Date */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em]">
+              <Label className="text-xs font-semibold text-muted-foreground uppercase">
                 Allocation Code
               </Label>
               {showNewCodeInput ? (
@@ -177,7 +177,7 @@ export function AllocateTrucksDialog({
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em]">
+              <Label className="text-xs font-semibold text-muted-foreground uppercase">
                 Date Loaded
               </Label>
               <Input
@@ -192,10 +192,10 @@ export function AllocateTrucksDialog({
           {/* Truck Selection */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.22em]">
+              <Label className="text-xs font-semibold text-muted-foreground uppercase">
                 Select Trucks <span className="text-destructive">*</span>
               </Label>
-              <span className="text-[11px] text-muted-foreground">
+              <span className="text-xs text-muted-foreground">
                 {selectedTruckIds.size} selected · {availableTrucks.length} available
               </span>
             </div>
@@ -240,7 +240,7 @@ export function AllocateTrucksDialog({
                           <span className="text-xs text-muted-foreground ml-2">— {truck.driver}</span>
                         )}
                       </div>
-                      <span className="text-xs font-medium text-muted-foreground shrink-0">
+                      <span className="text-xs font-normal text-muted-foreground shrink-0">
                         {capacity > 0 ? `${capacity.toLocaleString()} L` : 'No capacity'}
                       </span>
                     </label>
@@ -254,7 +254,7 @@ export function AllocateTrucksDialog({
           {selectedTruckIds.size > 0 && (
             <div className="bg-accent/60 border border-accent/40 rounded-lg px-4 py-3 space-y-1">
               <div className="flex items-center justify-between text-sm">
-                <span className="font-medium text-accent">
+                <span className="font-normal text-accent">
                   {selectedTruckIds.size} truck{selectedTruckIds.size !== 1 ? 's' : ''} selected
                 </span>
                 {autoSumCapacity > 0 && (
@@ -264,7 +264,7 @@ export function AllocateTrucksDialog({
                 )}
               </div>
               {trucksWithNoCapacity.length > 0 && (
-                <p className="text-[11px] text-warning">
+                <p className="text-xs text-warning">
                   ⚠ No capacity set for: {trucksWithNoCapacity.join(', ')}
                 </p>
               )}

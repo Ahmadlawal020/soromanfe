@@ -1,15 +1,7 @@
 import { useState } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
-import {
-  ArrowLeft,
-  Mail,
-  Shield,
-  CheckCircle,
-  Loader2,
-  AlertCircle,
-  UserCheck,
-  Send,
-} from 'lucide-react'
+import { Mail, Shield, CheckCircle, Loader2, AlertCircle, UserCheck, Send } from 'lucide-react'
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
@@ -166,23 +158,18 @@ function AdminForm() {
 
   return (
     <div className="space-y-6">
-      <header className="flex items-center justify-between">
-        <div>
-          <Button variant="ghost" size="sm" onClick={() => navigate({ to: '/admin/' as any })} className="mb-2">
-            <ArrowLeft className="size-4 mr-2" />
-            Back to Directory
-          </Button>
-          <h1 className="text-xl md:text-2xl font-semibold tracking-tight text-balance">{isEdit ? 'Edit User Account' : 'Create User Account'}</h1>
-          <p className="text-muted-foreground">{isEdit ? 'Update user details and role assignments' : 'Register a new system user and assign roles'}</p>
-        </div>
-      </header>
+      <PageHeader
+      eyebrow="Admin"
+      title={isEdit ? 'Edit User Account' : 'Create User Account'}
+      description={isEdit ? 'Update user details and role assignments' : 'Register a new system user and assign roles'}
+    />
 
       <form onSubmit={handleSubmit} noValidate className="space-y-6">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <div className="space-y-4 border rounded-lg p-4 lg:col-span-1">
             <div className="flex items-center space-x-2">
               <UserCheck className="size-5 text-primary" />
-              <h2 className="text-lg font-medium">Identity & Profile</h2>
+              <h2 className="text-lg font-normal">Identity & Profile</h2>
             </div>
             <div className="space-y-3">
               <div>
@@ -205,7 +192,7 @@ function AdminForm() {
           <div className="space-y-4 border rounded-lg p-4 lg:col-span-1">
             <div className="flex items-center space-x-2">
               <Mail className="size-5 text-primary" />
-              <h2 className="text-lg font-medium">Contact Details</h2>
+              <h2 className="text-lg font-normal">Contact Details</h2>
             </div>
             <div className="space-y-3">
               <div>
@@ -224,12 +211,12 @@ function AdminForm() {
           <div className="space-y-4 border rounded-lg p-4 lg:col-span-1">
             <div className="flex items-center space-x-2">
               <AlertCircle className="size-5 text-destructive" />
-              <h2 className="text-lg font-medium">Account Flags</h2>
+              <h2 className="text-lg font-normal">Account Flags</h2>
             </div>
             <label className="flex items-start gap-3 cursor-pointer select-none group">
               <input type="checkbox" name="suspended" checked={formData.suspended} onChange={handleChange} className="mt-1 size-4 rounded border-input text-destructive accent-destructive cursor-pointer" />
               <div className="flex flex-col gap-1">
-                <span className="font-medium text-foreground group-hover:text-destructive transition-colors duration-250 ease-luxe">Create as Suspended</span>
+                <span className="font-normal text-foreground group-hover:text-destructive transition-colors duration-250 ease-luxe">Create as Suspended</span>
                 <span className="text-sm text-muted-foreground">User will not be able to log in until suspension is lifted.</span>
               </div>
             </label>
@@ -239,7 +226,7 @@ function AdminForm() {
         <div className="space-y-4 border rounded-lg p-4">
           <div className="flex items-center space-x-2">
             <Shield className="size-5 text-primary" />
-            <h2 className="text-lg font-medium">Role Assignment*</h2>
+            <h2 className="text-lg font-normal">Role Assignment*</h2>
           </div>
 
           <div>
@@ -247,7 +234,7 @@ function AdminForm() {
             <div className="flex flex-wrap gap-2 min-h-[44px] p-3 rounded-lg border border-border bg-muted items-center">
               {formData.roles.length === 0 && <span className="text-sm text-muted-foreground px-2">No roles selected</span>}
               {formData.roles.map((r) => (
-                <span key={r} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-primary/10 text-primary border border-primary/20">
+                <span key={r} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-normal bg-primary/10 text-primary border border-primary/20">
                   <Shield className="size-3.5 opacity-70" />
                   {ROLE_LABELS[r] || r}
                   {formData.roles.length > 1 && (
@@ -283,7 +270,7 @@ function AdminForm() {
                   return (
                     <label key={r} className={`flex items-start gap-3 p-3 rounded-lg text-sm cursor-pointer border transition-all ${checked ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'}`}>
                       <input type="checkbox" checked={checked} onChange={(e) => handleRoleToggle(r, e.target.checked)} className="mt-0.5 size-4 rounded border-input text-primary accent-primary cursor-pointer" />
-                      <span className={`font-medium ${checked ? 'text-primary' : 'text-foreground'}`}>{ROLE_LABELS[r]}</span>
+                      <span className={`font-normal ${checked ? 'text-primary' : 'text-foreground'}`}>{ROLE_LABELS[r]}</span>
                     </label>
                   )
                 })}
@@ -295,7 +282,7 @@ function AdminForm() {
         {submitError && (
           <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive">
             <AlertCircle className="size-4 shrink-0" />
-            <p className="text-sm font-medium">{submitError}</p>
+            <p className="text-sm font-normal">{submitError}</p>
           </div>
         )}
 

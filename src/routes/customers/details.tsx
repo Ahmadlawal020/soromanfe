@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
@@ -145,15 +146,12 @@ function CustomerDetailPage() {
       <Breadcrumbs items={[{ label: 'Customers', href: '/customers' }, { label: customer?.name || 'Details' }]} />
 
       <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" onClick={handleBack}>
-            <ArrowLeft className="size-4" />
-          </Button>
-          <div>
-            <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">Customer Profile</h1>
-            <p className="text-muted-foreground">Account details, deposits, and contact information</p>
-          </div>
-        </div>
+        <PageHeader
+      eyebrow="Orders"
+      title="Customer Profile"
+      description="Account details, deposits, and contact information"
+      backAction={handleBack}
+    />
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={handleEdit}>
             <Edit className="size-4" /> Edit Profile
@@ -182,7 +180,7 @@ function CustomerDetailPage() {
               </p>
             </div>
             <div className="sm:text-right">
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Account Balance</p>
+              <p className="text-xs text-muted-foreground font-normal uppercase">Account Balance</p>
               <p className="text-2xl font-semibold text-foreground mt-1 tabular-nums">{formatCurrency(toNum(customer.balance))}</p>
             </div>
           </div>
@@ -211,21 +209,21 @@ function CustomerDetailPage() {
                 <Mail className="size-4 text-muted-foreground shrink-0" />
                 <div>
                   <p className="text-xs text-muted-foreground">Email</p>
-                  <p className="text-sm font-medium text-foreground">{customer.email || 'Not provided'}</p>
+                  <p className="text-sm font-normal text-foreground">{customer.email || 'Not provided'}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 <Phone className="size-4 text-muted-foreground shrink-0" />
                 <div>
                   <p className="text-xs text-muted-foreground">Phone</p>
-                  <p className="text-sm font-medium text-foreground">{customer.phone}</p>
+                  <p className="text-sm font-normal text-foreground">{customer.phone}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 <MapPin className="size-4 text-muted-foreground shrink-0" />
                 <div>
                   <p className="text-xs text-muted-foreground">Address</p>
-                  <p className="text-sm font-medium text-foreground">{customer.address || 'Not provided'}</p>
+                  <p className="text-sm font-normal text-foreground">{customer.address || 'Not provided'}</p>
                 </div>
               </div>
             </div>
@@ -300,7 +298,7 @@ function CustomerDetailPage() {
               <div className="space-y-4">
                 <div className="p-4 rounded-xl border-2 border-primary/20 bg-primary/5 space-y-3">
                   <div>
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-[0.14em] font-medium">Account Number</p>
+                    <p className="text-xs text-muted-foreground uppercase font-normal">Account Number</p>
                     <div className="flex items-center gap-2 mt-1">
                       <p className="text-xl font-semibold font-mono text-foreground tabular-nums">{customer.virtualAccountNumber}</p>
                       <button
@@ -313,11 +311,11 @@ function CustomerDetailPage() {
                     </div>
                   </div>
                   <div>
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-[0.14em] font-medium">Bank Name</p>
+                    <p className="text-xs text-muted-foreground uppercase font-normal">Bank Name</p>
                     <p className="text-sm font-semibold text-foreground mt-0.5">{customer.virtualAccountBank || '—'}</p>
                   </div>
                   <div>
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-[0.14em] font-medium">Account Name</p>
+                    <p className="text-xs text-muted-foreground uppercase font-normal">Account Name</p>
                     <p className="text-sm font-semibold text-foreground mt-0.5">{customer.virtualAccountName || customer.name}</p>
                   </div>
                 </div>
@@ -326,7 +324,7 @@ function CustomerDetailPage() {
                     <Hash className="size-3.5 text-muted-foreground shrink-0" />
                     <div>
                       <p className="text-xs text-muted-foreground">Paystack Customer ID</p>
-                      <p className="text-sm font-mono font-medium text-foreground">{customer.paystackCustomerId}</p>
+                      <p className="text-sm font-mono font-normal text-foreground">{customer.paystackCustomerId}</p>
                     </div>
                   </div>
                 )}
@@ -336,7 +334,7 @@ function CustomerDetailPage() {
                 <div className="inline-flex size-12 items-center justify-center rounded-xl bg-muted border border-border mb-3">
                   <CreditCard className="size-5 text-muted-foreground" />
                 </div>
-                <p className="text-sm font-medium text-foreground">No Virtual Account</p>
+                <p className="text-sm font-normal text-foreground">No Virtual Account</p>
                 <p className="text-xs text-muted-foreground mt-1">A virtual account will be generated when the customer places their first order.</p>
               </div>
             )}
@@ -362,20 +360,20 @@ function CustomerDetailPage() {
           <CardContent className="pt-4">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Account Status</p>
+                <p className="text-xs text-muted-foreground font-normal uppercase">Account Status</p>
                 <div className="mt-2">
                   {getStatusBadge(customer.status)}
                 </div>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Record Created</p>
-                <p className="text-sm font-medium text-foreground mt-2">
+                <p className="text-xs text-muted-foreground font-normal uppercase">Record Created</p>
+                <p className="text-sm font-normal text-foreground mt-2">
                   {customer.createdAt ? new Date(customer.createdAt).toLocaleDateString() : 'N/A'}
                 </p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Last Updated</p>
-                <p className="text-sm font-medium text-foreground mt-2">
+                <p className="text-xs text-muted-foreground font-normal uppercase">Last Updated</p>
+                <p className="text-sm font-normal text-foreground mt-2">
                   {customer.updatedAt ? new Date(customer.updatedAt).toLocaleDateString() : 'N/A'}
                 </p>
               </div>
@@ -411,7 +409,7 @@ function CustomerDetailPage() {
               <div className="inline-flex size-14 items-center justify-center rounded-xl bg-muted border border-border mb-4">
                 <SearchX className="size-6 text-muted-foreground" />
               </div>
-              <p className="text-sm font-medium text-foreground">No orders found</p>
+              <p className="text-sm font-normal text-foreground">No orders found</p>
               <p className="text-xs text-muted-foreground mt-1">This customer hasn&apos;t placed any orders yet.</p>
             </div>
           ) : (
@@ -472,7 +470,7 @@ function CustomerDetailPage() {
                           {order.orderNumber}
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-1.5 text-sm font-medium">
+                          <div className="flex items-center gap-1.5 text-sm font-normal">
                             <Package className="size-3.5 text-muted-foreground" />
                             {order.productName || order.product?.name || 'Unknown'}
                           </div>
@@ -483,7 +481,7 @@ function CustomerDetailPage() {
                             <span>{order.depotName || order.depot?.name || 'Unknown'}</span>
                           </div>
                         </TableCell>
-                        <TableCell className="font-medium">
+                        <TableCell className="font-normal">
                           {order.quantity?.toLocaleString()} {order.productUnit || order.product?.unit || 'Liters'}
                         </TableCell>
                         <TableCell className="font-semibold text-foreground">
@@ -534,7 +532,7 @@ function CustomerDetailPage() {
               <div className="inline-flex size-14 items-center justify-center rounded-xl bg-muted border border-border mb-4">
                 <SearchX className="size-6 text-muted-foreground" />
               </div>
-              <p className="text-sm font-medium text-foreground">No deposit records found</p>
+              <p className="text-sm font-normal text-foreground">No deposit records found</p>
               <p className="text-xs text-muted-foreground mt-1">Deposit transactions will appear here once recorded.</p>
             </div>
           ) : (
@@ -618,7 +616,7 @@ function CustomerDetailPage() {
                             ? `${(deposit.recordedBy as any).firstName || (deposit.recordedBy as any).first_name || ''} ${(deposit.recordedBy as any).surname || (deposit.recordedBy as any).last_name || ''}`.trim()
                             : '—'}
                         </TableCell>
-                        <TableCell className="text-right font-mono text-sm font-medium">
+                        <TableCell className="text-right font-mono text-sm font-normal">
                           {formatCurrency(toNum(deposit.balanceAfter))}
                         </TableCell>
                       </TableRow>
@@ -657,7 +655,7 @@ function CustomerDetailPage() {
               <div className="inline-flex size-14 items-center justify-center rounded-xl bg-muted border border-border mb-4">
                 <SearchX className="size-6 text-muted-foreground" />
               </div>
-              <p className="text-sm font-medium text-foreground">No commissions found</p>
+              <p className="text-sm font-normal text-foreground">No commissions found</p>
               <p className="text-xs text-muted-foreground mt-1">Commissions will appear here once orders are paid and commission rates are set.</p>
             </div>
           ) : (
@@ -711,7 +709,7 @@ function CustomerDetailPage() {
                         </TableCell>
                         <TableCell className="text-sm">{c.depotName}</TableCell>
                         <TableCell className="text-sm">{c.productName}</TableCell>
-                        <TableCell className="font-medium text-sm">{c.quantity.toLocaleString()} L</TableCell>
+                        <TableCell className="font-normal text-sm">{c.quantity.toLocaleString()} L</TableCell>
                         <TableCell className="text-sm text-muted-foreground">₦{c.commissionRate}/L</TableCell>
                         <TableCell className="text-right font-semibold text-foreground">
                           {formatCurrency(c.commissionAmount)}

@@ -43,17 +43,17 @@ export function ProductStep({ wizard }: ProductStepProps) {
               <div>
                 <div className="flex justify-between items-start">
                   <p className="font-semibold text-sm text-foreground">{priceEntry.product?.name || 'Unknown'}</p>
-                  <Badge variant="outline" className="text-[10px] uppercase font-mono">{priceEntry.product?.sku}</Badge>
+                  <Badge variant="outline" className="text-xs uppercase font-mono">{priceEntry.product?.sku}</Badge>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">{priceEntry.product?.category}</p>
               </div>
               <div className="flex justify-between items-end mt-4 pt-3 border-t border-border">
                 <div>
-                  <span className="text-[10px] text-muted-foreground block">Available Stock</span>
+                  <span className="text-xs text-muted-foreground block">Available Stock</span>
                   <span className="font-semibold text-xs">{remainingQty.toLocaleString()} {priceEntry.product?.unit || 'Liters'}</span>
                 </div>
                 <div className="text-right">
-                  <span className="text-[10px] text-muted-foreground block">Unit Price</span>
+                  <span className="text-xs text-muted-foreground block">Unit Price</span>
                   <span className="font-semibold text-primary text-sm">{formatCurrency(priceEntry.currentPrice)}</span>
                 </div>
               </div>

@@ -70,7 +70,7 @@ function SegmentedChoice<T extends string>({
                 {o.icon}
               </span>
             )}
-            <span className="text-sm font-medium">{o.label}</span>
+            <span className="text-sm font-normal">{o.label}</span>
             {o.hint && (
               <span
                 className={cn(
