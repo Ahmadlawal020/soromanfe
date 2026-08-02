@@ -112,12 +112,18 @@ function StatCardGrid({
   className,
   ...props
 }: React.ComponentProps<"div"> & { count: number }) {
+  // Columns follow the actual number of cards, so two tiles fill the row
+  // instead of sitting in two thirds of a three-column grid.
   const cols =
     count >= 6
       ? "grid-cols-2 sm:grid-cols-3"
       : count >= 4
         ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
-        : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+        : count === 3
+          ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+          : count === 2
+            ? "grid-cols-1 sm:grid-cols-2"
+            : "grid-cols-1"
 
   return <div className={cn("grid gap-3 sm:gap-4", className || cols)} {...props} />
 }

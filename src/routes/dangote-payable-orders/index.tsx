@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { StatCard, StatCardGrid } from '#/components/ui/stat-card'
 import { FilterBar } from '#/components/FilterBar'
 import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
@@ -66,157 +67,147 @@ function PayableDangoteOrdersPage() {
   if (isError) return <PageError message={(error as any)?.message || 'Failed to load payable orders'} onRetry={refetch} />
 
   return (
-    <PageHeader
+    <div className="space-y-6">
+      <PageHeader
       eyebrow="Dangote Delivery"
       title="Payable Dangote Orders"
       description={`Approved Dangote orders where the customer's wallet balance covers the total. Click "Pay Now" to process payment from the customer's wallet.`}
-      actions={
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card className="stats-card">
-          <CardContent className="p-4 flex justify-between items-center">
-          <div>
-          <p className="text-sm text-muted-foreground">Payable Orders</p>
-          <p className="text-2xl font-semibold">{totalItems}</p>
-          </div>
-          <Package className="size-8 text-primary" />
-          </CardContent>
-          </Card>
-          <Card className="stats-card">
-          <CardContent className="p-4 flex justify-between items-center">
-          <div>
-          <p className="text-sm text-muted-foreground">Total Payable Value</p>
-          <p className="text-2xl font-semibold text-info">{formatCurrency(totalPayableValue)}</p>
-          </div>
-          <DollarSign className="size-8 text-info" />
-          </CardContent>
-          </Card>
-          </div>
-          <FilterBar>
-        <div className="relative w-full sm:w-64">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground size-4" />
-        <Input
-        type="text"
-        placeholder="Search request ID, customer..."
-        value={searchTerm}
-        onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1) }}
-        className="pl-10"
-        />
-        {searchTerm && (
-        <button
-        onClick={() => { setSearchTerm(''); setCurrentPage(1) }}
-        className="absolute right-3 top-1/2 -translate-y-1/2 size-5 rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground flex items-center justify-center cursor-pointer transition-colors"
-        aria-label="Clear search"
-        >
-        <X className="size-2.5" />
-        </button>
-        )}
-        </div>
-          </FilterBar>
-
-          <Card>
-          
-          <CardContent>
-          {filteredOrders.length === 0 ? (
-          <PageEmpty
-          icon={<Wallet className="size-6 text-muted-foreground" />}
-          title="No payable Dangote orders"
-          description={searchTerm
-          ? 'No orders match your search.'
-          : 'There are no approved unpaid Dangote orders where the customer has sufficient wallet balance.'}
-          hasFilters={!!searchTerm}
-          onClearFilters={() => setSearchTerm('')}
-          />
-          ) : (
-          <>
-          <div className="overflow-x-auto">
-          <Table>
-          <TableHeader>
-          <TableRow>
-          <TableHead>Request ID</TableHead>
-          <TableHead>Customer</TableHead>
-          <TableHead>Product</TableHead>
-          <TableHead>Quantity</TableHead>
-          <TableHead>Total Amount</TableHead>
-          <TableHead>Wallet Balance</TableHead>
-          <TableHead className="text-center">Action</TableHead>
-          </TableRow>
-          </TableHeader>
-          <TableBody>
-          {paginatedOrders.map((order: any) => {
-          const balance = Number(order.customerBalance) || 0
-          const total = Number(order.totalAmount) || 0
-          return (
-          <TableRow
-          key={order.id}
-          className="hover:bg-muted/50 transition cursor-pointer"
-          onClick={() => navigate({ to: '/dangote-orders/details' as any, search: { id: String(order.id) } as any })}
-          >
-          <TableCell className="font-mono font-semibold text-primary">
-          {order.requestNumber}
-          </TableCell>
-          <TableCell>
-          <div className="space-y-0.5">
-          <p className="font-normal text-foreground">{order.customerName}</p>
-          {order.deliveryState && (
-          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-          <MapPin className="size-3" />
-          <span>{order.deliveryState}</span>
-          </div>
-          )}
-          </div>
-          </TableCell>
-          <TableCell>
-          <div className="flex items-center gap-1.5 text-sm font-normal">
-          <Package className="size-3.5 text-muted-foreground" />
-          <span>{order.product}</span>
-          </div>
-          </TableCell>
-          <TableCell className="font-normal">
-          {Number(order.quantity).toLocaleString()} {order.quantityUnit || 'Tons'}
-          </TableCell>
-          <TableCell className="font-semibold text-foreground">
-          {formatCurrency(total)}
-          </TableCell>
-          <TableCell>
-          <span className="font-semibold text-accent">
-          {formatCurrency(balance)}
-          </span>
-          </TableCell>
-          <TableCell className="text-center">
-          <Button
-          size="sm"
-          className="bg-accent text-accent-foreground hover:bg-accent/90 cursor-pointer"
-          disabled={payingId === order.id}
-          onClick={(e) => {
-          e.stopPropagation()
-          handlePay(order.id)
-          }}
-          >
-          <Wallet className="size-4 mr-1" />
-          {payingId === order.id ? 'Paying...' : 'Pay Now'}
-          </Button>
-          </TableCell>
-          </TableRow>
-          )
-          })}
-          </TableBody>
-          </Table>
-          </div>
-          <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          pageSize={pageSize}
-          totalItems={totalItems}
-          onPageChange={setCurrentPage}
-          onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1) }}
-          />
-          </>
-          )}
-          </CardContent>
-          </Card>
-        </>
-      }
     />
+
+      <StatCardGrid count={2}>
+        <StatCard
+          icon={<Package />} label="Payable orders" value={totalItems}
+          description="Wallet balance covers the full amount"
+        />
+        <StatCard
+          icon={<DollarSign />} label="Total payable value"
+          value={formatCurrency(totalPayableValue)}
+          description="Ready to draw from customer wallets"
+        />
+      </StatCardGrid>
+                <FilterBar>
+              <div className="relative w-full sm:w-64">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground size-4" />
+              <Input
+              type="text"
+              placeholder="Search request ID, customer..."
+              value={searchTerm}
+              onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1) }}
+              className="pl-10"
+              />
+              {searchTerm && (
+              <button
+              onClick={() => { setSearchTerm(''); setCurrentPage(1) }}
+              className="absolute right-3 top-1/2 -translate-y-1/2 size-5 rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground flex items-center justify-center cursor-pointer transition-colors"
+              aria-label="Clear search"
+              >
+              <X className="size-2.5" />
+              </button>
+              )}
+              </div>
+                </FilterBar>
+
+                <Card>
+
+                <CardContent>
+                {filteredOrders.length === 0 ? (
+                <PageEmpty
+                icon={<Wallet className="size-6 text-muted-foreground" />}
+                title="No payable Dangote orders"
+                description={searchTerm
+                ? 'No orders match your search.'
+                : 'There are no approved unpaid Dangote orders where the customer has sufficient wallet balance.'}
+                hasFilters={!!searchTerm}
+                onClearFilters={() => setSearchTerm('')}
+                />
+                ) : (
+                <>
+                <div className="overflow-x-auto">
+                <Table>
+                <TableHeader>
+                <TableRow>
+                <TableHead>Request ID</TableHead>
+                <TableHead>Customer</TableHead>
+                <TableHead>Product</TableHead>
+                <TableHead>Quantity</TableHead>
+                <TableHead>Total Amount</TableHead>
+                <TableHead>Wallet Balance</TableHead>
+                <TableHead className="text-center">Action</TableHead>
+                </TableRow>
+                </TableHeader>
+                <TableBody>
+                {paginatedOrders.map((order: any) => {
+                const balance = Number(order.customerBalance) || 0
+                const total = Number(order.totalAmount) || 0
+                return (
+                <TableRow
+                key={order.id}
+                className="hover:bg-muted/50 transition cursor-pointer"
+                onClick={() => navigate({ to: '/dangote-orders/details' as any, search: { id: String(order.id) } as any })}
+                >
+                <TableCell className="font-mono font-semibold text-primary">
+                {order.requestNumber}
+                </TableCell>
+                <TableCell>
+                <div className="space-y-0.5">
+                <p className="font-normal text-foreground">{order.customerName}</p>
+                {order.deliveryState && (
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <MapPin className="size-3" />
+                <span>{order.deliveryState}</span>
+                </div>
+                )}
+                </div>
+                </TableCell>
+                <TableCell>
+                <div className="flex items-center gap-1.5 text-sm font-normal">
+                <Package className="size-3.5 text-muted-foreground" />
+                <span>{order.product}</span>
+                </div>
+                </TableCell>
+                <TableCell className="font-normal">
+                {Number(order.quantity).toLocaleString()} {order.quantityUnit || 'Tons'}
+                </TableCell>
+                <TableCell className="font-semibold text-foreground">
+                {formatCurrency(total)}
+                </TableCell>
+                <TableCell>
+                <span className="font-semibold text-accent">
+                {formatCurrency(balance)}
+                </span>
+                </TableCell>
+                <TableCell className="text-center">
+                <Button
+                size="sm"
+                className="bg-accent text-accent-foreground hover:bg-accent/90 cursor-pointer"
+                disabled={payingId === order.id}
+                onClick={(e) => {
+                e.stopPropagation()
+                handlePay(order.id)
+                }}
+                >
+                <Wallet className="size-4 mr-1" />
+                {payingId === order.id ? 'Paying...' : 'Pay Now'}
+                </Button>
+                </TableCell>
+                </TableRow>
+                )
+                })}
+                </TableBody>
+                </Table>
+                </div>
+                <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                pageSize={pageSize}
+                totalItems={totalItems}
+                onPageChange={setCurrentPage}
+                onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1) }}
+                />
+                </>
+                )}
+                </CardContent>
+                </Card>
+    </div>
   )
 }
