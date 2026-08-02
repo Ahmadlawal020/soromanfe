@@ -18,6 +18,7 @@ import {
   Moon,
   Sun,
   ArrowRight,
+  Flame,
 } from 'lucide-react'
 import {
   Dialog,
@@ -52,10 +53,14 @@ export default function CommandPalette({ open, onOpenChange }: CommandPalettePro
       // Navigation
       { id: 'nav-overview', title: 'Overview Dashboard', category: 'Navigation', icon: GaugeIcon, path: '/overview', keywords: ['home', 'metrics', 'stats'] },
       { id: 'nav-orders', title: 'Orders Ledger', category: 'Navigation', icon: ShoppingBag, path: '/orders', keywords: ['transactions', 'sales'] },
+      { id: 'nav-payable-orders', title: 'Payable Orders', category: 'Navigation', icon: DollarSign, path: '/payable-orders', keywords: ['wallet', 'pay', 'pending'] },
       { id: 'nav-create-order', title: 'Create Order Wizard', category: 'Navigation', icon: PlusCircle, path: '/admin-order', keywords: ['new order', 'checkout'] },
       { id: 'nav-customers', title: 'Customer Directory', category: 'Navigation', icon: Users, path: '/customers', keywords: ['clients', 'accounts'] },
+      { id: 'nav-dangote-orders', title: 'Dangote Orders', category: 'Navigation', icon: ShoppingBag, path: '/dangote-orders', keywords: ['dangote', 'delivery'] },
+      { id: 'nav-dangote-payable', title: 'Payable Dangote Orders', category: 'Navigation', icon: DollarSign, path: '/dangote-payable-orders', keywords: ['dangote', 'wallet', 'pay'] },
       { id: 'nav-tickets', title: 'Loading Tickets', category: 'Navigation', icon: Ticket, path: '/ticket', keywords: ['passes', 'waybills'] },
       { id: 'nav-depots', title: 'Depots & Storage', category: 'Navigation', icon: Warehouse, path: '/depots', keywords: ['warehouses', 'tanks', 'capacity'] },
+      { id: 'nav-lpg-stations', title: 'LPG Stations', category: 'Navigation', icon: Flame, path: '/lpg-stations', keywords: ['lpg', 'gas', 'home delivery', 'station'] },
       { id: 'nav-products', title: 'Product Inventory', category: 'Navigation', icon: Package, path: '/products', keywords: ['pms', 'ago', 'dpk', 'lpg'] },
       { id: 'nav-deposits', title: 'Financial Deposits', category: 'Navigation', icon: DollarSign, path: '/deposits', keywords: ['payments', 'ledger', 'balance'] },
       { id: 'nav-trucks', title: 'Fleet Directory', category: 'Navigation', icon: Truck, path: '/trucks', keywords: ['vehicles', 'tankers'] },

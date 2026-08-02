@@ -5,21 +5,21 @@ import { Button } from '#/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '#/components/ui/card'
 import {
   ArrowLeft, AlertCircle, Package, MapPin,
-  Calendar, Phone, Mail, Building2, Truck, FileCheck,
+  Calendar, Phone, Mail, Truck, FileCheck,
   Banknote, Copy, CheckCircle, Clock, XCircle, User, CircleDollarSign,
-  ShieldPlus, FileText,
+  Flame,
 } from 'lucide-react'
-import { useDangoteOrderRequestDetails, useUpdateDangoteOrderCollectionStatus } from '#/lib/hooks/useDangoteOrders'
+import { useLpgOrderRequestDetails, useUpdateLpgOrderCollectionStatus } from '#/lib/hooks/useLpgOrders'
 import { Breadcrumbs } from '#/components/Breadcrumbs'
 import { ConfirmDialog } from '#/components/ConfirmDialog'
 import { PageLoader } from '#/components/PageLoader'
 import { PageError } from '#/components/PageError'
 
-export const Route = createFileRoute('/dangote-orders/details')({
+export const Route = createFileRoute('/lpg-orders/details')({
   validateSearch: (search: Record<string, unknown>) => ({
     id: (search.id as string) || '',
   }),
-  component: DangoteOrderDetails,
+  component: LpgOrderDetails,
 })
 
 function formatCurrency(value: number) {
@@ -86,25 +86,12 @@ function requestStatusBadge(status: string) {
   }
 }
 
-function licenseStatusBadge(status: string) {
-  switch (status) {
-    case 'approved':
-      return <Badge className="bg-accent/15 text-accent border-accent/20 gap-1"><CheckCircle className="size-3" /> Approved</Badge>
-    case 'pending':
-      return <Badge className="bg-warning/15 text-warning border-warning/20 gap-1"><Clock className="size-3" /> Pending</Badge>
-    case 'rejected':
-      return <Badge variant="destructive" className="gap-1"><XCircle className="size-3" /> Rejected</Badge>
-    default:
-      return <Badge variant="outline">{status || 'No Licence'}</Badge>
-  }
-}
-
-function DangoteOrderDetails() {
+function LpgOrderDetails() {
   const navigate = useNavigate()
   const { id } = Route.useSearch()
 
-  const { data: request, isLoading, isError, error, refetch } = useDangoteOrderRequestDetails(id)
-  const updateCollectionMutation = useUpdateDangoteOrderCollectionStatus()
+  const { data: request, isLoading, isError, error, refetch } = useLpgOrderRequestDetails(id)
+  const updateCollectionMutation = useUpdateLpgOrderCollectionStatus()
 
   const [copied, setCopied] = useState(false)
   const [showCollectionConfirm, setShowCollectionConfirm] = useState(false)
@@ -138,28 +125,29 @@ function DangoteOrderDetails() {
         </div>
         <h2 className="text-lg md:text-xl font-semibold text-foreground tracking-tight">Order Not Found</h2>
         <p className="text-muted-foreground max-w-sm">The requested order details could not be found or loaded.</p>
-        <Button onClick={() => navigate({ to: '/dangote-orders/' as any })}><ArrowLeft className="size-4" /> Back to Orders</Button>
+        <Button onClick={() => navigate({ to: '/lpg-orders/' as any })}><ArrowLeft className="size-4" /> Back to Orders</Button>
       </div>
     )
   }
 
   const reviewerName = [request.reviewerFirstName, request.reviewerSurname].filter(Boolean).join(' ') || 'N/A'
+  const totalWeightKg = Number(request.cylinderSizeKg) * Number(request.cylinderQuantity)
 
   return (
     <div className="space-y-6 animate-fade-in">
       <Breadcrumbs items={[
-        { label: 'Dangote Orders', href: '/dangote-orders' },
+        { label: 'LPG Orders', href: '/lpg-orders' },
         { label: request.requestNumber },
       ]} />
 
       <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" onClick={() => navigate({ to: '/dangote-orders/' as any })}>
+          <Button variant="outline" size="icon" onClick={() => navigate({ to: '/lpg-orders/' as any })}>
             <ArrowLeft className="size-4" />
           </Button>
           <div>
             <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-balance">Order Details</h1>
-            <p className="text-muted-foreground">Detailed breakdown of the Dangote delivery order</p>
+            <p className="text-muted-foreground">Detailed breakdown of the LPG cooking gas order</p>
           </div>
         </div>
       </header>
@@ -170,7 +158,7 @@ function DangoteOrderDetails() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
             <div className="flex items-start sm:items-center gap-5">
               <div className="size-16 bg-warning rounded-xl flex items-center justify-center text-warning-foreground shrink-0">
-                <Package className="size-7" />
+                <Flame className="size-7" />
               </div>
               <div>
                 <div className="flex flex-wrap items-center gap-2">
@@ -200,25 +188,33 @@ function DangoteOrderDetails() {
               </div>
               <div>
                 <CardTitle className="text-sm">Summary & Pricing</CardTitle>
-                <CardDescription className="text-xs">Quantity, unit price, and total amount details</CardDescription>
+                <CardDescription className="text-xs">Cylinder details, unit price, and total amount</CardDescription>
               </div>
             </div>
           </CardHeader>
           <CardContent className="space-y-4 pt-6">
             <div className="flex justify-between items-center py-2 border-b border-border/50">
-              <span className="text-sm text-muted-foreground">Product</span>
-              <span className="font-semibold text-foreground">{request.product}</span>
+              <span className="text-sm text-muted-foreground">LPG Station</span>
+              <span className="font-semibold text-foreground">{request.stationName}</span>
+            </div>
+            <div className="flex justify-between items-center py-2 border-b border-border/50">
+              <span className="text-sm text-muted-foreground">Cylinder Size</span>
+              <span className="font-mono font-semibold text-foreground">{request.cylinderSizeKg} Kg</span>
             </div>
             <div className="flex justify-between items-center py-2 border-b border-border/50">
               <span className="text-sm text-muted-foreground">Quantity</span>
               <span className="font-mono font-semibold text-foreground">
-                {Number(request.quantity).toLocaleString()} {request.quantityUnit}
+                {Number(request.cylinderQuantity).toLocaleString()} cylinders
               </span>
             </div>
-            {request.pricePerUnit && (
+            <div className="flex justify-between items-center py-2 border-b border-border/50">
+              <span className="text-sm text-muted-foreground">Total Weight</span>
+              <span className="font-mono font-medium text-foreground">{totalWeightKg.toLocaleString()} Kg</span>
+            </div>
+            {request.pricePerKg && (
               <div className="flex justify-between items-center py-2 border-b border-border/50">
-                <span className="text-sm text-muted-foreground">Price Per {request.quantityUnit === 'Liters' ? 'Litre' : 'Unit'}</span>
-                <span className="font-mono font-medium text-foreground">{formatCurrency(Number(request.pricePerUnit))}</span>
+                <span className="text-sm text-muted-foreground">Price Per Kg</span>
+                <span className="font-mono font-medium text-foreground">{formatCurrency(Number(request.pricePerKg))}</span>
               </div>
             )}
             {request.deliveryPrice && (
@@ -257,10 +253,7 @@ function DangoteOrderDetails() {
             {request.companyName && (
               <div>
                 <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Company</p>
-                <p className="text-sm text-foreground mt-0.5 flex items-center gap-1.5">
-                  <Building2 className="size-3.5 text-muted-foreground" />
-                  {request.companyName}
-                </p>
+                <p className="text-sm text-foreground mt-0.5">{request.companyName}</p>
               </div>
             )}
             <div className="grid grid-cols-2 gap-4">
@@ -281,65 +274,6 @@ function DangoteOrderDetails() {
             </div>
           </CardContent>
         </Card>
-
-        {/* Licence Information */}
-        {(request.licenseId || request.licenseCompanyName) && (
-          <Card>
-            <CardHeader className="border-b border-border">
-              <div className="flex items-center gap-2">
-                <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                  <ShieldPlus className="size-4" />
-                </div>
-                <div>
-                  <CardTitle className="text-sm">Company Licence</CardTitle>
-                  <CardDescription className="text-xs">Licence details and verification status</CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4 pt-6">
-              <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Company Name</p>
-                <p className="text-sm font-semibold text-foreground mt-0.5">{request.licenseCompanyName || '—'}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em]">Licence Status</p>
-                <div className="mt-1">{licenseStatusBadge(request.licenseStatus)}</div>
-              </div>
-              {request.licenseUrl && (
-                <div>
-                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-[0.22em] mb-2">Licence Document</p>
-                  <div className="rounded-lg border bg-background overflow-hidden">
-                    {/\.(pdf)/i.test(request.licenseUrl) ? (
-                      <div className="p-4 flex items-center gap-3">
-                        <FileText className="size-8 text-primary shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-foreground">PDF Document</p>
-                          <p className="text-xs text-muted-foreground truncate">{request.licenseUrl}</p>
-                        </div>
-                        <a
-                          href={request.licenseUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm text-primary underline hover:no-underline"
-                        >
-                          View PDF
-                        </a>
-                      </div>
-                    ) : (
-                      <a href={request.licenseUrl} target="_blank" rel="noopener noreferrer">
-                        <img
-                          src={request.licenseUrl}
-                          alt={`${request.licenseCompanyName} licence`}
-                          className="w-full max-h-[500px] object-contain cursor-pointer hover:opacity-95 transition-opacity duration-250 ease-luxe"
-                        />
-                      </a>
-                    )}
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
 
         {/* Delivery Information */}
         <Card>
@@ -538,7 +472,7 @@ function DangoteOrderDetails() {
             <Button
               variant="outline"
               className="border-warning text-warning hover:bg-warning/10 cursor-pointer"
-              onClick={() => navigate({ to: '/dangote-order-request/review' as any, search: { id: String(request.id) } as any })}
+              onClick={() => navigate({ to: '/lpg-order-request/review' as any, search: { id: String(request.id) } as any })}
             >
               <FileCheck className="size-4 mr-2" /> Review Request
             </Button>
@@ -546,7 +480,6 @@ function DangoteOrderDetails() {
         </CardContent>
       </Card>
 
-      {/* Confirm Dialogs */}
       <ConfirmDialog
         open={showCollectionConfirm}
         onOpenChange={setShowCollectionConfirm}

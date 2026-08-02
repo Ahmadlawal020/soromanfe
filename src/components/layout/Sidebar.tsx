@@ -23,6 +23,7 @@ import {
   FileSpreadsheet,
   LogIn,
   ClipboardList,
+  Flame,
 } from "lucide-react";
 import { useAuthStore, useAdminLogout } from "#/modules/auth";
 import { useLayoutStore } from "#/stores/layoutStore";
@@ -45,9 +46,19 @@ const navCategories: NavCategory[] = [
     items: [{ title: "Overview", icon: GaugeIcon, path: "/overview" }],
   },
   {
+    category: "LPG Home Delivery",
+    items: [
+      { title: "LPG Stations", icon: Flame, path: "/lpg-stations" },
+      { title: "LPG Orders", icon: ShoppingBag, path: "/lpg-orders" },
+      { title: "Payable Orders", icon: DollarSign, path: "/lpg-payable-orders" },
+      { title: "Order Requests", icon: FileText, path: "/lpg-order-request" },
+    ],
+  },
+  {
     category: "Orders",
     items: [
       { title: "Orders", icon: ShoppingBag, path: "/orders" },
+      { title: "Payable Orders", icon: DollarSign, path: "/payable-orders" },
       { title: "Create Order", icon: PlusCircle, path: "/admin-order" },
       { title: "Our Customers", icon: Building2, path: "/customers" },
     ],
@@ -57,6 +68,7 @@ const navCategories: NavCategory[] = [
     category: "Dangote Delivery",
     items: [
       { title: "Dangote Orders", icon: ShoppingBag, path: "/dangote-orders" },
+      { title: "Payable Orders", icon: DollarSign, path: "/dangote-payable-orders" },
       {
         title: "Order Requests",
         icon: FileText,
