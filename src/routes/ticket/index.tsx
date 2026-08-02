@@ -38,7 +38,10 @@ const PAGE_SIZE = 100
 
 function LoadingTicketsPage() {
   const [search, setSearch] = useState('')
-  const [datePreset, setDatePreset] = useState<DatePreset>('today')
+  // Opens on the month, not the day: order volume is low enough that
+  // "Today" is usually empty, which reads as a broken page rather than a
+  // quiet day. Change to 'today' if you'd rather it open narrow.
+  const [datePreset, setDatePreset] = useState<DatePreset>('month')
   const [customFrom, setCustomFrom] = useState('')
   const [customTo, setCustomTo] = useState('')
   const [productFilter, setProductFilter] = useState(ALL)
