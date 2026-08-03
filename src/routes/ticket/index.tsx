@@ -56,7 +56,10 @@ function LoadingTicketsPage() {
   const [exporting, setExporting] = useState(false)
 
   const { data, isLoading, isError, error, refetch } = useAllOrders()
-  const orders: any[] = data?.orders || []
+  const orders: any[] = useMemo(() => {
+    const list = data?.orders || []
+    return [...list].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+  }, [data?.orders])
 
   // Loads for whichever order currently has a dialog open.
   const { data: openOrder } = useOrderForTicketing(ticketOrder?.id ?? printOrderId ?? undefined)

@@ -116,17 +116,14 @@ export function TicketGenerateDialog({
         truckNumber: d.truckNumber.trim(),
         driverName: d.driverName.trim(),
         driverPhone: d.driverPhone.trim(),
-        // Compartment quantities, ullage and loader are handwritten on the
-        // printed sheet and deliberately never captured here.
-        compartments: null,
-        loaderName: null,
-        loaderPhone: null,
       }))
 
       // An order still sitting at Paid has to be released before it can be
-      // ticketed; truck 1's details carry that call.
+      // ticketed. Delivery orders carry all allocated trucks at release; pickup
+      // orders carry none.
       if (!['Released', 'Loading'].includes(String(order.status))) {
-        await api.post(`/orders/${order.id}/release`, { trucks: [trucks[0]] })
+        const releasePayload = order.deliveryType === 'delivery' ? { trucks } : {}
+        await api.post(`/orders/${order.id}/release`, releasePayload)
       }
 
       await api.post(`/orders/${order.id}/generate-tickets`, {

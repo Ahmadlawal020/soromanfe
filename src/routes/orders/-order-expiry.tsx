@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { Hourglass } from 'lucide-react'
 import { cn } from '#/lib/utils'
 
-const EXPIRY_HOURS = Number(import.meta.env.VITE_ORDER_EXPIRY_HOURS) || 3
+const EXPIRY_HOURS = Number(import.meta.env.VITE_ORDER_EXPIRY_HOURS) || 24
 
 /**
  * Shows how much time remains before an unpaid Pending order expires, or

@@ -30,13 +30,13 @@ const categoryList = [
 ]
 
 const categoryColors: Record<string, string> = {
-  'PMS (Premium Motor Spirit)': 'from-primary to-[#7ed3bf]',
-  'AGO (Automotive Gas Oil)': 'from-success to-[#6ec89a]',
-  'DPK (Dual Purpose Kerosene)': 'from-warning to-warning',
-  'Jet A-1 (Aviation Fuel)': 'from-muted to-muted',
-  'LPG (Liquefied Petroleum Gas)': 'from-info to-muted',
-  'LPFO / Heavy Fuel Oil': 'from-destructive to-destructive',
-  'Lubricants & Base Oils': 'from-muted to-muted',
+  'PMS (Premium Motor Spirit)': 'from-primary to-primary/80 text-primary-foreground',
+  'AGO (Automotive Gas Oil)': 'from-emerald-600 to-emerald-500 text-white',
+  'DPK (Dual Purpose Kerosene)': 'from-amber-500 to-amber-400 text-white',
+  'Jet A-1 (Aviation Fuel)': 'from-sky-600 to-sky-500 text-white',
+  'LPG (Liquefied Petroleum Gas)': 'from-blue-600 to-indigo-500 text-white',
+  'LPFO / Heavy Fuel Oil': 'from-rose-600 to-red-500 text-white',
+  'Lubricants & Base Oils': 'from-purple-600 to-indigo-600 text-white',
 }
 
 function DangoteProductsDashboard() {
@@ -121,7 +121,7 @@ function DangoteProductsDashboard() {
  >
                   <CardContent className="pt-6">
                     <div className="flex items-start justify-between mb-1"><h3 className="text-base font-semibold text-foreground leading-snug pr-2">{product.name}</h3><Badge variant="outline" className="font-mono text-xs shrink-0">{product.sku}</Badge></div>
-                    <div className="flex items-center gap-2 mb-4"><div className={`size-6 rounded-md ${categoryColors[product.category] || 'from-muted to-muted'} flex items-center justify-center`}><Layers className="size-3 text-white" /></div><span className="text-xs text-muted-foreground">{product.category}</span></div>
+                    <div className="flex items-center gap-2 mb-4"><div className={`size-6 rounded-md bg-gradient-to-r ${categoryColors[product.category] || 'bg-muted text-muted-foreground'} flex items-center justify-center`}><Layers className="size-3" /></div><span className="text-xs text-muted-foreground">{product.category}</span></div>
                     {product.gradeClass && <div className="flex items-center justify-between pt-3 border-t border-border"><div className="flex items-center gap-1.5"><Flame className="size-3.5 text-muted-foreground" /><span className="text-xs text-muted-foreground">Grade</span></div><Badge className="bg-success text-success-foreground text-xs">{product.gradeClass}</Badge></div>}
                     <div className="flex gap-2 pt-4 mt-4 border-t border-border">
                       <Button

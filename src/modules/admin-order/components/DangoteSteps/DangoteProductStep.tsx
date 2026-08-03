@@ -12,13 +12,13 @@ interface DangoteProductStepProps {
 }
 
 const categoryColors: Record<string, string> = {
-  'PMS (Premium Motor Spirit)': 'from-primary to-[#7ed3bf]',
-  'AGO (Automotive Gas Oil)': 'from-success to-[#6ec89a]',
-  'DPK (Dual Purpose Kerosene)': 'from-warning to-warning',
-  'Jet A-1 (Aviation Fuel)': 'from-muted to-muted',
-  'LPG (Liquefied Petroleum Gas)': 'from-info to-muted',
-  'LPFO / Heavy Fuel Oil': 'from-destructive to-destructive',
-  'Lubricants & Base Oils': 'from-muted to-muted',
+  'PMS (Premium Motor Spirit)': 'from-primary to-primary/80 text-primary-foreground',
+  'AGO (Automotive Gas Oil)': 'from-emerald-600 to-emerald-500 text-white',
+  'DPK (Dual Purpose Kerosene)': 'from-amber-500 to-amber-400 text-white',
+  'Jet A-1 (Aviation Fuel)': 'from-sky-600 to-sky-500 text-white',
+  'LPG (Liquefied Petroleum Gas)': 'from-blue-600 to-indigo-500 text-white',
+  'LPFO / Heavy Fuel Oil': 'from-rose-600 to-red-500 text-white',
+  'Lubricants & Base Oils': 'from-purple-600 to-indigo-600 text-white',
 }
 
 export function DangoteProductStep({ wizard }: DangoteProductStepProps) {
@@ -69,8 +69,8 @@ export function DangoteProductStep({ wizard }: DangoteProductStepProps) {
                     <Badge variant="outline" className="text-xs uppercase font-mono">{product.sku}</Badge>
                   </div>
                   <div className="flex items-center gap-2 mt-1.5">
-                    <div className={`size-5 rounded-md ${categoryColors[product.category] || 'from-muted to-muted'} flex items-center justify-center`}>
-                      <Layers className="size-2.5 text-white" />
+                    <div className={`size-5 rounded-md bg-gradient-to-r ${categoryColors[product.category] || 'bg-muted text-muted-foreground'} flex items-center justify-center`}>
+                      <Layers className="size-2.5" />
                     </div>
                     <span className="text-xs text-muted-foreground">{product.category}</span>
                   </div>
