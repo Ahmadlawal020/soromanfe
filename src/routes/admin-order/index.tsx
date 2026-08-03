@@ -111,17 +111,54 @@ const LPG_GROUPS: Group[] = [
 ]
 
 /** One step's fields inside a grouped screen, with its own quiet heading. */
-function Section({ label, children }: { label?: string; children: React.ReactNode }) {
+function Section({
+  label,
+  index,
+  children,
+}: {
+  label?: string
+  /** 1-based position, shown as a rail number when a screen holds several. */
+  index?: number
+  children: React.ReactNode
+}) {
   return (
     <div className="space-y-4">
       {label && (
-        <p className={cn(MICRO, 'border-b border-foreground/10 pb-2 text-muted-foreground')}>
-          {label}
-        </p>
+        <div className="flex items-center gap-2.5 border-b border-foreground/10 pb-2">
+          {index != null && (
+            <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground">
+              {index}
+            </span>
+          )}
+          <p className={cn(MICRO, 'text-muted-foreground')}>{label}</p>
+        </div>
       )}
       {children}
     </div>
   )
+}
+
+/**
+ * How many of a screen's steps to show.
+ *
+ * A grouped screen used to render every section at once, so "Order details"
+ * opened as a wall of depot, product, quantity and delivery with nothing
+ * filled in. Instead each section appears once the one above it validates —
+ * the same rule the Continue button already enforces, just applied earlier so
+ * the form grows as it is answered.
+ *
+ * Purely presentational: nothing here changes what is submitted.
+ */
+function useRevealed(
+  wizard: { validateStep: (n: number) => string | null },
+  steps: number[],
+) {
+  let count = 1
+  for (const s of steps) {
+    if (wizard.validateStep(s)) break
+    if (count < steps.length) count += 1
+  }
+  return steps.slice(0, count)
 }
 
 /** Shared group navigation — validates every step on screen before advancing. */
@@ -168,6 +205,7 @@ function DepotFlow() {
   const wizard = useOrderWizard()
   const { step, error, handlePlaceOrder, createOrderMutation } = wizard
   const nav = useGroupNav(wizard, DEPOT_GROUPS)
+  const revealed = useRevealed(wizard, nav.group.steps)
   const done = step > 5
 
   if (done) {
@@ -197,15 +235,22 @@ function DepotFlow() {
         nextPending={createOrderMutation.isPending}
       >
         <div className="space-y-8">
-          {nav.group.steps.map((s, i) => (
-            <Section key={s} label={nav.group.sections?.[i]}>
+          {revealed.map((s) => {
+            const i = nav.group.steps.indexOf(s)
+            return (
+            <Section
+              key={s}
+              label={nav.group.sections?.[i]}
+              index={nav.group.sections ? i + 1 : undefined}
+            >
               {s === 1 && <CustomerStep wizard={wizard} />}
               {s === 2 && <LocationDepotStep wizard={wizard} />}
               {s === 3 && <ProductStep wizard={wizard} />}
               {s === 4 && <DeliveryStep wizard={wizard} />}
               {s === 5 && <ReviewStep wizard={wizard} />}
             </Section>
-          ))}
+            )
+          })}
         </div>
       </WizardShell>
     </div>
@@ -216,6 +261,7 @@ function DangoteFlow() {
   const wizard = useDangoteOrderWizard()
   const { step, error, handlePlaceOrder, createDangoteOrderRequestMutation } = wizard
   const nav = useGroupNav(wizard, DANGOTE_GROUPS)
+  const revealed = useRevealed(wizard, nav.group.steps)
   const done = step > 6
 
   if (done) {
@@ -245,8 +291,14 @@ function DangoteFlow() {
         nextPending={createDangoteOrderRequestMutation?.isPending}
       >
         <div className="space-y-8">
-          {nav.group.steps.map((s, i) => (
-            <Section key={s} label={nav.group.sections?.[i]}>
+          {revealed.map((s) => {
+            const i = nav.group.steps.indexOf(s)
+            return (
+            <Section
+              key={s}
+              label={nav.group.sections?.[i]}
+              index={nav.group.sections ? i + 1 : undefined}
+            >
               {s === 1 && <DangoteCustomerStep wizard={wizard} />}
               {s === 2 && <DangoteCompanyLicenseStep wizard={wizard} />}
               {s === 3 && <DangoteProductStep wizard={wizard} />}
@@ -254,7 +306,8 @@ function DangoteFlow() {
               {s === 5 && <DangoteDeliveryStep wizard={wizard} />}
               {s === 6 && <DangoteReviewStep wizard={wizard} />}
             </Section>
-          ))}
+            )
+          })}
         </div>
       </WizardShell>
     </div>
@@ -265,6 +318,7 @@ function LpgFlow() {
   const wizard = useLpgOrderWizard()
   const { step, error, handlePlaceOrder, createLpgOrderRequestMutation } = wizard
   const nav = useGroupNav(wizard, LPG_GROUPS)
+  const revealed = useRevealed(wizard, nav.group.steps)
   const done = step > 5
 
   if (done) {
@@ -294,15 +348,22 @@ function LpgFlow() {
         nextPending={createLpgOrderRequestMutation?.isPending}
       >
         <div className="space-y-8">
-          {nav.group.steps.map((s, i) => (
-            <Section key={s} label={nav.group.sections?.[i]}>
+          {revealed.map((s) => {
+            const i = nav.group.steps.indexOf(s)
+            return (
+            <Section
+              key={s}
+              label={nav.group.sections?.[i]}
+              index={nav.group.sections ? i + 1 : undefined}
+            >
               {s === 1 && <LpgCustomerStep wizard={wizard} />}
               {s === 2 && <LpgStationStep wizard={wizard} />}
               {s === 3 && <LpgCylinderStep wizard={wizard} />}
               {s === 4 && <LpgDeliveryStep wizard={wizard} />}
               {s === 5 && <LpgReviewStep wizard={wizard} />}
             </Section>
-          ))}
+            )
+          })}
         </div>
       </WizardShell>
     </div>

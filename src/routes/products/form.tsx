@@ -26,12 +26,12 @@ export const Route = createFileRoute("/products/form")({
 });
 
 const categoriesList = [
-  "PMS (Premium Motor Spirit)",
-  "AGO (Automotive Gas Oil)",
-  "DPK (Dual Purpose Kerosene)",
-  "Jet A-1 (Aviation Fuel)",
-  "LPG (Liquefied Petroleum Gas)",
-  "LPFO / Heavy Fuel Oil",
+  "Petrol",
+  "Diesel",
+  // "Kerosene",
+  // "Jet A-1 (Aviation Fuel)",
+  "Cooking Gas",
+  // "LPFO / Heavy Fuel Oil",
   "Lubricants & Base Oils",
 ];
 const hazardClassesList = [
@@ -49,12 +49,12 @@ const unitsList = [
 ];
 
 const categoryLegacyMap: Record<string, string> = {
-  "Motor Fuel": "PMS (Premium Motor Spirit)",
-  "Diesel Fuel": "AGO (Automotive Gas Oil)",
-  Kerosene: "DPK (Dual Purpose Kerosene)",
-  "Cooking Gas": "LPG (Liquefied Petroleum Gas)",
-  "Industrial Fuel": "LPFO / Heavy Fuel Oil",
-  Lubricants: "Lubricants & Base Oils",
+  "Motor Fuel": "Petrol",
+  "Diesel Fuel": "Diesel",
+  // "Kerosene": "Kerosene",
+  "Cooking Gas": "Cooking Gas",
+  // "Industrial Fuel": "LPFO / Heavy Fuel Oil",
+  "Lubricants": "Lubricants & Base Oils",
 };
 
 function ProductForm() {
@@ -69,7 +69,7 @@ function ProductForm() {
   const [formData, setFormData] = useState({
     name: "",
     sku: "",
-    category: "PMS (Premium Motor Spirit)",
+    category: "PMS",
     productType: 'soroman',
     gradeClass: "",
     description: "",
