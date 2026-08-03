@@ -95,7 +95,7 @@ export function DangoteCompanyLicenseStep({ wizard }: DangoteCompanyLicenseStepP
             <div className="space-y-1.5">
               <Label>Company Name *</Label>
               <Input
-                placeholder="e.g. Dangote Industries Ltd"
+                placeholder="e.g. Danlami Industries Ltd"
                 value={newLicenseForm.companyName}
                 onChange={(e) => setNewLicenseForm({ ...newLicenseForm, companyName: e.target.value })}
               />
@@ -135,9 +135,8 @@ export function DangoteCompanyLicenseStep({ wizard }: DangoteCompanyLicenseStepP
               </div>
             ) : (
               <div
-                className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
- isUploading ? 'border-primary/50 bg-primary/5' : 'hover:border-primary/50'
- }`}
+                className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${isUploading ? 'border-primary/50 bg-primary/5' : 'hover:border-primary/50'
+                  }`}
                 onClick={() => { if (!isUploading) fileInputRef.current?.click() }}
               >
                 {isUploading ? (
@@ -208,17 +207,15 @@ export function DangoteCompanyLicenseStep({ wizard }: DangoteCompanyLicenseStepP
                     <div
                       key={license.id}
                       onClick={() => setSelectedLicense(license)}
-                      className={`p-4 rounded-xl border cursor-pointer transition-all duration-200 flex flex-col gap-3 ${
- isSelected
- ? 'border-primary bg-primary/5 '
- : 'hover:bg-muted/50 hover:border-muted-foreground/20 border-border'
- }`}
+                      className={`p-4 rounded-xl border cursor-pointer transition-all duration-200 flex flex-col gap-3 ${isSelected
+                          ? 'border-primary bg-primary/5 '
+                          : 'hover:bg-muted/50 hover:border-muted-foreground/20 border-border'
+                        }`}
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex items-center gap-3 min-w-0">
-                          <div className={`size-10 rounded-lg flex items-center justify-center shrink-0 ${
- isSelected ? 'bg-primary/20' : 'bg-muted'
- }`}>
+                          <div className={`size-10 rounded-lg flex items-center justify-center shrink-0 ${isSelected ? 'bg-primary/20' : 'bg-muted'
+                            }`}>
                             <FileText className={`size-5 ${isSelected ? 'text-primary' : 'text-muted-foreground'}`} />
                           </div>
                           <div className="min-w-0">

@@ -116,7 +116,7 @@ function OrdersDashboard() {
       if (pfiFilter !== ALL && o.pfiNumber !== pfiFilter) return false
       if (!q) return true
       return [
-        o.orderNumber, o.customerName, o.customerCompanyName, o.customerPhone,
+        o.orderNumber, o.customerName, o.companyName, o.customerCompanyName, o.customerPhone,
         o.depotName, o.state, o.productName, o.pfiNumber, o.id, o._id,
       ].some((f) => String(f ?? '').toLowerCase().includes(q))
     })
@@ -412,9 +412,9 @@ function OrdersDashboard() {
                               </TableCell>
                               <TableCell>
                                 <span className="block max-w-[14rem] truncate">{o.customerName || '—'}</span>
-                                {o.customerCompanyName && (
+                                {(o.companyName || o.customerCompanyName) && (
                                   <span className="block max-w-[14rem] truncate text-xs text-muted-foreground">
-                                    {o.customerCompanyName}
+                                    {o.companyName || o.customerCompanyName}
                                   </span>
                                 )}
                               </TableCell>

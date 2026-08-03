@@ -66,7 +66,7 @@ export function OrderDetailsDialog({
             <Row label="Name" value={order.customerName} />
             <Row label="Phone" value={order.customerPhone} />
             <Row label="Email" value={order.customerEmail} />
-            <Row label="Company" value={order.customerCompanyName} />
+            <Row label="Company" value={order.companyName || order.customerCompanyName} />
           </Section>
 
           <Section title="Order">

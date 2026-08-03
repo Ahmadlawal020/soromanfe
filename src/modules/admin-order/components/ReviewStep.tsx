@@ -19,6 +19,7 @@ interface ReviewStepProps {
 export function ReviewStep({ wizard }: ReviewStepProps) {
   const {
     selectedCustomer,
+    orderCompanyName,
     selectedState,
     selectedDepot,
     selectedProduct,
@@ -47,8 +48,8 @@ export function ReviewStep({ wizard }: ReviewStepProps) {
             <span className="font-semibold text-foreground">{selectedCustomer?.name}</span>
           </div>
           <div>
-            <span className="text-xs text-muted-foreground block">Company</span>
-            <span className="font-semibold text-foreground">{selectedCustomer?.companyName || '—'}</span>
+            <span className="text-xs text-muted-foreground block">Buying For Company</span>
+            <span className="font-semibold text-foreground">{orderCompanyName}</span>
           </div>
           <div>
             <span className="text-xs text-muted-foreground block">Phone</span>

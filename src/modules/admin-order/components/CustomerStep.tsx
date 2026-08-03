@@ -27,6 +27,8 @@ export function CustomerStep({ wizard }: CustomerStepProps) {
     setSelectedCustomer,
     isRegisteringCustomer,
     setIsRegisteringCustomer,
+    orderCompanyName,
+    setOrderCompanyName,
     newCustomerForm,
     setNewCustomerForm,
     customers,
@@ -86,6 +88,18 @@ export function CustomerStep({ wizard }: CustomerStepProps) {
                     </span>
                   </div>
                 </div>
+
+                <div className="pt-2 border-t border-border">
+                  <div className="space-y-1.5">
+                    <Label>Company Name *</Label>
+                    <Input
+                      placeholder="e.g. vinha Industries Ltd"
+                      value={orderCompanyName}
+                      onChange={(e) => setOrderCompanyName(e.target.value)}
+                    />
+                    <p className="text-xs text-muted-foreground">The company the customer is buying for</p>
+                  </div>
+                </div>
               </div>
             </>
           ) : (
@@ -99,12 +113,12 @@ export function CustomerStep({ wizard }: CustomerStepProps) {
                     onChange={(e) => { setCustomerSearch(e.target.value); setSelectedCustomer(null); setIsSearchOpen(true); }}
                     className="pl-10"
                     autoFocus
- />
+                  />
                   {customerSearch && (
                     <button
                       onClick={() => { setCustomerSearch(''); setSelectedCustomer(null); setIsSearchOpen(false); }}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors duration-250 ease-luxe"
- >
+                    >
                       &times;
                     </button>
                   )}
@@ -153,7 +167,7 @@ export function CustomerStep({ wizard }: CustomerStepProps) {
                         key={c._id}
                         onClick={() => { setSelectedCustomer(c); setIsSearchOpen(false); setCustomerSearch(''); }}
                         className="p-3 sm:p-4 rounded-xl border cursor-pointer transition-all duration-200 flex items-center gap-3 hover:bg-muted/50 hover:border-muted-foreground/20 border-border ease-luxe"
- >
+                      >
                         <div className="bg-accent size-10 rounded-full flex items-center justify-center text-white text-sm font-semibold shrink-0">
                           {c.name?.charAt(0)?.toUpperCase() || '?'}
                         </div>
@@ -183,7 +197,7 @@ export function CustomerStep({ wizard }: CustomerStepProps) {
                         className="text-xs text-primary"
                         onClick={() => setSearchPage(prev => prev + 1)}
                         disabled={isSearchingCustomers}
- >
+                      >
                         {isSearchingCustomers ? (
                           <><Loader2 className="size-3 animate-spin mr-1" /> Loading...</>
                         ) : (
@@ -216,7 +230,7 @@ export function CustomerStep({ wizard }: CustomerStepProps) {
                 placeholder="e.g. Ahmad Oluwafemi"
                 value={newCustomerForm.name}
                 onChange={(e) => setNewCustomerForm({ ...newCustomerForm, name: e.target.value })}
- />
+              />
             </div>
             <div className="space-y-1.5">
               <Label>Phone Number *</Label>
@@ -227,7 +241,7 @@ export function CustomerStep({ wizard }: CustomerStepProps) {
                 placeholder="e.g. 08012345678"
                 value={newCustomerForm.phone}
                 onChange={(e) => setNewCustomerForm({ ...newCustomerForm, phone: e.target.value })}
- />
+              />
             </div>
             <div className="space-y-1.5">
               <Label>Email Address</Label>
@@ -236,7 +250,7 @@ export function CustomerStep({ wizard }: CustomerStepProps) {
                 placeholder="e.g. customer@example.com"
                 value={newCustomerForm.email}
                 onChange={(e) => setNewCustomerForm({ ...newCustomerForm, email: e.target.value })}
- />
+              />
             </div>
             <div className="space-y-1.5">
               <Label>Company Name</Label>
@@ -244,7 +258,7 @@ export function CustomerStep({ wizard }: CustomerStepProps) {
                 placeholder="e.g. Ahmad Logistics Ltd"
                 value={newCustomerForm.companyName}
                 onChange={(e) => setNewCustomerForm({ ...newCustomerForm, companyName: e.target.value })}
- />
+              />
             </div>
             <div className="space-y-1.5 sm:col-span-2">
               <Label>Address</Label>
@@ -252,17 +266,17 @@ export function CustomerStep({ wizard }: CustomerStepProps) {
                 placeholder="e.g. 12 Link Road, Ikeja, Lagos"
                 value={newCustomerForm.address}
                 onChange={(e) => setNewCustomerForm({ ...newCustomerForm, address: e.target.value })}
- />
+              />
             </div>
           </div>
 
           <div className="flex justify-end gap-2 border-t border-border pt-3">
             <Button variant="outline" onClick={() => setIsRegisteringCustomer(false)}>Cancel</Button>
             <Button
-              
+
               onClick={handleRegisterCustomer}
               disabled={createCustomerMutation.isPending}
- >
+            >
               {createCustomerMutation.isPending ? <Loader2 className="size-4 animate-spin mr-2" /> : null}
               Register & Proceed
             </Button>

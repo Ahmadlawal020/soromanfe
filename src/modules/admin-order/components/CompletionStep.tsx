@@ -24,6 +24,7 @@ export function CompletionStep({ wizard }: CompletionStepProps) {
   const {
     placedOrder,
     paymentInfo,
+    orderCompanyName,
     copied,
     setCopied,
     resetWizard,
@@ -138,10 +139,14 @@ export function CompletionStep({ wizard }: CompletionStepProps) {
           <Package className="size-4 text-primary" />
           <span className="text-xs font-semibold text-muted-foreground uppercase">Order Summary</span>
         </div>
-        <div className="p-4 grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+        <div className="p-4 grid grid-cols-2 sm:grid-cols-5 gap-4 text-sm">
           <div>
             <span className="text-xs text-muted-foreground block">Product</span>
             <span className="font-semibold text-foreground">{placedOrder.productName || 'N/A'}</span>
+          </div>
+          <div>
+            <span className="text-xs text-muted-foreground block">Company</span>
+            <span className="font-semibold text-foreground">{orderCompanyName || 'N/A'}</span>
           </div>
           <div>
             <span className="text-xs text-muted-foreground block">Quantity</span>

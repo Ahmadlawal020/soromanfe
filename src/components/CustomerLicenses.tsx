@@ -330,7 +330,7 @@ export function CustomerLicenses({ customerId }: CustomerLicensesProps) {
                       return n
                     })
                 }}
-                placeholder="e.g. Dangote Industries Ltd"
+                placeholder="e.g. vinha Industries Ltd"
                 className={errors.companyName ? 'border-destructive' : ''}
               />
               {errors.companyName && (
@@ -384,11 +384,10 @@ export function CustomerLicenses({ customerId }: CustomerLicensesProps) {
                   </div>
                 ) : (
                   <div
-                    className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
-                      isUploading
+                    className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${isUploading
                         ? 'border-primary/50 bg-primary/5'
                         : 'hover:border-primary/50'
-                    }`}
+                      }`}
                     onClick={() => {
                       if (!isUploading) fileInputRef.current?.click()
                     }}

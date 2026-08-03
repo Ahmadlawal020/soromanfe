@@ -253,12 +253,12 @@ function RouteComponent() {
               <p className="text-xs text-muted-foreground font-normal uppercase">Client Name</p>
               <p className="text-sm font-semibold text-foreground mt-0.5">{order.customerName || order.customer?.name || 'N/A'}</p>
             </div>
-            {(order.customerCompanyName || order.customer?.companyName) && (
+            {(order.companyName || order.customerCompanyName || order.customer?.companyName) && (
               <div>
                 <p className="text-xs text-muted-foreground font-normal uppercase">Company</p>
                 <p className="text-sm text-foreground mt-0.5 flex items-center gap-1.5">
                   <Building2 className="size-3.5 text-muted-foreground" />
-                  {order.customerCompanyName || order.customer?.companyName}
+                  {order.companyName || order.customerCompanyName || order.customer?.companyName}
                 </p>
               </div>
             )}

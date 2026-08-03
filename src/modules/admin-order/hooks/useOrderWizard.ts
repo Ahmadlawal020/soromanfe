@@ -18,6 +18,7 @@ export function useOrderWizard() {
   const [searchPage, setSearchPage] = useState(1)
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null)
   const [isRegisteringCustomer, setIsRegisteringCustomer] = useState(false)
+  const [orderCompanyName, setOrderCompanyName] = useState('')
   const [newCustomerForm, setNewCustomerForm] = useState({
     name: '',
     email: '',
@@ -105,6 +106,7 @@ export function useOrderWizard() {
         price: Number(selectedProduct.currentPrice),
         totalAmount,
         deliveryType,
+        companyName: orderCompanyName.trim(),
       }
       const response = await createOrderMutation.mutateAsync(payload)
       if (response.success && response.data?.order) {
@@ -127,6 +129,7 @@ export function useOrderWizard() {
   const validateStep = (target: number): string | null => {
     if (target === 1) {
       if (!selectedCustomer) return 'Please select an existing customer or register a new one'
+      if (!orderCompanyName.trim()) return 'Please enter the company name'
       return null
     }
     if (target === 2) {
@@ -176,6 +179,7 @@ export function useOrderWizard() {
     setSearchPage(1)
     setSelectedCustomer(null)
     setIsRegisteringCustomer(false)
+    setOrderCompanyName('')
     setSelectedState('')
     setSelectedDepot(null)
     setSelectedProduct(null)
@@ -206,6 +210,8 @@ export function useOrderWizard() {
     setSelectedCustomer,
     isRegisteringCustomer,
     setIsRegisteringCustomer,
+    orderCompanyName,
+    setOrderCompanyName,
     newCustomerForm,
     setNewCustomerForm,
     customers,
