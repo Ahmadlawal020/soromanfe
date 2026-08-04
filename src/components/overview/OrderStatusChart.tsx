@@ -60,7 +60,7 @@ export function OrderStatusChart({ data, total }: OrderStatusChartProps) {
               borderRadius: '8px',
               fontSize: '12px',
             }}
-            formatter={(value: number, name: string) => [`${value} orders`, name]}
+            formatter={(value, name) => [`${value} orders`, name]}
           />
         </PieChart>
       </ResponsiveContainer>

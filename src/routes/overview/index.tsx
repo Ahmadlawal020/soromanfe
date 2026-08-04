@@ -98,9 +98,9 @@ function OverviewDashboard() {
   const fleetUtilization = fleet.total > 0 ? Math.round(((fleet.inTransit || 0) / fleet.total) * 100) : 0
   const totalOutstanding = outstanding.totalOutstanding || 0
 
-  const activePfis = pfi.byStatus?.filter((s) => s.status === 'active') || []
-  const totalRemainingLitres = activePfis.reduce((sum, p) => sum + (p.remainingLitres || 0), 0)
-  const totalPfiValue = activePfis.reduce((sum, p) => sum + Number(p.totalValue || 0), 0)
+  const activePfis = pfi.byStatus?.filter((s: { status: string }) => s.status === 'active') || []
+  const totalRemainingLitres = activePfis.reduce((sum: number, p: { remainingLitres?: number }) => sum + (p.remainingLitres || 0), 0)
+  const totalPfiValue = activePfis.reduce((sum: number, p: { totalValue?: number }) => sum + Number(p.totalValue || 0), 0)
 
   const fleetChartData = [
     { name: 'In Transit', value: fleet.inTransit || 0, color: 'var(--chart-1)' },
@@ -108,7 +108,7 @@ function OverviewDashboard() {
     { name: 'Maintenance', value: fleet.maintenance || 0, color: 'var(--destructive)' },
   ]
 
-  const orderStatusData = orderStatus.map((s) => ({
+  const orderStatusData = orderStatus.map((s: { name: string; value: number }) => ({
     name: s.name,
     value: s.value,
     color: '',
@@ -286,7 +286,7 @@ function OverviewDashboard() {
               <span className="text-sm">Inventory value</span>
               <span className="text-sm font-semibold tabular-nums">{formatCurrency(totalPfiValue)}</span>
             </div>
-            {(pfi.byStatus || []).map((s) => (
+            {(pfi.byStatus || []).map((s: { status: string; pfiCount: number; remainingLitres?: number }) => (
               <div key={s.status} className="flex items-center justify-between px-6 py-3.5">
                 <span className="text-sm capitalize">{s.status} PFIs</span>
                 <span className="text-sm font-semibold tabular-nums">
@@ -312,7 +312,7 @@ function OverviewDashboard() {
           {outstanding.customers?.length > 0 ? (
             <>
               <div className="divide-y divide-foreground/10">
-                {outstanding.customers.slice(0, 5).map((c, i) => (
+                {outstanding.customers.slice(0, 5).map((c: { customerName: string; customerType?: string; outstanding?: number }, i: number) => (
                   <div key={i} className="flex items-center justify-between px-6 py-3.5">
                     <div className="min-w-0 flex-1">
                       <span className="block truncate text-sm">{c.customerName}</span>
@@ -357,7 +357,7 @@ function OverviewDashboard() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {depotLeaderboard.map((d, i) => (
+              {depotLeaderboard.map((d: { id: string; name: string; orderCount: number; volume: number; revenue: number }, i: number) => (
                 <TableRow key={d.id}>
                   <TableCell className="font-semibold tabular-nums">{i + 1}</TableCell>
                   <TableCell className="font-medium">{d.name}</TableCell>
@@ -403,7 +403,7 @@ function OverviewDashboard() {
               <span className="text-sm">Paid value</span>
               <span className="text-sm font-semibold tabular-nums text-accent">{formatCurrency(dangote.paidValue)}</span>
             </div>
-            {(dangote.byStatus || []).map((s) => (
+            {(dangote.byStatus || []).map((s: { status: string; count: number; total: number }) => (
               <div key={s.status} className="flex items-center justify-between px-6 py-3.5">
                 <span className="text-sm">{s.status}</span>
                 <span className="text-sm font-semibold tabular-nums">
@@ -448,7 +448,7 @@ function OverviewDashboard() {
                 {lpg.stations?.active || 0} active / {lpg.stations?.total || 0} total
               </span>
             </div>
-            {(lpg.byStatus || []).map((s) => (
+            {(lpg.byStatus || []).map((s: { status: string; count: number; total: number }) => (
               <div key={s.status} className="flex items-center justify-between px-6 py-3.5">
                 <span className="text-sm">{s.status}</span>
                 <span className="text-sm font-semibold tabular-nums">

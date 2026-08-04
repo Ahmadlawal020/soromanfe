@@ -79,9 +79,9 @@ export function RevenueTrendChart({ data }: RevenueTrendChartProps) {
             borderRadius: '8px',
             fontSize: '12px',
           }}
-          labelFormatter={formatShortDate}
-          formatter={(value: number, name: string) => [
-            formatCurrency(value),
+          labelFormatter={(label) => formatShortDate(label as string)}
+          formatter={(value, name) => [
+            formatCurrency(value as number),
             name === 'orders' ? 'Orders' : name === 'offline' ? 'Offline Sales' : 'Delivery',
           ]}
         />

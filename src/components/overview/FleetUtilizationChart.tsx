@@ -38,7 +38,7 @@ export function FleetUtilizationChart({ data }: FleetUtilizationChartProps) {
             borderRadius: '8px',
             fontSize: '12px',
           }}
-          formatter={(value: number) => [`${value} trucks`]}
+          formatter={(value) => [`${value} trucks`]}
         />
         <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={24}>
           {data.map((entry, i) => (
