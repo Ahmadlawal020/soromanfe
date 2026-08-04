@@ -22,7 +22,10 @@ export const Route = createFileRoute('/depots/')({
 })
 
 export interface DepotItem {
-  id: string; name: string; code: string; address: string; city: string; state: string; country: string; postcode: string; maxCapacity?: number; staffIds?: Array<{ _id: string; firstName: string; surname: string; otherNames?: string; email: string; profilePicture?: { url: string | null } }>; staff?: Array<{ id: string | number; adminId: string | number; firstName: string; surname: string; email: string; _id?: string }>; status: 'Active' | 'Maintenance' | 'High Capacity'; establishedYear: string; productCapacities?: Array<{ product: { _id: string; id?: string; name: string; sku: string; category: string }; capacity: number; availableStock?: number }>; productPrices?: Array<{ product: { _id: string; id?: string; name: string; sku: string; category: string }; currentPrice: number; priceHistory: Array<{ price: number; setAt: string }> }>
+  id: string; name: string; code: string; address: string; city: string; state: string; country: string; postcode: string; maxCapacity?: number; staffIds?: Array<{ _id: string; firstName: string; surname: string; otherNames?: string; email: string; profilePicture?: { url: string | null } }>; staff?: Array<{ id: string | number; adminId: string | number; firstName: string; surname: string; email: string; _id?: string }>; status: 'Active' | 'Maintenance' | 'High Capacity'; establishedYear: string; productCapacities?: Array<{ product: { _id: string; id?: string; name: string; sku: string; category: string }; capacity: number; availableStock?: number }>; productPrices?: Array<{ product: { _id: string; id?: string; name: string; sku: string; category: string }; currentPrice: number; priceHistory: Array<{ price: number; setAt: string }> }>;
+  paystackSubaccountCode?: string;
+  subaccountActive?: boolean;
+  subaccountSplitPercentage?: number;
 }
 
 function StatusBadge({ status }: { status: string }) {

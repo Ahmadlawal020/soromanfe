@@ -194,6 +194,9 @@ export interface DepotItem {
     surname: string | null
     email: string | null
   }[]
+  paystackSubaccountCode?: string
+  subaccountActive?: boolean
+  subaccountSplitPercentage?: number
 }
 
 export interface LpgStationCylinder {
