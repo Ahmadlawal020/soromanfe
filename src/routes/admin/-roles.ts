@@ -79,9 +79,20 @@ export const roleColorMap: Record<number, string> = {
   [Roles.IT_COMPLIANCE]: 'text-zinc-600',
 };
 
-// Stub — in production this would read from auth context / token
+// Reads the current user's roles from the auth store.
+// Falls back to empty array if no user is logged in.
 export function getCurrentUserRoles(): number[] {
-  return [Roles.SUPERADMIN];
+  try {
+    const stored = localStorage.getItem('dashboard-auth-storage')
+    if (stored) {
+      const parsed = JSON.parse(stored)
+      const roles = parsed?.state?.user?.roles
+      if (Array.isArray(roles)) return roles.map(Number).filter((n: number) => !isNaN(n))
+    }
+  } catch {
+    // Ignore parse errors
+  }
+  return []
 }
 
 export const LOCATION_CHOICES = [

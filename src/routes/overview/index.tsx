@@ -1,161 +1,475 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useState } from 'react'
+import { createFileRoute } from '@tanstack/react-router'
 import { PageHeader } from '#/components/PageHeader'
-import { Button } from '#/components/ui/button'
-import { StatusChip, LiveDot } from '#/components/ui/status-chip'
 import { StatCard, StatCardGrid } from '#/components/ui/stat-card'
+import { StatusChip, LiveDot } from '#/components/ui/status-chip'
 import { HoverArrowLink } from '#/components/ui/hover-arrow-link'
-import {
-  Users,
-  UserCheck,
-  Calendar,
-  Building,
-  GraduationCap,
-  TrendingUp,
-  Shield,
-  Loader2,
-} from 'lucide-react'
+import { Skeleton } from '#/components/ui/skeleton'
+import { PeriodFilter, type Period } from '#/components/overview/PeriodFilter'
+import { RevenueTrendChart } from '#/components/overview/RevenueTrendChart'
+import { OrderStatusChart } from '#/components/overview/OrderStatusChart'
+import { FleetUtilizationChart } from '#/components/overview/FleetUtilizationChart'
+import { ActivityFeed } from '#/components/overview/ActivityFeed'
+import { useDashboardOverview } from '#/lib/hooks/useDashboard'
+import { useAuthStore } from '#/modules/auth'
+import { formatCurrency, formatLitres, formatNumber, formatPercent } from '#/lib/format'
 import { cn } from '#/lib/utils'
 import { PANEL, MICRO, PANEL_RAIL, PANEL_BODY, PANEL_FOOTER } from '#/lib/panel'
-import { useDashboardStats } from '#/lib/hooks/useDashboard'
-import { useAuthStore } from '#/modules/auth'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '#/components/ui/table'
+import {
+  DollarSign,
+  ShoppingCart,
+  Users,
+  Truck,
+  AlertTriangle,
+  Package,
+  Flame,
+} from 'lucide-react'
 
 export const Route = createFileRoute('/overview/')({
   component: OverviewDashboard,
 })
 
-/** Trend-aware description line for a stat tile. */
-function Meta({ text, trend }: { text: string; trend?: boolean }) {
+function PanelSkeleton() {
   return (
-    <span className="flex items-center gap-1">
-      {trend && <TrendingUp className="size-3 text-accent" />}
-      {text}
-    </span>
+    <div className={cn(PANEL, 'p-6')}>
+      <Skeleton className="mb-4 h-4 w-32" />
+      <Skeleton className="h-48 w-full" />
+    </div>
   )
 }
 
 function OverviewDashboard() {
-  const navigate = useNavigate()
-  const { data: stats, isLoading } = useDashboardStats()
+  const [period, setPeriod] = useState<Period>('month')
+  const { data, isLoading } = useDashboardOverview(period)
   const user = useAuthStore((s) => s.user)
-
-  const truckStats = stats?.trucks || { total: 0, inTransit: 0, idle: 0, maintenance: 0 }
-  const driverStats = stats?.drivers || { total: 0, active: 0, onTrip: 0, offDuty: 0 }
-  const depotStats = stats?.depots || { total: 0 }
-  const productStats = stats?.products || { total: 0, categories: 0 }
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-24" role="status" aria-label="Loading">
-        <Loader2 className="size-6 animate-spin text-accent" />
+      <div className="animate-fade-in space-y-6">
+        <PageHeader
+          eyebrow="Overview"
+          title="Dashboard"
+          description={`Welcome back, ${user?.firstName || 'Admin'}.`}
+          actions={<PeriodFilter value={period} onChange={setPeriod} />}
+        />
+        <StatCardGrid count={5}>
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className={cn(PANEL, 'p-4')}>
+              <Skeleton className="mb-2 h-10 w-10 rounded-2xl" />
+              <Skeleton className="mt-5 h-3 w-20" />
+              <Skeleton className="mt-2 h-8 w-28" />
+              <Skeleton className="mt-2 h-3 w-24" />
+            </div>
+          ))}
+        </StatCardGrid>
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <PanelSkeleton />
+          <PanelSkeleton />
+        </div>
       </div>
     )
   }
 
-  const fleetRows = [
-    { label: 'In Transit', count: truckStats.inTransit, fill: 'bg-accent' },
-    { label: 'Idle', count: truckStats.idle, fill: 'bg-warning' },
-    { label: 'Maintenance', count: truckStats.maintenance, fill: 'bg-destructive' },
+  const rev = data?.revenue || {}
+  const orders = data?.orders || { totals: {}, byStatus: [] }
+  const wallet = data?.wallet || { movement: {}, balances: {}, activeHolds: {} }
+  const pfi = data?.pfi || { byStatus: [] }
+  const outstanding = data?.outstanding || { totalOutstanding: 0, customers: [] }
+  const fleet = data?.fleet || { total: 0, inTransit: 0, idle: 0, maintenance: 0 }
+  const drv = data?.drivers || { total: 0, active: 0, onTrip: 0, offDuty: 0 }
+  const cust = data?.customers || { total: 0, newThisPeriod: 0 }
+  const trend = data?.revenueTrend || []
+  const orderStatus = data?.orderStatusBreakdown || []
+  const activity = data?.recentActivity || []
+  const depotLeaderboard = data?.depotLeaderboard || []
+  const dangote = data?.dangote || { totalRequests: 0, totalValue: 0, paidValue: 0, byStatus: [] }
+  const lpg = data?.lpg || { totalOrders: 0, totalValue: 0, paidValue: 0, stations: { total: 0, active: 0 }, byStatus: [] }
+
+  const totalOrders = orders.totals?.orders || 0
+  const combinedRevenue = rev.combined || 0
+  const fleetUtilization = fleet.total > 0 ? Math.round(((fleet.inTransit || 0) / fleet.total) * 100) : 0
+  const totalOutstanding = outstanding.totalOutstanding || 0
+
+  const activePfis = pfi.byStatus?.filter((s) => s.status === 'active') || []
+  const totalRemainingLitres = activePfis.reduce((sum, p) => sum + (p.remainingLitres || 0), 0)
+  const totalPfiValue = activePfis.reduce((sum, p) => sum + Number(p.totalValue || 0), 0)
+
+  const fleetChartData = [
+    { name: 'In Transit', value: fleet.inTransit || 0, color: 'var(--chart-1)' },
+    { name: 'Idle', value: fleet.idle || 0, color: 'var(--chart-4)' },
+    { name: 'Maintenance', value: fleet.maintenance || 0, color: 'var(--destructive)' },
   ]
 
-  const driverRows = [
-    { label: 'Active', count: driverStats.active, tone: 'text-accent' },
-    { label: 'On Trip', count: driverStats.onTrip, tone: 'text-warning' },
-    { label: 'Off Duty', count: driverStats.offDuty, tone: 'text-muted-foreground' },
-  ]
+  const orderStatusData = orderStatus.map((s) => ({
+    name: s.name,
+    value: s.value,
+    color: '',
+  }))
 
   return (
     <div className="animate-fade-in space-y-6">
       <PageHeader
-      eyebrow="Overview"
-      title="Dashboard"
-      description={`Welcome back, {user?.firstName || 'Admin'}. Here&apos;s what&apos;s happening today.`}
-      actions={
-        <>
-          <Button variant="outline" size="sm" onClick={() => navigate({ to: '/fleet-trucks' as any })}>
-          <Users data-icon="inline-start" />
-          View fleet
-          </Button>
-        </>
-      }
-    />
+        eyebrow="Overview"
+        title="Dashboard"
+        description={`Welcome back, ${user?.firstName || 'Admin'}. Here's what's happening ${data?.period?.label?.toLowerCase() || 'this month'}.`}
+        actions={<PeriodFilter value={period} onChange={setPeriod} />}
+      />
 
-      <StatCardGrid count={4}>
-        <StatCard icon={<Users />} label="Total trucks" value={truckStats.total} description={<Meta trend text={`${truckStats.inTransit} in transit`} />} />
-        <StatCard icon={<UserCheck />} label="Active drivers" value={driverStats.active} description={<Meta trend text={`${driverStats.total} total`} />} />
-        <StatCard icon={<Building />} label="Depots" value={depotStats.total} description="All operational" />
-        <StatCard icon={<GraduationCap />} label="Products" value={productStats.total} description={<Meta trend text={`${productStats.categories} categories`} />} />
+      <StatCardGrid count={5}>
+        <StatCard
+          icon={<DollarSign />}
+          label="Revenue"
+          value={formatCurrency(combinedRevenue)}
+          tone="green"
+          description={`${formatCurrency(rev.orders?.total || 0)} from orders`}
+        />
+        <StatCard
+          icon={<ShoppingCart />}
+          label="Orders"
+          value={formatNumber(totalOrders)}
+          tone="blue"
+          description={`${formatCurrency(orders.totals?.paidValue || 0)} collected`}
+        />
+        <StatCard
+          icon={<Users />}
+          label="Active Customers"
+          value={formatNumber(cust.total)}
+          tone="green"
+          description={`${cust.newThisPeriod || 0} new ${data?.period?.label?.toLowerCase() || 'this month'}`}
+        />
+        <StatCard
+          icon={<Truck />}
+          label="Fleet Utilization"
+          value={formatPercent(fleetUtilization)}
+          tone={fleetUtilization > 60 ? 'green' : fleetUtilization > 30 ? 'amber' : 'red'}
+          description={`${fleet.inTransit || 0} of ${fleet.total} in use`}
+        />
+        <StatCard
+          icon={<AlertTriangle />}
+          label="Outstanding"
+          value={formatCurrency(totalOutstanding)}
+          tone={totalOutstanding > 0 ? 'amber' : 'green'}
+          description={`${outstanding.customers?.length || 0} customers owe`}
+        />
       </StatCardGrid>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        {/* Fleet status — header rail, body, footer rail. */}
-        <section className={PANEL} aria-label="Fleet status">
+        <section className={PANEL} aria-label="Revenue trend">
           <div className={PANEL_RAIL}>
-            <span className={MICRO}>Fleet status</span>
+            <span className={MICRO}>Revenue trend</span>
+            <StatusChip tone="accent" size="rail">
+              {data?.period?.label}
+            </StatusChip>
+          </div>
+          <div className={PANEL_BODY}>
+            <RevenueTrendChart data={trend} />
+          </div>
+          <div className={cn(PANEL_FOOTER, 'gap-4')}>
+            <span className="text-xs text-muted-foreground">
+              Orders: <span className="font-semibold text-foreground">{formatCurrency(rev.orders?.total || 0)}</span>
+            </span>
+            <span className="text-xs text-muted-foreground">
+              Offline: <span className="font-semibold text-foreground">{formatCurrency(rev.offlineSales?.total || 0)}</span>
+            </span>
+            <span className="text-xs text-muted-foreground">
+              Delivery: <span className="font-semibold text-foreground">{formatCurrency(rev.deliverySales?.paymentAmount || 0)}</span>
+            </span>
+          </div>
+        </section>
+
+        <section className={PANEL} aria-label="Orders by status">
+          <div className={PANEL_RAIL}>
+            <span className={MICRO}>Orders by status</span>
+          </div>
+          <div className={PANEL_BODY}>
+            <OrderStatusChart data={orderStatusData} total={totalOrders} />
+          </div>
+          <div className={cn(PANEL_FOOTER, 'justify-end')}>
+            <HoverArrowLink to={'/orders' as any}>View all orders</HoverArrowLink>
+          </div>
+        </section>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <section className={PANEL} aria-label="Financial summary">
+          <div className={PANEL_RAIL}>
+            <span className={MICRO}>Financial summary</span>
+          </div>
+          <div className="divide-y divide-foreground/10">
+            <div className="flex items-center justify-between px-6 py-3.5">
+              <span className="text-sm">Total revenue</span>
+              <span className="text-sm font-semibold tabular-nums">{formatCurrency(combinedRevenue)}</span>
+            </div>
+            <div className="flex items-center justify-between px-6 py-3.5">
+              <span className="text-sm">Order revenue</span>
+              <span className="text-sm font-semibold tabular-nums">{formatCurrency(rev.orders?.total || 0)}</span>
+            </div>
+            <div className="flex items-center justify-between px-6 py-3.5">
+              <span className="text-sm">Offline sales</span>
+              <span className="text-sm font-semibold tabular-nums">{formatCurrency(rev.offlineSales?.total || 0)}</span>
+            </div>
+            <div className="flex items-center justify-between px-6 py-3.5">
+              <span className="text-sm">Delivery payments</span>
+              <span className="text-sm font-semibold tabular-nums">{formatCurrency(rev.deliverySales?.paymentAmount || 0)}</span>
+            </div>
+            <div className="flex items-center justify-between px-6 py-3.5">
+              <span className="text-sm">Customer wallets</span>
+              <span className="text-sm font-semibold tabular-nums">{formatCurrency(Number(wallet.balances?.totalBalance || 0))}</span>
+            </div>
+            <div className="flex items-center justify-between px-6 py-3.5">
+              <span className="text-sm">Active holds</span>
+              <span className="text-sm font-semibold tabular-nums text-warning">{formatCurrency(Number(wallet.activeHolds?.totalHeld || 0))}</span>
+            </div>
+          </div>
+          <div className={cn(PANEL_FOOTER, 'justify-between')}>
+            <span className="text-xs text-muted-foreground">
+              Deposits: <span className="font-semibold text-foreground">{formatCurrency(Number(wallet.movement?.credits || 0))}</span>
+            </span>
+            <HoverArrowLink to={'/deposits' as any}>View deposits</HoverArrowLink>
+          </div>
+        </section>
+
+        <section className={PANEL} aria-label="Fleet and operations">
+          <div className={PANEL_RAIL}>
+            <span className={MICRO}>Fleet &amp; Operations</span>
             <StatusChip tone="accent" size="rail">
               <LiveDot />
               Live
             </StatusChip>
           </div>
-
           <div className={PANEL_BODY}>
-            <div className="space-y-3">
-              {fleetRows.map((item) => (
-                <div key={item.label} className="flex items-center gap-4">
-                  <div className="w-28 truncate text-sm">{item.label}</div>
-                  <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
-                    <div
-                      className={cn('h-full rounded-full transition-[width] duration-500 ease-luxe', item.fill)}
-                      style={{
-                        width: `${truckStats.total > 0 ? (item.count / truckStats.total) * 100 : 0}%`,
-                      }}
-                    />
-                  </div>
-                  <div className="w-10 text-right text-sm font-semibold tabular-nums">
-                    {item.count}
-                  </div>
-                </div>
-              ))}
+            <FleetUtilizationChart data={fleetChartData} />
+          </div>
+          <div className="divide-y divide-foreground/10">
+            <div className="flex items-center justify-between px-6 py-3">
+              <span className="text-sm">Active drivers</span>
+              <span className="text-sm font-semibold tabular-nums text-accent">{drv.active}</span>
+            </div>
+            <div className="flex items-center justify-between px-6 py-3">
+              <span className="text-sm">On trip</span>
+              <span className="text-sm font-semibold tabular-nums text-warning">{drv.onTrip}</span>
+            </div>
+            <div className="flex items-center justify-between px-6 py-3">
+              <span className="text-sm">Off duty</span>
+              <span className="text-sm font-semibold tabular-nums text-muted-foreground">{drv.offDuty}</span>
             </div>
           </div>
-
-          <div className={cn(PANEL_FOOTER, 'justify-between')}>
-            <span className="text-xs text-muted-foreground">
-              Total: <span className="font-semibold text-foreground tabular-nums">{truckStats.total}</span> trucks
-            </span>
-            <HoverArrowLink to={'/fleet-trucks' as any}>View details</HoverArrowLink>
-          </div>
-        </section>
-
-        <section className={PANEL} aria-label="Driver status">
-          <div className={PANEL_RAIL}>
-            <span className={MICRO}>Driver status</span>
-          </div>
-
-          <div className="divide-y divide-foreground/10">
-            {driverRows.map((item) => (
-              <div key={item.label} className="flex items-center justify-between px-6 py-3.5">
-                <span className="text-sm">{item.label}</span>
-                <span className={cn('text-sm font-semibold tabular-nums', item.tone)}>
-                  {item.count}
-                </span>
-              </div>
-            ))}
-          </div>
-
           <div className={cn(PANEL_FOOTER, 'justify-end')}>
-            <HoverArrowLink to={'/drivers/' as any}>View all drivers</HoverArrowLink>
+            <HoverArrowLink to={'/fleet-trucks' as any}>View fleet</HoverArrowLink>
           </div>
         </section>
       </div>
 
-      <StatCardGrid count={4}>
-        <StatCard icon={<GraduationCap />} label="Total drivers" value={driverStats.total} description={`${driverStats.active} active`} />
-        <StatCard icon={<Shield />} label="Idle trucks" value={truckStats.idle} description="Available at depots" />
-        {/* Plain counts, not alarm states — the brand mark carries them.
-            warning/destructive are reserved for things that need attention. */}
-        <StatCard icon={<UserCheck />} label="On trip" value={driverStats.onTrip} description="Currently delivering" />
-        <StatCard icon={<Calendar />} label="In maintenance" value={truckStats.maintenance} description="Scheduled service" />
-      </StatCardGrid>
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <section className={PANEL} aria-label="PFI and inventory">
+          <div className={PANEL_RAIL}>
+            <span className={MICRO}>PFI &amp; Inventory</span>
+          </div>
+          <div className="divide-y divide-foreground/10">
+            <div className="flex items-center justify-between px-6 py-3.5">
+              <span className="text-sm">Active PFIs</span>
+              <span className="text-sm font-semibold tabular-nums">{activePfis.length}</span>
+            </div>
+            <div className="flex items-center justify-between px-6 py-3.5">
+              <span className="text-sm">Litres remaining</span>
+              <span className="text-sm font-semibold tabular-nums">{formatLitres(totalRemainingLitres)}</span>
+            </div>
+            <div className="flex items-center justify-between px-6 py-3.5">
+              <span className="text-sm">Inventory value</span>
+              <span className="text-sm font-semibold tabular-nums">{formatCurrency(totalPfiValue)}</span>
+            </div>
+            {(pfi.byStatus || []).map((s) => (
+              <div key={s.status} className="flex items-center justify-between px-6 py-3.5">
+                <span className="text-sm capitalize">{s.status} PFIs</span>
+                <span className="text-sm font-semibold tabular-nums">
+                  {s.pfiCount} &middot; {formatLitres(s.remainingLitres || 0)}
+                </span>
+              </div>
+            ))}
+          </div>
+          <div className={cn(PANEL_FOOTER, 'justify-end')}>
+            <HoverArrowLink to={'/pfi' as any}>View PFIs</HoverArrowLink>
+          </div>
+        </section>
+
+        <section className={PANEL} aria-label="Outstanding payments">
+          <div className={PANEL_RAIL}>
+            <span className={MICRO}>Outstanding payments</span>
+            {totalOutstanding > 0 && (
+              <StatusChip tone="warning" size="rail">
+                {formatCurrency(totalOutstanding)}
+              </StatusChip>
+            )}
+          </div>
+          {outstanding.customers?.length > 0 ? (
+            <>
+              <div className="divide-y divide-foreground/10">
+                {outstanding.customers.slice(0, 5).map((c, i) => (
+                  <div key={i} className="flex items-center justify-between px-6 py-3.5">
+                    <div className="min-w-0 flex-1">
+                      <span className="block truncate text-sm">{c.customerName}</span>
+                      <span className="text-xs text-muted-foreground capitalize">{c.customerType?.replace(/_/g, ' ')}</span>
+                    </div>
+                    <span className="shrink-0 text-sm font-semibold tabular-nums text-warning">
+                      {formatCurrency(Number(c.outstanding || 0))}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <div className={cn(PANEL_FOOTER, 'justify-end')}>
+                <HoverArrowLink to={'/delivery-sales' as any}>View all</HoverArrowLink>
+              </div>
+            </>
+          ) : (
+            <div className={PANEL_BODY}>
+              <div className="flex h-24 items-center justify-center text-sm text-muted-foreground">
+                No outstanding payments
+              </div>
+            </div>
+          )}
+        </section>
+      </div>
+
+      <section className={PANEL} aria-label="Depot leaderboard">
+        <div className={PANEL_RAIL}>
+          <span className={MICRO}>Depot leaderboard</span>
+          <StatusChip tone="accent" size="rail">
+            By revenue
+          </StatusChip>
+        </div>
+        {depotLeaderboard.length > 0 ? (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-12">Rank</TableHead>
+                <TableHead>Depot</TableHead>
+                <TableHead className="text-right">Orders</TableHead>
+                <TableHead className="text-right">Volume</TableHead>
+                <TableHead className="text-right">Revenue</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {depotLeaderboard.map((d, i) => (
+                <TableRow key={d.id}>
+                  <TableCell className="font-semibold tabular-nums">{i + 1}</TableCell>
+                  <TableCell className="font-medium">{d.name}</TableCell>
+                  <TableCell className="text-right tabular-nums">{formatNumber(d.orderCount)}</TableCell>
+                  <TableCell className="text-right tabular-nums">{formatLitres(d.volume)}</TableCell>
+                  <TableCell className="text-right font-semibold tabular-nums">{formatCurrency(d.revenue)}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        ) : (
+          <div className={PANEL_BODY}>
+            <div className="flex h-24 items-center justify-center text-sm text-muted-foreground">
+              No depot data for this period
+            </div>
+          </div>
+        )}
+      </section>
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <section className={PANEL} aria-label="Dangote orders">
+          <div className={PANEL_RAIL}>
+            <span className="flex items-center gap-2">
+              <Package className="size-3.5" />
+              <span className={MICRO}>Dangote delivery</span>
+            </span>
+            {dangote.totalRequests > 0 && (
+              <StatusChip tone="accent" size="rail">
+                {dangote.totalRequests} requests
+              </StatusChip>
+            )}
+          </div>
+          <div className="divide-y divide-foreground/10">
+            <div className="flex items-center justify-between px-6 py-3.5">
+              <span className="text-sm">Total requests</span>
+              <span className="text-sm font-semibold tabular-nums">{dangote.totalRequests}</span>
+            </div>
+            <div className="flex items-center justify-between px-6 py-3.5">
+              <span className="text-sm">Total value</span>
+              <span className="text-sm font-semibold tabular-nums">{formatCurrency(dangote.totalValue)}</span>
+            </div>
+            <div className="flex items-center justify-between px-6 py-3.5">
+              <span className="text-sm">Paid value</span>
+              <span className="text-sm font-semibold tabular-nums text-accent">{formatCurrency(dangote.paidValue)}</span>
+            </div>
+            {(dangote.byStatus || []).map((s) => (
+              <div key={s.status} className="flex items-center justify-between px-6 py-3.5">
+                <span className="text-sm">{s.status}</span>
+                <span className="text-sm font-semibold tabular-nums">
+                  {s.count} &middot; {formatCurrency(Number(s.total))}
+                </span>
+              </div>
+            ))}
+          </div>
+          <div className={cn(PANEL_FOOTER, 'justify-end')}>
+            <HoverArrowLink to={'/dangote-orders' as any}>View orders</HoverArrowLink>
+          </div>
+        </section>
+
+        <section className={PANEL} aria-label="LPG cooking gas">
+          <div className={PANEL_RAIL}>
+            <span className="flex items-center gap-2">
+              <Flame className="size-3.5" />
+              <span className={MICRO}>LPG cooking gas</span>
+            </span>
+            {lpg.totalOrders > 0 && (
+              <StatusChip tone="accent" size="rail">
+                {lpg.totalOrders} orders
+              </StatusChip>
+            )}
+          </div>
+          <div className="divide-y divide-foreground/10">
+            <div className="flex items-center justify-between px-6 py-3.5">
+              <span className="text-sm">Total orders</span>
+              <span className="text-sm font-semibold tabular-nums">{lpg.totalOrders}</span>
+            </div>
+            <div className="flex items-center justify-between px-6 py-3.5">
+              <span className="text-sm">Total value</span>
+              <span className="text-sm font-semibold tabular-nums">{formatCurrency(lpg.totalValue)}</span>
+            </div>
+            <div className="flex items-center justify-between px-6 py-3.5">
+              <span className="text-sm">Paid value</span>
+              <span className="text-sm font-semibold tabular-nums text-accent">{formatCurrency(lpg.paidValue)}</span>
+            </div>
+            <div className="flex items-center justify-between px-6 py-3.5">
+              <span className="text-sm">Stations</span>
+              <span className="text-sm font-semibold tabular-nums">
+                {lpg.stations?.active || 0} active / {lpg.stations?.total || 0} total
+              </span>
+            </div>
+            {(lpg.byStatus || []).map((s) => (
+              <div key={s.status} className="flex items-center justify-between px-6 py-3.5">
+                <span className="text-sm">{s.status}</span>
+                <span className="text-sm font-semibold tabular-nums">
+                  {s.count} &middot; {formatCurrency(Number(s.total))}
+                </span>
+              </div>
+            ))}
+          </div>
+          <div className={cn(PANEL_FOOTER, 'justify-end')}>
+            <HoverArrowLink to={'/lpg-orders' as any}>View orders</HoverArrowLink>
+          </div>
+        </section>
+      </div>
+
+      <section className={PANEL} aria-label="Recent activity">
+        <div className={PANEL_RAIL}>
+          <span className={MICRO}>Recent activity</span>
+          <HoverArrowLink to={'/orders' as any}>View all</HoverArrowLink>
+        </div>
+        <ActivityFeed data={activity} />
+      </section>
     </div>
   )
 }

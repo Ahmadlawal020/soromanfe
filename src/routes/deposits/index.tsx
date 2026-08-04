@@ -45,7 +45,7 @@ function DepositsDashboard() {
   const [pageSize, setPageSize] = useState(10)
 
   const POLL_INTERVAL = 30_000
-  const { data, isLoading, isError, error, refetch } = useDepositList({ limit: 5000, refetchInterval: POLL_INTERVAL })
+  const { data, isLoading, isError, error, refetch } = useDepositList({ limit: 500, refetchInterval: POLL_INTERVAL })
   const deposits = data?.deposits || []
 
   const hasFilters = !!searchTerm || filterType !== 'all' || timeFilter !== 'all'

@@ -26,7 +26,7 @@ function formatCurrency(val: number) {
 
 function ManualDepositPage() {
     const navigate = useNavigate()
-    const { data: customerData, isLoading: isLoadingCustomers } = useCustomerList({ limit: 5000 })
+    const { data: customerData, isLoading: isLoadingCustomers } = useCustomerList({ limit: 500 })
     const { data: bankAccounts, isLoading: isLoadingBanks } = useBankAccounts({ status: 'Active' })
     const createDepositMutation = useCreateDeposit()
     const matchLines = useMatchStatementLines()

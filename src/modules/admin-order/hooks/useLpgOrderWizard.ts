@@ -9,7 +9,7 @@ export function useLpgOrderWizard() {
   const createLpgOrderRequestMutation = useCreateLpgOrderRequest()
 
   const [step, setStep] = useState(1)
-  const [error, setError] = useState('')
+  const [errors, setErrors] = useState<string[]>([])
 
   // Step 1: Customer
   const [customerSearch, setCustomerSearch] = useState('')
@@ -107,15 +107,15 @@ export function useLpgOrderWizard() {
   const availableCylinders = selectedStation?.cylinders || []
 
   const handleRegisterCustomer = async () => {
-    setError('')
+    setErrors([])
     if (!newCustomerForm.name || !newCustomerForm.phone) {
-      setError('Name and Phone Number are required')
+      setErrors(['Name and Phone Number are required'])
       return
     }
     const cleaned = newCustomerForm.phone.replace(/[\s\-()]/g, "")
     const isValid = /^(0|\+?234)\d{10}$/.test(cleaned) || /^8\d{9}$/.test(cleaned)
     if (!isValid) {
-      setError('Enter a valid Nigerian phone number (e.g. 08012345678)')
+      setErrors(['Enter a valid Nigerian phone number (e.g. 08012345678)'])
       return
     }
     try {
@@ -125,15 +125,15 @@ export function useLpgOrderWizard() {
         setIsRegisteringCustomer(false)
         setStep(2)
       } else {
-        setError('Failed to register customer')
+        setErrors(['Failed to register customer'])
       }
     } catch (err: any) {
-      setError(err?.response?.data?.message || err.message || 'Error registering customer')
+      setErrors([err?.response?.data?.message || err.message || 'Error registering customer'])
     }
   }
 
   const handlePlaceOrder = async () => {
-    setError('')
+    setErrors([])
     try {
       const payload = {
         customerId: selectedCustomer?._id || selectedCustomer?.id,
@@ -150,44 +150,45 @@ export function useLpgOrderWizard() {
         setStep(6)
       }
     } catch (err: any) {
-      setError(err?.response?.data?.message || err.message || 'Failed to submit order request')
+      setErrors([err?.response?.data?.message || err.message || 'Failed to submit order request'])
     }
   }
 
-  const validateStep = (target: number): string | null => {
+  const validateStep = (target: number): string[] => {
+    const errs: string[] = []
     if (target === 1) {
-      if (!selectedCustomer) return 'Please select an existing customer or register a new one'
-      return null
+      if (!selectedCustomer) errs.push('Please select an existing customer or register a new one')
+      return errs
     }
     if (target === 2) {
-      if (!selectedState) return 'Please select a state'
-      if (!selectedStation) return 'Please select an LPG station'
-      return null
+      if (!selectedState) errs.push('Please select a state')
+      if (!selectedStation) errs.push('Please select an LPG station')
+      return errs
     }
     if (target === 3) {
-      if (!selectedCylinderSizeKg) return 'Please select a cylinder size'
-      if (!cylinderQuantity || Number(cylinderQuantity) <= 0) return 'Please enter a valid quantity'
-      return null
+      if (!selectedCylinderSizeKg) errs.push('Please select a cylinder size')
+      if (!cylinderQuantity || Number(cylinderQuantity) <= 0) errs.push('Please enter a valid quantity')
+      return errs
     }
     if (target === 4) {
-      if (!deliveryAddress.trim()) return 'Please enter the delivery address'
-      return null
+      if (!deliveryAddress.trim()) errs.push('Please enter the delivery address')
+      return errs
     }
-    return null
+    return errs
   }
 
   const handleNextStep = () => {
-    const message = validateStep(step)
-    if (message) {
-      setError(message)
+    const stepErrors = validateStep(step)
+    if (stepErrors.length > 0) {
+      setErrors(stepErrors)
       return
     }
-    setError('')
+    setErrors([])
     if (step < 5) setStep(step + 1)
   }
 
   const handlePrevStep = () => {
-    setError('')
+    setErrors([])
     setStep(prev => Math.max(1, prev - 1))
   }
 
@@ -209,14 +210,14 @@ export function useLpgOrderWizard() {
     setDeliveryState('')
     setDeliveryLga('')
     setPlacedRequest(null)
-    setError('')
+    setErrors([])
   }
 
   return {
     step,
     setStep,
-    error,
-    setError,
+    errors,
+    setErrors,
     validateStep,
 
     // Customer state

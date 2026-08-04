@@ -8,9 +8,10 @@ import { Input } from '#/components/ui/input'
 import {
   ArrowLeft, Loader2, AlertCircle, ShoppingBag,
   User, Warehouse, Package, MapPin,
-  Calendar, Info, Phone, Mail, Building2, Truck, FileCheck, Banknote, Copy, CheckCircle, Ticket as TicketIcon, XCircle, Hourglass, Plus
+  Calendar, Info, Phone, Mail, Building2, Truck, FileCheck, Banknote, Copy, CheckCircle, Ticket as TicketIcon, XCircle, Hourglass, Plus, RefreshCw, Send
 } from 'lucide-react'
-import { useOrderDetails, useUpdateOrder, useCancelOrder } from '#/lib/hooks/useOrders'
+import { useOrderDetails, useReleaseOrder, useCancelOrder } from '#/lib/hooks/useOrders'
+import { OrderStatusBadge } from './-order-status'
 import { Breadcrumbs } from '#/components/Breadcrumbs'
 import { ConfirmDialog } from '#/components/ConfirmDialog'
 import { OrderExpiryBadge } from './-order-expiry'
@@ -43,27 +44,12 @@ function formatAccountName(name?: string) {
   return `SOROMANNIGERI/ ${initials}`;
 }
 
-function getStatusBadge(status: string) {
-  switch (status) {
-    case 'Completed':
-      return <Badge className="bg-success text-success-foreground">Completed</Badge>
-    case 'Pending':
-      return <Badge className="bg-warning text-warning-foreground">Pending</Badge>
-    case 'Cancelled':
-      return <Badge variant="destructive">Cancelled</Badge>
-    case 'Expired':
-      return <Badge variant="destructive"><Hourglass className="size-3 mr-1" /> Expired</Badge>
-    default:
-      return <Badge variant="outline">{status}</Badge>
-  }
-}
-
 function RouteComponent() {
   const navigate = useNavigate()
   const { id } = Route.useSearch()
-  const { data: order, isLoading } = useOrderDetails(id)
+  const { data: order, isLoading, isError, error, refetch } = useOrderDetails(id)
   const [copied, setCopied] = useState(false)
-  const updateMutation = useUpdateOrder()
+  const releaseMutation = useReleaseOrder()
   const cancelMutation = useCancelOrder()
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [showCancelDialog, setShowCancelDialog] = useState(false)
@@ -80,9 +66,9 @@ function RouteComponent() {
 
   const executeConfirmAction = async () => {
     if (!order) return
-    await updateMutation.mutateAsync({
+    await releaseMutation.mutateAsync({
       id: order._id || order.id,
-      data: { status: 'Completed' }
+      data: {}
     })
     setShowConfirmDialog(false)
   }
@@ -101,6 +87,24 @@ function RouteComponent() {
     return (
       <div className="flex items-center justify-center py-24">
         <Loader2 className="size-8 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 gap-5 text-center">
+        <div className="size-16 rounded-full bg-destructive/10 flex items-center justify-center text-destructive border border-destructive/20">
+          <AlertCircle className="size-8" />
+        </div>
+        <h2 className="text-lg md:text-xl font-semibold text-foreground tracking-tight">Failed to Load Order</h2>
+        <p className="text-muted-foreground max-w-sm">
+          {(error as any)?.message || 'A network error occurred while loading the order details.'}
+        </p>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => refetch()}><RefreshCw className="size-4 mr-2" /> Try Again</Button>
+          <Button onClick={() => navigate({ to: '/orders/' as any })}><ArrowLeft className="size-4 mr-2" /> Back to Orders</Button>
+        </div>
       </div>
     )
   }
@@ -150,8 +154,8 @@ function RouteComponent() {
               <div>
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge variant="outline" className="font-mono text-xs">ID: {order._id || order.id}</Badge>
-                  {getStatusBadge(order.status)}
-                  <OrderExpiryBadge status={order.status} createdAt={order.createdAt} expiredAt={order.expiredAt} />
+                  <OrderStatusBadge status={order.status} />
+                  <OrderExpiryBadge status={order.status} expiresAt={order.expiresAt} expiredAt={order.expiredAt} />
                 </div>
                 <h2 className="text-lg md:text-xl font-semibold text-foreground mt-2 tracking-tight">Order {order.orderNumber}</h2>
                 <p className="text-muted-foreground mt-1 text-sm flex items-center gap-1.5">
@@ -459,18 +463,30 @@ function RouteComponent() {
           <CardTitle className="text-sm font-semibold text-primary">Order Actions & Ticket Management</CardTitle>
           <CardDescription className="text-xs">Update order status or view generated pickup tickets.</CardDescription>
         </CardHeader>
-        <CardContent className="pt-6 flex flex-wrap gap-4">
-          {order.status !== 'Completed' && order.status !== 'Cancelled' && order.status !== 'Expired' && (
+        <CardContent className="pt-6 flex flex-wrap gap-4 items-center">
+          {order.status === 'Paid' && order.deliveryType === 'pickup' && (
             <Button
               className="bg-info text-info-foreground hover:bg-info/90 cursor-pointer"
               onClick={() => handleUpdateStatus()}
-              disabled={updateMutation.isPending}
+              disabled={releaseMutation.isPending}
             >
-              <CheckCircle className="size-4 mr-2" /> Mark as Completed
+              <Send className="size-4 mr-2" /> Release Order
             </Button>
           )}
 
-          {order.status !== 'Completed' && order.status !== 'Cancelled' && order.status !== 'Expired' && (
+          {order.status === 'Paid' && order.deliveryType === 'delivery' && (
+            <span className="text-sm text-muted-foreground flex items-center gap-1.5">
+              <Truck className="size-4" /> Delivery orders are released with truck allocation from the ticketing page.
+            </span>
+          )}
+
+          {(order.status === 'Released' || order.status === 'Loading') && (
+            <span className="text-sm text-info font-medium flex items-center gap-1.5">
+              <Truck className="size-4" /> Order is at the depot — loading in progress
+            </span>
+          )}
+
+          {order.status !== 'Completed' && order.status !== 'Cancelled' && order.status !== 'Expired' && order.status !== 'Loading' && (
             <Button
               variant="destructive"
               className="cursor-pointer"
@@ -509,11 +525,11 @@ function RouteComponent() {
       <ConfirmDialog
         open={showConfirmDialog}
         onOpenChange={setShowConfirmDialog}
-        title="Update Order Status"
-        description="Are you sure you want to mark this order as Completed?"
-        confirmLabel="Confirm"
+        title="Release Order"
+        description="Are you sure you want to release this order for loading at the depot?"
+        confirmLabel="Release"
         onConfirm={executeConfirmAction}
-        loading={updateMutation.isPending}
+        loading={releaseMutation.isPending}
       />
 
       <ConfirmDialog

@@ -143,7 +143,7 @@ function CustomerDashboard() {
                   </TableHeader>
                   <TableBody>
                     {customers.map((customer: any) => (
-                      <TableRow key={customer._id || customer.id} className="cursor-pointer hover:bg-muted transition" onClick={() => navigate({ to: '/customers/details' as any, search: { id: customer._id || customer.id } as any, state: { customer } } as any)}>
+                      <TableRow key={customer._id || customer.id} tabIndex={0} role="link" aria-label={`View ${customer.name}`} className="cursor-pointer hover:bg-muted transition" onClick={() => navigate({ to: '/customers/details' as any, search: { id: customer._id || customer.id } as any, state: { customer } } as any)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate({ to: '/customers/details' as any, search: { id: customer._id || customer.id } as any, state: { customer } } as any) } }}>
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <div className="size-10 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-normal">{getInitials(customer.name)}</div>

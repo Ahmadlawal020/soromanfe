@@ -126,7 +126,7 @@ function Section({ label, children }: { label?: string; children: React.ReactNod
 
 /** Shared group navigation — validates every step on screen before advancing. */
 function useGroupNav(
-  wizard: { step: number; setStep: (n: number) => void; setError: (m: string) => void; validateStep: (n: number) => string | null },
+  wizard: { step: number; setStep: (n: number) => void; setErrors: (m: string[]) => void; validateStep: (n: number) => string[] },
   groups: Group[],
 ) {
   const index = Math.max(groups.findIndex((g) => g.steps.includes(wizard.step)), 0)
@@ -134,14 +134,16 @@ function useGroupNav(
   const isLast = index === groups.length - 1
 
   const next = () => {
+    const allErrors: string[] = []
     for (const s of group.steps) {
-      const message = wizard.validateStep(s)
-      if (message) {
-        wizard.setError(message)
-        return false
-      }
+      const stepErrors = wizard.validateStep(s)
+      allErrors.push(...stepErrors)
     }
-    wizard.setError('')
+    if (allErrors.length > 0) {
+      wizard.setErrors(allErrors)
+      return false
+    }
+    wizard.setErrors([])
     const following = groups[index + 1]
     if (following) wizard.setStep(following.steps[0])
     return true
@@ -150,14 +152,14 @@ function useGroupNav(
   const back = () => {
     const previous = groups[index - 1]
     if (!previous) return
-    wizard.setError('')
+    wizard.setErrors([])
     wizard.setStep(previous.steps[0])
   }
 
   /** Jumping via the stepper is only allowed backwards. */
   const goTo = (groupNumber: number) => {
     if (groupNumber - 1 >= index) return
-    wizard.setError('')
+    wizard.setErrors([])
     wizard.setStep(groups[groupNumber - 1].steps[0])
   }
 
@@ -166,7 +168,7 @@ function useGroupNav(
 
 function DepotFlow() {
   const wizard = useOrderWizard()
-  const { step, error, handlePlaceOrder, createOrderMutation } = wizard
+  const { step, errors, handlePlaceOrder, createOrderMutation } = wizard
   const nav = useGroupNav(wizard, DEPOT_GROUPS)
   const done = step > 5
 
@@ -189,7 +191,7 @@ function DepotFlow() {
       <WizardShell
         title={nav.group.title}
         description={nav.group.description}
-        error={error}
+        errors={errors}
         onBack={nav.back}
         backDisabled={nav.index === 0}
         onNext={nav.isLast ? handlePlaceOrder : nav.next}
@@ -214,7 +216,7 @@ function DepotFlow() {
 
 function DangoteFlow() {
   const wizard = useDangoteOrderWizard()
-  const { step, error, handlePlaceOrder, createDangoteOrderRequestMutation } = wizard
+  const { step, errors, handlePlaceOrder, createDangoteOrderRequestMutation } = wizard
   const nav = useGroupNav(wizard, DANGOTE_GROUPS)
   const done = step > 6
 
@@ -237,7 +239,7 @@ function DangoteFlow() {
       <WizardShell
         title={nav.group.title}
         description={nav.group.description}
-        error={error}
+        errors={errors}
         onBack={nav.back}
         backDisabled={nav.index === 0}
         onNext={nav.isLast ? handlePlaceOrder : nav.next}
@@ -263,7 +265,7 @@ function DangoteFlow() {
 
 function LpgFlow() {
   const wizard = useLpgOrderWizard()
-  const { step, error, handlePlaceOrder, createLpgOrderRequestMutation } = wizard
+  const { step, errors, handlePlaceOrder, createLpgOrderRequestMutation } = wizard
   const nav = useGroupNav(wizard, LPG_GROUPS)
   const done = step > 5
 
@@ -286,7 +288,7 @@ function LpgFlow() {
       <WizardShell
         title={nav.group.title}
         description={nav.group.description}
-        error={error}
+        errors={errors}
         onBack={nav.back}
         backDisabled={nav.index === 0}
         onNext={nav.isLast ? handlePlaceOrder : nav.next}

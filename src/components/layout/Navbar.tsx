@@ -45,12 +45,10 @@ export default function Navbar() {
   const user = useAuthStore((s) => s.user)
   const logoutMutation = useAdminLogout()
 
-  const notifications = [
-    { id: 1, message: 'New driver registered', time: '5m ago', unread: true },
-    { id: 2, message: 'Truck TRK-003 completed maintenance', time: '1h ago', unread: true },
-    { id: 3, message: 'Depot capacity alert: Port Harcourt', time: '2h ago', unread: false },
-  ]
-  const unreadCount = notifications.filter((n) => n.unread).length
+  // Notifications are not yet integrated with the backend.
+  // When a notification API is available, replace this with a useQuery hook.
+  const notifications: { id: number; message: string; time: string; unread: boolean }[] = []
+  const unreadCount = 0
 
   const initials = user
     ? `${user.firstName?.[0] || ''}${user.surname?.[0] || ''}`.toUpperCase()
@@ -115,7 +113,7 @@ export default function Navbar() {
               <span className="truncate">Search dashboard…</span>
             </span>
             <kbd className="pointer-events-none inline-flex h-5 items-center gap-0.5 rounded border border-border bg-muted px-1.5 font-mono text-xs font-normal select-none">
-              {navigator.platform?.includes('Mac') ? '⌘' : 'Ctrl+'}K
+              {navigator.userAgent?.includes('Mac') ? '⌘' : 'Ctrl+'}K
             </kbd>
           </button>
 
@@ -181,25 +179,31 @@ export default function Navbar() {
                 )}
               </div>
               <div className="p-1">
-                {notifications.map((notification) => (
-                  <DropdownMenuItem
-                    key={notification.id}
-                    className="flex cursor-pointer flex-col items-start gap-0.5 p-3"
-                  >
-                    <div className="flex w-full justify-between gap-2">
-                      <span className="text-sm">{notification.message}</span>
-                      {notification.unread && (
-                        <span
-                          aria-hidden
-                          className="mt-1.5 size-1.5 shrink-0 rounded-full bg-accent"
-                        />
-                      )}
-                    </div>
-                    <span className="text-xs text-muted-foreground">
-                      {notification.time}
-                    </span>
-                  </DropdownMenuItem>
-                ))}
+                {notifications.length === 0 ? (
+                  <div className="px-3 py-6 text-center text-sm text-muted-foreground">
+                    No notifications yet
+                  </div>
+                ) : (
+                  notifications.map((notification) => (
+                    <DropdownMenuItem
+                      key={notification.id}
+                      className="flex cursor-pointer flex-col items-start gap-0.5 p-3"
+                    >
+                      <div className="flex w-full justify-between gap-2">
+                        <span className="text-sm">{notification.message}</span>
+                        {notification.unread && (
+                          <span
+                            aria-hidden
+                            className="mt-1.5 size-1.5 shrink-0 rounded-full bg-accent"
+                          />
+                        )}
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        {notification.time}
+                      </span>
+                    </DropdownMenuItem>
+                  ))
+                )}
               </div>
             </DropdownMenuContent>
           </DropdownMenu>

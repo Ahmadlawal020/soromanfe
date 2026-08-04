@@ -204,7 +204,7 @@ function DepotDetailPage() {
     : allBankAccounts.filter((b: any) => b.status === 'Active')
 
   // Orders query + robust depot matching
-  const { data: ordersData, isLoading: isLoadingOrders } = useOrderList(activeDepotId ? { depot: activeDepotId, limit: 1000 } : { limit: 1000 })
+  const { data: ordersData, isLoading: isLoadingOrders } = useOrderList(activeDepotId ? { depot: activeDepotId, limit: 500 } : { limit: 500 })
   const rawOrders = ordersData?.orders || []
   const ordersList = rawOrders.filter((o: any) => {
     if (!activeDepotId) return true

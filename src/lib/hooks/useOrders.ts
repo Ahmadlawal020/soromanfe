@@ -110,11 +110,32 @@ export function useUpdateOrder() {
   return useMutation({
     retry: false,
     mutationFn: async ({ id, data }: { id: string; data: Record<string, any> }) => {
-      const res = await api.put(`/orders/${id}`, data)
+      const res = await api.patch(`/orders/${id}`, data)
       return res.data
     },
     onSuccess: (data) => {
       toast.success(data?.message || 'Order updated successfully')
+      queryClient.invalidateQueries({ queryKey: ['orders'] })
+      queryClient.invalidateQueries({ queryKey: ['tickets'] })
+    },
+    onError: (err: any) => {
+      toast.error(getErrorMessage(err))
+    },
+  })
+}
+
+export function useReleaseOrder() {
+  const queryClient = useQueryClient()
+  const toast = useToast()
+
+  return useMutation({
+    retry: false,
+    mutationFn: async ({ id, data }: { id: string; data?: Record<string, any> }) => {
+      const res = await api.post(`/orders/${id}/release`, data || {})
+      return res.data
+    },
+    onSuccess: (data) => {
+      toast.success(data?.message || 'Order released successfully')
       queryClient.invalidateQueries({ queryKey: ['orders'] })
       queryClient.invalidateQueries({ queryKey: ['tickets'] })
     },

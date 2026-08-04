@@ -10,7 +10,7 @@ export function useDangoteOrderWizard() {
   const createLicenseMutation = useCreateCustomerLicense()
 
   const [step, setStep] = useState(1)
-  const [error, setError] = useState('')
+  const [errors, setErrors] = useState<string[]>([])
 
   // Step 1: Customer
   const [customerSearch, setCustomerSearch] = useState('')
@@ -95,15 +95,15 @@ export function useDangoteOrderWizard() {
   const { data: dangoteProducts = [], isLoading: isLoadingProducts } = useDangoteProductsActive()
 
   const handleRegisterCustomer = async () => {
-    setError('')
+    setErrors([])
     if (!newCustomerForm.name || !newCustomerForm.phone) {
-      setError('Name and Phone Number are required')
+      setErrors(['Name and Phone Number are required'])
       return
     }
     const cleaned = newCustomerForm.phone.replace(/[\s\-()]/g, "")
     const isValid = /^(0|\+?234)\d{10}$/.test(cleaned) || /^8\d{9}$/.test(cleaned)
     if (!isValid) {
-      setError('Enter a valid Nigerian phone number (e.g. 08012345678)')
+      setErrors(['Enter a valid Nigerian phone number (e.g. 08012345678)'])
       return
     }
     try {
@@ -113,21 +113,21 @@ export function useDangoteOrderWizard() {
         setIsRegisteringCustomer(false)
         setStep(2)
       } else {
-        setError('Failed to register customer')
+        setErrors(['Failed to register customer'])
       }
     } catch (err: any) {
-      setError(err?.response?.data?.message || err.message || 'Error registering customer')
+      setErrors([err?.response?.data?.message || err.message || 'Error registering customer'])
     }
   }
 
   const handleAddLicense = async () => {
-    setError('')
+    setErrors([])
     if (!newLicenseForm.companyName.trim()) {
-      setError('Company name is required')
+      setErrors(['Company name is required'])
       return
     }
     if (!newLicenseForm.licenseUrl) {
-      setError('Please upload a licence file')
+      setErrors(['Please upload a licence file'])
       return
     }
     try {
@@ -145,12 +145,12 @@ export function useDangoteOrderWizard() {
         setNewLicenseForm({ companyName: '', licenseUrl: '', licensePublicId: '', expiryDate: '' })
       }
     } catch (err: any) {
-      setError(err?.response?.data?.message || err.message || 'Failed to add licence')
+      setErrors([err?.response?.data?.message || err.message || 'Failed to add licence'])
     }
   }
 
   const handlePlaceOrder = async () => {
-    setError('')
+    setErrors([])
     try {
       const payload = {
         customerId: customerId,
@@ -169,7 +169,7 @@ export function useDangoteOrderWizard() {
         setStep(7)
       }
     } catch (err: any) {
-      setError(err?.response?.data?.message || err.message || 'Failed to submit order request')
+      setErrors([err?.response?.data?.message || err.message || 'Failed to submit order request'])
     }
   }
 
@@ -177,45 +177,46 @@ export function useDangoteOrderWizard() {
    * Validation for a single step, independent of where the user currently is.
    *
    * Kept separate from navigation so the UI can group several steps onto one
-   * screen and validate the whole group before advancing. Returns the error
-   * message, or null when the step is satisfied.
+   * screen and validate the whole group before advancing. Returns all error
+   * messages, or an empty array when the step is satisfied.
    */
-  const validateStep = (target: number): string | null => {
+  const validateStep = (target: number): string[] => {
+    const errs: string[] = []
     if (target === 1) {
-      if (!selectedCustomer) return 'Please select an existing customer or register a new one'
-      return null
+      if (!selectedCustomer) errs.push('Please select an existing customer or register a new one')
+      return errs
     }
     if (target === 2) {
-      if (!selectedLicense) return 'Please select a company & licence or add a new one'
-      return null
+      if (!selectedLicense) errs.push('Please select a company & licence or add a new one')
+      return errs
     }
     if (target === 3) {
-      if (!selectedProduct) return 'Please select a Dangote product'
-      return null
+      if (!selectedProduct) errs.push('Please select a Dangote product')
+      return errs
     }
     if (target === 4) {
-      if (!orderQuantity || Number(orderQuantity) <= 0) return 'Please enter a valid quantity'
-      return null
+      if (!orderQuantity || Number(orderQuantity) <= 0) errs.push('Please enter a valid quantity')
+      return errs
     }
     if (target === 5) {
-      if (!deliveryAddress.trim()) return 'Please enter the delivery address'
-      return null
+      if (!deliveryAddress.trim()) errs.push('Please enter the delivery address')
+      return errs
     }
-    return null
+    return errs
   }
 
   const handleNextStep = () => {
-    const message = validateStep(step)
-    if (message) {
-      setError(message)
+    const stepErrors = validateStep(step)
+    if (stepErrors.length > 0) {
+      setErrors(stepErrors)
       return
     }
-    setError('')
+    setErrors([])
     if (step < 6) setStep(step + 1)
   }
 
   const handlePrevStep = () => {
-    setError('')
+    setErrors([])
     setStep(prev => Math.max(1, prev - 1))
   }
 
@@ -237,14 +238,14 @@ export function useDangoteOrderWizard() {
     setDeliveryState('')
     setDeliveryLga('')
     setPlacedRequest(null)
-    setError('')
+    setErrors([])
   }
 
   return {
     step,
     setStep,
-    error,
-    setError,
+    errors,
+    setErrors,
     validateStep,
 
     // Customer state

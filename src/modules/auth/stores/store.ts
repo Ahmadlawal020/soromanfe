@@ -48,7 +48,7 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'dashboard-auth-storage',
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => sessionStorage),
     },
   ),
 )

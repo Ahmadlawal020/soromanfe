@@ -15,6 +15,7 @@ export function WizardShell({
   title,
   description,
   error,
+  errors,
   children,
   onBack,
   backDisabled,
@@ -28,6 +29,7 @@ export function WizardShell({
   title: string
   description?: string
   error?: string | null
+  errors?: string[]
   children: React.ReactNode
   onBack?: () => void
   backDisabled?: boolean
@@ -38,6 +40,7 @@ export function WizardShell({
   hint?: string
   footer?: boolean
 }) {
+  const allErrors = errors && errors.length > 0 ? errors : error ? [error] : []
   return (
     <section className={cn(PANEL, 'mx-auto w-full max-w-3xl')}>
       <div className="border-b border-foreground/15 px-6 py-5">
@@ -47,13 +50,26 @@ export function WizardShell({
         )}
       </div>
 
-      {error && (
+      {allErrors.length > 0 && (
         <div
           role="alert"
-          className="flex items-center gap-2 border-b border-destructive/25 bg-destructive/10 px-6 py-3 text-sm font-normal text-destructive"
+          className="border-b border-destructive/25 bg-destructive/10 px-6 py-3 text-sm font-normal text-destructive"
         >
-          <AlertCircle className="size-4 shrink-0" />
-          <span>{error}</span>
+          {allErrors.length === 1 ? (
+            <div className="flex items-center gap-2">
+              <AlertCircle className="size-4 shrink-0" />
+              <span>{allErrors[0]}</span>
+            </div>
+          ) : (
+            <ul className="space-y-1">
+              {allErrors.map((e, i) => (
+                <li key={i} className="flex items-start gap-2">
+                  <AlertCircle className="size-4 shrink-0 mt-0.5" />
+                  <span>{e}</span>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
 

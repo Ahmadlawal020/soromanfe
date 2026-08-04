@@ -81,6 +81,8 @@ function OrdersDashboard() {
   // recalculate against the filtered set, which needs the whole result.
   const { data, isLoading, isError, error, refetch, isFetching } = useAllOrders()
   const orders: any[] = data?.orders || []
+  const isTruncated = data?.truncated === true
+  const totalAvailable = data?.totalAvailable ?? orders.length
 
   // Dropdowns are populated from the data actually present.
   const options = useMemo(() => {
@@ -271,6 +273,15 @@ function OrdersDashboard() {
             />
           </StatCardGrid>
 
+          {isTruncated && (
+            <div className="rounded-lg border border-warning/30 bg-warning/5 px-4 py-3 text-sm text-warning-foreground">
+              <p className="font-semibold">Showing {orders.length.toLocaleString()} of {totalAvailable.toLocaleString()} orders</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Data is capped at 5,000 orders. Use filters to narrow results or export the full dataset from the backend.
+              </p>
+            </div>
+          )}
+
           <section className={PANEL}>
             <div className={PANEL_RAIL}>
               <span className={MICRO}>Filters</span>
@@ -426,7 +437,7 @@ function OrdersDashboard() {
                               <TableCell>
                                 <div className="flex flex-col gap-1">
                                   <OrderStatusBadge status={o.status} />
-                                  <OrderExpiryBadge status={o.status} createdAt={o.createdAt} expiredAt={o.expiredAt} />
+                                  <OrderExpiryBadge status={o.status} expiresAt={o.expiresAt} expiredAt={o.expiredAt} />
                                 </div>
                               </TableCell>
                               <TableCell className="text-muted-foreground">{o.pfiNumber || '—'}</TableCell>

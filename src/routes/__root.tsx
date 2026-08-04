@@ -14,6 +14,7 @@ import Sidebar from '#/components/layout/Sidebar'
 import Navbar from '#/components/layout/Navbar'
 import { QueryProvider } from '#/components/QueryProvider'
 import { ToastContainer } from '#/components/ui/toast'
+import { ErrorBoundary } from '#/components/ErrorBoundary'
 import { Button } from '#/components/ui/button'
 import { ArrowLeft, AlertTriangle } from 'lucide-react'
 import appCss from '../styles.css?url'
@@ -128,6 +129,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryProvider>
+      <ErrorBoundary>
       <AuthGuard>
         {isPublicRoute ? (
           children
@@ -159,6 +161,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           </div>
         )}
       </AuthGuard>
+      </ErrorBoundary>
 
       <ToastContainer />
 

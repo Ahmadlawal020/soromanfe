@@ -334,6 +334,8 @@ export interface Order {
   paymentStatus: 'Unpaid' | 'Paid'
   /** Matches the order_status enum in the database, not a subset of it. */
   status: 'Pending' | 'Paid' | 'Released' | 'Loading' | 'Completed' | 'Cancelled' | 'Expired'
+  /** Computed deadline: when this Pending/unpaid order will expire. Null for non-expirable orders. */
+  expiresAt?: string | null
   expiredAt?: string
   createdAt?: string
   updatedAt?: string

@@ -12,12 +12,12 @@ export function useDashboardStats() {
   })
 }
 
-export function useDashboardOverview() {
+export function useDashboardOverview(period: string = 'month') {
   return useQuery({
-    queryKey: ['dashboard', 'overview'],
+    queryKey: ['dashboard', 'overview', period],
     staleTime: 30_000,
     queryFn: async () => {
-      const res = await api.get('/dashboard/overview')
+      const res = await api.get(`/dashboard/overview?period=${period}`)
       return res.data.data
     },
   })

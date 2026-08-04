@@ -1,14 +1,12 @@
-import { Clock, CheckCircle2, Send, Truck, PackageCheck, XCircle, CircleDashed, Hourglass } from 'lucide-react'
+import { Clock, CheckCircle2, Send, Truck, XCircle, CircleDashed, Hourglass } from 'lucide-react'
 
 import { cn } from '#/lib/utils'
 
 /**
  * Status badge: a coloured chip with an icon.
  *
- * The Node backend currently emits only Pending / Completed / Cancelled plus a
- * separate paymentStatus, but the wider Soroman order lifecycle also has Paid,
- * Released, Loaded and Sold. All of them are mapped here so the column renders
- * correctly the moment the API starts returning the richer set.
+ * Matches the `order_status` enum in the database: Pending, Paid, Released,
+ * Loading, Completed, Cancelled, Expired.
  *
  * `blue` and `violet` have no design token — the system runs one accent — so
  * those two carry the palette directly with an explicit dark pairing.
@@ -29,14 +27,6 @@ const STATUS: Record<string, { label: string; icon: typeof Clock; className: str
   loading: {
     label: 'Loading', icon: Truck,
     className: 'border-violet-500/40 bg-violet-50 text-violet-700 dark:bg-violet-950 dark:text-violet-300',
-  },
-  loaded: {
-    label: 'Loaded', icon: Truck,
-    className: 'border-violet-500/40 bg-violet-50 text-violet-700 dark:bg-violet-950 dark:text-violet-300',
-  },
-  sold: {
-    label: 'Sold', icon: PackageCheck,
-    className: 'border-accent/40 bg-accent/10 text-accent',
   },
   completed: {
     label: 'Completed', icon: CheckCircle2,

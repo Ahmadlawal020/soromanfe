@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useState } from 'react'
 import { PageHeader } from '#/components/PageHeader'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
@@ -8,6 +9,7 @@ import {
   Warehouse, Package, Building2, MapPin, CheckSquare, Award
 } from 'lucide-react'
 import { useTicketDetails, useRedeemTicket } from '#/lib/hooks/useTickets'
+import { ConfirmDialog } from '#/components/ConfirmDialog'
 
 export const Route = createFileRoute('/ticket/details')({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -25,6 +27,7 @@ function TicketDetailsComponent() {
   const { id } = Route.useSearch()
   const { data: ticket, isLoading } = useTicketDetails(id)
   const redeemMutation = useRedeemTicket()
+  const [showRedeemDialog, setShowRedeemDialog] = useState(false)
 
   const handleBack = () => {
     window.history.length > 1 ? window.history.back() : navigate({ to: '/ticket' as any })
@@ -32,12 +35,11 @@ function TicketDetailsComponent() {
 
   const handleRedeem = async () => {
     if (!ticket) return
-    if (confirm(`Are you sure you want to redeem ticket ${ticket.ticketNumber}? This will mark the order as Completed.`)) {
-      try {
-        await redeemMutation.mutateAsync(ticket.ticketNumber)
-      } catch (err) {
-        // Error handled in hook/toast
-      }
+    try {
+      await redeemMutation.mutateAsync(ticket.ticketNumber)
+      setShowRedeemDialog(false)
+    } catch (err) {
+      // Error handled in hook/toast
     }
   }
 
@@ -221,7 +223,7 @@ function TicketDetailsComponent() {
                 <Button
                   size="lg"
                   className="w-full bg-success hover:bg-success-hover text-success-foreground font-semibold flex items-center justify-center gap-2 cursor-pointer"
-                  onClick={handleRedeem}
+                  onClick={() => setShowRedeemDialog(true)}
                   disabled={redeemMutation.isPending}
                 >
                   {redeemMutation.isPending ? (
@@ -301,6 +303,16 @@ function TicketDetailsComponent() {
         </div>
 
       </div>
+
+      <ConfirmDialog
+        open={showRedeemDialog}
+        onOpenChange={setShowRedeemDialog}
+        title="Redeem Ticket"
+        description={`Are you sure you want to redeem ticket ${ticket?.ticketNumber}? This will mark the order as Completed.`}
+        confirmLabel="Redeem Ticket"
+        onConfirm={handleRedeem}
+        loading={redeemMutation.isPending}
+      />
     </div>
   )
 }

@@ -8,7 +8,7 @@ export function useOrderWizard() {
   const createOrderMutation = useCreateOrder()
 
   const [step, setStep] = useState(1)
-  const [error, setError] = useState('')
+  const [errors, setErrors] = useState<string[]>([])
   const [copied, setCopied] = useState(false)
 
   // Step 1: Customer
@@ -68,15 +68,15 @@ export function useOrderWizard() {
   )
 
   const handleRegisterCustomer = async () => {
-    setError('')
+    setErrors([])
     if (!newCustomerForm.name || !newCustomerForm.phone) {
-      setError('Name and Phone Number are required')
+      setErrors(['Name and Phone Number are required'])
       return
     }
     const cleaned = newCustomerForm.phone.replace(/[\s\-\(\)]/g, "");
     const isValid = /^(0|\+?234)\d{10}$/.test(cleaned) || /^8\d{9}$/.test(cleaned);
     if (!isValid) {
-      setError('Enter a valid Nigerian phone number (e.g. 08012345678)')
+      setErrors(['Enter a valid Nigerian phone number (e.g. 08012345678)'])
       return
     }
     try {
@@ -86,15 +86,15 @@ export function useOrderWizard() {
         setIsRegisteringCustomer(false)
         setStep(2)
       } else {
-        setError('Failed to register customer')
+        setErrors(['Failed to register customer'])
       }
     } catch (err: any) {
-      setError(err?.response?.data?.message || err.message || 'Error registering customer')
+      setErrors([err?.response?.data?.message || err.message || 'Error registering customer'])
     }
   }
 
   const handlePlaceOrder = async () => {
-    setError('')
+    setErrors([])
     try {
       const totalAmount = Number(orderQuantity) * Number(selectedProduct.currentPrice)
       const payload = {
@@ -115,7 +115,7 @@ export function useOrderWizard() {
         setStep(6)
       }
     } catch (err: any) {
-      setError(err?.response?.data?.message || err.message || 'Failed to place order')
+      setErrors([err?.response?.data?.message || err.message || 'Failed to place order'])
     }
   }
 
@@ -123,51 +123,54 @@ export function useOrderWizard() {
    * Validation for a single step, independent of where the user currently is.
    *
    * Kept separate from navigation so the UI can group several steps onto one
-   * screen and validate the whole group before advancing. Returns the error
-   * message, or null when the step is satisfied.
+   * screen and validate the whole group before advancing. Returns all error
+   * messages, or an empty array when the step is satisfied.
    */
-  const validateStep = (target: number): string | null => {
+  const validateStep = (target: number): string[] => {
+    const errs: string[] = []
     if (target === 1) {
-      if (!selectedCustomer) return 'Please select an existing customer or register a new one'
-      if (!orderCompanyName.trim()) return 'Please enter the company name'
-      return null
+      if (!selectedCustomer) errs.push('Please select an existing customer or register a new one')
+      if (!orderCompanyName.trim()) errs.push('Please enter the company name')
+      return errs
     }
     if (target === 2) {
-      if (!selectedState) return 'Please select the destination state'
-      if (!selectedDepot) return 'Please select a depot'
-      return null
+      if (!selectedState) errs.push('Please select the destination state')
+      if (!selectedDepot) errs.push('Please select a depot')
+      return errs
     }
     if (target === 3) {
-      if (!selectedProduct) return 'Please select a product'
-      if (!orderQuantity || Number(orderQuantity) <= 0) return 'Please enter a valid quantity'
-      const capacityEntry = selectedDepot?.productCapacities?.find(
-        (pc: any) => (pc.product?._id || pc.product?.id) === (selectedProduct.product?._id || selectedProduct.product?.id)
-      )
-      if (capacityEntry && capacityEntry.capacity < Number(orderQuantity)) {
-        return `Insufficient capacity. Available: ${capacityEntry.capacity.toLocaleString()} ${selectedProduct.product?.unit || 'Liters'}`
+      if (!selectedProduct) errs.push('Please select a product')
+      if (!orderQuantity || Number(orderQuantity) <= 0) errs.push('Please enter a valid quantity')
+      if (selectedProduct && orderQuantity && Number(orderQuantity) > 0) {
+        const capacityEntry = selectedDepot?.productCapacities?.find(
+          (pc: any) => (pc.product?._id || pc.product?.id) === (selectedProduct.product?._id || selectedProduct.product?.id)
+        )
+        if (capacityEntry && capacityEntry.capacity < Number(orderQuantity)) {
+          errs.push(`Insufficient capacity. Available: ${capacityEntry.capacity.toLocaleString()} ${selectedProduct.product?.unit || 'Liters'}`)
+        }
       }
-      return null
+      return errs
     }
-    return null
+    return errs
   }
 
   const handleNextStep = () => {
-    const message = validateStep(step)
-    if (message) {
-      setError(message)
+    const stepErrors = validateStep(step)
+    if (stepErrors.length > 0) {
+      setErrors(stepErrors)
       return
     }
-    setError('')
+    setErrors([])
     if (step < 5) setStep(step + 1)
   }
 
   const handlePrevStep = () => {
-    setError('')
+    setErrors([])
     setStep(prev => Math.max(1, prev - 1))
   }
 
   const goToStep = (targetStep: number) => {
-    setError('')
+    setErrors([])
     setStep(targetStep)
   }
 
@@ -186,15 +189,15 @@ export function useOrderWizard() {
     setOrderQuantity('')
     setPlacedOrder(null)
     setPaymentInfo(null)
-    setError('')
+    setErrors([])
   }
 
   return {
     // Step state
     step,
     setStep,
-    error,
-    setError,
+    errors,
+    setErrors,
     validateStep,
     copied,
     setCopied,

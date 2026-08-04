@@ -39,7 +39,7 @@ function DepotForm() {
 
   const [formData, setFormData] = useState({ id: '', name: '', code: '', address: '', city: '', state: '', country: 'Nigeria', postcode: '', status: 'Active' as DepotItem['status'], establishedYear: new Date().getFullYear().toString() })
 
-  const { data: productsData } = useProductList({ limit: 1000 } as any)
+  const { data: productsData } = useProductList({ limit: 500 } as any)
   const products = productsData?.products || []
 
   const { data: staffData } = useAdminList()

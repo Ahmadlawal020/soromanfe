@@ -28,7 +28,7 @@ export function ProductStep({ wizard }: ProductStepProps) {
           const capacityEntry = selectedDepot.productCapacities?.find(
             (c: any) => (c.product?._id || c.product?.id) === (priceEntry.product?._id || priceEntry.product?.id)
           )
-          const remainingQty = capacityEntry?.capacity ?? 0
+          const remainingQty = capacityEntry?.availableStock ?? 0
           const isSelected = selectedProduct?.product?._id === priceEntry.product?._id
 
           return (

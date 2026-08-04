@@ -36,6 +36,19 @@ export function LoginForm() {
     e.preventDefault()
     setError('')
 
+    if (!email.trim()) {
+      setError('Please enter your email address')
+      return
+    }
+    if (!email.includes('@')) {
+      setError('Please enter a valid email address')
+      return
+    }
+    if (!password) {
+      setError('Please enter your password')
+      return
+    }
+
     try {
       await loginMutation.mutateAsync({ email, password })
       navigate({ to: '/overview' })

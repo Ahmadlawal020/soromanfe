@@ -117,7 +117,7 @@ function DriversDashboard() {
                   <TableHeader><TableRow><TableHead>Driver</TableHead><TableHead>License Details</TableHead><TableHead className="hidden lg:table-cell">Assigned Vehicle</TableHead><TableHead>Safety Score</TableHead><TableHead className="hidden md:table-cell">Contact Info</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
                   <TableBody>
                     {paginatedDrivers.map((driver: any) => (
-                      <TableRow key={driver._id} className="cursor-pointer hover:bg-muted transition" onClick={() => navigate({ to: '/drivers/details' as any, search: { id: driver._id || driver.id } as any, state: { driver } } as any)}>
+                      <TableRow key={driver._id} tabIndex={0} role="link" aria-label={`View ${driver.name}`} className="cursor-pointer hover:bg-muted transition" onClick={() => navigate({ to: '/drivers/details' as any, search: { id: driver._id || driver.id } as any, state: { driver } } as any)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate({ to: '/drivers/details' as any, search: { id: driver._id || driver.id } as any, state: { driver } } as any) } }}>
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <div className="size-10 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-normal">{getInitials(driver.name)}</div>
