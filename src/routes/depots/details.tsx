@@ -190,18 +190,9 @@ function DepotDetailPage() {
     return true
   })
 
-  // Bank Accounts query + robust depot matching
+  // Bank Accounts query — only show accounts assigned to this depot
   const { data: depotBankAccounts = [], isLoading: isLoadingBankAccounts } = useBankAccounts(activeDepotId ? { depotId: activeDepotId } : undefined)
-  const { data: allBankAccounts = [] } = useBankAccounts()
-  const matchingAccounts = depotBankAccounts.length > 0
-    ? depotBankAccounts
-    : allBankAccounts.filter((b: any) => {
-      const bDepotId = b.depotId ?? b.depot_id ?? (typeof b.depot === 'object' ? (b.depot?._id || b.depot?.id) : b.depot)
-      return b.status === 'Active' && String(bDepotId) === String(activeDepotId)
-    })
-  const displayBankAccounts = matchingAccounts.length > 0
-    ? matchingAccounts
-    : allBankAccounts.filter((b: any) => b.status === 'Active')
+  const displayBankAccounts = depotBankAccounts
 
   // Orders query + robust depot matching
   const { data: ordersData, isLoading: isLoadingOrders } = useOrderList(activeDepotId ? { depot: activeDepotId, limit: 500 } : { limit: 500 })
@@ -690,6 +681,64 @@ function DepotDetailPage() {
                       </div>
                     )
                   })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Paystack Subaccount Status */}
+          <Card className="md:col-span-2">
+            <CardHeader className="border-b border-border/50 pb-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="size-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500">
+                    <CreditCard className="size-4" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-sm font-semibold">Paystack Subaccount</CardTitle>
+                    <CardDescription className="text-xs">Automatically created when a bank account is assigned to this depot</CardDescription>
+                  </div>
+                </div>
+                <Badge
+                  variant="outline"
+                  className={
+                    depot?.subaccountActive
+                      ? 'bg-accent/15 text-accent border-accent/30'
+                      : 'bg-muted text-muted-foreground'
+                  }
+                >
+                  {depot?.subaccountActive ? 'Active' : 'Inactive'}
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-6">
+              {depot?.subaccountActive && depot?.paystackSubaccountCode ? (
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase font-semibold">Subaccount Code</p>
+                    <p className="text-sm font-mono font-semibold text-foreground mt-1">{depot.paystackSubaccountCode}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase font-semibold">Split Percentage</p>
+                    <p className="text-sm font-semibold text-foreground mt-1">{depot.subaccountSplitPercentage ?? 100}%</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase font-semibold">Status</p>
+                    <p className="text-sm font-semibold text-accent mt-1">Receiving payments</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-4 rounded-lg bg-muted/20 border border-border/40 text-center space-y-2">
+                  <p className="text-sm text-foreground font-medium">
+                    {displayBankAccounts.length > 0
+                      ? 'Bank account assigned. Subaccount setup requires valid NUBAN account details on Paystack.'
+                      : 'No bank account assigned to this depot.'}
+                  </p>
+                  <p className="text-xs text-muted-foreground max-w-lg mx-auto">
+                    {displayBankAccounts.length > 0
+                      ? 'When an active corporate bank account with valid NUBAN account number and bank code is assigned, Paystack automatically registers the settlement subaccount.'
+                      : 'Go to Bank Accounts and assign an active corporate account to this depot to automatically generate a Paystack settlement subaccount.'}
+                  </p>
                 </div>
               )}
             </CardContent>

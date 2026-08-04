@@ -166,6 +166,9 @@ export interface Depot {
     surname: string | null
     email: string | null
   }[]
+  paystackSubaccountCode?: string
+  subaccountActive?: boolean
+  subaccountSplitPercentage?: number
   createdAt?: string
   updatedAt?: string
 }

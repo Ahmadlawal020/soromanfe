@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { PageHeader } from '#/components/PageHeader'
-import { createFileRoute, useNavigate, useLocation } from '@tanstack/react-router'
+import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
@@ -9,6 +9,7 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '#/com
 import { Badge } from '#/components/ui/badge'
 import { ArrowLeft, Landmark, Warehouse, Loader2, Search, Check, X, Star } from 'lucide-react'
 import {
+  useBankAccounts,
   useCreateBankAccount,
   useUpdateBankAccount,
   useBankAccountDetails,
@@ -41,14 +42,33 @@ const NIGERIAN_BANKS = [
   'Other (Custom Bank)',
 ]
 
+const BANK_CODES_MAP: Record<string, string> = {
+  'Zenith Bank': '057',
+  'Guaranty Trust Bank (GTBank)': '058',
+  'First Bank of Nigeria': '011',
+  'Access Bank': '044',
+  'United Bank for Africa (UBA)': '033',
+  'Wema Bank': '035',
+  'Sterling Bank': '232',
+  'Fidelity Bank': '070',
+  'Union Bank': '032',
+  'Stanbic IBTC Bank': '221',
+  'Kuda Bank': '50211',
+  'Moniepoint Microfinance Bank': '50515',
+  'OPay': '999992',
+  'Ecobank Nigeria': '050',
+  'First City Monument Bank (FCMB)': '214',
+  'Providus Bank': '101',
+}
+
 function BankAccountForm() {
   const navigate = useNavigate()
-  const location = useLocation()
+  const router = useRouter()
   const toast = useToast()
   const createBankAccount = useCreateBankAccount()
   const updateBankAccount = useUpdateBankAccount()
 
-  const stateData = location.state as { bankAccount?: BankAccount; isEdit?: boolean } | undefined
+  const stateData = router.history.location.state as { bankAccount?: BankAccount; isEdit?: boolean } | undefined
   const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
   const accountIdFromUrl = searchParams?.get('id') || searchParams?.get('accountId') || ''
 
@@ -60,49 +80,100 @@ function BankAccountForm() {
   const editingAccount = stateAccount || fetchedAccount
 
   const { data: depots = [], isLoading: isLoadingDepots } = useDepots()
+  const { data: allBankAccounts = [] } = useBankAccounts()
+
+  const alreadyAssignedDepotIds = useMemo(() => {
+    const assignedSet = new Set<number>()
+    for (const acc of allBankAccounts) {
+      if (isEdit && accountId && String(acc.id) === String(accountId)) {
+        continue
+      }
+      const rawIds = acc.depotIds || (acc.depots || []).map((d: any) => d.id)
+      if (Array.isArray(rawIds)) {
+        for (const dId of rawIds) {
+          const numId = Number(dId)
+          if (!isNaN(numId) && numId > 0) {
+            assignedSet.add(numId)
+          }
+        }
+      }
+    }
+    return assignedSet
+  }, [allBankAccounts, isEdit, accountId])
+
+  const availableDepots = depots.filter((depot) => !alreadyAssignedDepotIds.has(Number(depot.id)))
 
   // Form State
-  const [selectedBankPreset, setSelectedBankPreset] = useState<string>('Zenith Bank')
-  const [customBankName, setCustomBankName] = useState<string>('')
-  const [accountName, setAccountName] = useState<string>('')
-  const [accountNumber, setAccountNumber] = useState<string>('')
-  const [bankCode, setBankCode] = useState<string>('')
-  const [branchName, setBranchName] = useState<string>('')
-  const [currency, setCurrency] = useState<string>('NGN')
-  const [status, setStatus] = useState<'Active' | 'Inactive' | 'Suspended'>('Active')
-  const [isDefault, setIsDefault] = useState<boolean>(false)
-  const [notes, setNotes] = useState<string>('')
+  const [selectedBankPreset, setSelectedBankPreset] = useState<string>(
+    () => {
+      if (!stateAccount) return 'Zenith Bank'
+      const bank = (stateAccount.bankName || '').trim()
+      if (NIGERIAN_BANKS.includes(bank)) return bank
+      if (bank) return 'Other (Custom Bank)'
+      return 'Zenith Bank'
+    }
+  )
+  const [customBankName, setCustomBankName] = useState<string>(
+    () => {
+      if (!stateAccount) return ''
+      const bank = (stateAccount.bankName || '').trim()
+      return NIGERIAN_BANKS.includes(bank) ? '' : bank
+    }
+  )
+  const [accountName, setAccountName] = useState<string>(stateAccount?.accountName || '')
+  const [accountNumber, setAccountNumber] = useState<string>(stateAccount?.accountNumber || '')
+  const [bankCode, setBankCode] = useState<string>(
+    () => stateAccount?.bankCode || BANK_CODES_MAP[stateAccount?.bankName || 'Zenith Bank'] || '057'
+  )
+  const [branchName, setBranchName] = useState<string>(stateAccount?.branchName || '')
+  const [currency, setCurrency] = useState<string>(stateAccount?.currency || 'NGN')
+  const [status, setStatus] = useState<'Active' | 'Inactive' | 'Suspended'>(stateAccount?.status || 'Active')
+  const [isDefault, setIsDefault] = useState<boolean>(Boolean(stateAccount?.isDefault))
+  const [notes, setNotes] = useState<string>(stateAccount?.notes || '')
 
   // Depot Multi-Select State
-  const [selectedDepotIds, setSelectedDepotIds] = useState<number[]>([])
+  const [selectedDepotIds, setSelectedDepotIds] = useState<number[]>(() => {
+    if (!stateAccount) return []
+    const rawDepotIds = stateAccount.depotIds || (stateAccount.depots || []).map((d) => d.id)
+    return (Array.isArray(rawDepotIds) ? rawDepotIds : [])
+      .map((i) => Number(i))
+      .filter((i) => !isNaN(i) && i > 0)
+  })
   const [depotSearchTerm, setDepotSearchTerm] = useState<string>('')
 
-  // Populate form on edit
+  const handleBankPresetChange = (preset: string) => {
+    setSelectedBankPreset(preset)
+    if (preset !== 'Other (Custom Bank)' && BANK_CODES_MAP[preset]) {
+      setBankCode(BANK_CODES_MAP[preset])
+    }
+  }
+
+  // Populate form when fetched account loads (fallback for URL-based edit)
   useEffect(() => {
-    if (editingAccount) {
-      const bank = editingAccount.bankName || ''
+    if (fetchedAccount && !stateAccount) {
+      const bank = (fetchedAccount.bankName || '').trim()
       if (NIGERIAN_BANKS.includes(bank)) {
         setSelectedBankPreset(bank)
       } else if (bank) {
         setSelectedBankPreset('Other (Custom Bank)')
         setCustomBankName(bank)
       }
-      setAccountName(editingAccount.accountName || '')
-      setAccountNumber(editingAccount.accountNumber || '')
-      setBankCode(editingAccount.bankCode || '')
-      setBranchName(editingAccount.branchName || '')
-      setCurrency(editingAccount.currency || 'NGN')
-      setStatus(editingAccount.status || 'Active')
-      setIsDefault(Boolean(editingAccount.isDefault))
-      setNotes(editingAccount.notes || '')
+      setAccountName(fetchedAccount.accountName || '')
+      setAccountNumber(fetchedAccount.accountNumber || '')
+      setBankCode(fetchedAccount.bankCode || BANK_CODES_MAP[bank] || '')
+      setBranchName(fetchedAccount.branchName || '')
+      setCurrency(fetchedAccount.currency || 'NGN')
+      setStatus(fetchedAccount.status || 'Active')
+      setIsDefault(Boolean(fetchedAccount.isDefault))
+      setNotes(fetchedAccount.notes || '')
 
-      const rawDepotIds = editingAccount.depotIds || (editingAccount.depots || []).map((d) => d.id)
+      const rawDepotIds = fetchedAccount.depotIds || (fetchedAccount.depots || []).map((d) => d.id)
       const numericIds = (Array.isArray(rawDepotIds) ? rawDepotIds : [])
         .map((i) => Number(i))
         .filter((i) => !isNaN(i) && i > 0)
       setSelectedDepotIds(numericIds)
     }
-  }, [editingAccount])
+  }, [fetchedAccount, stateAccount])
 
   const toggleDepotSelection = (id: number) => {
     setSelectedDepotIds((prev) =>
@@ -111,7 +182,7 @@ function BankAccountForm() {
   }
 
   const handleSelectAllDepots = () => {
-    setSelectedDepotIds(depots.map((d) => Number(d.id)).filter((id) => !isNaN(id)))
+    setSelectedDepotIds(availableDepots.map((d) => Number(d.id)).filter((id) => !isNaN(id)))
   }
 
   const handleClearDepotSelection = () => {
@@ -122,6 +193,7 @@ function BankAccountForm() {
     e.preventDefault()
 
     const finalBankName = selectedBankPreset === 'Other (Custom Bank)' ? customBankName.trim() : selectedBankPreset.trim()
+    const resolvedBankCode = bankCode.trim() || BANK_CODES_MAP[finalBankName] || ''
 
     if (!finalBankName) {
       toast.error('Please select or specify a bank name')
@@ -140,7 +212,7 @@ function BankAccountForm() {
       bankName: finalBankName,
       accountName: accountName.trim(),
       accountNumber: accountNumber.trim(),
-      bankCode: bankCode.trim(),
+      bankCode: resolvedBankCode,
       branchName: branchName.trim(),
       currency,
       status,
@@ -161,7 +233,7 @@ function BankAccountForm() {
     }
   }
 
-  const filteredDepots = depots.filter((depot) =>
+  const filteredDepots = availableDepots.filter((depot) =>
     depot.name.toLowerCase().includes(depotSearchTerm.toLowerCase()) ||
     depot.code.toLowerCase().includes(depotSearchTerm.toLowerCase()) ||
     (depot.city && depot.city.toLowerCase().includes(depotSearchTerm.toLowerCase()))
@@ -209,7 +281,7 @@ function BankAccountForm() {
                 <Label htmlFor="bankPreset" className="text-xs font-semibold">
                   Bank Name <span className="text-destructive">*</span>
                 </Label>
-                <Select value={selectedBankPreset} onValueChange={setSelectedBankPreset}>
+                <Select value={selectedBankPreset} onValueChange={handleBankPresetChange}>
                   <SelectTrigger id="bankPreset" className="bg-background/50">
                     <SelectValue placeholder="Select Bank" />
                   </SelectTrigger>
@@ -451,7 +523,9 @@ function BankAccountForm() {
               </div>
             ) : filteredDepots.length === 0 ? (
               <div className="p-6 text-center text-xs text-muted-foreground border border-dashed rounded-lg">
-                No depots match your search query.
+                {availableDepots.length === 0
+                  ? 'All operational depots already have bank accounts assigned.'
+                  : 'No available depots match your search query.'}
               </div>
             ) : (
               <div className="grid gap-2 sm:grid-cols-2 max-h-72 overflow-y-auto pr-1">
