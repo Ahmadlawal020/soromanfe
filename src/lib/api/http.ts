@@ -102,6 +102,18 @@ api.interceptors.response.use(
         window.location.href = "/login";
       }
     }
+
+    // Handle 403 Forbidden - Insufficient permissions
+    if (error.response?.status === 403) {
+      const message = error.response?.data?.message || 'You do not have permission to perform this action';
+      // Create a custom error with the permission message
+      const permissionError = new Error(message);
+      permissionError.name = 'PermissionError';
+      (permissionError as any).status = 403;
+      (permissionError as any).isPermissionError = true;
+      return Promise.reject(permissionError);
+    }
+
     return Promise.reject(error);
   },
 );

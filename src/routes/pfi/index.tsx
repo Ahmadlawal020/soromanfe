@@ -25,8 +25,10 @@ import {
   naira, litres, moneyTone, SurplusDeficit, SellThroughBar,
 } from '#/routes/pfi/-pfi-utils'
 import { downloadPfiReport, downloadMasterReport } from '#/routes/pfi/-pfi-report'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/pfi/')({
+  beforeLoad: () => routeGuard('/pfi'),
   component: PFIDashboard,
 })
 

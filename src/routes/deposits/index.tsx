@@ -17,8 +17,10 @@ import { Pagination } from '#/components/Pagination'
 import { useDepositList } from '#/lib/hooks/useDeposits'
 import type { Deposit } from '#/lib/hooks/useDeposits'
 import { cn, toNum } from '#/lib/utils'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/deposits/')({
+  beforeLoad: () => routeGuard('/deposits'),
   component: DepositsDashboard,
 })
 

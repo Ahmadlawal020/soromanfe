@@ -17,8 +17,10 @@ import { useLicenseDetails, useReviewLicense } from '#/lib/hooks/useCustomerLice
 import { PageLoader } from '#/components/PageLoader'
 import { PageError } from '#/components/PageError'
 import { Breadcrumbs } from '#/components/Breadcrumbs'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/licence-verification/review')({
+  beforeLoad: () => routeGuard('/licence-verification'),
   validateSearch: (search: Record<string, unknown>) => ({
     id: (search.id as string) || '',
   }),

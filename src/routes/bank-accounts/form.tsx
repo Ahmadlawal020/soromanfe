@@ -17,8 +17,10 @@ import {
 } from '#/lib/hooks/useBankAccounts'
 import { useDepots } from '#/lib/hooks/useDepots'
 import { useToast } from '#/lib/hooks/useToast'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/bank-accounts/form')({
+  beforeLoad: () => routeGuard('/bank-accounts'),
   component: BankAccountForm,
 })
 

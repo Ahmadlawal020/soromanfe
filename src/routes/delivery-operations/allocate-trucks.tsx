@@ -10,8 +10,10 @@ import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
 import { Truck, Plus, Search, Loader2, CheckCircle2, Droplets, Building2, Calendar, Tag, AlertCircle, X } from 'lucide-react'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/delivery-operations/allocate-trucks')({
+  beforeLoad: () => routeGuard('/delivery-operations'),
   component: AllocateTrucksPage,
 })
 

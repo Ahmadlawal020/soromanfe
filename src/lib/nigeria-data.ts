@@ -402,7 +402,6 @@ export const nigeriaLgas: Record<string, string[]> = {
     "Owerri Municipal",
     "Owerri North",
     "Owerri West",
-    "Nwangele",
     "Unuimo"
   ],
   "Jigawa": [

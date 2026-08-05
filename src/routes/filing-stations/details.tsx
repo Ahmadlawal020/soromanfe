@@ -28,8 +28,10 @@ import { useDeliveryInventoryList } from '#/lib/hooks/useDeliveryInventory'
 import { useToast } from '#/lib/hooks/useToast'
 import { cn, toNum } from '#/lib/utils'
 import type { FilingStation, DeliverySale, AccountEntry } from '#/lib/types'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/filing-stations/details')({
+  beforeLoad: () => routeGuard('/filing-stations'),
   validateSearch: (search: Record<string, unknown>) => ({
     stationId: (search.stationId as string) || '',
   }),

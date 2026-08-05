@@ -1,7 +1,9 @@
 import { createFileRoute, useRouterState } from '@tanstack/react-router'
 import { UnifiedDeliveryCustomerForm } from '#/components/UnifiedDeliveryCustomerForm'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/filing-stations/form')({
+  beforeLoad: () => routeGuard('/filing-stations'),
   validateSearch: (search: Record<string, unknown>) => ({
     customerId: (search.customerId as string) || '',
   }),

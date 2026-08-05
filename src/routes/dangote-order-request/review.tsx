@@ -9,7 +9,7 @@ import { Label } from '#/components/ui/label'
 import { CommaInput } from '#/components/ui/comma-input'
 import {
   ArrowLeft, Package, MapPin, Truck, DollarSign, Calendar, Clock, CheckCircle, XCircle,
-  User, FileText, Mail, Phone, ShieldPlus, AlertTriangle,
+  User, FileText, Mail, Phone, ShieldPlus, AlertTriangle, Hourglass,
 } from 'lucide-react'
 import { useDangoteOrderRequestDetails, useReviewDangoteOrderRequest } from '#/lib/hooks/useDangoteOrders'
 import { PageLoader } from '#/components/PageLoader'
@@ -17,8 +17,10 @@ import { PageError } from '#/components/PageError'
 import { Breadcrumbs } from '#/components/Breadcrumbs'
 import { ConfirmDialog } from '#/components/ConfirmDialog'
 import { getErrorMessage } from '#/lib/utils'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/dangote-order-request/review')({
+  beforeLoad: () => routeGuard('/dangote-order-request'),
   validateSearch: (search: Record<string, unknown>) => ({
     id: (search.id as string) || '',
   }),
@@ -49,6 +51,10 @@ function statusBadge(status: string) {
       return <Badge className="bg-accent/15 text-accent border-accent/20 gap-1"><CheckCircle className="size-3" /> Approved</Badge>
     case 'Rejected':
       return <Badge variant="destructive" className="gap-1"><XCircle className="size-3" /> Rejected</Badge>
+    case 'Cancelled':
+      return <Badge variant="outline" className="gap-1"><XCircle className="size-3" /> Cancelled</Badge>
+    case 'Expired':
+      return <Badge className="bg-muted/50 text-muted-foreground border-muted/20 gap-1"><Hourglass className="size-3" /> Expired</Badge>
     default:
       return <Badge variant="outline">{status}</Badge>
   }

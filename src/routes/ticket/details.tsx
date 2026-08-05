@@ -10,8 +10,10 @@ import {
 } from 'lucide-react'
 import { useTicketDetails, useRedeemTicket } from '#/lib/hooks/useTickets'
 import { ConfirmDialog } from '#/components/ConfirmDialog'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/ticket/details')({
+  beforeLoad: () => routeGuard('/ticket'),
   validateSearch: (search: Record<string, unknown>) => ({
     id: (search.id as string) || '',
   }),

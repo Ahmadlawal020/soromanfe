@@ -18,8 +18,10 @@ import { useDepositList } from '#/lib/hooks/useDeposits'
 import { useToast } from '#/lib/hooks/useToast'
 import { Breadcrumbs } from '#/components/Breadcrumbs'
 import { ConfirmDialog } from '#/components/ConfirmDialog'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/depots/details')({
+  beforeLoad: () => routeGuard('/depots'),
   validateSearch: (search: Record<string, unknown>): { id?: string } => ({
     id: (search.id as string) || '',
   }),

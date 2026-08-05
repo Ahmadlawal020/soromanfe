@@ -16,8 +16,10 @@ import { useToast } from '#/lib/hooks/useToast'
 import type { DeliveryInventory, DeliveryCustomer, DeliverySale } from '#/lib/types'
 import type { LedgerGroup } from '#/components/sales-ledger/SalesLedgerDialogs'
 import { toNum, formatWithCommas, stripCommas, isFillingStation, safeFormatDate, normalizeCycleDate } from '#/lib/sales-ledger-utils'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/sales-ledger/assign-customer')({
+  beforeLoad: () => routeGuard('/sales-ledger'),
   validateSearch: (search: Record<string, unknown>): {
     loadingId?: string
     truckNumber?: string

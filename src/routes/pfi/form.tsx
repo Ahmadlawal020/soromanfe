@@ -10,8 +10,10 @@ import { useCreatePfi, useDepotsForFilter, useUpdatePfi } from '#/lib/hooks/useP
 import { useProductList } from '#/lib/hooks/useProducts'
 import { useAdminList } from '#/lib/hooks/useAdmin'
 import { useLpgStations } from '#/lib/hooks/useLpgStations'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/pfi/form')({
+  beforeLoad: () => routeGuard('/pfi'),
   component: PFIForm,
 })
 

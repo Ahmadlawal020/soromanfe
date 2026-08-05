@@ -26,8 +26,10 @@ import { useBankAccountDetails, useDeleteBankAccount, type BankAccount } from '#
 import { useToast } from '#/lib/hooks/useToast'
 import { Breadcrumbs } from '#/components/Breadcrumbs'
 import { ConfirmDialog } from '#/components/ConfirmDialog'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/bank-accounts/details')({
+  beforeLoad: () => routeGuard('/bank-accounts'),
   component: BankAccountDetails,
 })
 

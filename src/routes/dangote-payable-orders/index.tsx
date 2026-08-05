@@ -13,8 +13,10 @@ import { PageLoader } from '#/components/PageLoader'
 import { PageError } from '#/components/PageError'
 import { PageEmpty } from '#/components/PageEmpty'
 import { Pagination } from '#/components/Pagination'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/dangote-payable-orders/')({
+  beforeLoad: () => routeGuard('/dangote-payable-orders'),
   component: PayableDangoteOrdersPage,
 })
 

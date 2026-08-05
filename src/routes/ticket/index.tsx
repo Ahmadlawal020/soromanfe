@@ -26,11 +26,13 @@ import { useOrderForTicketing, type TruckLoad } from '#/lib/hooks/useTickets'
 import {
   DATE_PRESETS, resolveRange, toNumber, formatQty, type DatePreset,
 } from '#/routes/orders/-orders-utils'
+import { routeGuard } from '#/lib/route-guard'
 
 // QR ticket scanning used to live on this page. It is disabled but kept
 // verbatim in ./qr-scanner-disabled.txt.
 
 export const Route = createFileRoute('/ticket/')({
+  beforeLoad: () => routeGuard('/ticket'),
   component: LoadingTicketsPage,
 })
 

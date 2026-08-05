@@ -5,18 +5,23 @@ export const Route = createFileRoute('/login')({
   beforeLoad: () => {
     if (typeof window === 'undefined') return
 
-    const stored = localStorage.getItem('dashboard-auth-storage')
+    const stored = sessionStorage.getItem('dashboard-auth-storage')
     if (!stored) return
 
+    let isAuthenticated = false
     try {
       const parsed = JSON.parse(stored)
       if (parsed?.state?.accessToken) {
-        throw redirect({ to: '/overview' })
+        isAuthenticated = true
       }
-    } catch (e) {
-      // Re-throw TanStack redirect objects; ignore JSON parse errors
-      if (e && typeof e === 'object' && '__isRedirect' in e) throw e
+    } catch {
+      // ignore JSON parse errors
+    }
+
+    if (isAuthenticated) {
+      throw redirect({ to: '/overview' })
     }
   },
   component: LoginForm,
 })
+

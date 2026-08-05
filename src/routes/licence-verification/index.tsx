@@ -33,8 +33,10 @@ import { PageError } from '#/components/PageError'
 import { PageEmpty } from '#/components/PageEmpty'
 import { Pagination } from '#/components/Pagination'
 import type { CustomerLicense } from '#/lib/types'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/licence-verification/')({
+  beforeLoad: () => routeGuard('/licence-verification'),
   component: LicenceVerification,
 })
 

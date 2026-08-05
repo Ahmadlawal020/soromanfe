@@ -10,8 +10,10 @@ import {
   ROLE_GROUPS,
 } from './-roles'
 import { useCreateAdmin, useUpdateAdmin } from '#/modules/admin/hooks/hook'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/admin/form')({
+  beforeLoad: () => routeGuard('/admin'),
   component: AdminForm,
 })
 

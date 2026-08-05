@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
 import { cn } from "#/lib/utils";
 import {
@@ -29,6 +29,8 @@ import {
 import { useAuthStore, useAdminLogout } from "#/modules/auth";
 import { useLayoutStore } from "#/stores/layoutStore";
 import { Avatar, AvatarFallback } from "#/components/ui/avatar";
+import { useRoles } from "#/lib/hooks/useRoles";
+import { canAccessRoute, isSuperAdmin } from "#/lib/rbac";
 
 type NavItem = {
   title: string;
@@ -212,6 +214,22 @@ export default function Sidebar() {
   const expanded = !isCollapsed;
   const user = useAuthStore((s) => s.user);
   const logoutMutation = useAdminLogout();
+  const { userRoles } = useRoles();
+
+  // Filter navigation categories based on user roles
+  const filteredNavCategories = useMemo(() => {
+    // SUPERADMIN sees everything
+    if (isSuperAdmin(userRoles)) return navCategories;
+
+    return navCategories
+      .map((category) => ({
+        ...category,
+        items: category.items.filter((item) =>
+          canAccessRoute(userRoles, item.path)
+        ),
+      }))
+      .filter((category) => category.items.length > 0);
+  }, [userRoles]);
 
   const handleLogout = async () => {
     try {
@@ -278,7 +296,7 @@ export default function Sidebar() {
           className="flex-1 space-y-1 overflow-x-hidden overflow-y-auto py-3"
           aria-label="Primary"
         >
-          {navCategories.map((group) => (
+          {filteredNavCategories.map((group) => (
             <NavGroup
               key={group.category || "__overview"}
               label={group.category}

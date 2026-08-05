@@ -15,8 +15,10 @@ import { StatementLinePicker } from '#/components/StatementLinePicker'
 import { useMatchStatementLines, type StatementLine } from '#/lib/hooks/useBankStatements'
 import { toNum } from '#/lib/utils'
 import type { Customer, } from '#/lib/types'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/deposits/manual-deposit')({
+    beforeLoad: () => routeGuard('/deposits'),
     component: ManualDepositPage,
 })
 

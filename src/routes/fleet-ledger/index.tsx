@@ -23,8 +23,10 @@ import {
   type LedgerEntry,
 } from '#/lib/hooks/useFleet'
 import { DATE_PRESETS, resolveRange, type DatePreset } from '#/routes/orders/-orders-utils'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/fleet-ledger/')({
+  beforeLoad: () => routeGuard('/fleet-ledger'),
   component: FleetLedgerPage,
 })
 

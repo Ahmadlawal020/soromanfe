@@ -24,8 +24,10 @@ import {
   parseStatus, isExpired, STATUS_RATINGS, type FleetTruck,
 } from '#/lib/hooks/useFleet'
 import { DATE_PRESETS, resolveRange, type DatePreset } from '#/routes/orders/-orders-utils'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/fleet-trucks/')({
+  beforeLoad: () => routeGuard('/fleet-trucks'),
   component: FleetDirectoryPage,
 })
 

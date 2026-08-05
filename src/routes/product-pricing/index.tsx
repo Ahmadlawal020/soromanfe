@@ -31,8 +31,10 @@ import { useProductList } from '#/lib/hooks/useProducts'
 import { PageLoader } from '#/components/PageLoader'
 import { PageError } from '#/components/PageError'
 import { PageEmpty } from '#/components/PageEmpty'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/product-pricing/')({
+  beforeLoad: () => routeGuard('/product-pricing'),
   component: ProductPricingPage,
 })
 

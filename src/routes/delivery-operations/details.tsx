@@ -19,8 +19,10 @@ import { useAllocatableTrucks } from '#/lib/hooks/useFleet'
 import { useToast } from '#/lib/hooks/useToast'
 import type { DeliveryInventory, DeliverySale } from '#/lib/types'
 import type { Pfi } from '#/lib/hooks/usePfis'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/delivery-operations/details')({
+  beforeLoad: () => routeGuard('/delivery-operations'),
   validateSearch: (search: Record<string, unknown>) => ({
     inventoryId: (search.inventoryId as string) || '',
   }),

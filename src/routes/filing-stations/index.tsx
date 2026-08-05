@@ -28,8 +28,10 @@ import { useDeliveryInventoryList, useUpdateDeliveryInventory, useDeleteDelivery
 import { useToast } from '#/lib/hooks/useToast'
 import { cn, toNum } from '#/lib/utils'
 import type { FilingStation, DeliverySale, DeliveryCustomer, AccountEntry } from '#/lib/types'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/filing-stations/')({
+  beforeLoad: () => routeGuard('/filing-stations'),
   component: FilingStationsDashboard,
 })
 

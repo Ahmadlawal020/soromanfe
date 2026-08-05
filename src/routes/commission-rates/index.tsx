@@ -23,8 +23,10 @@ import { useCommissionRates, useUpsertCommissionRate } from '#/lib/hooks/useComm
 import { useDepots } from '#/lib/hooks/useDepots'
 import { useProductList } from '#/lib/hooks/useProducts'
 import type { CommissionRate } from '#/lib/types'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/commission-rates/')({
+  beforeLoad: () => routeGuard('/commission-rates'),
   component: CommissionRatesPage,
 })
 

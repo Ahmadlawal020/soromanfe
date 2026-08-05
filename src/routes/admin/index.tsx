@@ -62,8 +62,10 @@ export {
   type StaffMember,
 } from './-roles'
 export { Roles, ALL_ROLES, ROLE_GROUPS, LOCATION_CHOICES, type LocationChoice, type PfiOption, pfisList, getCurrentUserRoles } from './-roles'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/admin/')({
+  beforeLoad: () => routeGuard('/admin'),
   component: StaffManagement,
 })
 

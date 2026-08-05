@@ -23,8 +23,10 @@ import type { Pfi } from '#/lib/hooks/usePfis'
 
 import { AllocateTrucksDialog } from '#/components/delivery-operations/AllocateTrucksDialog'
 import { ManageCodesDialog } from '#/components/delivery-operations/ManageCodesDialog'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/delivery-operations/')({
+  beforeLoad: () => routeGuard('/delivery-operations'),
   component: DeliveryOperationsPage,
 })
 

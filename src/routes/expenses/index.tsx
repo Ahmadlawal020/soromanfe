@@ -26,8 +26,10 @@ import {
   type PfiExpense, type ExpenseFilters,
 } from '#/lib/hooks/usePfis'
 import { naira } from '#/routes/pfi/-pfi-utils'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/expenses/')({
+  beforeLoad: () => routeGuard('/expenses'),
   component: ExpensesPage,
 })
 

@@ -9,8 +9,10 @@ import { useProductDetails, useDeleteProduct } from '#/lib/hooks/useProducts'
 
 import { Breadcrumbs } from '#/components/Breadcrumbs'
 import { ConfirmDialog } from '#/components/ConfirmDialog'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/dangote-products/details')({
+  beforeLoad: () => routeGuard('/dangote-products'),
   validateSearch: (search: Record<string, unknown>) => ({
     id: (search.id as string) || '',
   }),

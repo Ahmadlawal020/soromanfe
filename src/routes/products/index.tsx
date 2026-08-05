@@ -17,8 +17,10 @@ import { PageEmpty } from '#/components/PageEmpty'
 import { PANEL, MICRO } from '#/lib/panel'
 import { cn, getErrorMessage } from '#/lib/utils'
 import { useProductList } from '#/lib/hooks/useProducts'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/products/')({
+  beforeLoad: () => routeGuard('/products'),
   component: ProductsDashboard,
 })
 

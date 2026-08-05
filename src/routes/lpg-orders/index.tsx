@@ -9,14 +9,17 @@ import { Card, CardContent } from '#/components/ui/card'
 import { Input } from '#/components/ui/input'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '#/components/ui/select'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '#/components/ui/table'
-import { Clock, CheckCircle, DollarSign, Search, Plus, X, Eye, FileText, MapPin, Truck, Flame } from 'lucide-react'
+import { Flame, Clock, CheckCircle, Search, Plus, X, Eye, FileText, MapPin, Truck, DollarSign, Hourglass, XCircle } from 'lucide-react'
 import { useLpgOrderRequests } from '#/lib/hooks/useLpgOrders'
 import { PageLoader } from '#/components/PageLoader'
 import { PageError } from '#/components/PageError'
 import { PageEmpty } from '#/components/PageEmpty'
 import { Pagination } from '#/components/Pagination'
+import { OrderExpiryBadge } from '../orders/-order-expiry'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/lpg-orders/')({
+  beforeLoad: () => routeGuard('/lpg-orders'),
   component: LpgOrdersDashboard,
 })
 
@@ -61,6 +64,7 @@ function LpgOrdersDashboard() {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')
   const [paymentFilter, setPaymentFilter] = useState('all')
   const [collectionFilter, setCollectionFilter] = useState('all')
   const [currentPage, setCurrentPage] = useState(1)
@@ -73,21 +77,22 @@ function LpgOrdersDashboard() {
 
   useEffect(() => {
     setCurrentPage(1)
-  }, [debouncedSearch, paymentFilter, collectionFilter])
+  }, [debouncedSearch, statusFilter, paymentFilter, collectionFilter])
 
   const { data, isLoading, isError, error, refetch } = useLpgOrderRequests({
     search: debouncedSearch || undefined,
-    status: 'Approved',
+    status: statusFilter !== 'all' ? statusFilter : undefined,
     limit: 100,
   })
 
   const requests = data?.requests || []
-  const hasFilters = !!(debouncedSearch || paymentFilter !== 'all' || collectionFilter !== 'all')
+  const hasFilters = !!(debouncedSearch || statusFilter !== 'all' || paymentFilter !== 'all' || collectionFilter !== 'all')
 
   const filteredRequests = requests.filter((req: any) => {
+    const matchesStatus = statusFilter === 'all' || req.status === statusFilter
     const matchesPayment = paymentFilter === 'all' || req.paymentStatus === paymentFilter
     const matchesCollection = collectionFilter === 'all' || req.collectionStatus === collectionFilter
-    return matchesPayment && matchesCollection
+    return matchesStatus && matchesPayment && matchesCollection
   })
 
   const totalOrders = filteredRequests.length
@@ -154,6 +159,19 @@ function LpgOrdersDashboard() {
         </button>
         )}
         </div>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-full sm:w-[150px]">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="Approved">Approved</SelectItem>
+            <SelectItem value="Cancelled">Cancelled</SelectItem>
+            <SelectItem value="Expired">Expired</SelectItem>
+            <SelectItem value="Rejected">Rejected</SelectItem>
+            <SelectItem value="Pending Review">Pending Review</SelectItem>
+          </SelectContent>
+        </Select>
         <Select value={paymentFilter} onValueChange={setPaymentFilter}>
         <SelectTrigger className="w-full sm:w-[150px]">
         <SelectValue placeholder="Payment" />
@@ -205,7 +223,7 @@ function LpgOrdersDashboard() {
                       <TableHead>Payment</TableHead>
                       <TableHead>Collection</TableHead>
                       <TableHead>Date</TableHead>
-                      <TableHead className="text-center">Action</TableHead>
+                      <TableHead>Status</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -246,19 +264,21 @@ function LpgOrdersDashboard() {
                         <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                           {formatDate(req.createdAt)}
                         </TableCell>
-                        <TableCell className="text-center">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 px-2 text-primary hover:text-primary/80 hover:bg-primary/10 gap-1 text-xs"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              navigate({ to: '/lpg-orders/details' as any, search: { id: String(req.id) } as any })
-                            }}
-                          >
-                            <Eye className="size-3.5" />
-                            View
-                          </Button>
+                        <TableCell>
+                          <div className="flex flex-col gap-1">
+                            {req.status === 'Cancelled' ? (
+                              <Badge variant="outline" className="gap-1 w-fit"><XCircle className="size-3" /> Cancelled</Badge>
+                            ) : req.status === 'Expired' ? (
+                              <Badge className="bg-muted/50 text-muted-foreground border-muted/20 gap-1 w-fit"><Hourglass className="size-3" /> Expired</Badge>
+                            ) : req.status === 'Rejected' ? (
+                              <Badge variant="destructive" className="gap-1 w-fit"><XCircle className="size-3" /> Rejected</Badge>
+                            ) : req.status === 'Pending Review' ? (
+                              <Badge className="bg-warning/15 text-warning border-warning/20 gap-1 w-fit"><Clock className="size-3" /> Pending Review</Badge>
+                            ) : (
+                              <Badge className="bg-accent/15 text-accent border-accent/20 gap-1 w-fit"><CheckCircle className="size-3" /> Active</Badge>
+                            )}
+                            <OrderExpiryBadge status={req.status} expiresAt={req.expiresAt} expiredAt={req.expiredAt} />
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}

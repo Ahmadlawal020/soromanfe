@@ -1,7 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { SalesLedgerDetails } from '#/components/sales-ledger/details'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/sales-ledger/details')({
+  beforeLoad: () => routeGuard('/sales-ledger'),
   validateSearch: (search: Record<string, unknown>): {
     key?: string
     loadingId?: string

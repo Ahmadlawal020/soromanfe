@@ -17,8 +17,10 @@ import { cn } from '#/lib/utils'
 import { useAllOrders } from '#/lib/hooks/useOrders'
 import { useAuthStore } from '#/modules/auth'
 import api from '#/lib/api/http'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/security-report/')({
+  beforeLoad: () => routeGuard('/security-report'),
   component: SecurityReportPage,
 })
 

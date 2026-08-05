@@ -10,8 +10,10 @@ import {
   Fuel, Wallet, Camera, Landmark, Pencil, Clock, AlertTriangle
 } from 'lucide-react'
 import { useDeliveryCustomerDetails, useDeleteDeliveryCustomer } from '#/lib/hooks/useDeliveryCustomers'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/delivery-customer/details')({
+  beforeLoad: () => routeGuard('/delivery-customer'),
   validateSearch: (search: Record<string, unknown>) => ({
     customerId: (search.customerId as string) || '',
   }),

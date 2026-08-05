@@ -36,7 +36,7 @@ export interface DangoteOrderRequest {
   deliveryLga?: string
   paymentReference?: string
   paymentMode?: 'Bank Transfer' | 'Bank Draft' | 'Wallet'
-  status: 'Pending Review' | 'Approved' | 'Rejected'
+  status: 'Pending Review' | 'Approved' | 'Rejected' | 'Cancelled' | 'Expired'
   createdDate: string
   pricePerUnit?: number
   deliveryPrice?: number

@@ -34,8 +34,10 @@ import {
   toNum, fmt, fmtQty, normalizeCycleDate, getCycleKey, safeFormatDate,
   getCodeTheme, type TimePreset,
 } from '#/lib/sales-ledger-utils'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/sales-ledger/')({
+  beforeLoad: () => routeGuard('/sales-ledger'),
   component: SalesLedgerDashboard,
 })
 

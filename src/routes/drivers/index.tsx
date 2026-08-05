@@ -11,8 +11,10 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '#
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '#/components/ui/select'
 import { Contact, Search, Plus, UserCheck, UserX, Star, Phone, Mail, Truck, FileText, X, SearchX, Loader2 } from 'lucide-react'
 import { useDriverList } from '#/lib/hooks/useDrivers'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/drivers/')({
+  beforeLoad: () => routeGuard('/drivers'),
   component: DriversDashboard,
 })
 

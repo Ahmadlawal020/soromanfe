@@ -8,8 +8,10 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '#
 import { Users, CheckCircle, Loader2, Building2 } from 'lucide-react'
 import { useCreateCustomer, useUpdateCustomer } from '#/lib/hooks/useCustomers'
 import { CustomerLicenses } from '#/components/CustomerLicenses'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/customers/form')({
+  beforeLoad: () => routeGuard('/customers'),
   component: CustomerForm,
 })
 

@@ -32,8 +32,10 @@ import {
   Package,
   Flame,
 } from 'lucide-react'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/overview/')({
+  beforeLoad: () => routeGuard('/overview'),
   component: OverviewDashboard,
 })
 

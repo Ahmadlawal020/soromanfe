@@ -13,6 +13,7 @@ import {
   ShieldAlert, AlertTriangle
 } from 'lucide-react'
 import { useDeliveryCustomerList, useDeleteDeliveryCustomer } from '#/lib/hooks/useDeliveryCustomers'
+import { routeGuard } from '#/lib/route-guard'
 
 type DeliveryCustomer = {
   _id: string
@@ -48,6 +49,7 @@ type DeliveryCustomer = {
 }
 
 export const Route = createFileRoute('/delivery-customer/')({
+  beforeLoad: () => routeGuard('/delivery-customer'),
   component: DeliveryCustomerListRoute,
 })
 

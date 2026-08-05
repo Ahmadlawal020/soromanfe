@@ -23,8 +23,10 @@ import {
   LpgCustomerStep, LpgStationStep, LpgCylinderStep,
   LpgDeliveryStep, LpgReviewStep, LpgCompletionStep,
 } from '#/modules/admin-order/components/LpgSteps'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/admin-order/')({
+  beforeLoad: () => routeGuard('/admin-order'),
   component: CreateOrderPage,
 })
 

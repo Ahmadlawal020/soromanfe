@@ -4,14 +4,16 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '#/components/ui/card'
-import { ArrowLeft, AlertCircle, MapPin, Calendar, Phone, Mail, Truck, FileCheck, Banknote, Copy, CheckCircle, Clock, XCircle, User, CircleDollarSign, Flame } from 'lucide-react'
+import { ArrowLeft, AlertCircle, MapPin, Calendar, Phone, Mail, Truck, FileCheck, Banknote, Copy, CheckCircle, Clock, XCircle, User, CircleDollarSign, Flame, Hourglass } from 'lucide-react'
 import { useLpgOrderRequestDetails, useUpdateLpgOrderCollectionStatus } from '#/lib/hooks/useLpgOrders'
 import { Breadcrumbs } from '#/components/Breadcrumbs'
 import { ConfirmDialog } from '#/components/ConfirmDialog'
 import { PageLoader } from '#/components/PageLoader'
 import { PageError } from '#/components/PageError'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/lpg-orders/details')({
+  beforeLoad: () => routeGuard('/lpg-orders'),
   validateSearch: (search: Record<string, unknown>) => ({
     id: (search.id as string) || '',
   }),
@@ -77,6 +79,10 @@ function requestStatusBadge(status: string) {
       return <Badge className="bg-accent/15 text-accent border-accent/20 gap-1"><CheckCircle className="size-3" /> Approved</Badge>
     case 'Rejected':
       return <Badge variant="destructive" className="gap-1"><XCircle className="size-3" /> Rejected</Badge>
+    case 'Cancelled':
+      return <Badge variant="outline" className="gap-1"><XCircle className="size-3" /> Cancelled</Badge>
+    case 'Expired':
+      return <Badge className="bg-muted/50 text-muted-foreground border-muted/20 gap-1"><Hourglass className="size-3" /> Expired</Badge>
     default:
       return <Badge variant="outline">{status}</Badge>
   }

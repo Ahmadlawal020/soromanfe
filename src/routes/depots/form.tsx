@@ -12,8 +12,10 @@ import { useProductList } from '#/lib/hooks/useProducts'
 import { useAdminList } from '#/lib/hooks/useAdmin'
 import { useToast } from '#/lib/hooks/useToast'
 import { countries, nigeriaStates, nigeriaLgas } from '#/lib/nigeria-data'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/depots/form')({
+  beforeLoad: () => routeGuard('/depots'),
   component: DepotForm,
 })
 

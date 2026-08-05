@@ -16,8 +16,10 @@ import { useAllOrders } from '#/lib/hooks/useOrders'
 import {
   useOrderForTicketing, useGenerateTickets, type TruckDraft, type TruckLoad,
 } from '#/lib/hooks/useTickets'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/ticket/generate')({
+  beforeLoad: () => routeGuard('/ticket'),
   component: GenerateTicketsPage,
 })
 

@@ -12,8 +12,10 @@ import { PageError } from '#/components/PageError'
 import { PageEmpty } from '#/components/PageEmpty'
 import type { LpgStationItem } from '#/lib/hooks/useLpgStations'
 import { useLpgStations } from '#/lib/hooks/useLpgStations'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/lpg-stations/')({
+  beforeLoad: () => routeGuard('/lpg-stations'),
   component: LpgStationsDashboard,
 })
 

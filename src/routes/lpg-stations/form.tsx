@@ -10,8 +10,10 @@ import type { LpgStationItem } from '#/lib/hooks/useLpgStations'
 import { useCreateLpgStation, useUpdateLpgStation, useLpgStationDetails } from '#/lib/hooks/useLpgStations'
 import { useAdminList } from '#/lib/hooks/useAdmin'
 import { countries, nigeriaStates, nigeriaLgas } from '#/lib/nigeria-data'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/lpg-stations/form')({
+  beforeLoad: () => routeGuard('/lpg-stations'),
   component: LpgStationForm,
 })
 

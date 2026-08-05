@@ -15,8 +15,10 @@ import { OrderStatusBadge } from './-order-status'
 import { Breadcrumbs } from '#/components/Breadcrumbs'
 import { ConfirmDialog } from '#/components/ConfirmDialog'
 import { OrderExpiryBadge } from './-order-expiry'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/orders/details')({
+  beforeLoad: () => routeGuard('/orders'),
   validateSearch: (search: Record<string, unknown>) => ({
     id: (search.id as string) || '',
   }),

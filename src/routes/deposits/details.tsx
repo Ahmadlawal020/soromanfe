@@ -27,8 +27,10 @@ import {
 import type { Deposit } from '#/lib/hooks/useDeposits'
 import { toNum } from '#/lib/utils'
 import { Breadcrumbs } from '#/components/Breadcrumbs'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/deposits/details')({
+  beforeLoad: () => routeGuard('/deposits'),
   component: DepositDetailPage,
 })
 

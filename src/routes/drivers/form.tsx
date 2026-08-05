@@ -7,8 +7,10 @@ import { Label } from '#/components/ui/label'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '#/components/ui/select'
 import { Contact, CheckCircle, Loader2, Truck, FileText } from 'lucide-react'
 import { useCreateDriver, useUpdateDriver } from '#/lib/hooks/useDrivers'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/drivers/form')({
+  beforeLoad: () => routeGuard('/drivers'),
   component: DriverForm,
 })
 

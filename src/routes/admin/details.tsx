@@ -15,8 +15,10 @@ import { useAdminDetails, useDeleteAdmin } from '#/lib/hooks/useAdmin'
 import { useToast } from '#/lib/hooks/useToast'
 import { Breadcrumbs } from '#/components/Breadcrumbs'
 import { ConfirmDialog } from '#/components/ConfirmDialog'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/admin/details')({
+  beforeLoad: () => routeGuard('/admin'),
   component: UserDetailPage,
 })
 

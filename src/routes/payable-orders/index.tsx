@@ -14,8 +14,10 @@ import { PageError } from '#/components/PageError'
 import { PageEmpty } from '#/components/PageEmpty'
 import { Pagination } from '#/components/Pagination'
 import { toast } from 'sonner'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/payable-orders/')({
+  beforeLoad: () => routeGuard('/payable-orders'),
   component: PayableOrdersPage,
 })
 

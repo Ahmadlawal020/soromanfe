@@ -22,8 +22,10 @@ import {
 import {
   readGrid, parseRows, type Grid, type ColumnMapping,
 } from '#/lib/bank-statement-parser'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/bank-statements/')({
+  beforeLoad: () => routeGuard('/bank-statements'),
   component: BankStatementsPage,
 })
 

@@ -10,7 +10,7 @@ const ROLE_MAP_REVERSE: Record<string, number> = {
   finance: 2,
   truck_sales: 3,
   ticketing: 4,
-  security: 5,
+  security_entry: 5,
   transport: 6,
   release: 7,
   audit: 8,
@@ -24,6 +24,47 @@ const ROLE_MAP_REVERSE: Record<string, number> = {
   commission_officer: 16,
   dispatch: 17,
   it_compliance: 18,
+  security_exit: 19,
+
+  // Tiered Subroles - Finance Department
+  finance_viewer: 20,
+  finance_operator: 21,
+  finance_manager: 22,
+
+  // Tiered Subroles - Transport Department
+  transport_viewer: 23,
+  transport_operator: 24,
+  transport_manager: 25,
+
+  // Tiered Subroles - Security Department
+  security_viewer: 26,
+  security_operator: 27,
+  security_manager: 28,
+
+  // Tiered Subroles - Ticketing Department
+  ticketing_viewer: 29,
+  ticketing_operator: 30,
+  ticketing_manager: 31,
+
+  // Tiered Subroles - Orders Department
+  orders_viewer: 32,
+  orders_operator: 33,
+  orders_manager: 34,
+
+  // Tiered Subroles - Sales Department
+  sales_viewer: 35,
+  sales_operator: 36,
+  sales_manager_tier: 37,
+
+  // Tiered Subroles - Dangote Department
+  dangote_viewer: 38,
+  dangote_operator: 39,
+  dangote_manager: 40,
+
+  // Tiered Subroles - LPG Department
+  lpg_viewer: 41,
+  lpg_operator: 42,
+  lpg_manager: 43,
 };
 
 function mapAdminToStaffMember(admin: any): StaffMember {

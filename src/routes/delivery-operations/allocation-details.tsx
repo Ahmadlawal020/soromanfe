@@ -29,8 +29,10 @@ import { EditRecordDialog } from '#/components/delivery-operations/EditRecordDia
 import { DeleteConfirmDialog } from '#/components/delivery-operations/DeleteConfirmDialog'
 import { BulkAssignDialog } from '#/components/delivery-operations/BulkAssignDialog'
 import { BulkDeleteDialog } from '#/components/delivery-operations/BulkDeleteDialog'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/delivery-operations/allocation-details')({
+  beforeLoad: () => routeGuard('/delivery-operations'),
   validateSearch: (search: Record<string, unknown>) => ({
     code: (search.code as string) || '',
   }),

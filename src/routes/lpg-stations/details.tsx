@@ -14,8 +14,10 @@ import { useDeleteLpgStation, useLpgStationDetails, useUpdateLpgStation } from '
 import { useToast } from '#/lib/hooks/useToast'
 import { Breadcrumbs } from '#/components/Breadcrumbs'
 import { ConfirmDialog } from '#/components/ConfirmDialog'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/lpg-stations/details')({
+  beforeLoad: () => routeGuard('/lpg-stations'),
   validateSearch: (search: Record<string, unknown>): { id?: string } => ({
     id: (search.id as string) || '',
   }),

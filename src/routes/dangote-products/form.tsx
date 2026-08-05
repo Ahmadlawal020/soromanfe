@@ -7,8 +7,10 @@ import { Label } from '#/components/ui/label'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '#/components/ui/select'
 import { Scale, Save, Loader2, Package, AlertTriangle, FileText } from 'lucide-react'
 import { useProductDetails, useCreateProduct, useUpdateProduct } from '#/lib/hooks/useProducts'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/dangote-products/form')({
+  beforeLoad: () => routeGuard('/dangote-products'),
   validateSearch: (search: Record<string, unknown>) => ({
     id: (search.id as string) || '',
   }),

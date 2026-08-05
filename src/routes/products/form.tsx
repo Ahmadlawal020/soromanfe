@@ -17,8 +17,10 @@ import {
   useCreateProduct,
   useUpdateProduct,
 } from "#/lib/hooks/useProducts";
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute("/products/form")({
+  beforeLoad: () => routeGuard('/products'),
   validateSearch: (search: Record<string, unknown>) => ({
     id: (search.id as string) || "",
   }),

@@ -4,6 +4,7 @@ import {
   useRouter,
   useRouterState,
   Link,
+  Outlet,
 } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
@@ -42,7 +43,7 @@ export const Route = createRootRoute({
       },
     ],
   }),
-  shellComponent: RootDocument,
+  component: RootDocument,
   notFoundComponent: NotFound,
 })
 
@@ -120,7 +121,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
 
-function RootDocument({ children }: { children: React.ReactNode }) {
+function RootDocument() {
   const { isCollapsed } = useLayoutStore()
   const location = useRouterState({ select: (s) => s.location })
   const isLoginRoute = location.pathname === '/login'
@@ -132,7 +133,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <ErrorBoundary>
       <AuthGuard>
         {isPublicRoute ? (
-          children
+          <Outlet />
         ) : (
           // svh, never vh — mobile browser chrome would clip the shell.
           // The ground is bg-sidebar so the inset content card below can float
@@ -153,7 +154,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
                 <main className="flex-1 overflow-y-auto p-4 md:p-6">
                   {/* max-w-6xl is the content column across the whole app. */}
                   <div className="mx-auto max-w-6xl animate-fade-in">
-                    {children}
+                    <Outlet />
                   </div>
                 </main>
               </div>
@@ -181,3 +182,4 @@ function RootDocument({ children }: { children: React.ReactNode }) {
     </QueryProvider>
   )
 }
+

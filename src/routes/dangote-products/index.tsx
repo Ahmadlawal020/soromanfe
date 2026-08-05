@@ -12,8 +12,10 @@ import { PageLoader } from '#/components/PageLoader'
 import { PageError } from '#/components/PageError'
 import { PageEmpty } from '#/components/PageEmpty'
 import { useProductList } from '#/lib/hooks/useProducts'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/dangote-products/')({
+  beforeLoad: () => routeGuard('/dangote-products'),
   component: DangoteProductsDashboard,
 })
 

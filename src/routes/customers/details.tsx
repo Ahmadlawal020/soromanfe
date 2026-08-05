@@ -15,8 +15,10 @@ import { toNum } from '#/lib/utils'
 import { Breadcrumbs } from '#/components/Breadcrumbs'
 import { ConfirmDialog } from '#/components/ConfirmDialog'
 import { CustomerLicenses } from '#/components/CustomerLicenses'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/customers/details')({
+  beforeLoad: () => routeGuard('/customers'),
   validateSearch: (search: Record<string, unknown>): { id?: string; customerId?: string } => {
     return {
       id: (search.id as string) || undefined,

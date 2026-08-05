@@ -11,8 +11,10 @@ import type { TruckLoad } from '#/lib/hooks/useTickets'
 import {
   useOrderLookup, OrderSearch, TruckCard, GateDialog, useGateAction, localNow, gateTime,
 } from './-security-shared'
+import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/security/exit')({
+  beforeLoad: () => routeGuard('/security/exit'),
   component: SecurityExitPage,
 })
 

@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { Hourglass } from 'lucide-react'
 import { cn } from '#/lib/utils'
 
@@ -10,7 +10,8 @@ import { cn } from '#/lib/utils'
  * because they can no longer expire.
  *
  * Uses `expiresAt` from the backend (the computed deadline) — no local
- * expiration duration knowledge needed.
+ * expiration duration knowledge needed.  Ticks every 30 s so the countdown
+ * stays accurate while the page is open.
  */
 export function OrderExpiryBadge({
   status,
@@ -23,23 +24,12 @@ export function OrderExpiryBadge({
 }) {
   const s = String(status || '').toLowerCase()
 
-  const expiryInfo = useMemo(() => {
-    if (s !== 'pending' || !expiresAt) return null
-    const deadline = new Date(expiresAt).getTime()
-    // eslint-disable-next-line react-hooks/purity -- display-only, no side effect
-    const now = Date.now()
-    const remaining = deadline - now
-
-    if (remaining <= 0) {
-      return null
-    }
-
-    const hours = Math.floor(remaining / (1000 * 60 * 60))
-    const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60))
-    const label = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`
-    const urgent = remaining < 2 * 60 * 1000 // < 2 minutes
-
-    return { type: 'countdown' as const, label, urgent }
+  // Tick counter forces re-computation every 30 s
+  const [, setTick] = useState(0)
+  useEffect(() => {
+    if (!['pending', 'approved', 'pending review'].includes(s) || !expiresAt) return
+    const id = setInterval(() => setTick((t) => t + 1), 30_000)
+    return () => clearInterval(id)
   }, [s, expiresAt])
 
   // Already expired — show when it happened.
@@ -52,19 +42,37 @@ export function OrderExpiryBadge({
     )
   }
 
-  if (!expiryInfo) return null
+  // Only show countdown for statuses that can still expire
+  if (!['pending', 'approved', 'pending review'].includes(s) || !expiresAt) return null
+
+  const deadline = new Date(expiresAt).getTime()
+  const remaining = deadline - Date.now()
+
+  if (remaining <= 0) {
+    return (
+      <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-destructive/40 bg-destructive/10 px-2.5 py-0.5 text-[0.65rem] tracking-[0.14em] uppercase text-destructive">
+        <Hourglass className="size-3" />
+        Expired
+      </span>
+    )
+  }
+
+  const hours = Math.floor(remaining / (1000 * 60 * 60))
+  const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60))
+  const label = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`
+  const urgent = remaining < 2 * 60 * 1000 // < 2 minutes
 
   return (
     <span
       className={cn(
         'inline-flex w-fit items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[0.65rem] tracking-[0.14em] uppercase',
-        expiryInfo.urgent
+        urgent
           ? 'border-destructive/40 bg-destructive/10 text-destructive'
           : 'border-warning/40 bg-warning/10 text-warning',
       )}
     >
       <Hourglass className="size-3" />
-      Expires in {expiryInfo.label}
+      Expires in {label}
     </span>
   )
 }

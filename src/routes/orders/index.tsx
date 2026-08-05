@@ -23,6 +23,7 @@ import { Pagination } from '#/components/Pagination'
 import { PANEL, MICRO, PANEL_RAIL } from '#/lib/panel'
 import { cn } from '#/lib/utils'
 import { useAllOrders } from '#/lib/hooks/useOrders'
+import { routeGuard } from '#/lib/route-guard'
 
 import {
   DATE_PRESETS, resolveRange, toNumber, formatNaira, formatQty, isPaid, groupByDay,
@@ -34,6 +35,7 @@ import { OrderDetailsDialog, OrderEditDialog } from './-order-dialogs'
 import { exportOrdersExcel, exportOrdersPdf } from './-order-exports'
 
 export const Route = createFileRoute('/orders/')({
+  beforeLoad: () => routeGuard('/orders'),
   component: OrdersDashboard,
 })
 
