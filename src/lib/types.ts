@@ -35,6 +35,7 @@ export interface Customer {
   virtualAccountNumber?: string
   virtualAccountBank?: string
   virtualAccountName?: string
+  dvaSubaccountCode?: string
   createdAt?: string
   updatedAt?: string
 }

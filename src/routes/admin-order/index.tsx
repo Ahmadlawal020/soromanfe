@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Truck, Building2, Package, ClipboardCheck, User, Flame } from 'lucide-react'
+import { Truck, Building2, Package, ClipboardCheck, User, Flame, CreditCard, Zap } from 'lucide-react'
 
 import { SegmentedChoice } from '#/components/ui/segmented-choice'
 import { MICRO } from '#/lib/panel'
@@ -200,6 +200,13 @@ function DepotFlow() {
         nextLabel={nav.isLast ? 'Place order' : 'Continue'}
         nextPending={createOrderMutation.isPending}
       >
+        <div className="p-3.5 rounded-lg bg-primary/5 border border-primary/20 flex items-start gap-3 mb-6">
+          <Zap className="size-4 text-primary shrink-0 mt-0.5" />
+          <div className="text-xs text-muted-foreground">
+            <span className="font-semibold text-foreground">DVA Auto-Subaccount Settlement:</span> Upon placing this depot order, the customer&apos;s Dedicated Virtual Account (DVA) is automatically switched to the selected depot&apos;s Paystack Subaccount so all payments land directly in the depot&apos;s account.
+          </div>
+        </div>
+
         <div className="space-y-8">
           {nav.group.steps.map((s, i) => (
             <Section key={s} label={nav.group.sections?.[i]}>

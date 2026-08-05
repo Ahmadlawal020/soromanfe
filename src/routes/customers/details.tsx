@@ -321,6 +321,19 @@ function CustomerDetailPage() {
                     <p className="text-sm font-semibold text-foreground mt-0.5">{customer.virtualAccountName || customer.name}</p>
                   </div>
                 </div>
+                {customer.dvaSubaccountCode ? (
+                  <div className="p-3 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-between text-xs">
+                    <div>
+                      <p className="text-muted-foreground uppercase font-semibold text-[10px]">Active Settlement Route</p>
+                      <p className="font-mono font-semibold text-foreground mt-0.5">Paystack Subaccount: {customer.dvaSubaccountCode}</p>
+                    </div>
+                    <Badge className="bg-accent/15 text-accent border-accent/30 font-normal">Active Depot Link</Badge>
+                  </div>
+                ) : (
+                  <div className="p-3 rounded-lg bg-muted/40 border border-border flex items-center gap-2 text-xs text-muted-foreground">
+                    <span>⚡ DVA Settlement: Auto-switches to the depot subaccount whenever an order is placed.</span>
+                  </div>
+                )}
                 {customer.paystackCustomerId && (
                   <div className="flex items-center gap-3 px-1">
                     <Hash className="size-3.5 text-muted-foreground shrink-0" />

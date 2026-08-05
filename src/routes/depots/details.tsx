@@ -715,18 +715,23 @@ function DepotDetailPage() {
             </CardHeader>
             <CardContent className="pt-6">
               {depot?.subaccountActive && depot?.paystackSubaccountCode ? (
-                <div className="grid gap-4 sm:grid-cols-3">
-                  <div>
-                    <p className="text-xs text-muted-foreground uppercase font-semibold">Subaccount Code</p>
-                    <p className="text-sm font-mono font-semibold text-foreground mt-1">{depot.paystackSubaccountCode}</p>
+                <div className="space-y-4">
+                  <div className="grid gap-4 sm:grid-cols-3">
+                    <div>
+                      <p className="text-xs text-muted-foreground uppercase font-semibold">Subaccount Code</p>
+                      <p className="text-sm font-mono font-semibold text-foreground mt-1">{depot.paystackSubaccountCode}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground uppercase font-semibold">Split Percentage</p>
+                      <p className="text-sm font-semibold text-foreground mt-1">{depot.subaccountSplitPercentage ?? 100}%</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground uppercase font-semibold">Status</p>
+                      <p className="text-sm font-semibold text-accent mt-1">Receiving payments</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground uppercase font-semibold">Split Percentage</p>
-                    <p className="text-sm font-semibold text-foreground mt-1">{depot.subaccountSplitPercentage ?? 100}%</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground uppercase font-semibold">Status</p>
-                    <p className="text-sm font-semibold text-accent mt-1">Receiving payments</p>
+                  <div className="p-3 rounded-lg bg-accent/5 border border-accent/20 flex items-center gap-2 text-xs text-muted-foreground">
+                    <span className="font-semibold text-foreground">Customer DVA Routing Active:</span> When a customer places an order for this depot, their DVA is automatically switched to route funds directly into this subaccount ({depot.paystackSubaccountCode}).
                   </div>
                 </div>
               ) : (
