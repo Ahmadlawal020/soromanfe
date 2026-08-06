@@ -1,57 +1,41 @@
-import {
-  Truck,
-  Warehouse,
-} from 'lucide-react'
+import { Truck, Warehouse } from 'lucide-react'
+import { ChoiceCard, ChoiceGrid } from '#/components/ui/choice-card'
 import type { OrderWizardReturn } from '../hooks/useOrderWizard'
 
 interface DeliveryStepProps {
   wizard: OrderWizardReturn
 }
 
+const OPTIONS = [
+  {
+    value: 'pickup' as const,
+    icon: <Warehouse />,
+    title: 'Self pickup',
+    subtitle: 'The customer sends their own trucks to load at the depot.',
+  },
+  {
+    value: 'delivery' as const,
+    icon: <Truck />,
+    title: 'Company delivery',
+    subtitle: 'Soroman moves it. Trucks are allocated when the order is released.',
+  },
+]
+
 export function DeliveryStep({ wizard }: DeliveryStepProps) {
   const { deliveryType, setDeliveryType } = wizard
 
   return (
-    <div key="step-4" className="space-y-6 animate-fade-in">
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {[
-          {
-            value: 'pickup' as const,
-            icon: Warehouse,
-            title: 'Self Pickup',
-            description: 'Customer arranges their own trucks to load from the depot.',
-          },
-          {
-            value: 'delivery' as const,
-            icon: Truck,
-            title: 'Company Delivery',
-            description: 'Soroman Logistics will manage transport and delivery to destination.',
-          },
-        ].map((option) => {
-          const Icon = option.icon
-          const isSelected = deliveryType === option.value
-          return (
-            <div
-              key={option.value}
-              onClick={() => setDeliveryType(option.value)}
-              className={`p-5 border rounded-xl cursor-pointer transition-all duration-200 flex gap-3 items-start ${isSelected
- ? 'border-primary bg-primary/5 '
- : 'hover:bg-muted/50 hover:border-muted-foreground/20 border-border'
- }`}
-            >
-              <div className={`size-10 rounded-lg flex items-center justify-center shrink-0 ${isSelected ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
- }`}>
-                <Icon className="size-4" />
-              </div>
-              <div>
-                <p className="font-semibold text-sm text-foreground">{option.title}</p>
-                <p className="text-xs text-muted-foreground mt-1">{option.description}</p>
-              </div>
-            </div>
-          )
-        })}
-      </div>
-    </div>
+    <ChoiceGrid>
+      {OPTIONS.map((o) => (
+        <ChoiceCard
+          key={o.value}
+          selected={deliveryType === o.value}
+          onSelect={() => setDeliveryType(o.value)}
+          icon={o.icon}
+          title={o.title}
+          subtitle={o.subtitle}
+        />
+      ))}
+    </ChoiceGrid>
   )
 }

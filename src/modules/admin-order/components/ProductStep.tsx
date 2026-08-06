@@ -1,9 +1,8 @@
 import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
 import { Badge } from '#/components/ui/badge'
-import {
-  CircleDollarSign,
-} from 'lucide-react'
+import { ChoiceCard, ChoiceGrid, ChoiceMeta } from '#/components/ui/choice-card'
+import { cn } from '#/lib/utils'
 import { formatCurrency } from '../utils/formatters'
 import type { OrderWizardReturn } from '../hooks/useOrderWizard'
 
@@ -20,81 +19,112 @@ export function ProductStep({ wizard }: ProductStepProps) {
     setOrderQuantity,
   } = wizard
 
+  const prices: any[] = selectedDepot?.productPrices ?? []
+  const unit = selectedProduct?.product?.unit || 'Litres'
+  const qty = Number(orderQuantity || 0)
+  const total = selectedProduct ? qty * selectedProduct.currentPrice : 0
+
+  const stockFor = (entry: any) =>
+    selectedDepot?.productCapacities?.find(
+      (c: any) => (c.product?._id || c.product?.id) === (entry.product?._id || entry.product?.id),
+    )?.capacity ?? 0
+
+  const stock = selectedProduct ? stockFor(selectedProduct) : 0
+  // The wizard's own validation refuses to advance past this, so the warning
+  // says blocked rather than merely discouraged.
+  const overStock = qty > 0 && stock > 0 && qty > stock
+
+  if (prices.length === 0) {
+    return (
+      <p className="rounded-xl border border-dashed border-foreground/20 p-6 text-center text-sm text-muted-foreground">
+        This depot has no priced products yet. Set a price under Product Pricing before ordering
+        from it.
+      </p>
+    )
+  }
+
   return (
-    <div key="step-3" className="space-y-6 animate-fade-in">
-
-      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
-        {selectedDepot?.productPrices?.map((priceEntry: any, idx: number) => {
-          const capacityEntry = selectedDepot.productCapacities?.find(
-            (c: any) => (c.product?._id || c.product?.id) === (priceEntry.product?._id || priceEntry.product?.id)
-          )
-          const remainingQty = capacityEntry?.availableStock ?? 0
-          const isSelected = selectedProduct?.product?._id === priceEntry.product?._id
-
+    <div className="space-y-5">
+      <ChoiceGrid>
+        {prices.map((entry: any, idx: number) => {
+          const remaining = stockFor(entry)
+          const selected = selectedProduct?.product?._id === entry.product?._id
           return (
-            <div
+            <ChoiceCard
               key={idx}
-              onClick={() => setSelectedProduct(priceEntry)}
-              className={`p-4 rounded-xl border cursor-pointer transition-all duration-200 flex flex-col justify-between ${isSelected
- ? 'border-primary bg-primary/5 '
- : 'hover:bg-muted/50 hover:border-muted-foreground/20 border-border'
- }`}
-            >
-              <div>
-                <div className="flex justify-between items-start">
-                  <p className="font-semibold text-sm text-foreground">{priceEntry.product?.name || 'Unknown'}</p>
-                  <Badge variant="outline" className="text-xs uppercase font-mono">{priceEntry.product?.sku}</Badge>
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">{priceEntry.product?.category}</p>
-              </div>
-              <div className="flex justify-between items-end mt-4 pt-3 border-t border-border">
-                <div>
-                  <span className="text-xs text-muted-foreground block">Available Stock</span>
-                  <span className="font-semibold text-xs">{remainingQty.toLocaleString()} {priceEntry.product?.unit || 'Liters'}</span>
-                </div>
-                <div className="text-right">
-                  <span className="text-xs text-muted-foreground block">Unit Price</span>
-                  <span className="font-semibold text-primary text-sm">{formatCurrency(priceEntry.currentPrice)}</span>
-                </div>
-              </div>
-            </div>
+              selected={selected}
+              onSelect={() => setSelectedProduct(entry)}
+              title={entry.product?.name || 'Unknown'}
+              subtitle={
+                <span className="flex items-center gap-1.5">
+                  {entry.product?.category}
+                  {entry.product?.sku && (
+                    <Badge variant="outline" className="font-mono text-xs">
+                      {entry.product.sku}
+                    </Badge>
+                  )}
+                </span>
+              }
+              meta={
+                <>
+                  <ChoiceMeta
+                    label="In stock"
+                    value={`${remaining.toLocaleString()} ${entry.product?.unit || 'L'}`}
+                    tone={remaining === 0 ? 'text-muted-foreground' : undefined}
+                  />
+                  <ChoiceMeta
+                    label="Unit price"
+                    align="right"
+                    value={formatCurrency(entry.currentPrice)}
+                    tone="text-accent"
+                  />
+                </>
+              }
+            />
           )
         })}
-      </div>
+      </ChoiceGrid>
 
+      {/* Quantity only appears once there is a product to price it against —
+          an empty box above an unchosen product is just noise. */}
       {selectedProduct && (
-        <div className="p-5 border-2 border-primary/25 rounded-xl bg-primary/5 space-y-4">
-          <div className="flex items-center gap-3 pb-3 border-b border-primary/20">
-            <div className="size-9 rounded-lg bg-primary/15 flex items-center justify-center text-primary">
-              <CircleDollarSign className="size-5" />
-            </div>
-            <div>
-              <span className="font-semibold text-base text-foreground">Order Details</span>
-              <p className="text-xs text-muted-foreground">Enter the quantity and review pricing.</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
             <div className="space-y-1.5">
-              <Label>Order Quantity ({selectedProduct.product?.unit || 'Liters'}) *</Label>
+              <Label htmlFor="order-qty">Quantity ({unit})</Label>
               <Input
+                id="order-qty"
                 type="number"
+                min="1"
+                inputMode="numeric"
                 placeholder="e.g. 5000"
                 value={orderQuantity}
                 onChange={(e) => setOrderQuantity(e.target.value)}
-                min="1"
+                aria-invalid={overStock || undefined}
+                aria-describedby="order-total"
               />
             </div>
-            <div className="flex flex-col justify-end bg-card p-3 rounded-lg border border-border">
-              <div className="flex justify-between items-center text-xs text-muted-foreground">
-                <span>Unit Price</span>
-                <span>{formatCurrency(selectedProduct.currentPrice)}</span>
-              </div>
-              <div className="flex justify-between items-center font-semibold text-lg mt-2 border-t border-border pt-2 text-foreground">
-                <span>Total</span>
-                <span className="text-primary">{formatCurrency(Number(orderQuantity || 0) * selectedProduct.currentPrice)}</span>
-              </div>
+
+            {/* The number the desk is actually deciding on, kept beside the
+                input rather than boxed away in its own panel. */}
+            <div
+              id="order-total"
+              className="rounded-lg border border-foreground/15 px-4 py-2.5 sm:min-w-[13rem]"
+            >
+              <span className="block text-xs text-muted-foreground">
+                {qty > 0 ? `${qty.toLocaleString()} × ${formatCurrency(selectedProduct.currentPrice)}` : 'Order total'}
+              </span>
+              <span className="block text-lg font-semibold tabular-nums">
+                {formatCurrency(total)}
+              </span>
             </div>
           </div>
+
+          <p className={cn('text-xs', overStock ? 'text-warning' : 'text-muted-foreground')}>
+            {overStock
+              ? `Only ${stock.toLocaleString()} ${unit} in stock at ${selectedDepot?.name} — reduce the quantity to continue.`
+              : `${stock.toLocaleString()} ${unit} available at ${selectedDepot?.name}.`}
+          </p>
         </div>
       )}
     </div>

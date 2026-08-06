@@ -60,7 +60,7 @@ function ProductsDashboard() {
         }
       />
 
-      <StatCardGrid count={2}>
+      {/* <StatCardGrid count={2}>
         <StatCard
           icon={<Fuel />} label="Products" value={data?.pagination?.total ?? products.length}
           description="Registered and sellable"
@@ -69,7 +69,7 @@ function ProductsDashboard() {
           icon={<Layers />} label="Categories" value={categories.length}
           description="Product classifications"
         />
-      </StatCardGrid>
+      </StatCardGrid> */}
 
       <FilterBar>
         <FilterSearch value={search} onChange={setSearch} placeholder="Search name or SKU…" />
