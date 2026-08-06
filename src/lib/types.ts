@@ -236,6 +236,9 @@ export interface LpgStation {
   pfis?: Pfi[]
   cylinders?: LpgStationCylinder[]
   priceHistory?: LpgPriceHistoryEntry[]
+  paystackSubaccountCode?: string
+  subaccountActive?: boolean
+  subaccountSplitPercentage?: number
   createdAt?: string
   updatedAt?: string
 }
@@ -263,6 +266,9 @@ export interface LpgStationItem {
   pfis?: Pfi[]
   cylinders?: LpgStationCylinder[]
   priceHistory?: LpgPriceHistoryEntry[]
+  paystackSubaccountCode?: string
+  subaccountActive?: boolean
+  subaccountSplitPercentage?: number
 }
 
 export interface Pfi {
@@ -560,6 +566,16 @@ export interface BankAccount {
   isDefault: boolean
   depotIds: (string | number)[]
   depots?: Array<{
+    id: string | number
+    name: string
+    code: string
+    city?: string
+    state?: string
+    country?: string
+    status?: string
+  }>
+  lpgStationIds?: (string | number)[]
+  lpgStations?: Array<{
     id: string | number
     name: string
     code: string

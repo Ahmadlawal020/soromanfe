@@ -304,6 +304,13 @@ function LpgFlow() {
         nextLabel={nav.isLast ? 'Submit request' : 'Continue'}
         nextPending={createLpgOrderRequestMutation?.isPending}
       >
+        <div className="p-3.5 rounded-lg bg-primary/5 border border-primary/20 flex items-start gap-3 mb-6">
+          <Zap className="size-4 text-primary shrink-0 mt-0.5" />
+          <div className="text-xs text-muted-foreground">
+            <span className="font-semibold text-foreground">DVA Auto-Subaccount Settlement:</span> Upon approving this LPG cooking gas order, the customer&apos;s Dedicated Virtual Account (DVA) is automatically switched to the selected LPG station&apos;s Paystack Subaccount so all payments land directly in the station&apos;s account.
+          </div>
+        </div>
+
         <div className="space-y-8">
           {nav.group.steps.map((s, i) => (
             <Section key={s} label={nav.group.sections?.[i]}>

@@ -13,6 +13,7 @@ import {
   Edit,
   Trash2,
   Warehouse,
+  Flame,
   Star,
   MapPin,
   FileText,
@@ -119,7 +120,8 @@ function BankAccountDetails() {
   }
 
   const assignedDepots = account.depots || []
-  const isShared = assignedDepots.length > 1
+  const assignedStations = account.lpgStations || []
+  const isShared = (assignedDepots.length + assignedStations.length) > 1
 
   return (
     <div className="space-y-6 animate-fade-in max-w-6xl mx-auto pb-12">
@@ -129,7 +131,7 @@ function BankAccountDetails() {
         <PageHeader
       eyebrow="Finance"
       title="Bank Account Details"
-      description="View account information and linked depots"
+      description="View account information, linked depots, and assigned LPG stations"
     />
         <div className="flex items-center gap-2">
           <Button
@@ -277,56 +279,32 @@ function BankAccountDetails() {
           </CardContent>
         </Card>
 
-        {/* Right Column: Linked Depots */}
-        <Card className="md:col-span-2 border-border/60">
-          <CardHeader className="border-b border-border/40 pb-3 flex flex-row items-center justify-between">
-            <div>
-              <CardTitle className="text-base font-semibold flex items-center gap-2">
-                <Warehouse className="size-4 text-primary" /> Assigned Depots & Hubs ({assignedDepots.length})
-              </CardTitle>
-              <CardDescription className="mt-0.5 text-xs">
-                Depots collecting or remitting payments through this bank account
-              </CardDescription>
-            </div>
-            {isShared && (
-              <Badge className="bg-warning/10 text-warning border-warning/20 font-normal text-xs px-2.5 py-1">
-                Shared by {assignedDepots.length} Depots
-              </Badge>
-            )}
-          </CardHeader>
-          <CardContent className="pt-4">
-            {assignedDepots.length === 0 ? (
-              <div className="p-8 text-center rounded-xl border border-dashed border-border/50 bg-muted/20">
-                <Warehouse className="size-10 text-muted-foreground mx-auto mb-2" />
-                <p className="text-sm font-normal text-foreground">No Depots Currently Linked</p>
-                <p className="text-xs text-muted-foreground mt-1 max-w-md mx-auto">
-                  This bank account is configured as a general company account and is not assigned to specific depots.
-                </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="mt-4 text-xs"
-                  onClick={() =>
-                    navigate({
-                      to: '/bank-accounts/form' as any,
-                      state: { bankAccount: account, isEdit: true } as any,
-                    })
-                  }
- >
-                  <Edit className="size-3.5 mr-1" /> Assign Depots Now
-                </Button>
+        {/* Right Column: Linked Depots and LPG Stations */}
+        <div className="md:col-span-2 space-y-6">
+          {/* Linked Depots Card */}
+          <Card className="border-border/60">
+            <CardHeader className="border-b border-border/40 pb-3 flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="text-base font-semibold flex items-center gap-2">
+                  <Warehouse className="size-4 text-primary" /> Assigned Depots & Hubs ({assignedDepots.length})
+                </CardTitle>
+                <CardDescription className="mt-0.5 text-xs">
+                  Depots collecting or remitting payments through this bank account
+                </CardDescription>
               </div>
-            ) : (
-              <div className="space-y-4">
-                {isShared && (
-                  <div className="bg-warning/10 border border-warning/20 rounded-xl p-3.5 flex items-start gap-3 text-xs text-warning">
-                    <Layers className="size-4 shrink-0 mt-0.5 text-warning" />
-                    <div>
-                      <span className="font-semibold text-warning">Shared Bank Account Notice:</span> Multiple operational depots deposit into or share this exact bank account. Transactions made to this account should reference the respective depot code.
-                    </div>
-                  </div>
-                )}
-
+              {assignedDepots.length > 1 && (
+                <Badge className="bg-warning/10 text-warning border-warning/20 font-normal text-xs px-2.5 py-1">
+                  Shared by {assignedDepots.length} Depots
+                </Badge>
+              )}
+            </CardHeader>
+            <CardContent className="pt-4">
+              {assignedDepots.length === 0 ? (
+                <div className="p-6 text-center rounded-xl border border-dashed border-border/50 bg-muted/20">
+                  <Warehouse className="size-8 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-xs font-normal text-muted-foreground">No Depots Currently Linked</p>
+                </div>
+              ) : (
                 <div className="grid gap-3 sm:grid-cols-2">
                   {assignedDepots.map((depot) => (
                     <div
@@ -365,10 +343,76 @@ function BankAccountDetails() {
                     </div>
                   ))}
                 </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Linked LPG Stations Card */}
+          <Card className="border-border/60">
+            <CardHeader className="border-b border-border/40 pb-3 flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="text-base font-semibold flex items-center gap-2">
+                  <Flame className="size-4 text-primary" /> Assigned LPG Cooking Gas Stations ({assignedStations.length})
+                </CardTitle>
+                <CardDescription className="mt-0.5 text-xs">
+                  LPG stations accepting payments through this bank account
+                </CardDescription>
               </div>
-            )}
-          </CardContent>
-        </Card>
+              {assignedStations.length > 1 && (
+                <Badge className="bg-warning/10 text-warning border-warning/20 font-normal text-xs px-2.5 py-1">
+                  Shared by {assignedStations.length} Stations
+                </Badge>
+              )}
+            </CardHeader>
+            <CardContent className="pt-4">
+              {assignedStations.length === 0 ? (
+                <div className="p-6 text-center rounded-xl border border-dashed border-border/50 bg-muted/20">
+                  <Flame className="size-8 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-xs font-normal text-muted-foreground">No LPG Stations Currently Linked</p>
+                </div>
+              ) : (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {assignedStations.map((station) => (
+                    <div
+                      key={station.id}
+                      className="p-4 rounded-xl border border-border/50 bg-muted/20 hover:bg-muted/40 transition-all flex flex-col justify-between duration-250 ease-luxe"
+                    >
+                      <div>
+                        <div className="flex items-center justify-between gap-2 mb-1.5">
+                          <h4 className="font-semibold text-foreground text-sm flex items-center gap-1.5">
+                            <Flame className="size-4 text-primary shrink-0" />
+                            {station.name}
+                          </h4>
+                          <Badge variant="outline" className="text-xs font-mono">
+                            {station.code}
+                          </Badge>
+                        </div>
+                        {station.city && (
+                          <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                            <MapPin className="size-3 text-muted-foreground" />
+                            {station.city}{station.state ? `, ${station.state}` : ''}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="mt-4 pt-2 border-t border-border/30 flex items-center justify-between text-xs">
+                        <span className="text-muted-foreground">Status: <span className="font-normal text-foreground">{station.status || 'Active'}</span></span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 text-xs text-primary hover:text-primary/80 hover:bg-primary/10 p-1 px-2"
+                          onClick={() => navigate({ to: '/lpg-stations/details' as any, search: { id: String(station.id) } as any, state: { station } as any })}
+                        >
+                          View Station <ExternalLink className="size-3 ml-1" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       <ConfirmDialog

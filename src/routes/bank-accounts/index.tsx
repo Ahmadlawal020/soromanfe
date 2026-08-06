@@ -17,6 +17,7 @@ import {
   Copy,
   Check,
   Warehouse,
+  Flame,
   ShieldCheck,
   X,
   Loader2,
@@ -28,6 +29,7 @@ import { PageError } from '#/components/PageError'
 import { PageEmpty } from '#/components/PageEmpty'
 import { useBankAccounts, useDeleteBankAccount } from '#/lib/hooks/useBankAccounts'
 import { useDepots } from '#/lib/hooks/useDepots'
+import { useLpgStations } from '#/lib/hooks/useLpgStations'
 import { useToast } from '#/lib/hooks/useToast'
 import { routeGuard } from '#/lib/route-guard'
 
@@ -60,6 +62,7 @@ function BankAccountsIndex() {
   const { data: bankAccounts = [], isLoading, isError, error, refetch } = useBankAccounts()
   const hasFilters = !!(searchTerm || statusFilter !== 'ALL')
   const { data: depots = [] } = useDepots()
+  const { data: lpgStations = [] } = useLpgStations({ limit: 100 })
   const deleteBankAccount = useDeleteBankAccount()
 
   const handleCopyAccount = (accountNumber: string, id: string | number) => {
@@ -89,14 +92,20 @@ function BankAccountsIndex() {
         (d) =>
           d.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           d.code.toLowerCase().includes(searchTerm.toLowerCase())
+      ) ||
+      (account.lpgStations || []).some(
+        (s) =>
+          s.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          s.code?.toLowerCase().includes(searchTerm.toLowerCase())
       )
 
     const matchesStatus = statusFilter === 'ALL' || account.status === statusFilter
     return matchesSearch && matchesStatus
   })
 
-  // Linked depots count across all bank accounts
+  // Linked locations count across all bank accounts
   const uniqueLinkedDepotIds = new Set(bankAccounts.flatMap((acc) => acc.depotIds || []))
+  const uniqueLinkedStationIds = new Set(bankAccounts.flatMap((acc) => acc.lpgStationIds || []))
   const activeCount = bankAccounts.filter((a) => a.status === 'Active').length
   const defaultAccount = bankAccounts.find((a) => a.isDefault)
 
@@ -109,9 +118,9 @@ function BankAccountsIndex() {
       color: 'text-accent',
     },
     {
-      title: 'Depots Connected',
-      value: uniqueLinkedDepotIds.size,
-      sub: `Out of ${depots.length} total depots`,
+      title: 'Locations Connected',
+      value: uniqueLinkedDepotIds.size + uniqueLinkedStationIds.size,
+      sub: `${uniqueLinkedDepotIds.size} Depots · ${uniqueLinkedStationIds.size} LPG Stations`,
       icon: Warehouse,
       color: 'text-muted-foreground',
     },
@@ -130,7 +139,7 @@ function BankAccountsIndex() {
       <PageHeader
       eyebrow="Finance"
       title="Bank Accounts Management"
-      description="Manage corporate bank accounts and depot collection assignments. Multiple depots can share a single bank account."
+      description="Manage corporate bank accounts and depot/station collection assignments. Multiple locations can share a single bank account."
       actions={
         <>
           <Button
@@ -166,7 +175,7 @@ function BankAccountsIndex() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <CardTitle className="text-xl">Bank Accounts Directory</CardTitle>
-              <CardDescription>View, edit, and assign bank accounts to operational depots</CardDescription>
+              <CardDescription>View, edit, and assign bank accounts to operational depots and LPG stations</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -177,7 +186,7 @@ function BankAccountsIndex() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
               <Input
                 type="text"
-                placeholder="Search by bank name, account number, or depot..."
+                placeholder="Search by bank name, account number, depot, or station..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 pr-9 bg-background/50"
@@ -226,6 +235,9 @@ function BankAccountsIndex() {
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {filteredAccounts.map((account) => {
                 const assignedDepots = account.depots || []
+                const assignedStations = account.lpgStations || []
+                const totalLocations = assignedDepots.length + assignedStations.length
+
                 return (
                   <Card
                     key={account.id}
@@ -289,35 +301,59 @@ function BankAccountsIndex() {
                           <p className="text-sm font-semibold text-foreground truncate">{account.accountName}</p>
                         </div>
 
-                        {/* Linked Depots Section */}
-                        <div className="mt-4 pt-3 border-t border-border/40">
-                          <div className="flex items-center justify-between text-xs mb-2">
-                            <span className="text-muted-foreground font-normal flex items-center gap-1.5">
-                              <Warehouse className="size-3.5 text-primary" /> Linked Depots ({assignedDepots.length})
-                            </span>
-                            {assignedDepots.length > 1 && (
-                              <span className="text-xs text-warning font-semibold bg-warning/10 px-1.5 py-0.5 rounded border border-warning/20">
-                                Shared Account
+                        {/* Linked Depots & Stations Section */}
+                        <div className="mt-4 pt-3 border-t border-border/40 space-y-2.5">
+                          {/* Depots */}
+                          <div>
+                            <div className="flex items-center justify-between text-xs mb-1">
+                              <span className="text-muted-foreground font-normal flex items-center gap-1.5">
+                                <Warehouse className="size-3.5 text-primary" /> Depots ({assignedDepots.length})
                               </span>
-                            )}
+                              {totalLocations > 1 && (
+                                <span className="text-xs text-warning font-semibold bg-warning/10 px-1.5 py-0.5 rounded border border-warning/20">
+                                  Shared Account
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex flex-wrap gap-1.5 max-h-16 overflow-y-auto pr-1">
+                              {assignedDepots.length === 0 ? (
+                                <span className="text-xs text-muted-foreground">No depots assigned</span>
+                              ) : (
+                                assignedDepots.map((depot) => (
+                                  <Badge
+                                    key={depot.id}
+                                    variant="secondary"
+                                    className="text-xs bg-primary/10 text-primary border border-primary/20 font-normal py-0.5"
+ >
+                                    {depot.name} ({depot.code})
+                                  </Badge>
+                                ))
+                              )}
+                            </div>
                           </div>
 
-                          <div className="flex flex-wrap gap-1.5 max-h-20 overflow-y-auto pr-1">
-                            {assignedDepots.length === 0 ? (
-                              <span className="text-xs text-muted-foreground">
-                                No depots assigned (Company-wide / Unassigned)
+                          {/* LPG Stations */}
+                          <div>
+                            <div className="flex items-center justify-between text-xs mb-1">
+                              <span className="text-muted-foreground font-normal flex items-center gap-1.5">
+                                <Flame className="size-3.5 text-primary" /> LPG Stations ({assignedStations.length})
                               </span>
-                            ) : (
-                              assignedDepots.map((depot) => (
-                                <Badge
-                                  key={depot.id}
-                                  variant="secondary"
-                                  className="text-xs bg-primary/10 text-primary border border-primary/20 font-normal py-0.5"
+                            </div>
+                            <div className="flex flex-wrap gap-1.5 max-h-16 overflow-y-auto pr-1">
+                              {assignedStations.length === 0 ? (
+                                <span className="text-xs text-muted-foreground">No stations assigned</span>
+                              ) : (
+                                assignedStations.map((station) => (
+                                  <Badge
+                                    key={station.id}
+                                    variant="secondary"
+                                    className="text-xs bg-primary/15 text-primary border border-primary/30 font-normal py-0.5"
  >
-                                  {depot.name} ({depot.code})
-                                </Badge>
-                              ))
-                            )}
+                                    {station.name} ({station.code})
+                                  </Badge>
+                                ))
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>

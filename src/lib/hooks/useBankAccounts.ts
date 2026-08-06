@@ -6,7 +6,7 @@ import type { BankAccount } from '#/lib/types'
 
 export type { BankAccount }
 
-export function useBankAccounts(params?: { search?: string; status?: string; depotId?: string | number }) {
+export function useBankAccounts(params?: { search?: string; status?: string; depotId?: string | number; lpgStationId?: string | number }) {
   return useQuery({
     queryKey: ['bank-accounts', params],
     queryFn: async () => {
@@ -39,6 +39,8 @@ export function useCreateBankAccount() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bank-accounts'] })
+      queryClient.invalidateQueries({ queryKey: ['lpg-stations'] })
+      queryClient.invalidateQueries({ queryKey: ['depots'] })
       toast.success('Bank account created successfully')
     },
     onError: (err: any) => {
@@ -59,6 +61,8 @@ export function useUpdateBankAccount() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bank-accounts'] })
+      queryClient.invalidateQueries({ queryKey: ['lpg-stations'] })
+      queryClient.invalidateQueries({ queryKey: ['depots'] })
       toast.success('Bank account updated successfully')
     },
     onError: (err: any) => {
@@ -79,6 +83,8 @@ export function useDeleteBankAccount() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bank-accounts'] })
+      queryClient.invalidateQueries({ queryKey: ['lpg-stations'] })
+      queryClient.invalidateQueries({ queryKey: ['depots'] })
       toast.success('Bank account deleted successfully')
     },
     onError: (err: any) => {

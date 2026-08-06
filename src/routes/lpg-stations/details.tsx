@@ -7,10 +7,11 @@ import { Input } from '#/components/ui/input'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '#/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '#/components/ui/dialog'
 import {
-  Flame, MapPin, User, ArrowLeft, Edit, Trash2, Activity, AlertCircle, Loader2, FileText, Plus, BarChart3, PackageCheck, Droplets, TrendingUp, AlertTriangle, Layers, DollarSign
+  Flame, MapPin, User, ArrowLeft, Edit, Trash2, Activity, AlertCircle, Loader2, FileText, Plus, BarChart3, PackageCheck, Droplets, TrendingUp, AlertTriangle, Layers, DollarSign, Landmark, CreditCard, Copy, CheckCircle2
 } from 'lucide-react'
 import type { LpgStationItem } from '#/lib/hooks/useLpgStations'
 import { useDeleteLpgStation, useLpgStationDetails, useUpdateLpgStation } from '#/lib/hooks/useLpgStations'
+import { useBankAccounts } from '#/lib/hooks/useBankAccounts'
 import { useToast } from '#/lib/hooks/useToast'
 import { Breadcrumbs } from '#/components/Breadcrumbs'
 import { ConfirmDialog } from '#/components/ConfirmDialog'
@@ -52,22 +53,7 @@ function getStatusBadge(status: string) {
   }
 }
 
-function getPfiVolumeStats(pfi: any) {
-  const startingLitres = Number(pfi.startingQtyLitres ?? pfi.starting_qty_litres ?? pfi.totalVolumeLitres ?? pfi.volumeLitres ?? pfi.startingQty ?? 0)
-  const soldLitres = Number(pfi.soldQtyLitres ?? pfi.sold_qty_litres ?? pfi.soldVolumeLitres ?? pfi.soldQty ?? 0)
-
-  let starting = startingLitres
-  const sold = soldLitres
-
-  if (starting === 0 && Number(pfi.qtyVolumeMt ?? pfi.qty_volume_mt ?? 0) > 0) {
-    starting = Number(pfi.qtyVolumeMt ?? pfi.qty_volume_mt)
-  }
-
-  const remaining = Math.max(0, starting - sold)
-  return { starting, sold, remaining }
-}
-
-type TabType = 'overview' | 'pfis' | 'activity'
+type TabType = 'overview' | 'activity'
 
 function LpgStationDetailPage() {
   const navigate = useNavigate()
@@ -89,16 +75,25 @@ function LpgStationDetailPage() {
 
   const activeStationId = (station as any)?._id || (station as any)?.id || stationId
 
-  const pfis = (station as any)?.pfis || []
+  const { data: rawBankAccounts = [], isLoading: isLoadingBankAccounts } = useBankAccounts(activeStationId ? { lpgStationId: activeStationId } : undefined)
+  const stationBankAccounts = rawBankAccounts.filter((acc: any) => {
+    if (!activeStationId) return true
+    const rawIds = acc.lpgStationIds || (acc.lpgStations || []).map((s: any) => s.id || s._id || s)
+    const numericIds = (Array.isArray(rawIds) ? rawIds : []).map((i: any) => Number(i))
+    return numericIds.includes(Number(activeStationId))
+  })
+
+  const [copiedAccount, setCopiedAccount] = useState<string | null>(null)
+
   const cylinders = (station as any)?.cylinders || []
   const totalCylinders = cylinders.reduce((sum: number, c: any) => sum + (Number(c.quantity) || 0), 0)
 
-  const totalPfiStartingQty = pfis.reduce((sum: number, pfi: any) => sum + getPfiVolumeStats(pfi).starting, 0)
-  const totalPfiSoldQty = pfis.reduce((sum: number, pfi: any) => sum + getPfiVolumeStats(pfi).sold, 0)
-  const totalPfiRemainingQty = pfis.reduce((sum: number, pfi: any) => sum + getPfiVolumeStats(pfi).remaining, 0)
-  const fulfillmentPct = totalPfiStartingQty > 0 ? Math.min(100, (totalPfiSoldQty / totalPfiStartingQty) * 100) : 0
-  const isStockLow = totalPfiStartingQty > 0 && (totalPfiRemainingQty / totalPfiStartingQty) <= 0.15
-  const remainingStockPct = totalPfiStartingQty > 0 ? (totalPfiRemainingQty / totalPfiStartingQty) * 100 : 0
+  const handleCopyAccount = (accountNumber: string) => {
+    navigator.clipboard.writeText(accountNumber)
+    setCopiedAccount(accountNumber)
+    toast.success(`Account number ${accountNumber} copied to clipboard`)
+    setTimeout(() => setCopiedAccount(null), 2000)
+  }
 
   const handleBack = () => { window.history.length > 1 ? window.history.back() : navigate({ to: '/lpg-stations/' as any }) }
   const handleDelete = () => { setShowDeleteDialog(true) }
@@ -168,13 +163,6 @@ function LpgStationDetailPage() {
 
         <div className="flex items-center gap-2 flex-wrap">
           <Button
-            size="sm"
-            className="gap-1.5 font-semibold text-xs"
-            onClick={() => navigate({ to: '/pfi/form' as any, search: { lpgStationId: activeStationId } as any })}
-          >
-            <Plus className="size-4" /> Assign PFI
-          </Button>
-          <Button
             variant="outline"
             size="sm"
             className="gap-1.5 text-xs font-normal"
@@ -232,10 +220,6 @@ function LpgStationDetailPage() {
                 <span><strong className="text-foreground">{Number(station.pricePerKg || 0) > 0 ? `₦${Number(station.pricePerKg).toLocaleString()}` : 'Not set'}</strong> / Kg</span>
               </div>
               <div className="flex items-center gap-2 bg-background/80 backdrop-blur px-3 py-1.5 rounded-lg border text-muted-foreground">
-                <FileText className="size-3.5 text-accent" />
-                <span><strong className="text-foreground">{pfis.length}</strong> Assigned PFI(s)</span>
-              </div>
-              <div className="flex items-center gap-2 bg-background/80 backdrop-blur px-3 py-1.5 rounded-lg border text-muted-foreground">
                 <User className="size-3.5 text-warning" />
                 <span><strong className="text-foreground">{staffList.length}</strong> Staff</span>
               </div>
@@ -250,60 +234,6 @@ function LpgStationDetailPage() {
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="border-l-4 border-l-primary hover:shadow transition-shadow duration-250 ease-luxe">
-          <CardContent className="p-5 flex items-center justify-between">
-            <div className="space-y-1">
-              <p className="text-xs text-muted-foreground font-semibold uppercase">Total Allocated Stock</p>
-              <h3 className="text-2xl font-semibold text-foreground">
-                {totalPfiStartingQty.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">Kg</span>
-              </h3>
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
-                <FileText className="size-3 text-primary" />
-                <span>Across {pfis.length} PFI(s)</span>
-              </p>
-            </div>
-            <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
-              <PackageCheck className="size-6" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-l-4 border-l-emerald-500 hover:shadow transition-shadow duration-250 ease-luxe">
-          <CardContent className="p-5 flex items-center justify-between">
-            <div className="space-y-1">
-              <p className="text-xs text-muted-foreground font-semibold uppercase">Volume Sold</p>
-              <h3 className="text-2xl font-semibold text-foreground">
-                {totalPfiSoldQty.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">Kg</span>
-              </h3>
-              <p className="text-xs text-accent font-normal flex items-center gap-1">
-                <TrendingUp className="size-3" />
-                <span>{Math.round(fulfillmentPct)}% sold</span>
-              </p>
-            </div>
-            <div className="size-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent shrink-0">
-              <TrendingUp className="size-6" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className={`border-l-4 hover:shadow transition-shadow ${isStockLow ? 'border-l-destructive' : 'border-l-amber-500'}`}>
-          <CardContent className="p-5 flex items-center justify-between">
-            <div className="space-y-1">
-              <p className="text-xs text-muted-foreground font-semibold uppercase">Stock Remaining</p>
-              <h3 className="text-2xl font-semibold text-foreground">
-                {totalPfiRemainingQty.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">Kg</span>
-              </h3>
-              <p className={`text-xs font-normal flex items-center gap-1 ${isStockLow ? 'text-destructive font-semibold' : 'text-warning'}`}>
-                <Droplets className="size-3" />
-                <span>{Math.round(remainingStockPct)}% available</span>
-              </p>
-            </div>
-            <div className={`size-12 rounded-xl flex items-center justify-center shrink-0 ${isStockLow ? 'bg-destructive/10 text-destructive' : 'bg-warning/10 text-warning'}`}>
-              <Droplets className="size-6" />
-            </div>
-          </CardContent>
-        </Card>
-
         <Card className="border-l-4 border-l-blue-500 hover:shadow transition-shadow duration-250 ease-luxe">
           <CardContent className="p-5 flex items-center justify-between">
             <div className="space-y-1">
@@ -313,44 +243,72 @@ function LpgStationDetailPage() {
               </h3>
               <p className="text-xs text-muted-foreground flex items-center gap-1">
                 <Flame className="size-3 text-muted-foreground" />
-                <span>Standard LPG</span>
+                <span>Station Capacity</span>
               </p>
             </div>
-            <div className="size-12 rounded-xl bg-muted/10 flex items-center justify-center text-muted-foreground shrink-0">
+            <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
               <Flame className="size-6" />
             </div>
           </CardContent>
         </Card>
-      </div>
 
-      {/* Low Stock Warning */}
-      {isStockLow && (
-        <Card className="border-warning/50 bg-warning/10 text-warning">
-          <CardContent className="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="size-10 rounded-full bg-warning/20 flex items-center justify-center text-warning shrink-0">
-                <AlertTriangle className="size-5" />
-              </div>
-              <div>
-                <h4 className="font-semibold text-foreground text-sm flex items-center gap-2">
-                  <span>Low Stock Warning &bull; Available at {Math.round(remainingStockPct)}%</span>
-                  <Badge variant="destructive" className="text-xs uppercase font-semibold">Action Required</Badge>
-                </h4>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Active PFI stock at {station.name} is down to <strong>{totalPfiRemainingQty.toLocaleString()} Kg</strong>. Consider assigning a new PFI.
-                </p>
-              </div>
+        <Card className="border-l-4 border-l-emerald-500 hover:shadow transition-shadow duration-250 ease-luxe">
+          <CardContent className="p-5 flex items-center justify-between">
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground font-semibold uppercase">Price Per Kg</p>
+              <h3 className="text-2xl font-semibold text-foreground">
+                {Number(station.pricePerKg || 0) > 0 ? `₦${Number(station.pricePerKg).toLocaleString()}` : 'Not set'}
+              </h3>
+              <button
+                onClick={handleEditPrice}
+                className="text-xs text-accent hover:underline font-normal flex items-center gap-1 cursor-pointer"
+              >
+                <Edit className="size-3" />
+                <span>Update price</span>
+              </button>
             </div>
-            <Button
-              size="sm"
-              className="bg-warning text-warning-foreground hover:bg-warning shrink-0 text-xs font-semibold gap-1.5"
-              onClick={() => navigate({ to: '/pfi/form' as any, search: { lpgStationId: activeStationId } as any })}
-            >
-              <Plus className="size-3.5" /> Assign New PFI
-            </Button>
+            <div className="size-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent shrink-0">
+              <DollarSign className="size-6" />
+            </div>
           </CardContent>
         </Card>
-      )}
+
+        <Card className="border-l-4 border-l-amber-500 hover:shadow transition-shadow duration-250 ease-luxe">
+          <CardContent className="p-5 flex items-center justify-between">
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground font-semibold uppercase">Total Cylinders</p>
+              <h3 className="text-2xl font-semibold text-foreground">
+                {totalCylinders.toLocaleString()}
+              </h3>
+              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                <Layers className="size-3 text-warning" />
+                <span>{cylinders.length} size variants</span>
+              </p>
+            </div>
+            <div className="size-12 rounded-xl bg-warning/10 flex items-center justify-center text-warning shrink-0">
+              <Layers className="size-6" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-l-4 border-l-purple-500 hover:shadow transition-shadow duration-250 ease-luxe">
+          <CardContent className="p-5 flex items-center justify-between">
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground font-semibold uppercase">Assigned Staff</p>
+              <h3 className="text-2xl font-semibold text-foreground">
+                {staffList.length}
+              </h3>
+              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                <User className="size-3 text-purple-500" />
+                <span>Station team members</span>
+              </p>
+            </div>
+            <div className="size-12 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-500 shrink-0">
+              <User className="size-6" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Tab Navigation */}
       <div className="border-b border-border">
@@ -364,20 +322,6 @@ function LpgStationDetailPage() {
           >
             <BarChart3 className="size-4" />
             <span>Overview</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('pfis')}
-            className={`px-4 py-2.5 text-xs font-semibold border-b-2 transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${activeTab === 'pfis'
-              ? 'border-primary text-primary bg-primary/5 rounded-t-md'
-              : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
-            }`}
-          >
-            <FileText className="size-4" />
-            <span>PFIs & Allocation</span>
-            <span className={`px-1.5 py-0.2 rounded-full text-xs ${activeTab === 'pfis' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
-              {pfis.length}
-            </span>
           </button>
 
           <button
@@ -635,72 +579,139 @@ function LpgStationDetailPage() {
               </div>
             </CardContent>
           </Card>
-        </div>
-      )}
-      {activeTab === 'pfis' && (
-        <div className="space-y-4">
-          {pfis.length === 0 ? (
-            <Card>
-              <CardContent className="py-12 text-center">
-                <FileText className="size-10 text-muted-foreground mx-auto mb-3" />
-                <h3 className="text-base font-semibold text-foreground mb-1">No PFIs Assigned</h3>
-                <p className="text-sm text-muted-foreground mb-4">No Proforma Invoices have been assigned to this LPG station yet.</p>
-                <Button size="sm" onClick={() => navigate({ to: '/pfi/form' as any, search: { lpgStationId: activeStationId } as any })}>
-                  <Plus className="size-4 mr-2" /> Assign PFI
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            pfis.map((pfi: any) => {
-              const stats = getPfiVolumeStats(pfi)
-              const remainingPct = stats.starting > 0 ? (stats.remaining / stats.starting) * 100 : 0
-              return (
-                <Card key={pfi._id || pfi.id} className="hover:border-primary/30 transition-colors">
-                  <CardContent className="p-5">
-                    <div className="flex items-start justify-between gap-4 mb-3">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="text-base font-semibold text-foreground">{pfi.pfiNumber || 'N/A'}</h3>
-                          <Badge variant={pfi.status === 'active' ? 'default' : 'secondary'} className="text-xs">
-                            {pfi.status}
+
+          {/* Configured Bank Accounts */}
+          <Card className="md:col-span-2">
+            <CardHeader className="border-b border-border/50 pb-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="size-8 rounded-lg bg-accent/10 flex items-center justify-center text-accent">
+                    <Landmark className="size-4" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-sm font-semibold">LPG Station Bank Accounts</CardTitle>
+                    <CardDescription className="text-xs">Bank accounts and account numbers configured for receiving payments at this LPG station</CardDescription>
+                  </div>
+                </div>
+                <Badge variant="outline" className="font-mono text-xs">
+                  {stationBankAccounts.length} Account{stationBankAccounts.length !== 1 ? 's' : ''}
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-6">
+              {isLoadingBankAccounts ? (
+                <div className="flex justify-center py-6">
+                  <Loader2 className="size-6 animate-spin text-muted-foreground" />
+                </div>
+              ) : stationBankAccounts.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">No bank accounts have been configured for this LPG station.</p>
+              ) : (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {stationBankAccounts.map((acc: any) => {
+                    const accId = acc.id || acc._id
+                    const isCopied = copiedAccount === acc.accountNumber
+                    return (
+                      <div key={accId} className="flex flex-col justify-between p-4 border rounded-xl bg-card hover:border-primary/50 transition-colors duration-250 ease-luxe">
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <Badge variant="outline" className="text-xs font-mono mb-1.5 bg-primary/5 text-primary border-primary/20">
+                              {acc.bankCode ? `${acc.bankName} (${acc.bankCode})` : acc.bankName}
+                            </Badge>
+                            <h4 className="text-sm font-semibold text-foreground">{acc.accountName}</h4>
+                          </div>
+                          <Badge className={acc.status === 'Active' ? 'bg-accent/15 text-accent border-accent/30' : 'bg-muted text-muted-foreground'}>
+                            {acc.status}
                           </Badge>
                         </div>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {pfi.productName || 'LPG'} &bull; {pfi.productUnit || 'Kg'}
-                        </p>
+
+                        <div className="mt-4 pt-3 border-t flex items-center justify-between">
+                          <div>
+                            <p className="text-xs text-muted-foreground uppercase font-semibold">Account Number</p>
+                            <p className="text-lg font-mono font-semibold text-primary">{acc.accountNumber}</p>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 gap-1.5 font-mono text-xs cursor-pointer hover:bg-primary/5"
+                            onClick={() => handleCopyAccount(acc.accountNumber)}
+                          >
+                            {isCopied ? <CheckCircle2 className="size-3.5 text-accent" /> : <Copy className="size-3.5" />}
+                            <span>{isCopied ? 'Copied' : 'Copy'}</span>
+                          </Button>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-xs text-muted-foreground">Remaining</p>
-                        <p className="text-lg font-semibold text-foreground">{stats.remaining.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">{pfi.productUnit || 'Kg'}</span></p>
-                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Paystack Subaccount Status */}
+          <Card className="md:col-span-2">
+            <CardHeader className="border-b border-border/50 pb-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="size-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500">
+                    <CreditCard className="size-4" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-sm font-semibold">Paystack Subaccount</CardTitle>
+                    <CardDescription className="text-xs">Automatically created when a bank account is assigned to this LPG station</CardDescription>
+                  </div>
+                </div>
+                <Badge
+                  variant="outline"
+                  className={
+                    station?.subaccountActive
+                      ? 'bg-accent/15 text-accent border-accent/30'
+                      : 'bg-muted text-muted-foreground'
+                  }
+                >
+                  {station?.subaccountActive ? 'Active' : 'Inactive'}
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-6">
+              {station?.subaccountActive && station?.paystackSubaccountCode ? (
+                <div className="space-y-4">
+                  <div className="grid gap-4 sm:grid-cols-3">
+                    <div>
+                      <p className="text-xs text-muted-foreground uppercase font-semibold">Subaccount Code</p>
+                      <p className="text-sm font-mono font-semibold text-foreground mt-1">{station.paystackSubaccountCode}</p>
                     </div>
-                    <div className="grid grid-cols-3 gap-4 text-center">
-                      <div>
-                        <p className="text-xs text-muted-foreground uppercase">Starting</p>
-                        <p className="text-sm font-semibold">{stats.starting.toLocaleString()}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground uppercase">Sold</p>
-                        <p className="text-sm font-semibold">{stats.sold.toLocaleString()}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground uppercase">Progress</p>
-                        <p className="text-sm font-semibold">{Math.round(remainingPct)}%</p>
-                      </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground uppercase font-semibold">Split Percentage</p>
+                      <p className="text-sm font-semibold text-foreground mt-1">{station.subaccountSplitPercentage ?? 100}%</p>
                     </div>
-                    <div className="mt-3 h-2 bg-muted rounded-full overflow-hidden">
-                      <div
-                        className={`h-full rounded-full transition-all ${remainingPct <= 15 ? 'bg-destructive' : remainingPct <= 40 ? 'bg-warning' : 'bg-accent'}`}
-                        style={{ width: `${Math.max(0, Math.min(100, 100 - remainingPct))}%` }}
-                      />
+                    <div>
+                      <p className="text-xs text-muted-foreground uppercase font-semibold">Status</p>
+                      <p className="text-sm font-semibold text-accent mt-1">Receiving payments</p>
                     </div>
-                  </CardContent>
-                </Card>
-              )
-            })
-          )}
+                  </div>
+                  <div className="p-3 rounded-lg bg-accent/5 border border-accent/20 flex items-center gap-2 text-xs text-muted-foreground">
+                    <span className="font-semibold text-foreground">Customer DVA Routing Active:</span> When a customer places an LPG cooking gas order for this station, their DVA is automatically switched to route funds directly into this subaccount ({station.paystackSubaccountCode}).
+                  </div>
+                </div>
+              ) : (
+                <div className="p-4 rounded-lg bg-muted/20 border border-border/40 text-center space-y-2">
+                  <p className="text-sm text-foreground font-medium">
+                    {stationBankAccounts.length > 0
+                      ? 'Bank account assigned. Subaccount setup requires valid NUBAN account details on Paystack.'
+                      : 'No bank account assigned to this LPG station.'}
+                  </p>
+                  <p className="text-xs text-muted-foreground max-w-lg mx-auto">
+                    {stationBankAccounts.length > 0
+                      ? 'When an active corporate bank account with valid NUBAN account number and bank code is assigned, Paystack automatically registers the settlement subaccount.'
+                      : 'Go to Bank Accounts and assign an active corporate account to this LPG station to automatically generate a Paystack settlement subaccount.'}
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       )}
+
 
       {/* Tab 3: Activity */}
       {activeTab === 'activity' && (

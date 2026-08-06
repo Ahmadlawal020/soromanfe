@@ -45,7 +45,6 @@ function LpgStationsDashboard() {
   const hasFilters = searchTerm.length > 0
 
   const totalCapacityKg = stations.reduce((sum, s) => sum + (s.lpgCapacityKg || 0), 0)
-  const totalPfis = stations.reduce((sum, s) => sum + (s.pfis?.length || 0), 0)
   const totalCylinders = stations.reduce((sum, s) => sum + (s.cylinders || []).reduce((s2: number, c: any) => s2 + (Number(c.quantity) || 0), 0), 0)
 
   const statsCards = [

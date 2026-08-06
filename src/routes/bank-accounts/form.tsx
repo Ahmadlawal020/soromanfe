@@ -7,7 +7,7 @@ import { Label } from '#/components/ui/label'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '#/components/ui/select'
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '#/components/ui/card'
 import { Badge } from '#/components/ui/badge'
-import { ArrowLeft, Landmark, Warehouse, Loader2, Search, Check, X, Star } from 'lucide-react'
+import { ArrowLeft, Landmark, Warehouse, Loader2, Search, Check, X, Star, Flame } from 'lucide-react'
 import {
   useBankAccounts,
   useCreateBankAccount,
@@ -16,6 +16,7 @@ import {
   type BankAccount,
 } from '#/lib/hooks/useBankAccounts'
 import { useDepots } from '#/lib/hooks/useDepots'
+import { useLpgStations } from '#/lib/hooks/useLpgStations'
 import { useToast } from '#/lib/hooks/useToast'
 import { routeGuard } from '#/lib/route-guard'
 
@@ -82,6 +83,7 @@ function BankAccountForm() {
   const editingAccount = stateAccount || fetchedAccount
 
   const { data: depots = [], isLoading: isLoadingDepots } = useDepots()
+  const { data: lpgStations = [], isLoading: isLoadingStations } = useLpgStations({ limit: 100 })
   const { data: allBankAccounts = [] } = useBankAccounts()
 
   const alreadyAssignedDepotIds = useMemo(() => {
@@ -103,7 +105,27 @@ function BankAccountForm() {
     return assignedSet
   }, [allBankAccounts, isEdit, accountId])
 
-  const availableDepots = depots.filter((depot) => !alreadyAssignedDepotIds.has(Number(depot.id)))
+  const alreadyAssignedStationIds = useMemo(() => {
+    const assignedSet = new Set<number>()
+    for (const acc of allBankAccounts) {
+      if (isEdit && accountId && String(acc.id) === String(accountId)) {
+        continue
+      }
+      const rawIds = acc.lpgStationIds || (acc.lpgStations || []).map((s: any) => typeof s === 'object' ? (s.id || s._id) : s)
+      if (Array.isArray(rawIds)) {
+        for (const sId of rawIds) {
+          const numId = Number(sId)
+          if (!isNaN(numId) && numId > 0) {
+            assignedSet.add(numId)
+          }
+        }
+      }
+    }
+    return assignedSet
+  }, [allBankAccounts, isEdit, accountId])
+
+  const availableDepots = depots
+  const availableLpgStations = lpgStations
 
   // Form State
   const [selectedBankPreset, setSelectedBankPreset] = useState<string>(
@@ -136,12 +158,22 @@ function BankAccountForm() {
   // Depot Multi-Select State
   const [selectedDepotIds, setSelectedDepotIds] = useState<number[]>(() => {
     if (!stateAccount) return []
-    const rawDepotIds = stateAccount.depotIds || (stateAccount.depots || []).map((d) => d.id)
+    const rawDepotIds = stateAccount.depotIds || (stateAccount.depots || []).map((d: any) => typeof d === 'object' ? (d.id || d._id) : d)
     return (Array.isArray(rawDepotIds) ? rawDepotIds : [])
       .map((i) => Number(i))
       .filter((i) => !isNaN(i) && i > 0)
   })
   const [depotSearchTerm, setDepotSearchTerm] = useState<string>('')
+
+  // LPG Station Multi-Select State
+  const [selectedLpgStationIds, setSelectedLpgStationIds] = useState<number[]>(() => {
+    if (!stateAccount) return []
+    const rawStationIds = stateAccount.lpgStationIds || (stateAccount.lpgStations || []).map((s: any) => typeof s === 'object' ? (s.id || s._id) : s)
+    return (Array.isArray(rawStationIds) ? rawStationIds : [])
+      .map((i) => Number(i))
+      .filter((i) => !isNaN(i) && i > 0)
+  })
+  const [stationSearchTerm, setStationSearchTerm] = useState<string>('')
 
   const handleBankPresetChange = (preset: string) => {
     setSelectedBankPreset(preset)
@@ -150,32 +182,39 @@ function BankAccountForm() {
     }
   }
 
-  // Populate form when fetched account loads (fallback for URL-based edit)
+  // Populate form when fetched account loads
   useEffect(() => {
-    if (fetchedAccount && !stateAccount) {
-      const bank = (fetchedAccount.bankName || '').trim()
+    const acc = fetchedAccount || stateAccount
+    if (acc) {
+      const bank = (acc.bankName || '').trim()
       if (NIGERIAN_BANKS.includes(bank)) {
         setSelectedBankPreset(bank)
       } else if (bank) {
         setSelectedBankPreset('Other (Custom Bank)')
         setCustomBankName(bank)
       }
-      setAccountName(fetchedAccount.accountName || '')
-      setAccountNumber(fetchedAccount.accountNumber || '')
-      setBankCode(fetchedAccount.bankCode || BANK_CODES_MAP[bank] || '')
-      setBranchName(fetchedAccount.branchName || '')
-      setCurrency(fetchedAccount.currency || 'NGN')
-      setStatus(fetchedAccount.status || 'Active')
-      setIsDefault(Boolean(fetchedAccount.isDefault))
-      setNotes(fetchedAccount.notes || '')
+      setAccountName(acc.accountName || '')
+      setAccountNumber(acc.accountNumber || '')
+      setBankCode(acc.bankCode || BANK_CODES_MAP[bank] || '')
+      setBranchName(acc.branchName || '')
+      setCurrency(acc.currency || 'NGN')
+      setStatus(acc.status || 'Active')
+      setIsDefault(Boolean(acc.isDefault))
+      setNotes(acc.notes || '')
 
-      const rawDepotIds = fetchedAccount.depotIds || (fetchedAccount.depots || []).map((d) => d.id)
+      const rawDepotIds = acc.depotIds || (acc.depots || []).map((d: any) => typeof d === 'object' ? (d.id || d._id) : d)
       const numericIds = (Array.isArray(rawDepotIds) ? rawDepotIds : [])
         .map((i) => Number(i))
         .filter((i) => !isNaN(i) && i > 0)
       setSelectedDepotIds(numericIds)
+
+      const rawStationIds = acc.lpgStationIds || (acc.lpgStations || []).map((s: any) => typeof s === 'object' ? (s.id || s._id) : s)
+      const numericStationIds = (Array.isArray(rawStationIds) ? rawStationIds : [])
+        .map((i) => Number(i))
+        .filter((i) => !isNaN(i) && i > 0)
+      setSelectedLpgStationIds(numericStationIds)
     }
-  }, [fetchedAccount, stateAccount])
+  }, [fetchedAccount])
 
   const toggleDepotSelection = (id: number) => {
     setSelectedDepotIds((prev) =>
@@ -189,6 +228,20 @@ function BankAccountForm() {
 
   const handleClearDepotSelection = () => {
     setSelectedDepotIds([])
+  }
+
+  const toggleStationSelection = (id: number) => {
+    setSelectedLpgStationIds((prev) =>
+      prev.includes(id) ? prev.filter((sId) => sId !== id) : [...prev, id]
+    )
+  }
+
+  const handleSelectAllStations = () => {
+    setSelectedLpgStationIds(availableLpgStations.map((s: any) => Number(s.id || s._id)).filter((id) => !isNaN(id)))
+  }
+
+  const handleClearStationSelection = () => {
+    setSelectedLpgStationIds([])
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -220,6 +273,7 @@ function BankAccountForm() {
       status,
       isDefault,
       depotIds: selectedDepotIds,
+      lpgStationIds: selectedLpgStationIds,
       notes: notes.trim(),
     }
 
@@ -566,6 +620,164 @@ function BankAccountForm() {
                 })}
               </div>
             )}
+          </CardContent>
+        </Card>
+
+        {/* Card 3: LPG Station Assignments */}
+        <Card className="border-border/60">
+          <CardHeader className="border-b border-border/40 pb-3 flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-base font-semibold flex items-center gap-2">
+                <Flame className="size-4 text-primary" /> Assign LPG Cooking Gas Stations
+              </CardTitle>
+              <CardDescription className="text-xs mt-0.5">
+                Select which LPG station(s) use this bank account for payment collection.
+              </CardDescription>
+            </div>
+            <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 text-xs px-2.5 py-1 font-semibold">
+              {selectedLpgStationIds.length} Selected
+            </Badge>
+          </CardHeader>
+          <CardContent className="pt-4 space-y-4">
+            {/* Search and Quick Selection Tools */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Filter LPG stations..."
+                  value={stationSearchTerm}
+                  onChange={(e) => setStationSearchTerm(e.target.value)}
+                  className="pl-9 text-xs h-9 bg-background/50"
+                />
+                {stationSearchTerm && (
+                  <button
+                    type="button"
+                    onClick={() => setStationSearchTerm('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="size-3" />
+                  </button>
+                )}
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSelectAllStations}
+                  className="h-9 text-xs"
+                >
+                  Select All
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleClearStationSelection}
+                  className="h-9 text-xs text-muted-foreground"
+                >
+                  Deselect All
+                </Button>
+              </div>
+            </div>
+
+            {/* Selected Station Chips */}
+            {selectedLpgStationIds.length > 0 && (
+              <div className="p-3 bg-muted/30 border border-border/40 rounded-xl">
+                <p className="text-xs font-semibold uppercase text-muted-foreground mb-2">
+                  Currently Assigned ({selectedLpgStationIds.length}):
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {selectedLpgStationIds.map((id) => {
+                    const station = lpgStations.find((s: any) => Number(s.id || s._id) === id) as any
+                    return (
+                      <Badge
+                        key={id}
+                        variant="secondary"
+                        className="bg-primary/15 text-primary border-primary/30 text-xs font-normal py-1 px-2.5 flex items-center gap-1.5"
+                      >
+                        <Flame className="size-3 text-primary" />
+                        {station ? `${station.name} (${station.code})` : `Station #${id}`}
+                        <button
+                          type="button"
+                          onClick={() => toggleStationSelection(id)}
+                          className="hover:text-destructive transition-colors ml-1 duration-250 ease-luxe"
+                        >
+                          <X className="size-3" />
+                        </button>
+                      </Badge>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Stations Checkbox List */}
+            {(() => {
+              const filteredStations = availableLpgStations.filter((station: any) =>
+                station.name?.toLowerCase().includes(stationSearchTerm.toLowerCase()) ||
+                station.code?.toLowerCase().includes(stationSearchTerm.toLowerCase()) ||
+                (station.city && station.city.toLowerCase().includes(stationSearchTerm.toLowerCase()))
+              )
+
+              if (isLoadingStations) {
+                return (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="size-5 animate-spin text-primary mr-2" />
+                    <span className="text-xs text-muted-foreground">Loading LPG stations list...</span>
+                  </div>
+                )
+              }
+
+              if (filteredStations.length === 0) {
+                return (
+                  <div className="p-6 text-center text-xs text-muted-foreground border border-dashed rounded-lg">
+                    {availableLpgStations.length === 0
+                      ? 'All operational LPG stations already have bank accounts assigned.'
+                      : 'No available LPG stations match your search query.'}
+                  </div>
+                )
+              }
+
+              return (
+                <div className="grid gap-2 sm:grid-cols-2 max-h-72 overflow-y-auto pr-1">
+                  {filteredStations.map((station: any) => {
+                    const numericId = Number(station.id || station._id)
+                    const isChecked = selectedLpgStationIds.includes(numericId)
+                    return (
+                      <div
+                        key={station.id || station._id}
+                        onClick={() => toggleStationSelection(numericId)}
+                        className={`p-3 rounded-lg border cursor-pointer transition-all flex items-center justify-between select-none ${isChecked
+                          ? 'border-primary/50 bg-primary/10 text-foreground '
+                          : 'border-border/40 hover:bg-muted/30 text-muted-foreground'
+                        }`}
+                      >
+                        <div className="min-w-0 flex-1 pr-2">
+                          <div className="flex items-center gap-2">
+                            <span className={`font-semibold text-xs ${isChecked ? 'text-primary' : 'text-foreground'}`}>
+                              {station.name}
+                            </span>
+                            <span className="text-xs font-mono opacity-80">({station.code})</span>
+                          </div>
+                          {station.city && (
+                            <p className="text-xs text-muted-foreground truncate mt-0.5">{station.city}, {station.state}</p>
+                          )}
+                        </div>
+
+                        <div
+                          className={`size-5 rounded-md border flex items-center justify-center transition-colors shrink-0 ${isChecked ? 'bg-primary border-primary text-primary-foreground' : 'border-border bg-background'
+                          }`}
+                        >
+                          {isChecked && <Check className="size-3.5 stroke-[3]" />}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )
+            })()}
           </CardContent>
         </Card>
 

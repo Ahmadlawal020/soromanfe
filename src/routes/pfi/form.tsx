@@ -5,11 +5,10 @@ import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '#/components/ui/select'
-import { Loader2, Save, CheckCircle, AlertCircle, FileText, User, Package, Search, Warehouse, Flame, X } from 'lucide-react'
+import { Loader2, Save, CheckCircle, AlertCircle, FileText, User, Package, Search, Warehouse, X } from 'lucide-react'
 import { useCreatePfi, useDepotsForFilter, useUpdatePfi } from '#/lib/hooks/usePfis'
 import { useProductList } from '#/lib/hooks/useProducts'
 import { useAdminList } from '#/lib/hooks/useAdmin'
-import { useLpgStations } from '#/lib/hooks/useLpgStations'
 import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/pfi/form')({
@@ -40,33 +39,22 @@ function PFIForm() {
 
   // Data for dropdowns
   const { data: statesData } = useDepotsForFilter()
-  const { data: lpgStationsData } = useLpgStations({ limit: 100 })
   const { data: productsData } = useProductList()
   const { data: adminsData } = useAdminList()
 
   const locations = Array.isArray(statesData) ? statesData : ((statesData as any)?.depots || (statesData as any)?.results || [])
-  const lpgStations = Array.isArray(lpgStationsData) ? lpgStationsData : []
   const products = Array.isArray(productsData) ? productsData : ((productsData as any)?.products || (productsData as any)?.results || [])
   const staff = Array.isArray(adminsData) ? adminsData : []
 
-  // Build combined location list
-  const combinedLocations = useMemo(() => {
-    const depots = locations.map((d: any) => ({
+  // Depots list for location dropdown
+  const depots = useMemo(() => {
+    return locations.map((d: any) => ({
       id: String(d.id || d._id),
       name: d.name || '',
       code: d.code || '',
       address: d.address || d.city || '',
-      type: 'depot' as const,
     }))
-    const stations = lpgStations.map((s: any) => ({
-      id: String(s.id || s._id),
-      name: s.name || '',
-      code: s.code || '',
-      address: s.address || s.city || '',
-      type: 'lpg' as const,
-    }))
-    return [...depots, ...stations]
-  }, [locations, lpgStations])
+  }, [locations])
 
   const [form, setForm] = useState({
     id: '',
@@ -74,7 +62,6 @@ function PFIForm() {
     pfiNumber: '',
     description: '',
     locationId: '',
-    lpgStationId: '',
     productId: '',
     productUnit: '',
     startingQtyLitres: '',
@@ -101,7 +88,6 @@ function PFIForm() {
         pfiNumber: editingPfi.pfiNumber || '',
         description: editingPfi.description || '',
         locationId: editingPfi.locationId ? String(editingPfi.locationId) : '',
-        lpgStationId: editingPfi.lpgStationId ? String(editingPfi.lpgStationId) : '',
         productId: String(editingPfi.productId || ''),
         productUnit: editingPfi.productUnit || '',
         startingQtyLitres: String(editingPfi.startingQtyLitres || ''),
@@ -144,7 +130,6 @@ function PFIForm() {
         pfiNumber: form.pfiNumber,
         description: form.description,
         locationId: form.locationId ? form.locationId : null,
-        lpgStationId: form.lpgStationId ? form.lpgStationId : null,
         productId: form.productId,
         productUnit: form.productUnit || undefined,
         startingQtyLitres: Number(form.startingQtyLitres) || 0,
@@ -196,7 +181,6 @@ function PFIForm() {
                 pfiNumber: '',
                 description: '',
                 locationId: '',
-                lpgStationId: '',
                 productId: '',
                 productUnit: '',
                 startingQtyLitres: '',
@@ -266,21 +250,19 @@ function PFIForm() {
               </div>
 
               <div>
-                <Label>Location (Optional)</Label>
+                <Label>Depot Location (Optional)</Label>
                 {(() => {
-                  const selectedId = form.lpgStationId || form.locationId
-                  const selectedType = form.lpgStationId ? 'lpg' : form.locationId ? 'depot' : null
-                  const selected = selectedId ? combinedLocations.find(l => l.id === selectedId && l.type === selectedType) : null
+                  const selected = form.locationId ? depots.find(d => d.id === form.locationId) : null
 
                   if (selected && !isLocationOpen) {
                     return (
                       <div className="mt-1 p-3 border rounded-lg bg-muted/30 flex items-center gap-3">
-                        <div className={`size-9 rounded-lg flex items-center justify-center shrink-0 ${selected.type === 'lpg' ? 'bg-orange-100 text-orange-600' : 'bg-primary/10 text-primary'}`}>
-                          {selected.type === 'lpg' ? <Flame className="size-4" /> : <Warehouse className="size-4" />}
+                        <div className="size-9 rounded-lg flex items-center justify-center shrink-0 bg-primary/10 text-primary">
+                          <Warehouse className="size-4" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="font-semibold text-sm text-foreground truncate">{selected.name}</p>
-                          <p className="text-xs text-muted-foreground">{selected.code} &bull; {selected.type === 'lpg' ? 'LPG Station' : 'Depot'}</p>
+                          <p className="text-xs text-muted-foreground">{selected.code} &bull; Depot</p>
                         </div>
                         <Button type="button" variant="outline" size="sm" onClick={() => { setIsLocationOpen(true); setLocationSearch('') }}>Change</Button>
                       </div>
@@ -288,19 +270,19 @@ function PFIForm() {
                   }
 
                   const filtered = locationSearch.trim()
-                    ? combinedLocations.filter(l =>
-                        l.name.toLowerCase().includes(locationSearch.toLowerCase()) ||
-                        l.code.toLowerCase().includes(locationSearch.toLowerCase()) ||
-                        l.address.toLowerCase().includes(locationSearch.toLowerCase())
+                    ? depots.filter(d =>
+                        d.name.toLowerCase().includes(locationSearch.toLowerCase()) ||
+                        d.code.toLowerCase().includes(locationSearch.toLowerCase()) ||
+                        d.address.toLowerCase().includes(locationSearch.toLowerCase())
                       )
-                    : combinedLocations
+                    : depots
 
                   return (
                     <div className="space-y-2 mt-1">
                       <div className="relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground size-4" />
                         <Input
-                          placeholder="Search depots and LPG stations..."
+                          placeholder="Search depots..."
                           className="pl-10 pr-9"
                           value={locationSearch}
                           onChange={(e) => { setLocationSearch(e.target.value); setIsLocationOpen(true) }}
@@ -315,38 +297,34 @@ function PFIForm() {
                       <div className="border rounded-lg max-h-[200px] overflow-y-auto">
                         <div
                           className="p-2.5 hover:bg-muted cursor-pointer text-sm text-muted-foreground border-b"
-                          onClick={() => { setForm({ ...form, locationId: '', lpgStationId: '' }); setIsLocationOpen(false); setLocationSearch('') }}
+                          onClick={() => { setForm({ ...form, locationId: '' }); setIsLocationOpen(false); setLocationSearch('') }}
                         >
-                          No Location Selected
+                          No Depot Selected
                         </div>
                         {filtered.length === 0 ? (
-                          <div className="p-4 text-center text-sm text-muted-foreground">No locations found</div>
+                          <div className="p-4 text-center text-sm text-muted-foreground">No depots found</div>
                         ) : (
-                          filtered.map((l) => {
-                            const isSelected = (l.type === 'lpg' ? form.lpgStationId : form.locationId) === l.id
+                          filtered.map((d) => {
+                            const isSelected = form.locationId === d.id
                             return (
                               <div
-                                key={`${l.type}-${l.id}`}
+                                key={d.id}
                                 className={`p-2.5 flex items-center gap-3 cursor-pointer hover:bg-muted transition-colors ${isSelected ? 'bg-primary/5' : ''}`}
                                 onClick={() => {
-                                  if (l.type === 'lpg') {
-                                    setForm({ ...form, lpgStationId: l.id, locationId: '' })
-                                  } else {
-                                    setForm({ ...form, locationId: l.id, lpgStationId: '' })
-                                  }
+                                  setForm({ ...form, locationId: d.id })
                                   setIsLocationOpen(false)
                                   setLocationSearch('')
                                 }}
                               >
-                                <div className={`size-8 rounded-lg flex items-center justify-center shrink-0 ${l.type === 'lpg' ? 'bg-orange-100 text-orange-600' : 'bg-primary/10 text-primary'}`}>
-                                  {l.type === 'lpg' ? <Flame className="size-3.5" /> : <Warehouse className="size-3.5" />}
+                                <div className="size-8 rounded-lg flex items-center justify-center shrink-0 bg-primary/10 text-primary">
+                                  <Warehouse className="size-3.5" />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <p className="font-normal text-sm text-foreground truncate">{l.name}</p>
-                                  <p className="text-xs text-muted-foreground truncate">{l.code} {l.address ? `• ${l.address}` : ''}</p>
+                                  <p className="font-normal text-sm text-foreground truncate">{d.name}</p>
+                                  <p className="text-xs text-muted-foreground truncate">{d.code} {d.address ? `• ${d.address}` : ''}</p>
                                 </div>
-                                <span className={`text-xs font-normal px-1.5 py-0.5 rounded ${l.type === 'lpg' ? 'bg-orange-100 text-orange-600' : 'bg-primary/10 text-primary'}`}>
-                                  {l.type === 'lpg' ? 'LPG' : 'Depot'}
+                                <span className="text-xs font-normal px-1.5 py-0.5 rounded bg-primary/10 text-primary">
+                                  Depot
                                 </span>
                               </div>
                             )
