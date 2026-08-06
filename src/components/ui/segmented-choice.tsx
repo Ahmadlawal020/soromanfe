@@ -56,26 +56,26 @@ function SegmentedChoice<T extends string>({
             disabled={o.disabled}
             onClick={() => onChange(o.value)}
             className={cn(
-              "flex cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border px-4 py-3.5",
-              "transition-colors duration-250 ease-luxe outline-none",
-              "focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",
+              "flex cursor-pointer flex-col items-center justify-center gap-3 rounded-3xl border px-6 py-4",
+              "transition duration-250 ease-luxe outline-none will-change-transform",
+              "focus-visible:border-ring focus-visible:ring-4 focus-visible:ring-ring/50",
               "disabled:pointer-events-none disabled:opacity-50",
               selected
-                ? "border-accent bg-accent/5 text-accent"
-                : "border-border hover:border-foreground/30 hover:bg-muted/50",
+                ? "border-emerald-500 bg-emerald-500/15 text-emerald-950"
+                : "border-border bg-background/90 hover:-translate-y-0.5 hover:border-foreground/30 hover:bg-muted/50",
             )}
           >
             {o.icon && (
-              <span className={cn("[&_svg]:size-4", selected ? "text-accent" : "text-muted-foreground")}>
+              <span className={cn("[&_svg]:size-4", selected ? "text-emerald-600" : "text-muted-foreground")}>
                 {o.icon}
               </span>
             )}
-            <span className="text-sm font-normal">{o.label}</span>
+            <span className="text-sm font-semibold">{o.label}</span>
             {o.hint && (
               <span
                 className={cn(
                   "text-xs",
-                  selected ? "text-accent/70" : "text-muted-foreground",
+                  selected ? "text-emerald-700" : "text-muted-foreground",
                 )}
               >
                 {o.hint}

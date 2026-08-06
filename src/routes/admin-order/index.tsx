@@ -70,13 +70,13 @@ const DEPOT_GROUPS: Group[] = [
 
 const DANGOTE_GROUPS: Group[] = [
   {
-    title: 'Customer & company', shortTitle: 'Customer', icon: User,
+    title: 'Customer', shortTitle: 'Customer', icon: User,
     description: 'Who the request is for, and the licence it sits under.',
     steps: [1, 2],
     sections: ['Customer', 'Company & licence'],
   },
   {
-    title: 'Order details', shortTitle: 'Details', icon: Package,
+    title: 'Order', shortTitle: 'Details', icon: Package,
     description: 'Select product, quantity, and where to deliver.',
     steps: [3, 4, 5],
     sections: ['Product', 'Quantity', 'Delivery'],
@@ -95,7 +95,7 @@ const LPG_GROUPS: Group[] = [
     steps: [1],
   },
   {
-    title: 'Station & cylinders', shortTitle: 'Station', icon: Flame,
+    title: 'Order', shortTitle: 'Order', icon: Flame,
     description: 'Select an LPG station by location and choose your cylinders.',
     steps: [2, 3],
     sections: ['LPG Station', 'Cylinder selection'],
@@ -400,9 +400,24 @@ function CreateOrderPage() {
           value={orderType}
           onChange={setOrderType}
           options={[
-            { value: 'depot', label: 'Depot order', hint: 'Soroman depots', icon: <Truck /> },
-            { value: 'dangote', label: 'Dangote delivery', hint: 'Bulk request', icon: <Building2 /> },
-            { value: 'lpg', label: 'LPG cooking gas', hint: 'Home delivery', icon: <Flame /> },
+            {
+              value: 'depot',
+              label: 'Buy from Our Depots',
+              hint: 'Order petroleum products from Soroman depots across Nigeria for pickup or delivery.',
+              icon: <Truck />,
+            },
+            {
+              value: 'dangote',
+              label: 'Dangote Delivery',
+              hint: 'Place bulk orders for petroleum products delivered directly from Dangote Refinery.',
+              icon: <Building2 />,
+            },
+            // {
+            //   value: 'lpg',
+            //   label: 'Cooking Gas',
+            //   hint: 'Get cooking gas delivered safely and conveniently to your doorstep.',
+            //   icon: <Flame />,
+            // },
           ]}
         />
       </div>
