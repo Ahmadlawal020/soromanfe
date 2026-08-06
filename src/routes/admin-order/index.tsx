@@ -152,12 +152,12 @@ function Section({
  * Purely presentational: nothing here changes what is submitted.
  */
 function useRevealed(
-  wizard: { validateStep: (n: number) => string | null },
+  wizard: { validateStep: (n: number) => string[] },
   steps: number[],
 ) {
   let count = 1
   for (const s of steps) {
-    if (wizard.validateStep(s)) break
+    if (wizard.validateStep(s).length > 0) break
     if (count < steps.length) count += 1
   }
   return steps.slice(0, count)

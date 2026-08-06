@@ -16,6 +16,13 @@ export const Route = createFileRoute('/pfi/form')({
   component: PFIForm,
 })
 
+interface Depot {
+  id: string
+  name: string
+  code: string
+  address: string
+}
+
 function formatDateToInput(dateStr: string | null | undefined): string {
   if (!dateStr) return ''
   try {
@@ -47,7 +54,7 @@ function PFIForm() {
   const staff = Array.isArray(adminsData) ? adminsData : []
 
   // Depots list for location dropdown
-  const depots = useMemo(() => {
+  const depots = useMemo<Depot[]>(() => {
     return locations.map((d: any) => ({
       id: String(d.id || d._id),
       name: d.name || '',
@@ -212,10 +219,10 @@ function PFIForm() {
   return (
     <div className="space-y-6 animate-fade-in ">
       <PageHeader
-      eyebrow="Admin"
-      title={isEdit ? 'Edit PFI' : 'Add New PFI'}
-      description={isEdit ? 'Modify information, officers, and vessel credentials of this PFI' : 'Register a new Pro Forma Invoice'}
-    />
+        eyebrow="Admin"
+        title={isEdit ? 'Edit PFI' : 'Add New PFI'}
+        description={isEdit ? 'Modify information, officers, and vessel credentials of this PFI' : 'Register a new Pro Forma Invoice'}
+      />
 
       <form onSubmit={handleSubmit} noValidate className="space-y-6">
         {error && (
@@ -252,7 +259,7 @@ function PFIForm() {
               <div>
                 <Label>Depot Location (Optional)</Label>
                 {(() => {
-                  const selected = form.locationId ? depots.find(d => d.id === form.locationId) : null
+                  const selected = form.locationId ? depots.find((d: Depot) => d.id === form.locationId) : null
 
                   if (selected && !isLocationOpen) {
                     return (
@@ -270,11 +277,11 @@ function PFIForm() {
                   }
 
                   const filtered = locationSearch.trim()
-                    ? depots.filter(d =>
-                        d.name.toLowerCase().includes(locationSearch.toLowerCase()) ||
-                        d.code.toLowerCase().includes(locationSearch.toLowerCase()) ||
-                        d.address.toLowerCase().includes(locationSearch.toLowerCase())
-                      )
+                    ? depots.filter((d: Depot) =>
+                      d.name.toLowerCase().includes(locationSearch.toLowerCase()) ||
+                      d.code.toLowerCase().includes(locationSearch.toLowerCase()) ||
+                      d.address.toLowerCase().includes(locationSearch.toLowerCase())
+                    )
                     : depots
 
                   return (
@@ -304,7 +311,7 @@ function PFIForm() {
                         {filtered.length === 0 ? (
                           <div className="p-4 text-center text-sm text-muted-foreground">No depots found</div>
                         ) : (
-                          filtered.map((d) => {
+                          filtered.map((d: Depot) => {
                             const isSelected = form.locationId === d.id
                             return (
                               <div
@@ -398,7 +405,7 @@ function PFIForm() {
                           }}
                           required
                           className="pr-16 font-normal"
- />
+                        />
                         <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-xs font-semibold text-muted-foreground bg-muted px-2 py-1 rounded">
                           {unitName}
                         </div>
@@ -482,7 +489,7 @@ function PFIForm() {
                             }
                           }}
                           className="pr-16 text-xs text-muted-foreground"
- />
+                        />
                         <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-xs font-normal text-muted-foreground bg-muted/60 px-2 py-0.5 rounded">
                           {isWeightProd ? 'Litres' : 'MT / kg'}
                         </div>
@@ -504,7 +511,7 @@ function PFIForm() {
                           value={form.unitPrice}
                           onChange={e => setForm({ ...form, unitPrice: e.target.value })}
                           className="pl-8 font-normal"
- />
+                        />
                       </div>
                     </div>
 
