@@ -148,7 +148,7 @@ export function ReviewStep({ wizard }: ReviewStepProps) {
             <CircleDollarSign className="size-5 text-primary" />
             <span className="font-semibold text-foreground">Total Amount Due</span>
           </div>
-          <span className="text-2xl font-semibold text-primary tabular-nums">
+          <span className="text-2xl font-semibold text-primary">
             {formatCurrency(Number(orderQuantity) * selectedProduct?.currentPrice)}
           </span>
         </div>

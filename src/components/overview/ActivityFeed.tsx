@@ -60,7 +60,7 @@ export function ActivityFeed({ data }: ActivityFeedProps) {
     <div className="divide-y divide-foreground/10">
       {data.map((item) => (
         <div key={item.id} className="flex items-center gap-4 px-6 py-3">
-          <span className="w-20 shrink-0 text-xs text-muted-foreground tabular-nums">
+          <span className="w-20 shrink-0 text-xs text-muted-foreground">
             {relativeTime(item.createdAt)}
           </span>
           <span className="min-w-0 flex-1 truncate text-sm">

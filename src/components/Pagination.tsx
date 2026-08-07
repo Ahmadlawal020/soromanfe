@@ -33,7 +33,7 @@ export function Pagination({
             onPageSizeChange(Number(val))
           }}
         >
-          <SelectTrigger size="sm" className="w-[70px] tabular-nums">
+          <SelectTrigger size="sm" className="w-[70px]">
             <SelectValue placeholder={pageSize.toString()} />
           </SelectTrigger>
           <SelectContent>
@@ -42,7 +42,7 @@ export function Pagination({
             ))}
           </SelectContent>
         </Select>
-        <p className="ml-4 text-xs text-muted-foreground tabular-nums">
+        <p className="ml-4 text-xs text-muted-foreground">
           Showing {startItem} to {endItem} of {totalItems} entries
         </p>
       </div>
@@ -66,7 +66,7 @@ export function Pagination({
                   <Button
                     variant={currentPage === p ? 'default' : 'outline'}
                     size="icon-sm"
-                    className="tabular-nums"
+                   
                     onClick={() => onPageChange(p)}
                     aria-current={currentPage === p ? 'page' : undefined}
                   >

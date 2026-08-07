@@ -83,7 +83,7 @@ function StatCard({
             card rather than blow the grid column out. */}
         <div
           className={cn(
-            "text-3xl leading-[1.05] font-semibold tracking-[-0.02em] break-words tabular-nums",
+            "text-3xl leading-[1.05] font-semibold tracking-[-0.02em] break-words",
             valueClassName ?? "text-foreground",
           )}
         >

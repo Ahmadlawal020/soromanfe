@@ -176,7 +176,7 @@ function FleetLedgerPage() {
               <TableBody>
                 {filtered.map((e) => (
                   <TableRow key={e.id}>
-                    <TableCell className="tabular-nums">
+                    <TableCell>
                       {format(new Date(e.entry_date), 'd MMM yyyy')}
                     </TableCell>
                     <TableCell className="font-mono">{e.truck_plate}</TableCell>
@@ -184,10 +184,10 @@ function FleetLedgerPage() {
                     <TableCell className="text-muted-foreground">{e.category}</TableCell>
                     {/* One entry occupies exactly one column — the split is the
                         whole point, since the model only has type and amount. */}
-                    <TableCell className="text-right font-semibold text-destructive tabular-nums">
+                    <TableCell className="text-right font-semibold text-destructive">
                       {e.entry_type === 'expense' ? naira(e.amount) : ''}
                     </TableCell>
-                    <TableCell className="text-right font-semibold text-accent tabular-nums">
+                    <TableCell className="text-right font-semibold text-accent">
                       {e.entry_type === 'income' ? naira(e.amount) : ''}
                     </TableCell>
                     <TableCell className="text-muted-foreground">{e.entered_by || '—'}</TableCell>
@@ -342,7 +342,7 @@ function EntryDialog({
           <div className="space-y-1.5">
             <label className={cn(MICRO, 'block text-muted-foreground')}>Amount</label>
             <Input
-              type="number" inputMode="decimal" className="tabular-nums"
+              type="number" inputMode="decimal"
               value={form.amount} onChange={(e) => set('amount', e.target.value)}
             />
           </div>

@@ -82,7 +82,7 @@ function SecurityExitPage() {
                 return (
                   <TruckCard key={l.id} load={l} unit={unit}>
                     {exited ? (
-                      <span className="text-xs text-muted-foreground tabular-nums">
+                      <span className="text-xs text-muted-foreground">
                         {gateTime(l.securityExitedAt)}
                       </span>
                     ) : entered ? (

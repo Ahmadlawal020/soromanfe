@@ -215,7 +215,7 @@ function DeliveryOperationDetailsView() {
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <div className="text-xs text-muted-foreground font-normal">Quantity Allocated</div>
-              <div className="text-xl font-semibold text-foreground mt-0.5 tabular-nums">
+              <div className="text-xl font-semibold text-foreground mt-0.5">
                 {record.qty > 0 ? `${fmtQty(record.qty)} ${record.unitLabel}` : '—'}
               </div>
             </div>
@@ -243,7 +243,7 @@ function DeliveryOperationDetailsView() {
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <div className="text-xs text-muted-foreground font-normal">Rate (per litre)</div>
-              <div className="text-xl font-semibold text-foreground mt-0.5 tabular-nums">
+              <div className="text-xl font-semibold text-foreground mt-0.5">
                 {toNum(record.rate) > 0 ? `₦${toNum(record.rate).toLocaleString()}` : '—'}
               </div>
             </div>

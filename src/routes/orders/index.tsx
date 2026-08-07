@@ -380,7 +380,7 @@ function OrdersDashboard() {
               <span className={MICRO}>
                 {formatQty(filtered.length)} order{filtered.length === 1 ? '' : 's'}
               </span>
-              <span className="text-xs text-muted-foreground tabular-nums">
+              <span className="text-xs text-muted-foreground">
                 {formatNaira(totals.amount)}
               </span>
             </div>
@@ -418,9 +418,9 @@ function OrdersDashboard() {
                           serial += 1
                           return (
                             <TableRow key={o.id ?? o._id}>
-                              <TableCell className="text-muted-foreground tabular-nums">{serial}</TableCell>
+                              <TableCell className="text-muted-foreground">{serial}</TableCell>
                               <TableCell className="font-normal text-accent">{o.orderNumber}</TableCell>
-                              <TableCell className="text-muted-foreground tabular-nums">
+                              <TableCell className="text-muted-foreground">
                                 {o.createdAt ? format(new Date(o.createdAt), 'd MMM yyyy') : '—'}
                               </TableCell>
                               <TableCell>
@@ -431,11 +431,11 @@ function OrdersDashboard() {
                                   </span>
                                 )}
                               </TableCell>
-                              <TableCell className="text-muted-foreground tabular-nums">{o.customerPhone || '—'}</TableCell>
+                              <TableCell className="text-muted-foreground">{o.customerPhone || '—'}</TableCell>
                               <TableCell>{o.depotName || o.state || '—'}</TableCell>
-                              <TableCell className="text-right tabular-nums">{formatQty(toNumber(o.quantity))}</TableCell>
-                              <TableCell className="text-right tabular-nums">{formatNaira(toNumber(o.price))}</TableCell>
-                              <TableCell className="text-right font-semibold tabular-nums">{formatNaira(toNumber(o.totalAmount))}</TableCell>
+                              <TableCell className="text-right">{formatQty(toNumber(o.quantity))}</TableCell>
+                              <TableCell className="text-right">{formatNaira(toNumber(o.price))}</TableCell>
+                              <TableCell className="text-right font-semibold">{formatNaira(toNumber(o.totalAmount))}</TableCell>
                               <TableCell>
                                 <div className="flex flex-col gap-1">
                                   <OrderStatusBadge status={o.status} />
@@ -464,11 +464,11 @@ function OrdersDashboard() {
                             <TableCell colSpan={6} className={cn(MICRO, 'text-xs text-muted-foreground')}>
                               {day} · {rows.length} order{rows.length === 1 ? '' : 's'}
                             </TableCell>
-                            <TableCell className="text-right font-semibold tabular-nums">
+                            <TableCell className="text-right font-semibold">
                               {formatQty(rows.reduce((s: number, r: any) => s + toNumber(r.quantity), 0))}
                             </TableCell>
                             <TableCell />
-                            <TableCell className="text-right font-semibold tabular-nums">
+                            <TableCell className="text-right font-semibold">
                               {formatNaira(rows.reduce((s: number, r: any) => s + toNumber(r.totalAmount), 0))}
                             </TableCell>
                             <TableCell colSpan={3} />

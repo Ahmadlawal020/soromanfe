@@ -105,7 +105,7 @@ function UserDetailPage() {
         <CardContent className="bg-primary/5 p-6 md:p-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
             <div className="relative">
-              <div className="size-20 bg-primary rounded-full flex items-center justify-center text-primary-foreground text-2xl font-semibold tabular-nums">
+              <div className="size-20 bg-primary rounded-full flex items-center justify-center text-primary-foreground text-2xl font-semibold">
                 {getInitials(staff.full_name)}
               </div>
               {staff.suspended

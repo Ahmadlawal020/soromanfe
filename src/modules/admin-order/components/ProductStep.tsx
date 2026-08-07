@@ -114,7 +114,7 @@ export function ProductStep({ wizard }: ProductStepProps) {
               <span className="block text-xs text-muted-foreground">
                 {qty > 0 ? `${qty.toLocaleString()} × ${formatCurrency(selectedProduct.currentPrice)}` : 'Order total'}
               </span>
-              <span className="block text-lg font-semibold tabular-nums">
+              <span className="block text-lg font-semibold">
                 {formatCurrency(total)}
               </span>
             </div>

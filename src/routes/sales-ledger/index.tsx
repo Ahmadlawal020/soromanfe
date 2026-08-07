@@ -878,11 +878,11 @@ function SalesLedgerDashboard() {
                           </TableCell>
                           <TableCell className="font-semibold text-foreground uppercase whitespace-nowrap text-xs">{group.customerName || '—'}</TableCell>
                           <TableCell className="text-muted-foreground text-xs uppercase whitespace-nowrap">{group.location || '—'}</TableCell>
-                          <TableCell className="text-right text-muted-foreground whitespace-nowrap tabular-nums text-xs">{group.quantity > 0 ? `${fmtQty(group.quantity)} L` : '—'}</TableCell>
-                          <TableCell className="text-right text-muted-foreground whitespace-nowrap tabular-nums text-xs">{group.rate > 0 ? fmt(group.rate) : '—'}</TableCell>
-                          <TableCell className="text-right font-normal text-foreground whitespace-nowrap tabular-nums text-xs">{group.expected > 0 ? fmt(group.expected) : '—'}</TableCell>
-                          <TableCell className="text-right font-semibold text-accent whitespace-nowrap tabular-nums text-xs">{fmt(toNum(group.totalPaid))}</TableCell>
-                          <TableCell className={`text-right font-semibold whitespace-nowrap tabular-nums text-xs ${group.balance > 0 ? 'text-destructive' : group.balance < 0 ? 'text-muted-foreground' : group.expected > 0 ? 'text-accent' : 'text-muted-foreground'}`}>
+                          <TableCell className="text-right text-muted-foreground whitespace-nowrap text-xs">{group.quantity > 0 ? `${fmtQty(group.quantity)} L` : '—'}</TableCell>
+                          <TableCell className="text-right text-muted-foreground whitespace-nowrap text-xs">{group.rate > 0 ? fmt(group.rate) : '—'}</TableCell>
+                          <TableCell className="text-right font-normal text-foreground whitespace-nowrap text-xs">{group.expected > 0 ? fmt(group.expected) : '—'}</TableCell>
+                          <TableCell className="text-right font-semibold text-accent whitespace-nowrap text-xs">{fmt(toNum(group.totalPaid))}</TableCell>
+                          <TableCell className={`text-right font-semibold whitespace-nowrap text-xs ${group.balance > 0 ? 'text-destructive' : group.balance < 0 ? 'text-muted-foreground' : group.expected > 0 ? 'text-accent' : 'text-muted-foreground'}`}>
                             {group.expected > 0 ? (group.balance === 0 ? '₦0' : group.balance > 0 ? fmt(group.balance) : `+${fmt(Math.abs(group.balance))}`) : '—'}
                           </TableCell>
                           <TableCell className="whitespace-nowrap text-center">
@@ -987,10 +987,10 @@ function SalesLedgerDashboard() {
                           </TableCell>
                           <TableCell className="font-normal text-foreground uppercase whitespace-nowrap text-xs">{customerName}</TableCell>
                           <TableCell className="text-muted-foreground uppercase whitespace-nowrap text-xs">{sale.location || '—'}</TableCell>
-                          <TableCell className="text-right text-muted-foreground whitespace-nowrap tabular-nums text-xs">{toNum(sale.quantity) > 0 ? fmtQty(toNum(sale.quantity)) : '—'}</TableCell>
-                          <TableCell className="text-right text-muted-foreground whitespace-nowrap tabular-nums text-xs">{toNum(sale.rate) > 0 ? fmt(toNum(sale.rate)) : '—'}</TableCell>
-                          <TableCell className="text-right text-muted-foreground whitespace-nowrap tabular-nums text-xs">{toNum(sale.salesValue) > 0 ? fmt(toNum(sale.salesValue)) : '—'}</TableCell>
-                          <TableCell className="text-right font-semibold text-accent whitespace-nowrap tabular-nums text-xs">{toNum(sale.paymentAmount) > 0 ? fmt(toNum(sale.paymentAmount)) : '—'}</TableCell>
+                          <TableCell className="text-right text-muted-foreground whitespace-nowrap text-xs">{toNum(sale.quantity) > 0 ? fmtQty(toNum(sale.quantity)) : '—'}</TableCell>
+                          <TableCell className="text-right text-muted-foreground whitespace-nowrap text-xs">{toNum(sale.rate) > 0 ? fmt(toNum(sale.rate)) : '—'}</TableCell>
+                          <TableCell className="text-right text-muted-foreground whitespace-nowrap text-xs">{toNum(sale.salesValue) > 0 ? fmt(toNum(sale.salesValue)) : '—'}</TableCell>
+                          <TableCell className="text-right font-semibold text-accent whitespace-nowrap text-xs">{toNum(sale.paymentAmount) > 0 ? fmt(toNum(sale.paymentAmount)) : '—'}</TableCell>
                           <TableCell className="text-muted-foreground whitespace-nowrap text-xs">{sale.payerName || '—'}</TableCell>
                           <TableCell className="text-muted-foreground text-xs whitespace-nowrap">
                             {formatBankLabel(sale.bank) || '—'}

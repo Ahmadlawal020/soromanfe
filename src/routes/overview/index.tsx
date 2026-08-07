@@ -208,27 +208,27 @@ function OverviewDashboard() {
           <div className="divide-y divide-foreground/10">
             <div className="flex items-center justify-between px-6 py-3.5">
               <span className="text-sm">Total revenue</span>
-              <span className="text-sm font-semibold tabular-nums">{formatCurrency(combinedRevenue)}</span>
+              <span className="text-sm font-semibold">{formatCurrency(combinedRevenue)}</span>
             </div>
             <div className="flex items-center justify-between px-6 py-3.5">
               <span className="text-sm">Order revenue</span>
-              <span className="text-sm font-semibold tabular-nums">{formatCurrency(rev.orders?.total || 0)}</span>
+              <span className="text-sm font-semibold">{formatCurrency(rev.orders?.total || 0)}</span>
             </div>
             <div className="flex items-center justify-between px-6 py-3.5">
               <span className="text-sm">Offline sales</span>
-              <span className="text-sm font-semibold tabular-nums">{formatCurrency(rev.offlineSales?.total || 0)}</span>
+              <span className="text-sm font-semibold">{formatCurrency(rev.offlineSales?.total || 0)}</span>
             </div>
             <div className="flex items-center justify-between px-6 py-3.5">
               <span className="text-sm">Delivery payments</span>
-              <span className="text-sm font-semibold tabular-nums">{formatCurrency(rev.deliverySales?.paymentAmount || 0)}</span>
+              <span className="text-sm font-semibold">{formatCurrency(rev.deliverySales?.paymentAmount || 0)}</span>
             </div>
             <div className="flex items-center justify-between px-6 py-3.5">
               <span className="text-sm">Customer wallets</span>
-              <span className="text-sm font-semibold tabular-nums">{formatCurrency(Number(wallet.balances?.totalBalance || 0))}</span>
+              <span className="text-sm font-semibold">{formatCurrency(Number(wallet.balances?.totalBalance || 0))}</span>
             </div>
             <div className="flex items-center justify-between px-6 py-3.5">
               <span className="text-sm">Active holds</span>
-              <span className="text-sm font-semibold tabular-nums text-warning">{formatCurrency(Number(wallet.activeHolds?.totalHeld || 0))}</span>
+              <span className="text-sm font-semibold text-warning">{formatCurrency(Number(wallet.activeHolds?.totalHeld || 0))}</span>
             </div>
           </div>
           <div className={cn(PANEL_FOOTER, 'justify-between')}>
@@ -253,15 +253,15 @@ function OverviewDashboard() {
           <div className="divide-y divide-foreground/10">
             <div className="flex items-center justify-between px-6 py-3">
               <span className="text-sm">Active drivers</span>
-              <span className="text-sm font-semibold tabular-nums text-accent">{drv.active}</span>
+              <span className="text-sm font-semibold text-accent">{drv.active}</span>
             </div>
             <div className="flex items-center justify-between px-6 py-3">
               <span className="text-sm">On trip</span>
-              <span className="text-sm font-semibold tabular-nums text-warning">{drv.onTrip}</span>
+              <span className="text-sm font-semibold text-warning">{drv.onTrip}</span>
             </div>
             <div className="flex items-center justify-between px-6 py-3">
               <span className="text-sm">Off duty</span>
-              <span className="text-sm font-semibold tabular-nums text-muted-foreground">{drv.offDuty}</span>
+              <span className="text-sm font-semibold text-muted-foreground">{drv.offDuty}</span>
             </div>
           </div>
           <div className={cn(PANEL_FOOTER, 'justify-end')}>
@@ -278,20 +278,20 @@ function OverviewDashboard() {
           <div className="divide-y divide-foreground/10">
             <div className="flex items-center justify-between px-6 py-3.5">
               <span className="text-sm">Active PFIs</span>
-              <span className="text-sm font-semibold tabular-nums">{activePfis.length}</span>
+              <span className="text-sm font-semibold">{activePfis.length}</span>
             </div>
             <div className="flex items-center justify-between px-6 py-3.5">
               <span className="text-sm">Litres remaining</span>
-              <span className="text-sm font-semibold tabular-nums">{formatLitres(totalRemainingLitres)}</span>
+              <span className="text-sm font-semibold">{formatLitres(totalRemainingLitres)}</span>
             </div>
             <div className="flex items-center justify-between px-6 py-3.5">
               <span className="text-sm">Inventory value</span>
-              <span className="text-sm font-semibold tabular-nums">{formatCurrency(totalPfiValue)}</span>
+              <span className="text-sm font-semibold">{formatCurrency(totalPfiValue)}</span>
             </div>
             {(pfi.byStatus || []).map((s: { status: string; pfiCount: number; remainingLitres?: number }) => (
               <div key={s.status} className="flex items-center justify-between px-6 py-3.5">
                 <span className="text-sm capitalize">{s.status} PFIs</span>
-                <span className="text-sm font-semibold tabular-nums">
+                <span className="text-sm font-semibold">
                   {s.pfiCount} &middot; {formatLitres(s.remainingLitres || 0)}
                 </span>
               </div>
@@ -320,7 +320,7 @@ function OverviewDashboard() {
                       <span className="block truncate text-sm">{c.customerName}</span>
                       <span className="text-xs text-muted-foreground capitalize">{c.customerType?.replace(/_/g, ' ')}</span>
                     </div>
-                    <span className="shrink-0 text-sm font-semibold tabular-nums text-warning">
+                    <span className="shrink-0 text-sm font-semibold text-warning">
                       {formatCurrency(Number(c.outstanding || 0))}
                     </span>
                   </div>
@@ -361,11 +361,11 @@ function OverviewDashboard() {
             <TableBody>
               {depotLeaderboard.map((d: { id: string; name: string; orderCount: number; volume: number; revenue: number }, i: number) => (
                 <TableRow key={d.id}>
-                  <TableCell className="font-semibold tabular-nums">{i + 1}</TableCell>
+                  <TableCell className="font-semibold">{i + 1}</TableCell>
                   <TableCell className="font-medium">{d.name}</TableCell>
-                  <TableCell className="text-right tabular-nums">{formatNumber(d.orderCount)}</TableCell>
-                  <TableCell className="text-right tabular-nums">{formatLitres(d.volume)}</TableCell>
-                  <TableCell className="text-right font-semibold tabular-nums">{formatCurrency(d.revenue)}</TableCell>
+                  <TableCell className="text-right">{formatNumber(d.orderCount)}</TableCell>
+                  <TableCell className="text-right">{formatLitres(d.volume)}</TableCell>
+                  <TableCell className="text-right font-semibold">{formatCurrency(d.revenue)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -395,20 +395,20 @@ function OverviewDashboard() {
           <div className="divide-y divide-foreground/10">
             <div className="flex items-center justify-between px-6 py-3.5">
               <span className="text-sm">Total requests</span>
-              <span className="text-sm font-semibold tabular-nums">{dangote.totalRequests}</span>
+              <span className="text-sm font-semibold">{dangote.totalRequests}</span>
             </div>
             <div className="flex items-center justify-between px-6 py-3.5">
               <span className="text-sm">Total value</span>
-              <span className="text-sm font-semibold tabular-nums">{formatCurrency(dangote.totalValue)}</span>
+              <span className="text-sm font-semibold">{formatCurrency(dangote.totalValue)}</span>
             </div>
             <div className="flex items-center justify-between px-6 py-3.5">
               <span className="text-sm">Paid value</span>
-              <span className="text-sm font-semibold tabular-nums text-accent">{formatCurrency(dangote.paidValue)}</span>
+              <span className="text-sm font-semibold text-accent">{formatCurrency(dangote.paidValue)}</span>
             </div>
             {(dangote.byStatus || []).map((s: { status: string; count: number; total: number }) => (
               <div key={s.status} className="flex items-center justify-between px-6 py-3.5">
                 <span className="text-sm">{s.status}</span>
-                <span className="text-sm font-semibold tabular-nums">
+                <span className="text-sm font-semibold">
                   {s.count} &middot; {formatCurrency(Number(s.total))}
                 </span>
               </div>
@@ -434,26 +434,26 @@ function OverviewDashboard() {
           <div className="divide-y divide-foreground/10">
             <div className="flex items-center justify-between px-6 py-3.5">
               <span className="text-sm">Total orders</span>
-              <span className="text-sm font-semibold tabular-nums">{lpg.totalOrders}</span>
+              <span className="text-sm font-semibold">{lpg.totalOrders}</span>
             </div>
             <div className="flex items-center justify-between px-6 py-3.5">
               <span className="text-sm">Total value</span>
-              <span className="text-sm font-semibold tabular-nums">{formatCurrency(lpg.totalValue)}</span>
+              <span className="text-sm font-semibold">{formatCurrency(lpg.totalValue)}</span>
             </div>
             <div className="flex items-center justify-between px-6 py-3.5">
               <span className="text-sm">Paid value</span>
-              <span className="text-sm font-semibold tabular-nums text-accent">{formatCurrency(lpg.paidValue)}</span>
+              <span className="text-sm font-semibold text-accent">{formatCurrency(lpg.paidValue)}</span>
             </div>
             <div className="flex items-center justify-between px-6 py-3.5">
               <span className="text-sm">Stations</span>
-              <span className="text-sm font-semibold tabular-nums">
+              <span className="text-sm font-semibold">
                 {lpg.stations?.active || 0} active / {lpg.stations?.total || 0} total
               </span>
             </div>
             {(lpg.byStatus || []).map((s: { status: string; count: number; total: number }) => (
               <div key={s.status} className="flex items-center justify-between px-6 py-3.5">
                 <span className="text-sm">{s.status}</span>
-                <span className="text-sm font-semibold tabular-nums">
+                <span className="text-sm font-semibold">
                   {s.count} &middot; {formatCurrency(Number(s.total))}
                 </span>
               </div>

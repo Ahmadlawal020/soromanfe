@@ -85,7 +85,7 @@ export function SellThroughBar({ value, className }: { value: number | null; cla
           style={{ width: `${Math.min(100, Math.max(share === 0 ? 0 : 2, share))}%` }}
         />
       </div>
-      <span className="shrink-0 tabular-nums text-xs text-muted-foreground">{share}%</span>
+      <span className="shrink-0 text-xs text-muted-foreground">{share}%</span>
     </div>
   )
 }

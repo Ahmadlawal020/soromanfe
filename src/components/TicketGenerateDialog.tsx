@@ -174,7 +174,7 @@ export function TicketGenerateDialog({
             ].map(([label, value]) => (
               <div key={String(label)}>
                 <p className={cn(MICRO, 'text-xs text-muted-foreground')}>{label}</p>
-                <p className="mt-1 text-base font-semibold tracking-tight tabular-nums">
+                <p className="mt-1 text-base font-semibold tracking-tight">
                   {fmt(Number(value))}
                 </p>
               </div>
@@ -240,7 +240,7 @@ export function TicketGenerateDialog({
                 <Input
                   type="number" inputMode="numeric" placeholder={`Quantity (${unit})`}
                   value={d.quantity} onChange={(e) => onQuantity(i, e.target.value)}
-                  className="tabular-nums"
+                 
                 />
                 <Input
                   placeholder="Truck number" value={d.truckNumber}
@@ -253,7 +253,7 @@ export function TicketGenerateDialog({
                 <Input
                   placeholder="Driver's phone" value={d.driverPhone}
                   onChange={(e) => setDraft(i, { driverPhone: e.target.value })}
-                  className="tabular-nums"
+                 
                 />
               </div>
             </div>

@@ -84,7 +84,7 @@ export function OrderSearch({
                 {picked.customerName} · {picked.depotName || picked.state} · {picked.productName}
               </p>
             </div>
-            <span className="text-sm font-semibold tabular-nums">
+            <span className="text-sm font-semibold">
               {fmt(picked.quantity)} {picked.productUnit || 'Litres'}
             </span>
           </div>
@@ -121,7 +121,7 @@ export function OrderSearch({
                               {o.customerName} · {o.depotName || o.state}
                             </span>
                           </span>
-                          <span className="shrink-0 text-sm tabular-nums">{fmt(o.quantity)}</span>
+                          <span className="shrink-0 text-sm">{fmt(o.quantity)}</span>
                         </button>
                       </li>
                     ))}
@@ -161,7 +161,7 @@ export function TruckCard({
           <p className="mt-0.5 truncate text-xs text-muted-foreground">
             {driverName || '—'}{driverPhone ? ` · ${driverPhone}` : ''}
           </p>
-          <p className="mt-1 text-sm font-semibold tabular-nums">
+          <p className="mt-1 text-sm font-semibold">
             {fmt(load.quantity)} <span className="text-xs font-normal text-muted-foreground">{unit}</span>
           </p>
         </div>

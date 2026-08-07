@@ -191,7 +191,7 @@ function BankAccountDetails() {
                 <p className="text-xs font-semibold uppercase text-muted-foreground">
                   Account Number ({account.currency})
                 </p>
-                <p className="text-2xl md:text-3xl font-mono font-semibold text-foreground mt-0.5 tabular-nums">
+                <p className="text-2xl md:text-3xl font-mono font-semibold text-foreground mt-0.5">
                   {account.accountNumber}
                 </p>
               </div>

@@ -43,7 +43,7 @@ export function StatementLinePicker({
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <StatusChip tone="accent">Matched to statement</StatusChip>
-            <span className="text-xs text-muted-foreground tabular-nums">
+            <span className="text-xs text-muted-foreground">
               {format(new Date(selected.txn_date), 'd MMM yyyy')}
             </span>
           </div>
@@ -56,7 +56,7 @@ export function StatementLinePicker({
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <span className="text-sm font-semibold tabular-nums">
+          <span className="text-sm font-semibold">
             ₦{Number(selected.amount).toLocaleString()}
           </span>
           <button
@@ -106,12 +106,12 @@ export function StatementLinePicker({
                     <p className="truncate text-sm font-normal">
                       {line.depositor || 'Unnamed depositor'}
                     </p>
-                    <p className="mt-0.5 truncate text-xs text-muted-foreground tabular-nums">
+                    <p className="mt-0.5 truncate text-xs text-muted-foreground">
                       {format(new Date(line.txn_date), 'd MMM yyyy')}
                       {line.bank_ref ? ` · ${line.bank_ref}` : ''}
                     </p>
                   </div>
-                  <span className="shrink-0 text-sm font-semibold tabular-nums">
+                  <span className="shrink-0 text-sm font-semibold">
                     ₦{Number(line.amount).toLocaleString()}
                   </span>
                 </button>

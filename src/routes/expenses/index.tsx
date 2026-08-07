@@ -315,7 +315,7 @@ function ExpensesPage() {
               <TableBody>
                 {rows.map((e) => (
                   <TableRow key={e.id}>
-                    <TableCell className="whitespace-nowrap tabular-nums text-muted-foreground">
+                    <TableCell className="whitespace-nowrap text-muted-foreground">
                       {format(new Date(e.expense_date), 'd MMM yyyy')}
                     </TableCell>
                     <TableCell className="max-w-[18rem] truncate">{e.description || '—'}</TableCell>
@@ -327,7 +327,7 @@ function ExpensesPage() {
                     <TableCell className="hidden md:table-cell text-muted-foreground">{e.vendor || '—'}</TableCell>
                     <TableCell className="hidden lg:table-cell text-muted-foreground">{e.bank_paid_from || '—'}</TableCell>
                     <TableCell className="hidden lg:table-cell text-muted-foreground">{e.entered_by || '—'}</TableCell>
-                    <TableCell className="text-right font-normal tabular-nums">{naira(Number(e.amount))}</TableCell>
+                    <TableCell className="text-right font-normal">{naira(Number(e.amount))}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-0.5">
                         <Button variant="ghost" size="icon-sm" onClick={() => openEdit(e)} title="Edit">

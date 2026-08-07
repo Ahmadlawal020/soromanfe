@@ -262,7 +262,7 @@ function PFIDashboard() {
                       </TableCell>
 
                       <TableCell className="hidden lg:table-cell">
-                        <p className="text-sm tabular-nums">{litres(f.blQtyLitres)}</p>
+                        <p className="text-sm">{litres(f.blQtyLitres)}</p>
                         <SurplusDeficit litres={f.surplusDeficitLitres} className="text-xs" />
                       </TableCell>
 
@@ -271,9 +271,9 @@ function PFIDashboard() {
                         <p className="mt-0.5 text-xs text-muted-foreground">{litres(f.remaining)} left</p>
                       </TableCell>
 
-                      <TableCell className="text-right tabular-nums">{naira(f.totalCost, { compact: true })}</TableCell>
-                      <TableCell className="text-right tabular-nums">{naira(f.revenue, { compact: true })}</TableCell>
-                      <TableCell className={cn('text-right tabular-nums', moneyTone(f.profitLoss))}>
+                      <TableCell className="text-right">{naira(f.totalCost, { compact: true })}</TableCell>
+                      <TableCell className="text-right">{naira(f.revenue, { compact: true })}</TableCell>
+                      <TableCell className={cn('text-right', moneyTone(f.profitLoss))}>
                         {naira(f.profitLoss, { compact: true })}
                         {/* A part-sold batch charges full cost against partial
                             revenue, so the figure beside this is not yet real. */}

@@ -9,21 +9,19 @@
  * Its italic is deliberately not loaded — emphasis stays weight and colour.
  */
 /*
- * General Sans, self-hosted. Two weights only — 400 and 600, nothing between.
- * The 500 tier is deliberately absent: with no file to load, a `font-weight:500`
- * would be synthesised, so the codebase resolves everything to one of these two.
+ * Satoshi, self-hosted as the variable cut.
+ *
+ * One file spanning 300–900 rather than two static weights: Satoshi ships no
+ * 600, and the variable axis gives an exact one. The codebase still only ever
+ * asks for 400 and 600 — see the weight sweep — so nothing in between renders.
+ *
+ * There is no Satoshi Mono; Fontshare doesn't publish one. Figures use the
+ * proportional defaults, which is the intent: no anywhere.
  */
 @font-face {
-  font-family: "General Sans";
-  src: url("./assets/fonts/GeneralSans-Regular.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "General Sans";
-  src: url("./assets/fonts/GeneralSans-Semibold.woff2") format("woff2");
-  font-weight: 600;
+  font-family: "Satoshi";
+  src: url("./assets/fonts/SatoshiVariable.woff2") format("woff2-variations");
+  font-weight: 300 900;
   font-style: normal;
   font-display: swap;
 }
@@ -172,7 +170,14 @@
 }
 
 @theme inline {
-  --font-sans: "General Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-sans: "Satoshi", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  /*
+   * Satoshi here too. There is no Satoshi Mono, and the alternative — letting
+   * `font-mono` fall through to the system stack — would put a second typeface
+   * on every SKU badge and reference code. The ~215 `font-mono` call sites now
+   * resolve to Satoshi rather than needing to be stripped one by one.
+   */
+  --font-mono: "Satoshi", ui-monospace, SFMono-Regular, Menlo, monospace;
 
   /* Cinematic timing — nothing snaps */
   --ease-luxe: cubic-bezier(0.25, 0.46, 0.45, 0.94);

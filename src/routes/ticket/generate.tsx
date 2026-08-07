@@ -158,7 +158,7 @@ function GenerateTicketsPage() {
                       <p className="mt-0.5 truncate text-xs text-muted-foreground">
                         {o.customerName} · {o.depotName || o.state}
                       </p>
-                      <p className="mt-0.5 text-xs text-muted-foreground tabular-nums">
+                      <p className="mt-0.5 text-xs text-muted-foreground">
                         {qty(Number(o.quantity))} {o.productUnit || 'L'}
                       </p>
                     </button>
@@ -212,9 +212,9 @@ function GenerateTicketsPage() {
                           const Icon = s.icon
                           return (
                             <TableRow key={l.id}>
-                              <TableCell className="text-muted-foreground tabular-nums">{l.truckIndex}</TableCell>
+                              <TableCell className="text-muted-foreground">{l.truckIndex}</TableCell>
                               <TableCell className="font-normal">{l.truckNumber}</TableCell>
-                              <TableCell className="text-right tabular-nums">{qty(Number(l.quantity))}</TableCell>
+                              <TableCell className="text-right">{qty(Number(l.quantity))}</TableCell>
                               <TableCell>
                                 <span className="block truncate">{l.driverName || '—'}</span>
                                 {/* Only differs once the gate has seen someone else. */}
@@ -251,7 +251,7 @@ function GenerateTicketsPage() {
                   <span className={MICRO}>
                     {loads.length ? 'Add more trucks' : 'Allocate trucks'}
                   </span>
-                  <span className="text-xs text-muted-foreground tabular-nums">
+                  <span className="text-xs text-muted-foreground">
                     {qty(draftTotal)} of {qty(remaining)} available
                   </span>
                 </div>
@@ -276,7 +276,7 @@ function GenerateTicketsPage() {
                               onChange={(e) => setDraft(i, { quantity: e.target.value })}
                               aria-invalid={Number(d.quantity) > MAX_TRUCK_LITRES || undefined}
                               placeholder="30000"
-                              className="tabular-nums"
+                             
                             />
                           </div>
                           <div className="space-y-1.5">
@@ -307,7 +307,7 @@ function GenerateTicketsPage() {
                               value={d.driverPhone}
                               onChange={(e) => setDraft(i, { driverPhone: e.target.value })}
                               placeholder="0801…"
-                              className="tabular-nums"
+                             
                             />
                           </div>
                           <div className="flex items-end">

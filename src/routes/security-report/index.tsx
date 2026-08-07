@@ -288,12 +288,12 @@ function SecurityReportPage() {
                 <TableBody>
                 {rows.map((r, i) => (
                 <TableRow key={r.id}>
-                <TableCell className="text-muted-foreground tabular-nums">{i + 1}</TableCell>
-                <TableCell className="tabular-nums">{r.date}</TableCell>
+                <TableCell className="text-muted-foreground">{i + 1}</TableCell>
+                <TableCell>{r.date}</TableCell>
                 <TableCell className="font-mono">{r.truckNumber}</TableCell>
                 <TableCell className="font-normal text-accent">{r.orderRef}</TableCell>
-                <TableCell className="text-right tabular-nums">{fmt(r.quantity)}</TableCell>
-                <TableCell className="tabular-nums">{r.exitedAt}</TableCell>
+                <TableCell className="text-right">{fmt(r.quantity)}</TableCell>
+                <TableCell>{r.exitedAt}</TableCell>
                 <TableCell>{r.gantry}</TableCell>
                 <TableCell>{r.loader}</TableCell>
                 </TableRow>
@@ -410,7 +410,7 @@ function DailyGateReport({
             <div key={key} className="space-y-1.5">
               <label className={cn(MICRO, 'block text-muted-foreground')}>{label}</label>
               <Input
-                type="number" inputMode="numeric" className="tabular-nums"
+                type="number" inputMode="numeric"
                 value={form[key]} onChange={(e) => set(key, e.target.value)}
               />
             </div>

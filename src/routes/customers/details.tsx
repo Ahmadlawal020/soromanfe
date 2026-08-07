@@ -168,7 +168,7 @@ function CustomerDetailPage() {
       <Card className="card-hover">
         <CardContent className="bg-primary/5 p-6 md:p-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-            <div className="size-20 bg-primary rounded-full flex items-center justify-center text-primary-foreground text-2xl font-semibold shrink-0 tabular-nums">
+            <div className="size-20 bg-primary rounded-full flex items-center justify-center text-primary-foreground text-2xl font-semibold shrink-0">
               {getInitials(customer.name)}
             </div>
             <div className="flex-1">
@@ -183,7 +183,7 @@ function CustomerDetailPage() {
             </div>
             <div className="sm:text-right">
               <p className="text-xs text-muted-foreground font-normal uppercase">Account Balance</p>
-              <p className="text-2xl font-semibold text-foreground mt-1 tabular-nums">{formatCurrency(toNum(customer.balance))}</p>
+              <p className="text-2xl font-semibold text-foreground mt-1">{formatCurrency(toNum(customer.balance))}</p>
             </div>
           </div>
         </CardContent>
@@ -302,7 +302,7 @@ function CustomerDetailPage() {
                   <div>
                     <p className="text-xs text-muted-foreground uppercase font-normal">Account Number</p>
                     <div className="flex items-center gap-2 mt-1">
-                      <p className="text-xl font-semibold font-mono text-foreground tabular-nums">{customer.virtualAccountNumber}</p>
+                      <p className="text-xl font-semibold font-mono text-foreground">{customer.virtualAccountNumber}</p>
                       <button
                         onClick={() => copyToClipboard(customer.virtualAccountNumber, 'accountNumber')}
                         className="size-7 rounded-md border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors duration-250 ease-luxe"

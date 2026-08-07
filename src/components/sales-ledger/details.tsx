@@ -304,7 +304,7 @@ export function SalesLedgerDetails() {
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <div className="text-xs text-muted-foreground font-normal">Quantity Loaded</div>
-              <div className="text-xl font-semibold text-foreground mt-0.5 tabular-nums">
+              <div className="text-xl font-semibold text-foreground mt-0.5">
                 {targetGroup.quantity > 0 ? `${fmtQty(targetGroup.quantity)} L` : '—'}
               </div>
               <div className="text-xs text-muted-foreground mt-0.5">
@@ -321,7 +321,7 @@ export function SalesLedgerDetails() {
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <div className="text-xs text-muted-foreground font-normal">Expected Revenue</div>
-              <div className="text-xl font-semibold text-foreground mt-0.5 tabular-nums">
+              <div className="text-xl font-semibold text-foreground mt-0.5">
                 {targetGroup.expected > 0 ? fmt(targetGroup.expected) : '—'}
               </div>
               <div className="text-xs text-muted-foreground mt-0.5">
@@ -338,7 +338,7 @@ export function SalesLedgerDetails() {
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <div className="text-xs text-accent font-semibold">Total Paid</div>
-              <div className="text-xl font-semibold text-accent mt-0.5 tabular-nums">
+              <div className="text-xl font-semibold text-accent mt-0.5">
                 {fmt(targetGroup.totalPaid)}
               </div>
               <div className="text-xs text-muted-foreground mt-0.5">
@@ -478,10 +478,10 @@ export function SalesLedgerDetails() {
                               <TableCell className="font-normal text-foreground whitespace-nowrap">
                                 {safeFormatDate(payment.dateOfPayment)}
                               </TableCell>
-                              <TableCell className="text-right font-semibold text-accent whitespace-nowrap tabular-nums">
+                              <TableCell className="text-right font-semibold text-accent whitespace-nowrap">
                                 {fmt(toNum(payment.paymentAmount))}
                               </TableCell>
-                              <TableCell className={`text-right font-semibold whitespace-nowrap tabular-nums ${balanceAfter > 0 ? 'text-destructive' : balanceAfter < 0 ? 'text-muted-foreground' : targetGroup.expected > 0 ? 'text-accent' : 'text-muted-foreground'}`}>
+                              <TableCell className={`text-right font-semibold whitespace-nowrap ${balanceAfter > 0 ? 'text-destructive' : balanceAfter < 0 ? 'text-muted-foreground' : targetGroup.expected > 0 ? 'text-accent' : 'text-muted-foreground'}`}>
                                 {targetGroup.expected > 0 ? (balanceAfter === 0 ? '₦0.00' : balanceAfter > 0 ? fmt(balanceAfter) : `+${fmt(Math.abs(balanceAfter))}`) : '—'}
                               </TableCell>
                               <TableCell className="text-foreground font-normal whitespace-nowrap">

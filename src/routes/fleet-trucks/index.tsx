@@ -274,7 +274,7 @@ function FleetDirectoryPage() {
                   const lapsed = isExpired(r.truck.insuranceExpiry) || isExpired(r.truck.roadWorthinessExpiry)
                   return (
                     <TableRow key={r.truck.id}>
-                      <TableCell className="text-muted-foreground tabular-nums">{i + 1}</TableCell>
+                      <TableCell className="text-muted-foreground">{i + 1}</TableCell>
                       <TableCell className="font-mono font-normal">
                         {r.truck.plateNumber}
                         {!r.truck.isActive && (
@@ -301,24 +301,24 @@ function FleetDirectoryPage() {
                           </p>
                         )}
                       </TableCell>
-                      <TableCell className="hidden tabular-nums md:table-cell">
+                      <TableCell className="hidden md:table-cell">
                         {r.truck.maxCapacity ?? '—'}
                       </TableCell>
                       <TableCell className="hidden max-w-[12rem] truncate md:table-cell">
                         {r.truck.driverName}
                       </TableCell>
-                      <TableCell className="hidden text-muted-foreground tabular-nums md:table-cell">
+                      <TableCell className="hidden text-muted-foreground md:table-cell">
                         {r.truck.driverPhone || '—'}
                       </TableCell>
-                      <TableCell className="text-right text-destructive tabular-nums">
+                      <TableCell className="text-right text-destructive">
                         {r.debits ? naira(r.debits) : '—'}
                       </TableCell>
-                      <TableCell className="text-right text-accent tabular-nums">
+                      <TableCell className="text-right text-accent">
                         {r.credits ? naira(r.credits) : '—'}
                       </TableCell>
                       <TableCell
                         className={cn(
-                          'text-right font-semibold tabular-nums',
+                          'text-right font-semibold',
                           r.balance > 0 && 'text-accent',
                           r.balance < 0 && 'text-destructive',
                           r.balance === 0 && 'text-muted-foreground',

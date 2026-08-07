@@ -107,7 +107,7 @@ function DangoteProductDetailPage() {
       <Card className="card-hover">
         <CardContent className="bg-primary/5 p-6 md:p-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-            <div className="size-20 bg-primary rounded-full flex items-center justify-center text-primary-foreground text-2xl font-semibold shrink-0 tabular-nums">
+            <div className="size-20 bg-primary rounded-full flex items-center justify-center text-primary-foreground text-2xl font-semibold shrink-0">
               <Fuel className="size-8" />
             </div>
             <div className="flex-1">

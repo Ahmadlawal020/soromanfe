@@ -84,7 +84,7 @@ function SecurityEntryPage() {
                       Confirm entry
                     </Button>
                   ) : (
-                    <span className="text-xs text-muted-foreground tabular-nums">
+                    <span className="text-xs text-muted-foreground">
                       {gateTime(l.securityEnteredAt)}
                     </span>
                   )}

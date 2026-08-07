@@ -555,7 +555,7 @@ function FilingStationDetailsView() {
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <div className="text-xs text-muted-foreground">Tank Capacity</div>
-              <div className="text-xl font-semibold text-foreground tabular-nums">{(station.tankCapacity || 0).toLocaleString()} L</div>
+              <div className="text-xl font-semibold text-foreground">{(station.tankCapacity || 0).toLocaleString()} L</div>
             </div>
             <div className="p-2.5 rounded-xl bg-muted/10 text-muted-foreground"><Fuel className="size-5" /></div>
           </CardContent>
@@ -564,7 +564,7 @@ function FilingStationDetailsView() {
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <div className="text-xs text-muted-foreground">Allocations</div>
-              <div className="text-xl font-semibold text-foreground tabular-nums">{stationGroups.length}</div>
+              <div className="text-xl font-semibold text-foreground">{stationGroups.length}</div>
             </div>
             <div className="p-2.5 rounded-xl bg-accent/10 text-accent"><Truck className="size-5" /></div>
           </CardContent>

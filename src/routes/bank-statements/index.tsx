@@ -265,10 +265,10 @@ function BankStatementsPage() {
                 <TableBody>
                 {preview.rows.slice(0, 5).map((r, i) => (
                 <TableRow key={i}>
-                <TableCell className="tabular-nums">{format(new Date(r.txnDate), 'd MMM yyyy')}</TableCell>
+                <TableCell>{format(new Date(r.txnDate), 'd MMM yyyy')}</TableCell>
                 <TableCell>{r.depositor || '—'}</TableCell>
                 <TableCell className="text-muted-foreground">{r.bankRef || '—'}</TableCell>
-                <TableCell className="text-right font-semibold tabular-nums">
+                <TableCell className="text-right font-semibold">
                 ₦{r.amount.toLocaleString()}
                 </TableCell>
                 </TableRow>
@@ -324,18 +324,18 @@ function BankStatementsPage() {
                 <TableCell className="text-muted-foreground">
                 {s.bank_name} · {s.account_number}
                 </TableCell>
-                <TableCell className="text-muted-foreground tabular-nums">
+                <TableCell className="text-muted-foreground">
                 {s.period_start ? format(new Date(s.period_start), 'd MMM') : '—'}
                 {' – '}
                 {s.period_end ? format(new Date(s.period_end), 'd MMM yyyy') : '—'}
                 </TableCell>
-                <TableCell className="text-right tabular-nums">{s.row_count}</TableCell>
-                <TableCell className="text-right tabular-nums">
+                <TableCell className="text-right">{s.row_count}</TableCell>
+                <TableCell className="text-right">
                 {s.matched_count > 0
                 ? <StatusChip tone="accent">{s.matched_count}</StatusChip>
                 : <span className="text-muted-foreground">0</span>}
                 </TableCell>
-                <TableCell className="text-muted-foreground tabular-nums">
+                <TableCell className="text-muted-foreground">
                 {format(new Date(s.created_at), 'd MMM yyyy')}
                 </TableCell>
                 <TableCell className="text-right">

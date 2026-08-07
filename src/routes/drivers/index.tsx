@@ -192,7 +192,7 @@ function DriversDashboard() {
                             <Button
                               variant={currentPage === p ? 'default' : 'outline'}
                               size="icon-sm"
-                              className="tabular-nums"
+                             
                               onClick={() => setCurrentPage(p)}
                               aria-current={currentPage === p ? 'page' : undefined}
                             >

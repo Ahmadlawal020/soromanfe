@@ -260,7 +260,7 @@ function DeliveryCustomerDetailsView() {
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <div className="text-xs text-muted-foreground font-normal">Credit Limit</div>
-              <div className="text-xl font-semibold text-foreground mt-0.5 tabular-nums">
+              <div className="text-xl font-semibold text-foreground mt-0.5">
                 {hasCreditLimit ? `₦${formatMoney(customer.creditLimit)}` : 'No Limit'}
               </div>
             </div>
@@ -290,7 +290,7 @@ function DeliveryCustomerDetailsView() {
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <div className="text-xs text-muted-foreground font-normal">Total Quantity Sold</div>
-              <div className="text-xl font-semibold text-foreground mt-0.5 tabular-nums">
+              <div className="text-xl font-semibold text-foreground mt-0.5">
                 {formatQty(customer.totalQty)} Litres
               </div>
             </div>

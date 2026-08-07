@@ -65,7 +65,7 @@ export function OrderStatusChart({ data, total }: OrderStatusChartProps) {
         </PieChart>
       </ResponsiveContainer>
       <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-3xl font-semibold tabular-nums">{total}</span>
+        <span className="text-3xl font-semibold">{total}</span>
         <span className="text-xs text-muted-foreground">orders</span>
       </div>
     </div>

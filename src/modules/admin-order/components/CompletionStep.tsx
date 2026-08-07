@@ -65,7 +65,7 @@ export function CompletionStep({ wizard }: CompletionStepProps) {
               <div>
                 <p className="text-xs text-muted-foreground uppercase">Account Number</p>
                 <div className="flex items-center gap-2">
-                  <p className="text-xl font-semibold font-mono text-foreground tabular-nums">{paymentInfo.accountNumber}</p>
+                  <p className="text-xl font-semibold font-mono text-foreground">{paymentInfo.accountNumber}</p>
                   <button
                     onClick={() => {
                       navigator.clipboard.writeText(paymentInfo.accountNumber)

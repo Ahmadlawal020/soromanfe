@@ -34,7 +34,7 @@ function Row({
         <p className="text-sm text-muted-foreground">{label}</p>
         {hint && <p className="text-xs leading-tight text-muted-foreground/60">{hint}</p>}
       </div>
-      <p className={cn('shrink-0 text-sm font-normal tabular-nums', tone)}>{value}</p>
+      <p className={cn('shrink-0 text-sm font-normal', tone)}>{value}</p>
     </div>
   )
 }
@@ -57,14 +57,14 @@ function QuantityPair({ f }: { f: PfiFinancials }) {
     <div className="grid grid-cols-2 gap-3">
       <div className={cn(PANEL, 'p-3')}>
         <p className={cn(MICRO, 'text-muted-foreground')}>BL quantity</p>
-        <p className="mt-1 text-lg font-semibold tabular-nums">{litres(f.blQtyLitres)}</p>
+        <p className="mt-1 text-lg font-semibold">{litres(f.blQtyLitres)}</p>
         <p className="mt-0.5 text-xs leading-tight text-muted-foreground/70">
           From the shipping papers — what you pay for
         </p>
       </div>
       <div className={cn(PANEL, 'p-3')}>
         <p className={cn(MICRO, 'text-muted-foreground')}>Tank quantity</p>
-        <p className="mt-1 text-lg font-semibold tabular-nums">{litres(f.tankQtyLitres)}</p>
+        <p className="mt-1 text-lg font-semibold">{litres(f.tankQtyLitres)}</p>
         <p className="mt-0.5 text-xs leading-tight text-muted-foreground/70">
           Measured on discharge — what you sell from
         </p>
@@ -260,7 +260,7 @@ export function PfiDetailDialog({
                           </p>
                         </div>
                         <div className="flex shrink-0 items-center gap-1">
-                          <span className="text-sm font-normal tabular-nums">{naira(Number(e.amount))}</span>
+                          <span className="text-sm font-normal">{naira(Number(e.amount))}</span>
                           <Button
                             variant="ghost" size="icon-sm"
                             disabled={deleteExpense.isPending}
@@ -335,7 +335,7 @@ export function PfiDetailDialog({
                               .filter(Boolean).join(' · ')}
                           </p>
                         </div>
-                        <span className="shrink-0 text-sm font-normal tabular-nums">
+                        <span className="shrink-0 text-sm font-normal">
                           {litres(m.qty_litres)}
                         </span>
                       </li>

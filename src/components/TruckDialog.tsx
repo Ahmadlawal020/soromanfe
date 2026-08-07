@@ -248,7 +248,7 @@ export function TruckDialog({
                 {incidents.map((inc, i) => (
                   <li key={i} className="flex items-start justify-between gap-3 rounded-lg border border-foreground/15 p-2.5">
                     <div className="min-w-0">
-                      <p className="text-xs text-muted-foreground tabular-nums">{inc.date}</p>
+                      <p className="text-xs text-muted-foreground">{inc.date}</p>
                       <p className="text-sm">{inc.description}</p>
                     </div>
                     <Button

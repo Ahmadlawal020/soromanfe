@@ -109,7 +109,7 @@ function DepositDetailPage() {
                   </Badge>
                 )}
               </div>
-              <p className="text-3xl font-semibold mt-2 text-success tabular-nums">
+              <p className="text-3xl font-semibold mt-2 text-success">
                 +{formatCurrency(toNum(deposit.amount))}
               </p>
               {deposit.customerName && (
@@ -238,7 +238,7 @@ function DepositDetailPage() {
           <CardContent className="space-y-4 pt-6">
             <div>
               <p className="text-xs text-muted-foreground font-normal uppercase">Amount</p>
-              <p className="text-2xl font-semibold mt-1 text-success tabular-nums">
+              <p className="text-2xl font-semibold mt-1 text-success">
                 +{formatCurrency(toNum(deposit.amount))}
               </p>
             </div>

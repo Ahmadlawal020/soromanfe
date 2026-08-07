@@ -523,7 +523,7 @@ function DepotDetailPage() {
       {activeTab === 'overview' && (
         <div className="grid gap-6 md:grid-cols-2">
           {/* Location & Coordinates */}
-          <Card className="">
+          <Card>
             <CardHeader className="border-b border-border/50 pb-3">
               <div className="flex items-center gap-2">
                 <div className="size-8 rounded-lg bg-accent/10 flex items-center justify-center text-accent">
@@ -568,7 +568,7 @@ function DepotDetailPage() {
           </Card>
 
           {/* Personnel & Operations */}
-          <Card className="">
+          <Card>
             <CardHeader className="border-b border-border/50 pb-3">
               <div className="flex items-center gap-2">
                 <div className="size-8 rounded-lg bg-muted/10 flex items-center justify-center text-muted-foreground">
@@ -858,7 +858,7 @@ function DepotDetailPage() {
                                       step="0.01"
                                       value={editPrice}
                                       onChange={(e) => setEditPrice(e.target.value)}
-                                      className="w-36 h-8 text-sm font-mono tabular-nums"
+                                      className="w-36 h-8 text-sm font-mono"
                                       placeholder="0.00"
                                       autoFocus
                                       onKeyDown={(e) => {
@@ -1009,7 +1009,7 @@ function DepotDetailPage() {
 
       {/* Tab 3: PFIs & Stock Allocation */}
       {activeTab === 'pfis' && (
-        <Card className="">
+        <Card>
           <CardHeader className="border-b border-border/50 pb-3">
             <div className="flex items-center justify-between flex-wrap gap-4">
               <div className="flex items-center gap-2">
@@ -1123,7 +1123,7 @@ function DepotDetailPage() {
 
       {/* Tab 4: Orders & Revenue */}
       {activeTab === 'orders' && (
-        <Card className="">
+        <Card>
           <CardHeader className="border-b border-border/50 pb-3">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="flex items-center gap-2">
@@ -1280,7 +1280,7 @@ function DepotDetailPage() {
 
       {/* Tab 5: Audit & Activity Log */}
       {activeTab === 'activity' && (
-        <Card className="">
+        <Card>
           <CardHeader className="border-b border-border/50 pb-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
