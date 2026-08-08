@@ -60,8 +60,61 @@ export type PfiExpense = {
   description: string
   amount: string
   bank_paid_from: string
+  receipt_reference?: string
   entered_by: string
   deleted_at: string | null
+
+  // ── The approval chain ────────────────────────────────────────────────
+  status: ExpenseStatus
+  status_label: string
+  status_step: number
+  total_steps: number
+  /** Computed server-side. The page renders these; it decides nothing itself. */
+  available_actions: ExpenseAction[]
+  action_blocked_reason: string
+
+  payee_bank_name?: string
+  payee_account_number?: string
+  payee_account_name?: string
+  submitted_by_name?: string | null
+  reviewed_by_name?: string | null
+  review_note?: string
+  attachment_count?: number
+  paid_at?: string | null
+  history?: Array<{
+    action: string
+    changes: { note?: string; status?: [string, string] } | null
+    created_at: string
+    actor_name: string | null
+  }>
+}
+
+export type ExpenseStatus =
+  | 'pending' | 'verified' | 'audit_approved' | 'admin_approved'
+  | 'paid' | 'rejected' | 'changes_requested'
+
+export type ExpenseAction =
+  | 'verify' | 'audit_approve' | 'admin_approve' | 'mark_paid'
+  | 'reject' | 'request_changes'
+
+/** Label and tone per action, so the button and the badge it produces agree. */
+export const ACTION_META: Record<ExpenseAction, { label: string; tone: string; needsNote?: boolean }> = {
+  verify: { label: 'Verify', tone: 'bg-info text-info-foreground' },
+  audit_approve: { label: 'Audit approve', tone: 'bg-info text-info-foreground' },
+  admin_approve: { label: 'Authorise', tone: 'bg-accent text-accent-foreground' },
+  mark_paid: { label: 'Mark paid', tone: 'bg-success text-success-foreground' },
+  reject: { label: 'Reject', tone: 'bg-destructive text-destructive-foreground', needsNote: true },
+  request_changes: { label: 'Send back', tone: 'bg-warning text-warning-foreground', needsNote: true },
+}
+
+export const STATUS_TONE: Record<ExpenseStatus, string> = {
+  pending: 'bg-muted text-foreground',
+  verified: 'bg-info/15 text-info',
+  audit_approved: 'bg-info/25 text-info',
+  admin_approved: 'bg-accent/15 text-accent',
+  paid: 'bg-success/15 text-success',
+  rejected: 'bg-destructive/15 text-destructive',
+  changes_requested: 'bg-warning/15 text-warning',
 }
 
 export type ExpenseCategory = {
@@ -206,19 +259,31 @@ export type ExpenseFilters = {
   pfi?: string
   bank?: string
   type?: 'pfi' | 'general' | ''
+  status?: string
+  month?: string
   dateFrom?: string
   dateTo?: string
+  page?: number
 }
 
 export function useExpenses(filters?: ExpenseFilters) {
   return useQuery({
     queryKey: ['expenses', filters],
     queryFn: async () => {
-      const res = await api.get('/expenses', { params: { ...filters, limit: 500 } })
+      const res = await api.get('/expenses', { params: { ...filters, limit: 50 } })
       return res.data.data as {
         expenses: PfiExpense[]
-        totals: { count: number; total: number; pfiTotal: number; generalTotal: number }
+        totals: {
+          count: number; total: number; pfiTotal: number
+          generalTotal: number; paidTotal: number; openTotal: number
+        }
+        /** Deliberately ignores the status filter, so the tabs keep their counts. */
+        statusCounts: Record<string, number>
         banks: string[]
+        /** 'own' when the viewer is outside the oversight roles. */
+        scope: 'own' | 'all'
+        can_review: boolean
+        pagination: { page: number; limit: number; total: number; totalPages: number }
       }
     },
   })
@@ -244,6 +309,28 @@ export const useSaveExpense = () =>
     async ({ id, data }) =>
       (id ? await api.patch(`/expenses/${id}`, data) : await api.post('/expenses', data)).data,
     'Expense saved',
+  )
+
+/** One expense with its attachments and full review history. */
+export function useExpenseDetail(id: number | null) {
+  return useQuery({
+    enabled: id != null,
+    queryKey: ['expenses', 'detail', id],
+    queryFn: async () => (await api.get(`/expenses/${id}`)).data.data.expense as PfiExpense,
+  })
+}
+
+/**
+ * The only call that moves status.
+ *
+ * Invalidates the PFI queries too: approving changes a cargo's cost, so its
+ * screens have to refresh alongside this one.
+ */
+export const useReviewExpense = () =>
+  useMoneyMutation<{ id: number; action: ExpenseAction; note?: string }>(
+    async ({ id, action, note }) =>
+      (await api.post(`/expenses/${id}/review`, { action, note: note || '' })).data,
+    'Expense updated',
   )
 
 export const useDeleteExpense = () =>

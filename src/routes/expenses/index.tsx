@@ -23,8 +23,9 @@ import { MICRO, PANEL } from '#/lib/panel'
 import { cn, getErrorMessage } from '#/lib/utils'
 import {
   useExpenses, useExpenseCategories, useSaveExpense, useDeleteExpense,
-  type PfiExpense, type ExpenseFilters,
+  STATUS_TONE, type PfiExpense, type ExpenseFilters,
 } from '#/lib/hooks/usePfis'
+import { ExpenseReviewDrawer, StepBadge } from '#/components/ExpenseReviewDrawer'
 import { naira } from '#/routes/pfi/-pfi-utils'
 import { routeGuard } from '#/lib/route-guard'
 
@@ -40,6 +41,12 @@ const BLANK = {
   description: '',
   amount: '',
   bank_paid_from: '',
+  receipt_reference: '',
+  // Where the money is going. Captured up front so an approver can see the
+  // destination account before authorising rather than after.
+  payee_bank_name: '',
+  payee_account_number: '',
+  payee_account_name: '',
 }
 
 /**
@@ -68,6 +75,10 @@ function ExpenseDialog({
         description: expense.description || '',
         amount: String(Number(expense.amount)),
         bank_paid_from: expense.bank_paid_from || '',
+        receipt_reference: expense.receipt_reference || '',
+        payee_bank_name: expense.payee_bank_name || '',
+        payee_account_number: expense.payee_account_number || '',
+        payee_account_name: expense.payee_account_name || '',
       }
     : BLANK
 
@@ -96,7 +107,7 @@ function ExpenseDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{expense ? 'Edit expense' : 'Record an expense'}</DialogTitle>
+          <DialogTitle>{expense ? 'Edit request' : 'Raise a payment request'}</DialogTitle>
           <DialogDescription>
             Choosing a PFI category books this line against that batch.
           </DialogDescription>
@@ -151,13 +162,35 @@ function ExpenseDialog({
             <label className={cn(MICRO, 'block text-muted-foreground')}>Description</label>
             <Input value={form.description} onChange={(e) => set('description', e.target.value)} />
           </div>
+
+          <div className="space-y-1.5 sm:col-span-2">
+            <p className={cn(MICRO, 'border-b border-foreground/10 pb-2 text-muted-foreground')}>
+              Pay to
+            </p>
+          </div>
+          <div className="space-y-1.5">
+            <label className={cn(MICRO, 'block text-muted-foreground')}>Account name</label>
+            <Input value={form.payee_account_name} onChange={(e) => set('payee_account_name', e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <label className={cn(MICRO, 'block text-muted-foreground')}>Payee bank</label>
+            <Input value={form.payee_bank_name} onChange={(e) => set('payee_bank_name', e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <label className={cn(MICRO, 'block text-muted-foreground')}>Account number</label>
+            <Input value={form.payee_account_number} onChange={(e) => set('payee_account_number', e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <label className={cn(MICRO, 'block text-muted-foreground')}>Receipt reference</label>
+            <Input value={form.receipt_reference} onChange={(e) => set('receipt_reference', e.target.value)} />
+          </div>
         </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
           <Button onClick={submit} disabled={!ready || save.isPending}>
             {save.isPending && <Loader2 className="animate-spin" />}
-            {expense ? 'Save changes' : 'Record expense'}
+            {expense ? 'Save and resubmit' : 'Submit request'}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -169,6 +202,7 @@ function ExpensesPage() {
   const [filters, setFilters] = useState<ExpenseFilters>({})
   const [editing, setEditing] = useState<PfiExpense | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [reviewing, setReviewing] = useState<number | null>(null)
 
   const { data, isLoading, isError, error, refetch } = useExpenses(filters)
   const { data: cats } = useExpenseCategories()
@@ -247,6 +281,35 @@ function ExpensesPage() {
         />
       </StatCardGrid>
 
+      {/* Counts ignore the status filter, so a tab never reads zero just
+          because you are standing inside another one. */}
+      <div className="flex flex-wrap gap-1.5">
+        {[
+          ['', 'All'], ['awaiting', 'Awaiting'], ['pending', 'To verify'],
+          ['verified', 'To approve'], ['audit_approved', 'To authorise'],
+          ['admin_approved', 'To pay'], ['paid', 'Paid'], ['rejected', 'Rejected'],
+        ].map(([value, label]) => {
+          const active = (filters.status || '') === value
+          const n = data?.statusCounts?.[value || 'all'] ?? 0
+          return (
+            <button
+              key={value || 'all'}
+              type="button"
+              onClick={() => setFilters((f) => ({ ...f, status: value || undefined }))}
+              className={cn(
+                'rounded-full border px-3 py-1.5 text-sm transition-colors duration-250 ease-luxe',
+                active
+                  ? 'border-accent bg-accent/10 text-accent'
+                  : 'border-foreground/15 text-muted-foreground hover:border-foreground/30',
+              )}
+            >
+              {label}
+              <span className="ml-1.5 opacity-60">{n}</span>
+            </button>
+          )
+        })}
+      </div>
+
       <FilterBar>
         <div className="relative min-w-[11rem] flex-1">
         <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -304,6 +367,7 @@ function ExpensesPage() {
                 <TableRow>
                   <TableHead>Date</TableHead>
                   <TableHead>Description</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead>Category</TableHead>
                   <TableHead className="hidden md:table-cell">Vendor</TableHead>
                   <TableHead className="hidden lg:table-cell">Bank</TableHead>
@@ -314,11 +378,12 @@ function ExpensesPage() {
               </TableHeader>
               <TableBody>
                 {rows.map((e) => (
-                  <TableRow key={e.id}>
+                  <TableRow key={e.id} className="cursor-pointer" onClick={() => setReviewing(e.id)}>
                     <TableCell className="whitespace-nowrap text-muted-foreground">
                       {format(new Date(e.expense_date), 'd MMM yyyy')}
                     </TableCell>
                     <TableCell className="max-w-[18rem] truncate">{e.description || '—'}</TableCell>
+                    <TableCell><StepBadge expense={e} /></TableCell>
                     <TableCell>
                       <Badge variant={e.pfi_id ? 'default' : 'secondary'} className="max-w-[14rem] truncate">
                         {e.category_name}
@@ -328,7 +393,7 @@ function ExpensesPage() {
                     <TableCell className="hidden lg:table-cell text-muted-foreground">{e.bank_paid_from || '—'}</TableCell>
                     <TableCell className="hidden lg:table-cell text-muted-foreground">{e.entered_by || '—'}</TableCell>
                     <TableCell className="text-right font-normal">{naira(Number(e.amount))}</TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right" onClick={(ev) => ev.stopPropagation()}>
                       <div className="flex items-center justify-end gap-0.5">
                         <Button variant="ghost" size="icon-sm" onClick={() => openEdit(e)} title="Edit">
                           <Pencil /><span className="sr-only">Edit</span>
@@ -351,12 +416,21 @@ function ExpensesPage() {
 
         {rows.length > 0 && (
           <p className={cn(MICRO, 'border-t border-foreground/10 p-3 text-muted-foreground')}>
-            {rows.length} line{rows.length === 1 ? '' : 's'} · deletes are soft, so figures stay auditable
+            {rows.length} of {data?.pagination?.total ?? rows.length}
+            {data?.scope === 'own' && ' · showing only requests you raised'}
+            {' · only paid requests count toward a cargo\'s cost'}
           </p>
         )}
       </div>
 
       <ExpenseDialog expense={editing} open={dialogOpen} onOpenChange={setDialogOpen} />
+
+      <ExpenseReviewDrawer
+        expenseId={reviewing}
+        open={reviewing != null}
+        onOpenChange={(o) => !o && setReviewing(null)}
+        onEdit={(e) => { setEditing(e); setDialogOpen(true) }}
+      />
     </div>
   )
 }
