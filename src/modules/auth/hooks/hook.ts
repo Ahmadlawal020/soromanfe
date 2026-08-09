@@ -15,6 +15,9 @@ export const useAdminLogin = () => {
           user,
           accessToken: payload.accessToken || payload.token || '',
           refreshToken: payload.refreshToken || '',
+          // The refresh token itself is an httpOnly cookie; this is the
+          // double-submit value the refresh call has to echo back.
+          csrfToken: payload.csrfToken,
         })
       }
     },
