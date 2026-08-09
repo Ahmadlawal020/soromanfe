@@ -330,6 +330,15 @@ function ManualDepositPage() {
                                     onSelect={applyStatementLine}
                                     onClear={() => setStatementLine(null)}
                                 />
+                                {/* Once matched, those four fields are the bank's own record.
+                                    Letting the desk retype them is how a deposit ends up
+                                    disagreeing with the statement it was reconciled against. */}
+                                {statementLine && (
+                                    <p className="mt-2 text-xs text-muted-foreground">
+                                        Amount, depositor, date and reference are taken from the bank
+                                        statement and cannot be edited. Clear the match to enter them by hand.
+                                    </p>
+                                )}
                                 {errors.bankAccount && <p className="text-xs text-destructive mt-1">{errors.bankAccount}</p>}
                             </div>
 
@@ -380,6 +389,8 @@ function ManualDepositPage() {
                                             min="1"
                                             placeholder="0.00"
                                             value={amount}
+                                        readOnly={!!statementLine}
+                                        aria-readonly={!!statementLine}
                                             onChange={(e) => {
                                                 setAmount(e.target.value)
                                                 setErrors((prev) => ({ ...prev, amount: '' }))
@@ -400,6 +411,8 @@ function ManualDepositPage() {
                                         type="text"
                                         placeholder="e.g. John Doe (Transfer)"
                                         value={depositorName}
+                                        readOnly={!!statementLine}
+                                        aria-readonly={!!statementLine}
                                         onChange={(e) => {
                                             setDepositorName(e.target.value)
                                             setErrors((prev) => ({ ...prev, depositorName: '' }))
@@ -418,6 +431,8 @@ function ManualDepositPage() {
                                         id="paymentDate"
                                         type="datetime-local"
                                         value={paymentDate}
+                                        readOnly={!!statementLine}
+                                        aria-readonly={!!statementLine}
                                         onChange={(e) => setPaymentDate(e.target.value)}
  />
                                 </div>
@@ -432,6 +447,8 @@ function ManualDepositPage() {
                                         type="text"
                                         placeholder="e.g. TRX-9082319"
                                         value={reference}
+                                        readOnly={!!statementLine}
+                                        aria-readonly={!!statementLine}
                                         onChange={(e) => setReference(e.target.value)}
                                         className="font-mono text-sm"
  />
