@@ -7,6 +7,11 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 .env
+# Timestamped copies made when switching the API URL between local and
+# deployed. Untracked but unignored, they were one `git add -A` from being
+# committed.
+.env.backup*
+.env.*.bak
 
 node_modules
 dist
