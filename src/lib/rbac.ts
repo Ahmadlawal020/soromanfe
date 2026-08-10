@@ -365,6 +365,33 @@ export const ROUTE_PERMISSIONS: Record<string, RoutePermissions> = {
     delete: [],
     review: [Roles.IT_COMPLIANCE, Roles.SUPERADMIN],
   },
+
+  // ---------------------------------------------------------------------
+  // Ported from the other dashboard. Roles are its numeric ids, which
+  // this file already maps to. Pages are placeholders for now; the
+  // permissions are real so the nav hides what a role may not open.
+  // ---------------------------------------------------------------------
+  '/home': { view: ALL_AUTHENTICATED, create: [], edit: [], delete: [] },
+  '/sales-manager-view': { view: [0, 9], create: [], edit: [], delete: [] },
+  '/product-manager-view': { view: [0, 10], create: [], edit: [], delete: [] },
+  '/customer-desk': { view: [0, 1], create: [], edit: [], delete: [] },
+  '/my-report': { view: [0, 5, 9, 10, 15, 16, 18], create: [], edit: [], delete: [] },
+  '/payment-verify': { view: [0, 1, 2, 8], create: [], edit: [], delete: [] },
+  '/confirmed-payments': { view: [0, 1, 2, 8], create: [], edit: [], delete: [] },
+  '/overpayment-refunds': { view: [0], create: [], edit: [], delete: [] },
+  '/overpayment-requests': { view: [0], create: [], edit: [], delete: [] },
+  '/lpg': { view: [0, 1, 8, 11, 13, 14], create: [], edit: [], delete: [] },
+  '/lpg/dashboard': { view: [0, 1, 8, 11, 13], create: [], edit: [], delete: [] },
+  '/lpg/plants': { view: [0, 1, 8, 11], create: [], edit: [], delete: [] },
+  '/lpg/stock': { view: [0, 1, 8, 11, 13], create: [], edit: [], delete: [] },
+  '/lpg/sales': { view: [0, 1, 8, 11, 13, 14], create: [], edit: [], delete: [] },
+  '/delivery-inventory': { view: [0, 1, 3, 6, 8], create: [], edit: [], delete: [] },
+  '/admin-reports': { view: [0, 1, 8], create: [], edit: [], delete: [] },
+  '/messaging': { view: [0, 1], create: [], edit: [], delete: [] },
+  '/orders-pfi': { view: [0], create: [], edit: [], delete: [] },
+  '/inventory': { view: [0], create: [], edit: [], delete: [] },
+  '/order-audit': { view: [0, 1, 8], create: [], edit: [], delete: [] },
+  '/feedback-dashboard': { view: [0, 1, 8], create: [], edit: [], delete: [] },
 }
 
 // ============================================================================

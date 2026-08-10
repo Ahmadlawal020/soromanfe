@@ -16,6 +16,7 @@ import { Route as AdminOrderIndexRouteImport } from './routes/admin-order/index'
 import { Route as AdminOrderDangoteRequestFormRouteImport } from './routes/admin-order/dangote-request-form'
 import { Route as AdminOrderDepotRouteImport } from './routes/admin-order/depot'
 import { Route as AdminOrderLpgRequestFormRouteImport } from './routes/admin-order/lpg-request-form'
+import { Route as AdminReportsIndexRouteImport } from './routes/admin-reports/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminDetailsRouteImport } from './routes/admin/details'
 import { Route as AdminFormRouteImport } from './routes/admin/form'
@@ -26,6 +27,8 @@ import { Route as BankAccountsFormRouteImport } from './routes/bank-accounts/for
 import { Route as BankStatementsIndexRouteImport } from './routes/bank-statements/index'
 import { Route as CommissionRatesIndexRouteImport } from './routes/commission-rates/index'
 import { Route as CommissionsIndexRouteImport } from './routes/commissions/index'
+import { Route as ConfirmedPaymentsIndexRouteImport } from './routes/confirmed-payments/index'
+import { Route as CustomerDeskIndexRouteImport } from './routes/customer-desk/index'
 import { Route as CustomersIndexRouteImport } from './routes/customers/index'
 import { Route as CustomersDetailsRouteImport } from './routes/customers/details'
 import { Route as CustomersFormRouteImport } from './routes/customers/form'
@@ -40,6 +43,7 @@ import { Route as DangoteProductsFormRouteImport } from './routes/dangote-produc
 import { Route as DeliveryCustomerIndexRouteImport } from './routes/delivery-customer/index'
 import { Route as DeliveryCustomerDetailsRouteImport } from './routes/delivery-customer/details'
 import { Route as DeliveryCustomerFormRouteImport } from './routes/delivery-customer/form'
+import { Route as DeliveryInventoryIndexRouteImport } from './routes/delivery-inventory/index'
 import { Route as DeliveryOperationsIndexRouteImport } from './routes/delivery-operations/index'
 import { Route as DeliveryOperationsAllocateTrucksRouteImport } from './routes/delivery-operations/allocate-trucks'
 import { Route as DeliveryOperationsAllocationDetailsRouteImport } from './routes/delivery-operations/allocation-details'
@@ -54,11 +58,14 @@ import { Route as DriversIndexRouteImport } from './routes/drivers/index'
 import { Route as DriversDetailsRouteImport } from './routes/drivers/details'
 import { Route as DriversFormRouteImport } from './routes/drivers/form'
 import { Route as ExpensesIndexRouteImport } from './routes/expenses/index'
+import { Route as FeedbackDashboardIndexRouteImport } from './routes/feedback-dashboard/index'
 import { Route as FilingStationsIndexRouteImport } from './routes/filing-stations/index'
 import { Route as FilingStationsDetailsRouteImport } from './routes/filing-stations/details'
 import { Route as FilingStationsFormRouteImport } from './routes/filing-stations/form'
 import { Route as FleetLedgerIndexRouteImport } from './routes/fleet-ledger/index'
 import { Route as FleetTrucksIndexRouteImport } from './routes/fleet-trucks/index'
+import { Route as HomeIndexRouteImport } from './routes/home/index'
+import { Route as InventoryIndexRouteImport } from './routes/inventory/index'
 import { Route as LicenceVerificationIndexRouteImport } from './routes/licence-verification/index'
 import { Route as LicenceVerificationReviewRouteImport } from './routes/licence-verification/review'
 import { Route as LpgOrderRequestIndexRouteImport } from './routes/lpg-order-request/index'
@@ -69,13 +76,22 @@ import { Route as LpgPayableOrdersIndexRouteImport } from './routes/lpg-payable-
 import { Route as LpgStationsIndexRouteImport } from './routes/lpg-stations/index'
 import { Route as LpgStationsDetailsRouteImport } from './routes/lpg-stations/details'
 import { Route as LpgStationsFormRouteImport } from './routes/lpg-stations/form'
+import { Route as LpgIndexRouteImport } from './routes/lpg/index'
+import { Route as MessagingIndexRouteImport } from './routes/messaging/index'
+import { Route as MyReportIndexRouteImport } from './routes/my-report/index'
+import { Route as OrderAuditIndexRouteImport } from './routes/order-audit/index'
+import { Route as OrdersPfiIndexRouteImport } from './routes/orders-pfi/index'
 import { Route as OrdersIndexRouteImport } from './routes/orders/index'
 import { Route as OrdersDetailsRouteImport } from './routes/orders/details'
+import { Route as OverpaymentRefundsIndexRouteImport } from './routes/overpayment-refunds/index'
+import { Route as OverpaymentRequestsIndexRouteImport } from './routes/overpayment-requests/index'
 import { Route as OverviewIndexRouteImport } from './routes/overview/index'
 import { Route as PayableOrdersIndexRouteImport } from './routes/payable-orders/index'
+import { Route as PaymentVerifyIndexRouteImport } from './routes/payment-verify/index'
 import { Route as PfiIndexRouteImport } from './routes/pfi/index'
 import { Route as PfiDetailsRouteImport } from './routes/pfi/details'
 import { Route as PfiFormRouteImport } from './routes/pfi/form'
+import { Route as ProductManagerViewIndexRouteImport } from './routes/product-manager-view/index'
 import { Route as ProductPricingIndexRouteImport } from './routes/product-pricing/index'
 import { Route as ProductsIndexRouteImport } from './routes/products/index'
 import { Route as ProductsDetailsRouteImport } from './routes/products/details'
@@ -83,12 +99,17 @@ import { Route as ProductsFormRouteImport } from './routes/products/form'
 import { Route as SalesLedgerIndexRouteImport } from './routes/sales-ledger/index'
 import { Route as SalesLedgerAssignCustomerRouteImport } from './routes/sales-ledger/assign-customer'
 import { Route as SalesLedgerDetailsRouteImport } from './routes/sales-ledger/details'
+import { Route as SalesManagerViewIndexRouteImport } from './routes/sales-manager-view/index'
 import { Route as SecurityReportIndexRouteImport } from './routes/security-report/index'
 import { Route as SecurityEntryRouteImport } from './routes/security/entry'
 import { Route as SecurityExitRouteImport } from './routes/security/exit'
 import { Route as TicketIndexRouteImport } from './routes/ticket/index'
 import { Route as TicketDetailsRouteImport } from './routes/ticket/details'
 import { Route as TicketGenerateRouteImport } from './routes/ticket/generate'
+import { Route as LpgDashboardIndexRouteImport } from './routes/lpg/dashboard/index'
+import { Route as LpgPlantsIndexRouteImport } from './routes/lpg/plants/index'
+import { Route as LpgSalesIndexRouteImport } from './routes/lpg/sales/index'
+import { Route as LpgStockIndexRouteImport } from './routes/lpg/stock/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -127,6 +148,11 @@ const AdminOrderLpgRequestFormRoute =
     path: '/admin-order/lpg-request-form',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AdminReportsIndexRoute = AdminReportsIndexRouteImport.update({
+  id: '/admin-reports/',
+  path: '/admin-reports/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
@@ -175,6 +201,16 @@ const CommissionRatesIndexRoute = CommissionRatesIndexRouteImport.update({
 const CommissionsIndexRoute = CommissionsIndexRouteImport.update({
   id: '/commissions/',
   path: '/commissions/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConfirmedPaymentsIndexRoute = ConfirmedPaymentsIndexRouteImport.update({
+  id: '/confirmed-payments/',
+  path: '/confirmed-payments/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CustomerDeskIndexRoute = CustomerDeskIndexRouteImport.update({
+  id: '/customer-desk/',
+  path: '/customer-desk/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CustomersIndexRoute = CustomersIndexRouteImport.update({
@@ -250,6 +286,11 @@ const DeliveryCustomerFormRoute = DeliveryCustomerFormRouteImport.update({
   path: '/delivery-customer/form',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DeliveryInventoryIndexRoute = DeliveryInventoryIndexRouteImport.update({
+  id: '/delivery-inventory/',
+  path: '/delivery-inventory/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DeliveryOperationsIndexRoute = DeliveryOperationsIndexRouteImport.update({
   id: '/delivery-operations/',
   path: '/delivery-operations/',
@@ -323,6 +364,11 @@ const ExpensesIndexRoute = ExpensesIndexRouteImport.update({
   path: '/expenses/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FeedbackDashboardIndexRoute = FeedbackDashboardIndexRouteImport.update({
+  id: '/feedback-dashboard/',
+  path: '/feedback-dashboard/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FilingStationsIndexRoute = FilingStationsIndexRouteImport.update({
   id: '/filing-stations/',
   path: '/filing-stations/',
@@ -346,6 +392,16 @@ const FleetLedgerIndexRoute = FleetLedgerIndexRouteImport.update({
 const FleetTrucksIndexRoute = FleetTrucksIndexRouteImport.update({
   id: '/fleet-trucks/',
   path: '/fleet-trucks/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HomeIndexRoute = HomeIndexRouteImport.update({
+  id: '/home/',
+  path: '/home/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InventoryIndexRoute = InventoryIndexRouteImport.update({
+  id: '/inventory/',
+  path: '/inventory/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LicenceVerificationIndexRoute =
@@ -400,6 +456,31 @@ const LpgStationsFormRoute = LpgStationsFormRouteImport.update({
   path: '/lpg-stations/form',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LpgIndexRoute = LpgIndexRouteImport.update({
+  id: '/lpg/',
+  path: '/lpg/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MessagingIndexRoute = MessagingIndexRouteImport.update({
+  id: '/messaging/',
+  path: '/messaging/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MyReportIndexRoute = MyReportIndexRouteImport.update({
+  id: '/my-report/',
+  path: '/my-report/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrderAuditIndexRoute = OrderAuditIndexRouteImport.update({
+  id: '/order-audit/',
+  path: '/order-audit/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrdersPfiIndexRoute = OrdersPfiIndexRouteImport.update({
+  id: '/orders-pfi/',
+  path: '/orders-pfi/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OrdersIndexRoute = OrdersIndexRouteImport.update({
   id: '/orders/',
   path: '/orders/',
@@ -410,6 +491,17 @@ const OrdersDetailsRoute = OrdersDetailsRouteImport.update({
   path: '/orders/details',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OverpaymentRefundsIndexRoute = OverpaymentRefundsIndexRouteImport.update({
+  id: '/overpayment-refunds/',
+  path: '/overpayment-refunds/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OverpaymentRequestsIndexRoute =
+  OverpaymentRequestsIndexRouteImport.update({
+    id: '/overpayment-requests/',
+    path: '/overpayment-requests/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const OverviewIndexRoute = OverviewIndexRouteImport.update({
   id: '/overview/',
   path: '/overview/',
@@ -418,6 +510,11 @@ const OverviewIndexRoute = OverviewIndexRouteImport.update({
 const PayableOrdersIndexRoute = PayableOrdersIndexRouteImport.update({
   id: '/payable-orders/',
   path: '/payable-orders/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaymentVerifyIndexRoute = PaymentVerifyIndexRouteImport.update({
+  id: '/payment-verify/',
+  path: '/payment-verify/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PfiIndexRoute = PfiIndexRouteImport.update({
@@ -433,6 +530,11 @@ const PfiDetailsRoute = PfiDetailsRouteImport.update({
 const PfiFormRoute = PfiFormRouteImport.update({
   id: '/pfi/form',
   path: '/pfi/form',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProductManagerViewIndexRoute = ProductManagerViewIndexRouteImport.update({
+  id: '/product-manager-view/',
+  path: '/product-manager-view/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProductPricingIndexRoute = ProductPricingIndexRouteImport.update({
@@ -471,6 +573,11 @@ const SalesLedgerDetailsRoute = SalesLedgerDetailsRouteImport.update({
   path: '/sales-ledger/details',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SalesManagerViewIndexRoute = SalesManagerViewIndexRouteImport.update({
+  id: '/sales-manager-view/',
+  path: '/sales-manager-view/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SecurityReportIndexRoute = SecurityReportIndexRouteImport.update({
   id: '/security-report/',
   path: '/security-report/',
@@ -499,6 +606,26 @@ const TicketDetailsRoute = TicketDetailsRouteImport.update({
 const TicketGenerateRoute = TicketGenerateRouteImport.update({
   id: '/ticket/generate',
   path: '/ticket/generate',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LpgDashboardIndexRoute = LpgDashboardIndexRouteImport.update({
+  id: '/lpg/dashboard/',
+  path: '/lpg/dashboard/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LpgPlantsIndexRoute = LpgPlantsIndexRouteImport.update({
+  id: '/lpg/plants/',
+  path: '/lpg/plants/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LpgSalesIndexRoute = LpgSalesIndexRouteImport.update({
+  id: '/lpg/sales/',
+  path: '/lpg/sales/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LpgStockIndexRoute = LpgStockIndexRouteImport.update({
+  id: '/lpg/stock/',
+  path: '/lpg/stock/',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -550,39 +677,60 @@ export interface FileRoutesByFullPath {
   '/ticket/details': typeof TicketDetailsRoute
   '/ticket/generate': typeof TicketGenerateRoute
   '/admin-order/': typeof AdminOrderIndexRoute
+  '/admin-reports/': typeof AdminReportsIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/bank-accounts/': typeof BankAccountsIndexRoute
   '/bank-statements/': typeof BankStatementsIndexRoute
   '/commission-rates/': typeof CommissionRatesIndexRoute
   '/commissions/': typeof CommissionsIndexRoute
+  '/confirmed-payments/': typeof ConfirmedPaymentsIndexRoute
+  '/customer-desk/': typeof CustomerDeskIndexRoute
   '/customers/': typeof CustomersIndexRoute
   '/dangote-order-request/': typeof DangoteOrderRequestIndexRoute
   '/dangote-orders/': typeof DangoteOrdersIndexRoute
   '/dangote-payable-orders/': typeof DangotePayableOrdersIndexRoute
   '/dangote-products/': typeof DangoteProductsIndexRoute
   '/delivery-customer/': typeof DeliveryCustomerIndexRoute
+  '/delivery-inventory/': typeof DeliveryInventoryIndexRoute
   '/delivery-operations/': typeof DeliveryOperationsIndexRoute
   '/deposits/': typeof DepositsIndexRoute
   '/depots/': typeof DepotsIndexRoute
   '/drivers/': typeof DriversIndexRoute
   '/expenses/': typeof ExpensesIndexRoute
+  '/feedback-dashboard/': typeof FeedbackDashboardIndexRoute
   '/filing-stations/': typeof FilingStationsIndexRoute
   '/fleet-ledger/': typeof FleetLedgerIndexRoute
   '/fleet-trucks/': typeof FleetTrucksIndexRoute
+  '/home/': typeof HomeIndexRoute
+  '/inventory/': typeof InventoryIndexRoute
   '/licence-verification/': typeof LicenceVerificationIndexRoute
   '/lpg-order-request/': typeof LpgOrderRequestIndexRoute
   '/lpg-orders/': typeof LpgOrdersIndexRoute
   '/lpg-payable-orders/': typeof LpgPayableOrdersIndexRoute
   '/lpg-stations/': typeof LpgStationsIndexRoute
+  '/lpg/': typeof LpgIndexRoute
+  '/messaging/': typeof MessagingIndexRoute
+  '/my-report/': typeof MyReportIndexRoute
+  '/order-audit/': typeof OrderAuditIndexRoute
+  '/orders-pfi/': typeof OrdersPfiIndexRoute
   '/orders/': typeof OrdersIndexRoute
+  '/overpayment-refunds/': typeof OverpaymentRefundsIndexRoute
+  '/overpayment-requests/': typeof OverpaymentRequestsIndexRoute
   '/overview/': typeof OverviewIndexRoute
   '/payable-orders/': typeof PayableOrdersIndexRoute
+  '/payment-verify/': typeof PaymentVerifyIndexRoute
   '/pfi/': typeof PfiIndexRoute
+  '/product-manager-view/': typeof ProductManagerViewIndexRoute
   '/product-pricing/': typeof ProductPricingIndexRoute
   '/products/': typeof ProductsIndexRoute
   '/sales-ledger/': typeof SalesLedgerIndexRoute
+  '/sales-manager-view/': typeof SalesManagerViewIndexRoute
   '/security-report/': typeof SecurityReportIndexRoute
   '/ticket/': typeof TicketIndexRoute
+  '/lpg/dashboard/': typeof LpgDashboardIndexRoute
+  '/lpg/plants/': typeof LpgPlantsIndexRoute
+  '/lpg/sales/': typeof LpgSalesIndexRoute
+  '/lpg/stock/': typeof LpgStockIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -632,39 +780,60 @@ export interface FileRoutesByTo {
   '/ticket/details': typeof TicketDetailsRoute
   '/ticket/generate': typeof TicketGenerateRoute
   '/admin-order': typeof AdminOrderIndexRoute
+  '/admin-reports': typeof AdminReportsIndexRoute
   '/admin': typeof AdminIndexRoute
   '/bank-accounts': typeof BankAccountsIndexRoute
   '/bank-statements': typeof BankStatementsIndexRoute
   '/commission-rates': typeof CommissionRatesIndexRoute
   '/commissions': typeof CommissionsIndexRoute
+  '/confirmed-payments': typeof ConfirmedPaymentsIndexRoute
+  '/customer-desk': typeof CustomerDeskIndexRoute
   '/customers': typeof CustomersIndexRoute
   '/dangote-order-request': typeof DangoteOrderRequestIndexRoute
   '/dangote-orders': typeof DangoteOrdersIndexRoute
   '/dangote-payable-orders': typeof DangotePayableOrdersIndexRoute
   '/dangote-products': typeof DangoteProductsIndexRoute
   '/delivery-customer': typeof DeliveryCustomerIndexRoute
+  '/delivery-inventory': typeof DeliveryInventoryIndexRoute
   '/delivery-operations': typeof DeliveryOperationsIndexRoute
   '/deposits': typeof DepositsIndexRoute
   '/depots': typeof DepotsIndexRoute
   '/drivers': typeof DriversIndexRoute
   '/expenses': typeof ExpensesIndexRoute
+  '/feedback-dashboard': typeof FeedbackDashboardIndexRoute
   '/filing-stations': typeof FilingStationsIndexRoute
   '/fleet-ledger': typeof FleetLedgerIndexRoute
   '/fleet-trucks': typeof FleetTrucksIndexRoute
+  '/home': typeof HomeIndexRoute
+  '/inventory': typeof InventoryIndexRoute
   '/licence-verification': typeof LicenceVerificationIndexRoute
   '/lpg-order-request': typeof LpgOrderRequestIndexRoute
   '/lpg-orders': typeof LpgOrdersIndexRoute
   '/lpg-payable-orders': typeof LpgPayableOrdersIndexRoute
   '/lpg-stations': typeof LpgStationsIndexRoute
+  '/lpg': typeof LpgIndexRoute
+  '/messaging': typeof MessagingIndexRoute
+  '/my-report': typeof MyReportIndexRoute
+  '/order-audit': typeof OrderAuditIndexRoute
+  '/orders-pfi': typeof OrdersPfiIndexRoute
   '/orders': typeof OrdersIndexRoute
+  '/overpayment-refunds': typeof OverpaymentRefundsIndexRoute
+  '/overpayment-requests': typeof OverpaymentRequestsIndexRoute
   '/overview': typeof OverviewIndexRoute
   '/payable-orders': typeof PayableOrdersIndexRoute
+  '/payment-verify': typeof PaymentVerifyIndexRoute
   '/pfi': typeof PfiIndexRoute
+  '/product-manager-view': typeof ProductManagerViewIndexRoute
   '/product-pricing': typeof ProductPricingIndexRoute
   '/products': typeof ProductsIndexRoute
   '/sales-ledger': typeof SalesLedgerIndexRoute
+  '/sales-manager-view': typeof SalesManagerViewIndexRoute
   '/security-report': typeof SecurityReportIndexRoute
   '/ticket': typeof TicketIndexRoute
+  '/lpg/dashboard': typeof LpgDashboardIndexRoute
+  '/lpg/plants': typeof LpgPlantsIndexRoute
+  '/lpg/sales': typeof LpgSalesIndexRoute
+  '/lpg/stock': typeof LpgStockIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -715,39 +884,60 @@ export interface FileRoutesById {
   '/ticket/details': typeof TicketDetailsRoute
   '/ticket/generate': typeof TicketGenerateRoute
   '/admin-order/': typeof AdminOrderIndexRoute
+  '/admin-reports/': typeof AdminReportsIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/bank-accounts/': typeof BankAccountsIndexRoute
   '/bank-statements/': typeof BankStatementsIndexRoute
   '/commission-rates/': typeof CommissionRatesIndexRoute
   '/commissions/': typeof CommissionsIndexRoute
+  '/confirmed-payments/': typeof ConfirmedPaymentsIndexRoute
+  '/customer-desk/': typeof CustomerDeskIndexRoute
   '/customers/': typeof CustomersIndexRoute
   '/dangote-order-request/': typeof DangoteOrderRequestIndexRoute
   '/dangote-orders/': typeof DangoteOrdersIndexRoute
   '/dangote-payable-orders/': typeof DangotePayableOrdersIndexRoute
   '/dangote-products/': typeof DangoteProductsIndexRoute
   '/delivery-customer/': typeof DeliveryCustomerIndexRoute
+  '/delivery-inventory/': typeof DeliveryInventoryIndexRoute
   '/delivery-operations/': typeof DeliveryOperationsIndexRoute
   '/deposits/': typeof DepositsIndexRoute
   '/depots/': typeof DepotsIndexRoute
   '/drivers/': typeof DriversIndexRoute
   '/expenses/': typeof ExpensesIndexRoute
+  '/feedback-dashboard/': typeof FeedbackDashboardIndexRoute
   '/filing-stations/': typeof FilingStationsIndexRoute
   '/fleet-ledger/': typeof FleetLedgerIndexRoute
   '/fleet-trucks/': typeof FleetTrucksIndexRoute
+  '/home/': typeof HomeIndexRoute
+  '/inventory/': typeof InventoryIndexRoute
   '/licence-verification/': typeof LicenceVerificationIndexRoute
   '/lpg-order-request/': typeof LpgOrderRequestIndexRoute
   '/lpg-orders/': typeof LpgOrdersIndexRoute
   '/lpg-payable-orders/': typeof LpgPayableOrdersIndexRoute
   '/lpg-stations/': typeof LpgStationsIndexRoute
+  '/lpg/': typeof LpgIndexRoute
+  '/messaging/': typeof MessagingIndexRoute
+  '/my-report/': typeof MyReportIndexRoute
+  '/order-audit/': typeof OrderAuditIndexRoute
+  '/orders-pfi/': typeof OrdersPfiIndexRoute
   '/orders/': typeof OrdersIndexRoute
+  '/overpayment-refunds/': typeof OverpaymentRefundsIndexRoute
+  '/overpayment-requests/': typeof OverpaymentRequestsIndexRoute
   '/overview/': typeof OverviewIndexRoute
   '/payable-orders/': typeof PayableOrdersIndexRoute
+  '/payment-verify/': typeof PaymentVerifyIndexRoute
   '/pfi/': typeof PfiIndexRoute
+  '/product-manager-view/': typeof ProductManagerViewIndexRoute
   '/product-pricing/': typeof ProductPricingIndexRoute
   '/products/': typeof ProductsIndexRoute
   '/sales-ledger/': typeof SalesLedgerIndexRoute
+  '/sales-manager-view/': typeof SalesManagerViewIndexRoute
   '/security-report/': typeof SecurityReportIndexRoute
   '/ticket/': typeof TicketIndexRoute
+  '/lpg/dashboard/': typeof LpgDashboardIndexRoute
+  '/lpg/plants/': typeof LpgPlantsIndexRoute
+  '/lpg/sales/': typeof LpgSalesIndexRoute
+  '/lpg/stock/': typeof LpgStockIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -799,39 +989,60 @@ export interface FileRouteTypes {
     | '/ticket/details'
     | '/ticket/generate'
     | '/admin-order/'
+    | '/admin-reports/'
     | '/admin/'
     | '/bank-accounts/'
     | '/bank-statements/'
     | '/commission-rates/'
     | '/commissions/'
+    | '/confirmed-payments/'
+    | '/customer-desk/'
     | '/customers/'
     | '/dangote-order-request/'
     | '/dangote-orders/'
     | '/dangote-payable-orders/'
     | '/dangote-products/'
     | '/delivery-customer/'
+    | '/delivery-inventory/'
     | '/delivery-operations/'
     | '/deposits/'
     | '/depots/'
     | '/drivers/'
     | '/expenses/'
+    | '/feedback-dashboard/'
     | '/filing-stations/'
     | '/fleet-ledger/'
     | '/fleet-trucks/'
+    | '/home/'
+    | '/inventory/'
     | '/licence-verification/'
     | '/lpg-order-request/'
     | '/lpg-orders/'
     | '/lpg-payable-orders/'
     | '/lpg-stations/'
+    | '/lpg/'
+    | '/messaging/'
+    | '/my-report/'
+    | '/order-audit/'
+    | '/orders-pfi/'
     | '/orders/'
+    | '/overpayment-refunds/'
+    | '/overpayment-requests/'
     | '/overview/'
     | '/payable-orders/'
+    | '/payment-verify/'
     | '/pfi/'
+    | '/product-manager-view/'
     | '/product-pricing/'
     | '/products/'
     | '/sales-ledger/'
+    | '/sales-manager-view/'
     | '/security-report/'
     | '/ticket/'
+    | '/lpg/dashboard/'
+    | '/lpg/plants/'
+    | '/lpg/sales/'
+    | '/lpg/stock/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -881,39 +1092,60 @@ export interface FileRouteTypes {
     | '/ticket/details'
     | '/ticket/generate'
     | '/admin-order'
+    | '/admin-reports'
     | '/admin'
     | '/bank-accounts'
     | '/bank-statements'
     | '/commission-rates'
     | '/commissions'
+    | '/confirmed-payments'
+    | '/customer-desk'
     | '/customers'
     | '/dangote-order-request'
     | '/dangote-orders'
     | '/dangote-payable-orders'
     | '/dangote-products'
     | '/delivery-customer'
+    | '/delivery-inventory'
     | '/delivery-operations'
     | '/deposits'
     | '/depots'
     | '/drivers'
     | '/expenses'
+    | '/feedback-dashboard'
     | '/filing-stations'
     | '/fleet-ledger'
     | '/fleet-trucks'
+    | '/home'
+    | '/inventory'
     | '/licence-verification'
     | '/lpg-order-request'
     | '/lpg-orders'
     | '/lpg-payable-orders'
     | '/lpg-stations'
+    | '/lpg'
+    | '/messaging'
+    | '/my-report'
+    | '/order-audit'
+    | '/orders-pfi'
     | '/orders'
+    | '/overpayment-refunds'
+    | '/overpayment-requests'
     | '/overview'
     | '/payable-orders'
+    | '/payment-verify'
     | '/pfi'
+    | '/product-manager-view'
     | '/product-pricing'
     | '/products'
     | '/sales-ledger'
+    | '/sales-manager-view'
     | '/security-report'
     | '/ticket'
+    | '/lpg/dashboard'
+    | '/lpg/plants'
+    | '/lpg/sales'
+    | '/lpg/stock'
   id:
     | '__root__'
     | '/'
@@ -963,39 +1195,60 @@ export interface FileRouteTypes {
     | '/ticket/details'
     | '/ticket/generate'
     | '/admin-order/'
+    | '/admin-reports/'
     | '/admin/'
     | '/bank-accounts/'
     | '/bank-statements/'
     | '/commission-rates/'
     | '/commissions/'
+    | '/confirmed-payments/'
+    | '/customer-desk/'
     | '/customers/'
     | '/dangote-order-request/'
     | '/dangote-orders/'
     | '/dangote-payable-orders/'
     | '/dangote-products/'
     | '/delivery-customer/'
+    | '/delivery-inventory/'
     | '/delivery-operations/'
     | '/deposits/'
     | '/depots/'
     | '/drivers/'
     | '/expenses/'
+    | '/feedback-dashboard/'
     | '/filing-stations/'
     | '/fleet-ledger/'
     | '/fleet-trucks/'
+    | '/home/'
+    | '/inventory/'
     | '/licence-verification/'
     | '/lpg-order-request/'
     | '/lpg-orders/'
     | '/lpg-payable-orders/'
     | '/lpg-stations/'
+    | '/lpg/'
+    | '/messaging/'
+    | '/my-report/'
+    | '/order-audit/'
+    | '/orders-pfi/'
     | '/orders/'
+    | '/overpayment-refunds/'
+    | '/overpayment-requests/'
     | '/overview/'
     | '/payable-orders/'
+    | '/payment-verify/'
     | '/pfi/'
+    | '/product-manager-view/'
     | '/product-pricing/'
     | '/products/'
     | '/sales-ledger/'
+    | '/sales-manager-view/'
     | '/security-report/'
     | '/ticket/'
+    | '/lpg/dashboard/'
+    | '/lpg/plants/'
+    | '/lpg/sales/'
+    | '/lpg/stock/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1046,39 +1299,60 @@ export interface RootRouteChildren {
   TicketDetailsRoute: typeof TicketDetailsRoute
   TicketGenerateRoute: typeof TicketGenerateRoute
   AdminOrderIndexRoute: typeof AdminOrderIndexRoute
+  AdminReportsIndexRoute: typeof AdminReportsIndexRoute
   AdminIndexRoute: typeof AdminIndexRoute
   BankAccountsIndexRoute: typeof BankAccountsIndexRoute
   BankStatementsIndexRoute: typeof BankStatementsIndexRoute
   CommissionRatesIndexRoute: typeof CommissionRatesIndexRoute
   CommissionsIndexRoute: typeof CommissionsIndexRoute
+  ConfirmedPaymentsIndexRoute: typeof ConfirmedPaymentsIndexRoute
+  CustomerDeskIndexRoute: typeof CustomerDeskIndexRoute
   CustomersIndexRoute: typeof CustomersIndexRoute
   DangoteOrderRequestIndexRoute: typeof DangoteOrderRequestIndexRoute
   DangoteOrdersIndexRoute: typeof DangoteOrdersIndexRoute
   DangotePayableOrdersIndexRoute: typeof DangotePayableOrdersIndexRoute
   DangoteProductsIndexRoute: typeof DangoteProductsIndexRoute
   DeliveryCustomerIndexRoute: typeof DeliveryCustomerIndexRoute
+  DeliveryInventoryIndexRoute: typeof DeliveryInventoryIndexRoute
   DeliveryOperationsIndexRoute: typeof DeliveryOperationsIndexRoute
   DepositsIndexRoute: typeof DepositsIndexRoute
   DepotsIndexRoute: typeof DepotsIndexRoute
   DriversIndexRoute: typeof DriversIndexRoute
   ExpensesIndexRoute: typeof ExpensesIndexRoute
+  FeedbackDashboardIndexRoute: typeof FeedbackDashboardIndexRoute
   FilingStationsIndexRoute: typeof FilingStationsIndexRoute
   FleetLedgerIndexRoute: typeof FleetLedgerIndexRoute
   FleetTrucksIndexRoute: typeof FleetTrucksIndexRoute
+  HomeIndexRoute: typeof HomeIndexRoute
+  InventoryIndexRoute: typeof InventoryIndexRoute
   LicenceVerificationIndexRoute: typeof LicenceVerificationIndexRoute
   LpgOrderRequestIndexRoute: typeof LpgOrderRequestIndexRoute
   LpgOrdersIndexRoute: typeof LpgOrdersIndexRoute
   LpgPayableOrdersIndexRoute: typeof LpgPayableOrdersIndexRoute
   LpgStationsIndexRoute: typeof LpgStationsIndexRoute
+  LpgIndexRoute: typeof LpgIndexRoute
+  MessagingIndexRoute: typeof MessagingIndexRoute
+  MyReportIndexRoute: typeof MyReportIndexRoute
+  OrderAuditIndexRoute: typeof OrderAuditIndexRoute
+  OrdersPfiIndexRoute: typeof OrdersPfiIndexRoute
   OrdersIndexRoute: typeof OrdersIndexRoute
+  OverpaymentRefundsIndexRoute: typeof OverpaymentRefundsIndexRoute
+  OverpaymentRequestsIndexRoute: typeof OverpaymentRequestsIndexRoute
   OverviewIndexRoute: typeof OverviewIndexRoute
   PayableOrdersIndexRoute: typeof PayableOrdersIndexRoute
+  PaymentVerifyIndexRoute: typeof PaymentVerifyIndexRoute
   PfiIndexRoute: typeof PfiIndexRoute
+  ProductManagerViewIndexRoute: typeof ProductManagerViewIndexRoute
   ProductPricingIndexRoute: typeof ProductPricingIndexRoute
   ProductsIndexRoute: typeof ProductsIndexRoute
   SalesLedgerIndexRoute: typeof SalesLedgerIndexRoute
+  SalesManagerViewIndexRoute: typeof SalesManagerViewIndexRoute
   SecurityReportIndexRoute: typeof SecurityReportIndexRoute
   TicketIndexRoute: typeof TicketIndexRoute
+  LpgDashboardIndexRoute: typeof LpgDashboardIndexRoute
+  LpgPlantsIndexRoute: typeof LpgPlantsIndexRoute
+  LpgSalesIndexRoute: typeof LpgSalesIndexRoute
+  LpgStockIndexRoute: typeof LpgStockIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1130,6 +1404,13 @@ declare module '@tanstack/react-router' {
       path: '/admin-order/lpg-request-form'
       fullPath: '/admin-order/lpg-request-form'
       preLoaderRoute: typeof AdminOrderLpgRequestFormRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-reports/': {
+      id: '/admin-reports/'
+      path: '/admin-reports'
+      fullPath: '/admin-reports/'
+      preLoaderRoute: typeof AdminReportsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -1200,6 +1481,20 @@ declare module '@tanstack/react-router' {
       path: '/commissions'
       fullPath: '/commissions/'
       preLoaderRoute: typeof CommissionsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/confirmed-payments/': {
+      id: '/confirmed-payments/'
+      path: '/confirmed-payments'
+      fullPath: '/confirmed-payments/'
+      preLoaderRoute: typeof ConfirmedPaymentsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/customer-desk/': {
+      id: '/customer-desk/'
+      path: '/customer-desk'
+      fullPath: '/customer-desk/'
+      preLoaderRoute: typeof CustomerDeskIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/customers/': {
@@ -1300,6 +1595,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DeliveryCustomerFormRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/delivery-inventory/': {
+      id: '/delivery-inventory/'
+      path: '/delivery-inventory'
+      fullPath: '/delivery-inventory/'
+      preLoaderRoute: typeof DeliveryInventoryIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/delivery-operations/': {
       id: '/delivery-operations/'
       path: '/delivery-operations'
@@ -1398,6 +1700,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ExpensesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/feedback-dashboard/': {
+      id: '/feedback-dashboard/'
+      path: '/feedback-dashboard'
+      fullPath: '/feedback-dashboard/'
+      preLoaderRoute: typeof FeedbackDashboardIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/filing-stations/': {
       id: '/filing-stations/'
       path: '/filing-stations'
@@ -1431,6 +1740,20 @@ declare module '@tanstack/react-router' {
       path: '/fleet-trucks'
       fullPath: '/fleet-trucks/'
       preLoaderRoute: typeof FleetTrucksIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/home/': {
+      id: '/home/'
+      path: '/home'
+      fullPath: '/home/'
+      preLoaderRoute: typeof HomeIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inventory/': {
+      id: '/inventory/'
+      path: '/inventory'
+      fullPath: '/inventory/'
+      preLoaderRoute: typeof InventoryIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/licence-verification/': {
@@ -1503,6 +1826,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LpgStationsFormRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lpg/': {
+      id: '/lpg/'
+      path: '/lpg'
+      fullPath: '/lpg/'
+      preLoaderRoute: typeof LpgIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/messaging/': {
+      id: '/messaging/'
+      path: '/messaging'
+      fullPath: '/messaging/'
+      preLoaderRoute: typeof MessagingIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/my-report/': {
+      id: '/my-report/'
+      path: '/my-report'
+      fullPath: '/my-report/'
+      preLoaderRoute: typeof MyReportIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/order-audit/': {
+      id: '/order-audit/'
+      path: '/order-audit'
+      fullPath: '/order-audit/'
+      preLoaderRoute: typeof OrderAuditIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/orders-pfi/': {
+      id: '/orders-pfi/'
+      path: '/orders-pfi'
+      fullPath: '/orders-pfi/'
+      preLoaderRoute: typeof OrdersPfiIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/orders/': {
       id: '/orders/'
       path: '/orders'
@@ -1517,6 +1875,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrdersDetailsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/overpayment-refunds/': {
+      id: '/overpayment-refunds/'
+      path: '/overpayment-refunds'
+      fullPath: '/overpayment-refunds/'
+      preLoaderRoute: typeof OverpaymentRefundsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/overpayment-requests/': {
+      id: '/overpayment-requests/'
+      path: '/overpayment-requests'
+      fullPath: '/overpayment-requests/'
+      preLoaderRoute: typeof OverpaymentRequestsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/overview/': {
       id: '/overview/'
       path: '/overview'
@@ -1529,6 +1901,13 @@ declare module '@tanstack/react-router' {
       path: '/payable-orders'
       fullPath: '/payable-orders/'
       preLoaderRoute: typeof PayableOrdersIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/payment-verify/': {
+      id: '/payment-verify/'
+      path: '/payment-verify'
+      fullPath: '/payment-verify/'
+      preLoaderRoute: typeof PaymentVerifyIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pfi/': {
@@ -1550,6 +1929,13 @@ declare module '@tanstack/react-router' {
       path: '/pfi/form'
       fullPath: '/pfi/form'
       preLoaderRoute: typeof PfiFormRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/product-manager-view/': {
+      id: '/product-manager-view/'
+      path: '/product-manager-view'
+      fullPath: '/product-manager-view/'
+      preLoaderRoute: typeof ProductManagerViewIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/product-pricing/': {
@@ -1601,6 +1987,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SalesLedgerDetailsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sales-manager-view/': {
+      id: '/sales-manager-view/'
+      path: '/sales-manager-view'
+      fullPath: '/sales-manager-view/'
+      preLoaderRoute: typeof SalesManagerViewIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/security-report/': {
       id: '/security-report/'
       path: '/security-report'
@@ -1641,6 +2034,34 @@ declare module '@tanstack/react-router' {
       path: '/ticket/generate'
       fullPath: '/ticket/generate'
       preLoaderRoute: typeof TicketGenerateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lpg/dashboard/': {
+      id: '/lpg/dashboard/'
+      path: '/lpg/dashboard'
+      fullPath: '/lpg/dashboard/'
+      preLoaderRoute: typeof LpgDashboardIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lpg/plants/': {
+      id: '/lpg/plants/'
+      path: '/lpg/plants'
+      fullPath: '/lpg/plants/'
+      preLoaderRoute: typeof LpgPlantsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lpg/sales/': {
+      id: '/lpg/sales/'
+      path: '/lpg/sales'
+      fullPath: '/lpg/sales/'
+      preLoaderRoute: typeof LpgSalesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lpg/stock/': {
+      id: '/lpg/stock/'
+      path: '/lpg/stock'
+      fullPath: '/lpg/stock/'
+      preLoaderRoute: typeof LpgStockIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -1695,39 +2116,60 @@ const rootRouteChildren: RootRouteChildren = {
   TicketDetailsRoute: TicketDetailsRoute,
   TicketGenerateRoute: TicketGenerateRoute,
   AdminOrderIndexRoute: AdminOrderIndexRoute,
+  AdminReportsIndexRoute: AdminReportsIndexRoute,
   AdminIndexRoute: AdminIndexRoute,
   BankAccountsIndexRoute: BankAccountsIndexRoute,
   BankStatementsIndexRoute: BankStatementsIndexRoute,
   CommissionRatesIndexRoute: CommissionRatesIndexRoute,
   CommissionsIndexRoute: CommissionsIndexRoute,
+  ConfirmedPaymentsIndexRoute: ConfirmedPaymentsIndexRoute,
+  CustomerDeskIndexRoute: CustomerDeskIndexRoute,
   CustomersIndexRoute: CustomersIndexRoute,
   DangoteOrderRequestIndexRoute: DangoteOrderRequestIndexRoute,
   DangoteOrdersIndexRoute: DangoteOrdersIndexRoute,
   DangotePayableOrdersIndexRoute: DangotePayableOrdersIndexRoute,
   DangoteProductsIndexRoute: DangoteProductsIndexRoute,
   DeliveryCustomerIndexRoute: DeliveryCustomerIndexRoute,
+  DeliveryInventoryIndexRoute: DeliveryInventoryIndexRoute,
   DeliveryOperationsIndexRoute: DeliveryOperationsIndexRoute,
   DepositsIndexRoute: DepositsIndexRoute,
   DepotsIndexRoute: DepotsIndexRoute,
   DriversIndexRoute: DriversIndexRoute,
   ExpensesIndexRoute: ExpensesIndexRoute,
+  FeedbackDashboardIndexRoute: FeedbackDashboardIndexRoute,
   FilingStationsIndexRoute: FilingStationsIndexRoute,
   FleetLedgerIndexRoute: FleetLedgerIndexRoute,
   FleetTrucksIndexRoute: FleetTrucksIndexRoute,
+  HomeIndexRoute: HomeIndexRoute,
+  InventoryIndexRoute: InventoryIndexRoute,
   LicenceVerificationIndexRoute: LicenceVerificationIndexRoute,
   LpgOrderRequestIndexRoute: LpgOrderRequestIndexRoute,
   LpgOrdersIndexRoute: LpgOrdersIndexRoute,
   LpgPayableOrdersIndexRoute: LpgPayableOrdersIndexRoute,
   LpgStationsIndexRoute: LpgStationsIndexRoute,
+  LpgIndexRoute: LpgIndexRoute,
+  MessagingIndexRoute: MessagingIndexRoute,
+  MyReportIndexRoute: MyReportIndexRoute,
+  OrderAuditIndexRoute: OrderAuditIndexRoute,
+  OrdersPfiIndexRoute: OrdersPfiIndexRoute,
   OrdersIndexRoute: OrdersIndexRoute,
+  OverpaymentRefundsIndexRoute: OverpaymentRefundsIndexRoute,
+  OverpaymentRequestsIndexRoute: OverpaymentRequestsIndexRoute,
   OverviewIndexRoute: OverviewIndexRoute,
   PayableOrdersIndexRoute: PayableOrdersIndexRoute,
+  PaymentVerifyIndexRoute: PaymentVerifyIndexRoute,
   PfiIndexRoute: PfiIndexRoute,
+  ProductManagerViewIndexRoute: ProductManagerViewIndexRoute,
   ProductPricingIndexRoute: ProductPricingIndexRoute,
   ProductsIndexRoute: ProductsIndexRoute,
   SalesLedgerIndexRoute: SalesLedgerIndexRoute,
+  SalesManagerViewIndexRoute: SalesManagerViewIndexRoute,
   SecurityReportIndexRoute: SecurityReportIndexRoute,
   TicketIndexRoute: TicketIndexRoute,
+  LpgDashboardIndexRoute: LpgDashboardIndexRoute,
+  LpgPlantsIndexRoute: LpgPlantsIndexRoute,
+  LpgSalesIndexRoute: LpgSalesIndexRoute,
+  LpgStockIndexRoute: LpgStockIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

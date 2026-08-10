@@ -25,6 +25,8 @@ import {
   ClipboardList,
   Flame,
   Percent,
+  Home,
+  MessageSquare,
 } from "lucide-react";
 import { useAuthStore, useAdminLogout } from "#/modules/auth";
 import { useLayoutStore } from "#/stores/layoutStore";
@@ -45,44 +47,49 @@ type NavCategory = {
 
 const navCategories: NavCategory[] = [
   {
-    category: "", // Overview
-    items: [{ title: "Overview", icon: GaugeIcon, path: "/overview" }],
+    category: "", // Top of nav — no header
+    items: [
+      { title: "Home", icon: Home, path: "/home" },
+      { title: "Overview", icon: GaugeIcon, path: "/overview" },
+    ],
   },
-  // Ordered by how much of the day is spent in each: the core order desk
-  // first, then the floor, then money, then the side businesses. LPG is a
-  // newer, smaller line, so it sits below the established ones.
   {
     category: "Orders",
     items: [
-      { title: "Orders", icon: ShoppingBag, path: "/orders" },
+      { title: "All Orders", icon: ShoppingBag, path: "/orders" },
       { title: "Create Order", icon: PlusCircle, path: "/admin-order" },
-      { title: "Payable Orders", icon: DollarSign, path: "/payable-orders" },
+      // Two role-specific order views. Both are titled "Orders" upstream;
+      // named for their audience here so a SuperAdmin, who sees both, can
+      // tell them apart.
+      { title: "Marketing Orders", icon: ShoppingBag, path: "/sales-manager-view" },
+      { title: "Location Orders", icon: ShoppingBag, path: "/product-manager-view" },
       { title: "Our Customers", icon: Building2, path: "/customers" },
+      { title: "Customer Desk", icon: Contact, path: "/customer-desk" },
     ],
+  },
+  {
+    category: "My Reports",
+    items: [{ title: "My Report", icon: FileText, path: "/my-report" }],
   },
   {
     category: "Operations",
     items: [
       { title: "Loading Tickets", icon: Ticket, path: "/ticket" },
-      { title: "Depots", icon: Warehouse, path: "/depots" },
-      { title: "Products", icon: Package, path: "/products" },
-      { title: "Product Pricing", icon: Fuel, path: "/product-pricing" },
-    ],
-  },
-  {
-    category: "Security",
-    items: [
       { title: "Gate Entry", icon: LogIn, path: "/security/entry" },
       { title: "Gate Exit", icon: LogOut, path: "/security/exit" },
       { title: "Security Report", icon: ClipboardList, path: "/security-report" },
+      { title: "Depots", icon: Warehouse, path: "/depots" },
+      { title: "Products", icon: Package, path: "/products" },
     ],
   },
   {
     category: "Finance",
     items: [
-      { title: "PFI Tracking", icon: FileText, path: "/pfi" },
-      { title: "Expenses", icon: Receipt, path: "/expenses" },
+      { title: "Verify Payments", icon: ShieldCheck, path: "/payment-verify" },
+      { title: "Finance Report", icon: FileSpreadsheet, path: "/confirmed-payments" },
       { title: "Deposits", icon: Receipt, path: "/deposits" },
+      { title: "Overpayment Refunds", icon: DollarSign, path: "/overpayment-refunds" },
+      { title: "Transfer Requests", icon: DollarSign, path: "/overpayment-requests" },
       { title: "Customer Commissions", icon: DollarSign, path: "/commissions" },
       { title: "Commission Rates", icon: Percent, path: "/commission-rates" },
       { title: "Bank Accounts", icon: Landmark, path: "/bank-accounts" },
@@ -92,9 +99,27 @@ const navCategories: NavCategory[] = [
   {
     category: "Transport",
     items: [
-      { title: "Fleet", icon: Truck, path: "/fleet-trucks" },
-      { title: "Trucks Ledger", icon: BarChart3, path: "/fleet-ledger" },
+      { title: "Fleet Directory", icon: Truck, path: "/fleet-trucks" },
+      { title: "Fleet Expense Ledger", icon: BarChart3, path: "/fleet-ledger" },
       { title: "Drivers Directory", icon: Contact, path: "/drivers" },
+    ],
+  },
+  {
+    category: "LPG Division",
+    items: [
+      { title: "LPG Division", icon: Flame, path: "/lpg" },
+      { title: "LPG Dashboard", icon: GaugeIcon, path: "/lpg/dashboard" },
+      { title: "LPG Plants", icon: Warehouse, path: "/lpg/plants" },
+      { title: "LPG Stock Register", icon: Package, path: "/lpg/stock" },
+      { title: "LPG Sales Register", icon: BarChart3, path: "/lpg/sales" },
+    ],
+  },
+  {
+    category: "LPG Home Delivery",
+    items: [
+      { title: "LPG Stations", icon: Flame, path: "/lpg-stations" },
+      { title: "LPG Orders", icon: ShoppingBag, path: "/lpg-orders" },
+      { title: "Order Requests", icon: FileText, path: "/lpg-order-request" },
     ],
   },
   {
@@ -102,34 +127,37 @@ const navCategories: NavCategory[] = [
     items: [
       { title: "Dangote Orders", icon: ShoppingBag, path: "/dangote-orders" },
       { title: "Order Requests", icon: FileText, path: "/dangote-order-request" },
-      { title: "Payable Orders", icon: DollarSign, path: "/dangote-payable-orders" },
       { title: "Dangote Products", icon: Package, path: "/dangote-products" },
     ],
   },
   {
     category: "Truck Sales",
     items: [
+      { title: "Delivery Inventory", icon: Package, path: "/delivery-inventory" },
       { title: "Delivery Operations", icon: Truck, path: "/delivery-operations" },
+      { title: "Delivery Customers", icon: Users, path: "/delivery-customer" },
       { title: "Sales Ledger", icon: BarChart3, path: "/sales-ledger" },
       { title: "Filling Stations", icon: Fuel, path: "/filing-stations" },
-      { title: "Delivery Customers", icon: Users, path: "/delivery-customer" },
     ],
   },
   {
-    category: "LPG Home Delivery",
+    category: "Admin",
     items: [
-      { title: "LPG Orders", icon: ShoppingBag, path: "/lpg-orders" },
-      { title: "Order Requests", icon: FileText, path: "/lpg-order-request" },
-      { title: "Payable Orders", icon: DollarSign, path: "/lpg-payable-orders" },
-      { title: "LPG Stations", icon: Flame, path: "/lpg-stations" },
-    ],
-  },
-  {
-    category: "Administration",
-    items: [
-      { title: "User Management", icon: Users, path: "/admin" },
+      { title: "Reports Hub", icon: FileSpreadsheet, path: "/admin-reports" },
+      { title: "Messaging", icon: FileText, path: "/messaging" },
+      { title: "Assign PFI", icon: FileText, path: "/orders-pfi" },
+      { title: "Product Pricing", icon: Fuel, path: "/product-pricing" },
+      { title: "PFI Tracking", icon: FileText, path: "/pfi" },
+      { title: "Expenses", icon: Receipt, path: "/expenses" },
+      { title: "Stock Management", icon: Package, path: "/inventory" },
+      { title: "Users Log", icon: ClipboardList, path: "/order-audit" },
+      { title: "Manage Users", icon: Users, path: "/admin" },
       { title: "Licence Verification", icon: ShieldCheck, path: "/licence-verification" },
     ],
+  },
+  {
+    category: "Feedback",
+    items: [{ title: "Feedback & Reviews", icon: MessageSquare, path: "/feedback-dashboard" }],
   },
 ];
 
