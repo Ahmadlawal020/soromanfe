@@ -5,6 +5,7 @@ import { format, isWithinInterval } from 'date-fns'
 import {
   Package, CheckCircle2, Clock, DollarSign, Droplets, Truck, Hourglass,
   Search, Plus, X, RefreshCw, FileSpreadsheet, FileText, Eye, Pencil,
+  Wallet,
 } from 'lucide-react'
 
 import { Button } from '#/components/ui/button'
@@ -69,6 +70,18 @@ function OrdersDashboard() {
   const [customFrom, setCustomFrom] = useState('')
   const [customTo, setCustomTo] = useState('')
   const [statusFilter, setStatusFilter] = useState(ALL)
+  /**
+   * Payable is not a status — it is an unpaid pending order the customer
+   * already has the wallet balance to cover. It used to be its own page,
+   * which meant guessing which screen an order was on; it is a filter here so
+   * there is one register and one place to look.
+   */
+  const [payableOnly, setPayableOnly] = useState(() => {
+    // TanStack serialises search values as JSON, so an incoming ?payable=1
+    // can arrive as "1" with the quotes. Strip them before comparing.
+    const raw = new URLSearchParams(window.location.search).get('payable') ?? ''
+    return ['1', 'true'].includes(raw.replace(/^"|"$/g, ''))
+  })
   const [locationFilter, setLocationFilter] = useState(ALL)
   const [productFilter, setProductFilter] = useState(ALL)
   const [pfiFilter, setPfiFilter] = useState(ALL)
@@ -81,7 +94,9 @@ function OrdersDashboard() {
 
   // Filtering and the summary totals run client-side so the cards can
   // recalculate against the filtered set, which needs the whole result.
-  const { data, isLoading, isError, error, refetch, isFetching } = useAllOrders()
+  const { data, isLoading, isError, error, refetch, isFetching } = useAllOrders(
+    payableOnly ? { payable: 1 } : undefined,
+  )
   const orders: any[] = data?.orders || []
   const isTruncated = data?.truncated === true
   const totalAvailable = data?.totalAvailable ?? orders.length
@@ -299,6 +314,25 @@ function OrdersDashboard() {
             </div>
 
             <div className="space-y-4 px-6 pt-5 pb-6">
+              {/* Replaces the old Payable Orders page. Same rule the server
+                  applies: unpaid, pending, and the customer's wallet already
+                  covers it. */}
+              <button
+                type="button"
+                onClick={() => { setPayableOnly((v) => !v); setCurrentPage(1) }}
+                aria-pressed={payableOnly}
+                className={cn(
+                  'inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors duration-250 ease-luxe',
+                  payableOnly
+                    ? 'border-accent bg-accent/10 text-accent'
+                    : 'border-foreground/15 text-muted-foreground hover:border-foreground/30',
+                )}
+              >
+                <Wallet className="size-3.5" />
+                Ready to pay from wallet
+                {payableOnly && <X className="size-3" />}
+              </button>
+
               <div className="relative">
                 <Search className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
                 <Input
