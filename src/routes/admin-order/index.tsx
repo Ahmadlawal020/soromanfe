@@ -395,8 +395,8 @@ function CreateOrderPage() {
   return (
     <div className="animate-fade-in mx-auto w-full max-w-3xl space-y-8 py-2">
       <PageHeader
-      eyebrow="Orders"
-      title="Place a customer order"
+      eyebrow="Customer Orders"
+      title="Place order for a customer"
       description="Choose where the order is lifted from — the steps appear below."
     />
 

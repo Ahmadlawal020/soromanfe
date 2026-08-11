@@ -97,32 +97,58 @@ export function ProductStep({ wizard }: ProductStepProps) {
           an empty box above an unchosen product is just noise. */}
       {selectedProduct && (
         <div className="space-y-2">
-          <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+          {/*
+            Laid out as the sum it is: quantity × unit price = total.
+
+            It used to be a full-width input beside a bordered total, which put
+            two boxes of different heights next to each other and stretched a
+            five-digit field across the panel. The field is now sized to what
+            gets typed into it, and the total is type rather than another box.
+          */}
+          <div className="flex flex-wrap items-end gap-x-4 gap-y-3">
             <div className="space-y-1.5">
-              <Label htmlFor="order-qty">Quantity ({unit})</Label>
-              <Input
-                id="order-qty"
-                type="number"
-                min="1"
-                inputMode="numeric"
-                placeholder="e.g. 5000"
-                value={orderQuantity}
-                onChange={(e) => setOrderQuantity(e.target.value)}
-                aria-invalid={overStock || undefined}
-                aria-describedby="order-total"
-              />
+              <Label htmlFor="order-qty">Quantity</Label>
+              <div className="relative w-44">
+                <Input
+                  id="order-qty"
+                  type="number"
+                  min="1"
+                  inputMode="numeric"
+                  placeholder="45000"
+                  value={orderQuantity}
+                  onChange={(e) => setOrderQuantity(e.target.value)}
+                  aria-invalid={overStock || undefined}
+                  aria-describedby="order-total"
+                  // Room on the right for the unit, so the label above stays
+                  // just "Quantity" instead of "Quantity (Litres)".
+                  className="pr-12 text-right"
+                />
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm text-muted-foreground"
+                >
+                  {unit === 'Litres' ? 'L' : unit}
+                </span>
+              </div>
             </div>
 
-            {/* The number the desk is actually deciding on, kept beside the
-                input rather than boxed away in its own panel. */}
-            <div
-              id="order-total"
-              className="rounded-lg border border-foreground/15 px-4 py-2.5 sm:min-w-[13rem]"
-            >
-              <span className="block text-xs text-muted-foreground">
-                {qty > 0 ? `${qty.toLocaleString()} × ${formatCurrency(selectedProduct.currentPrice)}` : 'Order total'}
-              </span>
-              <span className="block text-lg font-semibold">
+            <div className="flex items-end gap-4 pb-2">
+              <span className="text-sm text-muted-foreground">×</span>
+              <div>
+                <span className="block text-xs text-muted-foreground">Unit price</span>
+                <span className="block text-sm">{formatCurrency(selectedProduct.currentPrice)}</span>
+              </div>
+              <span className="text-sm text-muted-foreground">=</span>
+            </div>
+
+            <div id="order-total" className="pb-1.5">
+              <span className="block text-xs text-muted-foreground">Order total</span>
+              <span
+                className={cn(
+                  'block text-2xl leading-none font-semibold tracking-[-0.02em]',
+                  qty > 0 ? 'text-foreground' : 'text-muted-foreground/50',
+                )}
+              >
                 {formatCurrency(total)}
               </span>
             </div>
@@ -133,7 +159,7 @@ export function ProductStep({ wizard }: ProductStepProps) {
               ? `This product is out of stock at ${selectedDepot?.name} (no active PFI stock assigned).`
               : overStock
               ? `Only ${stock.toLocaleString()} ${unit} in stock (from assigned PFIs) at ${selectedDepot?.name} — reduce the quantity to continue.`
-              : `${stock.toLocaleString()} ${unit} available in stock (from assigned PFIs) at ${selectedDepot?.name}.`}
+              : `${stock.toLocaleString()} ${unit} available in stock at ${selectedDepot?.name}.`}
           </p>
         </div>
       )}

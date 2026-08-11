@@ -101,7 +101,7 @@ export const ROUTE_PERMISSIONS: Record<string, RoutePermissions> = {
   // OVERVIEW - All authenticated users
   // --------------------------------------------------------------------------
   '/overview': {
-    view: ALL_AUTHENTICATED,
+    view: [...ADMIN_SUPERADMIN, Roles.FINANCE, Roles.ORDERS_MANAGER],
     create: [],
     edit: [],
     delete: [],

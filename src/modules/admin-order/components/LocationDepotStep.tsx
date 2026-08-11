@@ -23,7 +23,7 @@ export function LocationDepotStep({ wizard }: LocationDepotStepProps) {
   return (
     <div className="space-y-5">
       <div className="space-y-1.5">
-        <Label htmlFor="dest-state">Destination state</Label>
+        <Label htmlFor="dest-state">Location</Label>
         <Select
           value={selectedState}
           onValueChange={(v) => {
@@ -52,7 +52,7 @@ export function LocationDepotStep({ wizard }: LocationDepotStepProps) {
           </div>
         ) : stateDepots.length === 0 ? (
           <div className="rounded-xl border border-dashed border-foreground/20 p-8 text-center">
-            <p className="text-sm">No active depots in {selectedState}</p>
+            <p className="text-sm">No Soroman Depot in {selectedState}</p>
             <p className="mt-1 text-xs text-muted-foreground">Try a different state.</p>
           </div>
         ) : (

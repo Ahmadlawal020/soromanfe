@@ -47,7 +47,7 @@ export function CustomerStep({ wizard }: CustomerStepProps) {
           {selectedCustomer && !isSearchOpen ? (
             <>
               <div className="p-4 border rounded-xl bg-muted/30 space-y-3">
-                <div className="flex items-center gap-2 border-b border-border pb-2">
+                <div className="flex items-center gap-2 border-b border-border pb-8">
                   <div className="size-6 rounded bg-primary/10 flex items-center justify-center">
                     <User className="text-primary size-3.5" />
                   </div>
@@ -89,15 +89,15 @@ export function CustomerStep({ wizard }: CustomerStepProps) {
                   </div>
                 </div>
 
-                <div className="pt-2 border-t border-border">
-                  <div className="space-y-1.5">
+                <div className="pt-8 border-t border-border">
+                  <div className="space-y-4">
                     <Label>Company Name *</Label>
                     <Input
-                      placeholder="e.g. vinha Industries Ltd"
+                      placeholder="e.g. Soroman Energy"
                       value={orderCompanyName}
                       onChange={(e) => setOrderCompanyName(e.target.value)}
                     />
-                    <p className="text-xs text-muted-foreground">The company the customer is buying for</p>
+                    {/* <p className="text-xs text-muted-foreground">The company the customer is buying for</p> */}
                   </div>
                 </div>
               </div>

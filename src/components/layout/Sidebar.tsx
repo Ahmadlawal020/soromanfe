@@ -49,7 +49,7 @@ const navCategories: NavCategory[] = [
   {
     category: "", // Top of nav — no header
     items: [
-      { title: "Home", icon: Home, path: "/home" },
+      // { title: "Home", icon: Home, path: "/home" },
       { title: "Overview", icon: GaugeIcon, path: "/overview" },
     ],
   },
