@@ -183,6 +183,31 @@ export function usePayOrder() {
   })
 }
 
+/**
+ * Erase an order and everything attached to it.
+ *
+ * Not a cancel — the row and its tickets, trucks, commissions, wallet holds
+ * and stock movements are removed outright, paid orders included. Only the
+ * audit entry survives. super_admin only, enforced server-side.
+ */
+export function useDeleteOrder() {
+  const queryClient = useQueryClient()
+  const toast = useToast()
+
+  return useMutation({
+    retry: false,
+    mutationFn: async (id: string | number) => (await api.delete(`/orders/${id}`)).data,
+    onSuccess: (data) => {
+      toast.success(data?.message || 'Order deleted')
+      // Deleting an order changes PFI cost and stock, so those views are stale too.
+      queryClient.invalidateQueries({ queryKey: ['orders'] })
+      queryClient.invalidateQueries({ queryKey: ['pfis'] })
+      queryClient.invalidateQueries({ queryKey: ['tickets'] })
+    },
+    onError: (err: any) => toast.error(getErrorMessage(err)),
+  })
+}
+
 export function useCancelOrder() {
   const queryClient = useQueryClient()
   const toast = useToast()

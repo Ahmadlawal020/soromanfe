@@ -35,8 +35,8 @@ export function OrderExpiryBadge({
   // Already expired — show when it happened.
   if (s === 'expired') {
     return (
-      <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-destructive/40 bg-destructive/10 px-2.5 py-0.5 text-[0.65rem] tracking-[0.14em] uppercase text-destructive">
-        <Hourglass className="size-3" />
+      <span className="inline-flex w-fit items-center gap-1 text-xs text-destructive">
+        <Hourglass className="size-3 shrink-0" />
         Expired{expiredAt ? ` · ${formatShortDate(expiredAt)}` : ''}
       </span>
     )
@@ -50,8 +50,8 @@ export function OrderExpiryBadge({
 
   if (remaining <= 0) {
     return (
-      <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-destructive/40 bg-destructive/10 px-2.5 py-0.5 text-[0.65rem] tracking-[0.14em] uppercase text-destructive">
-        <Hourglass className="size-3" />
+      <span className="inline-flex w-fit items-center gap-1 text-xs text-destructive">
+        <Hourglass className="size-3 shrink-0" />
         Expired
       </span>
     )
@@ -63,16 +63,16 @@ export function OrderExpiryBadge({
   const urgent = remaining < 2 * 60 * 1000 // < 2 minutes
 
   return (
+    // Deliberately not a badge. Two pills stacked in one cell read as two
+    // statuses; the status is the badge, and this is a footnote under it.
     <span
       className={cn(
-        'inline-flex w-fit items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[0.65rem] tracking-[0.14em] uppercase',
-        urgent
-          ? 'border-destructive/40 bg-destructive/10 text-destructive'
-          : 'border-warning/40 bg-warning/10 text-warning',
+        'inline-flex w-fit items-center gap-1 text-xs',
+        urgent ? 'text-destructive' : 'text-muted-foreground',
       )}
     >
-      <Hourglass className="size-3" />
-      Expires in {label}
+      <Hourglass className="size-3 shrink-0" />
+      {label} left
     </span>
   )
 }
