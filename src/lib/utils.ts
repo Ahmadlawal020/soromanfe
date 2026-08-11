@@ -7,6 +7,9 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function getErrorMessage(err: any): string {
+  if (err?.response?.data?.errors && Array.isArray(err.response.data.errors) && err.response.data.errors.length > 0) {
+    return err.response.data.errors.map((e: any) => e.message || `${e.path}: invalid`).join(', ')
+  }
   return err?.response?.data?.message || err?.message || 'An unexpected error occurred'
 }
 

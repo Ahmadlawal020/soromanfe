@@ -21,13 +21,14 @@ import { PageLoader } from '#/components/PageLoader'
 import { PageError } from '#/components/PageError'
 import { PageEmpty } from '#/components/PageEmpty'
 import { Pagination } from '#/components/Pagination'
+import { ConfirmDialog } from '#/components/ConfirmDialog'
 import { PANEL, MICRO, PANEL_RAIL } from '#/lib/panel'
 import { cn } from '#/lib/utils'
-import { useAllOrders } from '#/lib/hooks/useOrders'
+import { useAllOrders, usePayOrder } from '#/lib/hooks/useOrders'
 import { routeGuard } from '#/lib/route-guard'
 
 import {
-  DATE_PRESETS, resolveRange, toNumber, formatNaira, formatQty, isPaid, groupByDay,
+  DATE_PRESETS, resolveRange, toNumber, formatNaira, formatQty, isPaid, isOrderPayable, groupByDay,
   type DatePreset,
 } from './-orders-utils'
 import { OrderStatusBadge } from './-order-status'
@@ -90,7 +91,21 @@ function OrdersDashboard() {
   const [pageSize, setPageSize] = useState(25)
   const [detailsOrder, setDetailsOrder] = useState<any | null>(null)
   const [editOrder, setEditOrder] = useState<any | null>(null)
+  const [payTargetOrder, setPayTargetOrder] = useState<any | null>(null)
   const [exporting, setExporting] = useState<'excel' | 'pdf' | null>(null)
+
+  const payOrderMutation = usePayOrder()
+
+  const handleConfirmPayment = async () => {
+    if (!payTargetOrder) return
+    const id = payTargetOrder.id ?? payTargetOrder._id
+    try {
+      await payOrderMutation.mutateAsync(id)
+      setPayTargetOrder(null)
+    } catch {
+      // Handled by usePayOrder toast
+    }
+  }
 
   // Filtering and the summary totals run client-side so the cards can
   // recalculate against the filtered set, which needs the whole result.
@@ -478,7 +493,18 @@ function OrdersDashboard() {
                               </TableCell>
                               <TableCell className="text-muted-foreground">{o.pfiNumber || '—'}</TableCell>
                               <TableCell>
-                                <div className="flex items-center justify-end gap-1">
+                                <div className="flex items-center justify-end gap-1.5">
+                                  {isOrderPayable(o) && (
+                                    <Button
+                                      size="sm"
+                                      className="h-7 gap-1 bg-emerald-600 px-2.5 text-xs font-medium text-white hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 shadow-none cursor-pointer"
+                                      onClick={() => setPayTargetOrder(o)}
+                                      disabled={payOrderMutation.isPending && (payTargetOrder?.id ?? payTargetOrder?._id) === (o.id ?? o._id)}
+                                    >
+                                      <Wallet className="size-3" />
+                                      <span>Pay Now</span>
+                                    </Button>
+                                  )}
                                   <Button variant="ghost" size="icon-sm" onClick={() => setDetailsOrder(o)}>
                                     <Eye />
                                     <span className="sr-only">View {o.orderNumber}</span>
@@ -528,6 +554,46 @@ function OrdersDashboard() {
           </section>
         </>
       )}
+
+      <ConfirmDialog
+        open={payTargetOrder !== null}
+        onOpenChange={(open) => { if (!open) setPayTargetOrder(null) }}
+        title={`Pay Order ${payTargetOrder?.orderNumber || ''}`}
+        description="Process payment directly from the customer's available wallet balance."
+        confirmLabel="Confirm & Pay"
+        cancelLabel="Cancel"
+        loading={payOrderMutation.isPending}
+        onConfirm={handleConfirmPayment}
+      >
+        {payTargetOrder && (
+          <div className="my-2 space-y-3 rounded-lg border border-foreground/10 bg-muted/30 p-3.5 text-sm">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">Customer:</span>
+              <span className="font-medium text-foreground">
+                {payTargetOrder.customerName || payTargetOrder.companyName || payTargetOrder.customerCompanyName || '—'}
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">Order Total:</span>
+              <span className="font-semibold text-foreground">
+                {formatNaira(toNumber(payTargetOrder.totalAmount))}
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">Wallet Balance:</span>
+              <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                {formatNaira(toNumber(payTargetOrder.customerBalance))}
+              </span>
+            </div>
+            <div className="flex items-center justify-between border-t border-foreground/10 pt-2 text-xs">
+              <span className="text-muted-foreground">Balance After Payment:</span>
+              <span className="font-semibold text-foreground">
+                {formatNaira(Math.max(0, toNumber(payTargetOrder.customerBalance) - toNumber(payTargetOrder.totalAmount)))}
+              </span>
+            </div>
+          </div>
+        )}
+      </ConfirmDialog>
 
       <OrderDetailsDialog
         order={detailsOrder}

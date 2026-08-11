@@ -136,7 +136,7 @@ export type PfiMovement = {
   created_at: string
 }
 
-export function usePfiList(params?: { search?: string; status?: string; location?: string }) {
+export function usePfiList(params?: { search?: string; status?: string; location?: string | number; page?: number; limit?: number }) {
   return useQuery({
     queryKey: ['pfis', params],
     queryFn: async () => {

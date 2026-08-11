@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Wallet } from 'lucide-react'
 import { format } from 'date-fns'
 
 import {
@@ -10,8 +10,8 @@ import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
 import { MICRO } from '#/lib/panel'
 import { cn } from '#/lib/utils'
-import { useUpdateOrder } from '#/lib/hooks/useOrders'
-import { formatNaira, formatQty, toNumber } from './-orders-utils'
+import { useUpdateOrder, usePayOrder } from '#/lib/hooks/useOrders'
+import { formatNaira, formatQty, toNumber, isOrderPayable } from './-orders-utils'
 import { OrderStatusBadge, PaymentBadge } from './-order-status'
 
 /** A label/value pair in the read-only detail grid. */
@@ -42,9 +42,19 @@ export function OrderDetailsDialog({
   open: boolean
   onOpenChange: (o: boolean) => void
 }) {
+  const payOrderMutation = usePayOrder()
   if (!order) return null
   const qty = toNumber(order.quantity)
   const unit = order.productUnit || 'L'
+
+  const handlePay = async () => {
+    try {
+      await payOrderMutation.mutateAsync(order.id ?? order._id)
+      onOpenChange(false)
+    } catch {
+      // Handled by usePayOrder toast
+    }
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -67,6 +77,9 @@ export function OrderDetailsDialog({
             <Row label="Phone" value={order.customerPhone} />
             <Row label="Email" value={order.customerEmail} />
             <Row label="Company" value={order.companyName || order.customerCompanyName} />
+            {order.customerBalance !== undefined && (
+              <Row label="Wallet balance" value={<span className="font-semibold text-emerald-600 dark:text-emerald-400">{formatNaira(toNumber(order.customerBalance))}</span>} />
+            )}
           </Section>
 
           <Section title="Order">
@@ -90,8 +103,18 @@ export function OrderDetailsDialog({
           )}
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
+        <DialogFooter className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={payOrderMutation.isPending}>Close</Button>
+          {isOrderPayable(order) && (
+            <Button
+              className="gap-1.5 bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 shadow-none cursor-pointer"
+              onClick={handlePay}
+              disabled={payOrderMutation.isPending}
+            >
+              {payOrderMutation.isPending ? <Loader2 className="size-4 animate-spin" /> : <Wallet className="size-4" />}
+              <span>{payOrderMutation.isPending ? 'Processing…' : 'Pay Now from Wallet'}</span>
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

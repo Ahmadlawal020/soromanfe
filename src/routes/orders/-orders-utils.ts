@@ -55,6 +55,23 @@ export const formatQty = (qty: number) => qty.toLocaleString('en-NG', { maximumF
 /** An order counts as paid when the gateway has confirmed it. */
 export const isPaid = (o: any) => String(o?.paymentStatus || '').toLowerCase() === 'paid'
 
+/**
+ * An order is payable (ready to be paid from wallet balance) when:
+ * 1. It is pending and unpaid
+ * 2. It has not expired
+ * 3. The customer's wallet balance covers the total order amount
+ */
+export function isOrderPayable(o: any): boolean {
+  if (!o) return false
+  if (isPaid(o)) return false
+  if (o.status !== 'Pending') return false
+  if (o.expiredAt && new Date(o.expiredAt).getTime() <= Date.now()) return false
+  const total = toNumber(o.totalAmount)
+  if (total <= 0) return false
+  const balance = toNumber(o.customerBalance)
+  return balance >= total
+}
+
 /** Groups rows by calendar day, preserving the incoming order. */
 export function groupByDay<T extends { createdAt?: string }>(rows: T[]) {
   const groups = new Map<string, T[]>()

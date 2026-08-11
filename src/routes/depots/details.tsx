@@ -756,7 +756,7 @@ function DepotDetailPage() {
       {/* Tab 2: Inventory & Pricing */}
       {activeTab === 'inventory' && (
         <div className="grid gap-6 md:grid-cols-2">
-          {/* Storage Capacities */}
+          {/* Storage Capacities & In-Stock */}
           <Card className="md:col-span-2">
             <CardHeader className="border-b border-border/50 pb-3">
               <div className="flex items-center gap-2">
@@ -764,8 +764,8 @@ function DepotDetailPage() {
                   <Warehouse className="size-4" />
                 </div>
                 <div>
-                  <CardTitle className="text-sm font-semibold">Storage Capacities by Product</CardTitle>
-                  <CardDescription className="text-xs">Holding capacity configuration for registered products</CardDescription>
+                  <CardTitle className="text-sm font-semibold">Product Storage Capacity & Active Stock</CardTitle>
+                  <CardDescription className="text-xs">Physical holding capacity vs current in-stock volume allocated from active PFIs</CardDescription>
                 </div>
               </div>
             </CardHeader>
@@ -778,16 +778,42 @@ function DepotDetailPage() {
                     const prodName = pc.product?.name || pc.productName || 'Unknown Product'
                     const prodSku = pc.product?.sku || pc.productSku || 'N/A'
                     const prodCat = pc.product?.category || pc.productCategory || 'N/A'
+                    const prodUnit = pc.product?.unit || 'Litres'
                     const prodId = pc.product?._id || pc.product?.id || pc.productId || String(pc.product || Math.random())
+                    const capacity = Number(pc.capacity || 0)
+                    const stock = Number(pc.availableStock ?? 0)
+                    const utilPct = capacity > 0 ? Math.min(100, Math.round((stock / capacity) * 100)) : 0
+
                     return (
-                      <div key={prodId} className="flex items-center justify-between p-4 border rounded-xl bg-card hover:border-primary/40 transition-colors duration-250 ease-luxe">
-                        <div>
-                          <p className="text-sm font-semibold text-foreground">{prodName}</p>
-                          <p className="text-xs text-muted-foreground font-mono mt-0.5">{prodSku} &bull; {prodCat}</p>
+                      <div key={prodId} className="flex flex-col justify-between p-4 border rounded-xl bg-card hover:border-primary/40 transition-colors duration-250 ease-luxe space-y-3">
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <p className="text-sm font-semibold text-foreground">{prodName}</p>
+                            <p className="text-xs text-muted-foreground font-mono mt-0.5">{prodSku} &bull; {prodCat}</p>
+                          </div>
+                          <Badge variant={stock > 0 ? 'default' : 'secondary'} className="text-xs font-mono font-semibold">
+                            {stock > 0 ? `${stock.toLocaleString()} L In Stock` : 'Out of Stock'}
+                          </Badge>
                         </div>
-                        <Badge variant="outline" className="font-mono text-sm font-semibold bg-secondary px-3 py-1">
-                          {(pc.capacity || 0).toLocaleString()} Units
-                        </Badge>
+
+                        <div className="space-y-1.5 pt-2 border-t text-xs">
+                          <div className="flex justify-between text-muted-foreground">
+                            <span>In Stock (PFI):</span>
+                            <span className={`font-semibold ${stock > 0 ? 'text-foreground' : 'text-destructive'}`}>
+                              {stock.toLocaleString()} {prodUnit}
+                            </span>
+                          </div>
+                          <div className="flex justify-between text-muted-foreground">
+                            <span>Max Tank Capacity:</span>
+                            <span className="font-mono text-foreground">{capacity.toLocaleString()} {prodUnit}</span>
+                          </div>
+                          <div className="h-1.5 bg-muted rounded-full overflow-hidden w-full mt-1">
+                            <div
+                              className={`h-full rounded-full transition-all ${utilPct > 80 ? 'bg-primary' : utilPct > 20 ? 'bg-accent' : 'bg-warning'}`}
+                              style={{ width: `${utilPct}%` }}
+                            />
+                          </div>
+                        </div>
                       </div>
                     )
                   })}

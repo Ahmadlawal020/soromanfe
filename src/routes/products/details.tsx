@@ -181,7 +181,8 @@ function ProductDetailPage() {
             code: d.code,
             city: d.city,
             state: d.state,
-            capacity: capInfo ? capInfo.capacity : 0,
+            capacity: capInfo ? (capInfo.capacity || 0) : 0,
+            availableStock: capInfo ? (capInfo.availableStock ?? 0) : 0,
             price: priceInfo ? priceInfo.currentPrice : null,
             rawDepot: d,
           };
@@ -196,7 +197,7 @@ function ProductDetailPage() {
                 </div>
                 <div>
                   <CardTitle className="text-sm">Supporting Depots & Pricing</CardTitle>
-                  <p className="text-xs text-muted-foreground">Depot allocation, storage capacity, and regional prices</p>
+                  <p className="text-xs text-muted-foreground">Depot allocation, active PFI stock, storage capacity, and regional prices</p>
                 </div>
               </div>
             </CardHeader>
@@ -212,6 +213,7 @@ function ProductDetailPage() {
                       <tr>
                         <th className="px-6 py-3 font-semibold">Depot Name</th>
                         <th className="px-6 py-3 font-semibold">Location</th>
+                        <th className="px-6 py-3 font-semibold text-right">In Stock (PFI)</th>
                         <th className="px-6 py-3 font-semibold text-right">Storage Capacity</th>
                         <th className="px-6 py-3 font-semibold text-right">Current Price</th>
                       </tr>
@@ -231,7 +233,12 @@ function ProductDetailPage() {
                           <td className="px-6 py-4 text-muted-foreground">
                             {depot.city}, {depot.state}
                           </td>
-                          <td className="px-6 py-4 text-right font-mono text-foreground font-normal">
+                          <td className="px-6 py-4 text-right font-mono">
+                            <span className={depot.availableStock > 0 ? 'text-accent font-semibold' : 'text-muted-foreground'}>
+                              {depot.availableStock.toLocaleString()} {getUnitAbbreviation(product.unit)}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-right font-mono text-muted-foreground">
                             {depot.capacity.toLocaleString()} {getUnitAbbreviation(product.unit)}
                           </td>
                           <td className="px-6 py-4 text-right font-mono font-semibold text-foreground">

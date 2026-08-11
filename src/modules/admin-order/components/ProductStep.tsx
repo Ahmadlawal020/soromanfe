@@ -24,15 +24,19 @@ export function ProductStep({ wizard }: ProductStepProps) {
   const qty = Number(orderQuantity || 0)
   const total = selectedProduct ? qty * selectedProduct.currentPrice : 0
 
-  const stockFor = (entry: any) =>
-    selectedDepot?.productCapacities?.find(
-      (c: any) => (c.product?._id || c.product?.id) === (entry.product?._id || entry.product?.id),
-    )?.capacity ?? 0
+  const stockFor = (entry: any) => {
+    const pId = entry.product?._id || entry.product?.id || entry.productId
+    const match = selectedDepot?.productCapacities?.find(
+      (c: any) => String(c.product?._id || c.product?.id || c.productId) === String(pId)
+    )
+    return Number(match?.availableStock ?? 0)
+  }
 
   const stock = selectedProduct ? stockFor(selectedProduct) : 0
+  const isOutOfStock = stock <= 0
   // The wizard's own validation refuses to advance past this, so the warning
   // says blocked rather than merely discouraged.
-  const overStock = qty > 0 && stock > 0 && qty > stock
+  const overStock = qty > 0 && (isOutOfStock || qty > stock)
 
   if (prices.length === 0) {
     return (
@@ -69,8 +73,12 @@ export function ProductStep({ wizard }: ProductStepProps) {
                 <>
                   <ChoiceMeta
                     label="In stock"
-                    value={`${remaining.toLocaleString()} ${entry.product?.unit || 'L'}`}
-                    tone={remaining === 0 ? 'text-muted-foreground' : undefined}
+                    value={
+                      remaining > 0
+                        ? `${remaining.toLocaleString()} ${entry.product?.unit || 'L'}`
+                        : '0 (No active PFI)'
+                    }
+                    tone={remaining === 0 ? 'text-destructive' : undefined}
                   />
                   <ChoiceMeta
                     label="Unit price"
@@ -120,10 +128,12 @@ export function ProductStep({ wizard }: ProductStepProps) {
             </div>
           </div>
 
-          <p className={cn('text-xs', overStock ? 'text-warning' : 'text-muted-foreground')}>
-            {overStock
-              ? `Only ${stock.toLocaleString()} ${unit} in stock at ${selectedDepot?.name} — reduce the quantity to continue.`
-              : `${stock.toLocaleString()} ${unit} available at ${selectedDepot?.name}.`}
+          <p className={cn('text-xs', isOutOfStock ? 'text-destructive' : overStock ? 'text-warning' : 'text-muted-foreground')}>
+            {isOutOfStock
+              ? `This product is out of stock at ${selectedDepot?.name} (no active PFI stock assigned).`
+              : overStock
+              ? `Only ${stock.toLocaleString()} ${unit} in stock (from assigned PFIs) at ${selectedDepot?.name} — reduce the quantity to continue.`
+              : `${stock.toLocaleString()} ${unit} available in stock (from assigned PFIs) at ${selectedDepot?.name}.`}
           </p>
         </div>
       )}

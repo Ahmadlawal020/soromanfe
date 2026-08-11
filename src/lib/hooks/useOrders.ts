@@ -161,7 +161,7 @@ export function usePayOrder() {
 
   return useMutation({
     retry: false,
-    mutationFn: async (orderId: number) => {
+    mutationFn: async (orderId: number | string) => {
       const res = await api.post(`/orders/${orderId}/pay`)
       return res.data
     },

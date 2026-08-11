@@ -428,7 +428,7 @@ function DangoteOrderDetails() {
             </div>
             <div>
               <CardTitle className="text-sm">Payment Information</CardTitle>
-              <CardDescription className="text-xs">Dedicated virtual account and payment status</CardDescription>
+              <CardDescription className="text-xs">Payment bank account details and payment status</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -437,32 +437,34 @@ function DangoteOrderDetails() {
             <span className="text-sm text-muted-foreground">Payment Status</span>
             {paymentStatusBadge(request.paymentStatus)}
           </div>
-          {request.virtualAccountNumber && (
+          {(request.accountNumber || request.virtualAccountNumber || request.bankName || request.virtualAccountBank) && (
             <>
               <div>
                 <p className="text-xs text-muted-foreground font-normal uppercase">Bank</p>
-                <p className="text-sm font-semibold text-foreground mt-0.5">{request.virtualAccountBank || 'N/A'}</p>
+                <p className="text-sm font-semibold text-foreground mt-0.5">{request.bankName || request.virtualAccountBank || 'N/A'}</p>
               </div>
               <div>
                 <p className="text-xs text-muted-foreground font-normal uppercase">Account Number</p>
                 <div className="flex items-center gap-2 mt-0.5">
-                  <p className="text-lg font-semibold font-mono text-foreground">{request.virtualAccountNumber}</p>
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(request.virtualAccountNumber)
-                      setCopied(true)
-                      setTimeout(() => setCopied(false), 2000)
-                    }}
-                    className="size-7 rounded-md border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors duration-250 ease-luxe"
-                    title="Copy account number"
-                  >
-                    {copied ? <CheckCircle className="size-3.5 text-success" /> : <Copy className="size-3.5" />}
-                  </button>
+                  <p className="text-lg font-semibold font-mono text-foreground">{request.accountNumber || request.virtualAccountNumber}</p>
+                  {(request.accountNumber || request.virtualAccountNumber) && (
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(request.accountNumber || request.virtualAccountNumber)
+                        setCopied(true)
+                        setTimeout(() => setCopied(false), 2000)
+                      }}
+                      className="size-7 rounded-md border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors duration-250 ease-luxe"
+                      title="Copy account number"
+                    >
+                      {copied ? <CheckCircle className="size-3.5 text-success" /> : <Copy className="size-3.5" />}
+                    </button>
+                  )}
                 </div>
               </div>
               <div>
                 <p className="text-xs text-muted-foreground font-normal uppercase">Account Name</p>
-                <p className="text-sm font-semibold text-foreground mt-0.5">{request.virtualAccountName || formatAccountName(request.customerName)}</p>
+                <p className="text-sm font-semibold text-foreground mt-0.5">{request.accountName || request.virtualAccountName || formatAccountName(request.customerName)}</p>
               </div>
             </>
           )}

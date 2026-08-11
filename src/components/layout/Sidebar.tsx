@@ -61,10 +61,10 @@ const navCategories: NavCategory[] = [
       // Two role-specific order views. Both are titled "Orders" upstream;
       // named for their audience here so a SuperAdmin, who sees both, can
       // tell them apart.
-      { title: "Marketing Orders", icon: ShoppingBag, path: "/sales-manager-view" },
-      { title: "Location Orders", icon: ShoppingBag, path: "/product-manager-view" },
+      // { title: "Marketing Orders", icon: ShoppingBag, path: "/sales-manager-view" },
+      // { title: "Location Orders", icon: ShoppingBag, path: "/product-manager-view" },
       { title: "Our Customers", icon: Building2, path: "/customers" },
-      { title: "Customer Desk", icon: Contact, path: "/customer-desk" },
+      // { title: "Customer Desk", icon: Contact, path: "/customer-desk" },
     ],
   },
   {
@@ -85,11 +85,11 @@ const navCategories: NavCategory[] = [
   {
     category: "Finance",
     items: [
-      { title: "Verify Payments", icon: ShieldCheck, path: "/payment-verify" },
-      { title: "Finance Report", icon: FileSpreadsheet, path: "/confirmed-payments" },
+      // { title: "Verify Payments", icon: ShieldCheck, path: "/payment-verify" },
+      // { title: "Finance Report", icon: FileSpreadsheet, path: "/confirmed-payments" },
       { title: "Deposits", icon: Receipt, path: "/deposits" },
-      { title: "Overpayment Refunds", icon: DollarSign, path: "/overpayment-refunds" },
-      { title: "Transfer Requests", icon: DollarSign, path: "/overpayment-requests" },
+      // { title: "Overpayment Refunds", icon: DollarSign, path: "/overpayment-refunds" },
+      // { title: "Transfer Requests", icon: DollarSign, path: "/overpayment-requests" },
       { title: "Customer Commissions", icon: DollarSign, path: "/commissions" },
       { title: "Commission Rates", icon: Percent, path: "/commission-rates" },
       { title: "Bank Accounts", icon: Landmark, path: "/bank-accounts" },
@@ -133,7 +133,7 @@ const navCategories: NavCategory[] = [
   {
     category: "Truck Sales",
     items: [
-      { title: "Delivery Inventory", icon: Package, path: "/delivery-inventory" },
+      // { title: "Delivery Inventory", icon: Package, path: "/delivery-inventory" },
       { title: "Delivery Operations", icon: Truck, path: "/delivery-operations" },
       { title: "Delivery Customers", icon: Users, path: "/delivery-customer" },
       { title: "Sales Ledger", icon: BarChart3, path: "/sales-ledger" },
@@ -143,14 +143,14 @@ const navCategories: NavCategory[] = [
   {
     category: "Admin",
     items: [
-      { title: "Reports Hub", icon: FileSpreadsheet, path: "/admin-reports" },
-      { title: "Messaging", icon: FileText, path: "/messaging" },
-      { title: "Assign PFI", icon: FileText, path: "/orders-pfi" },
+      // { title: "Reports Hub", icon: FileSpreadsheet, path: "/admin-reports" },
+      // { title: "Messaging", icon: FileText, path: "/messaging" },
+      // { title: "Assign PFI", icon: FileText, path: "/orders-pfi" },
       { title: "Product Pricing", icon: Fuel, path: "/product-pricing" },
       { title: "PFI Tracking", icon: FileText, path: "/pfi" },
       { title: "Expenses", icon: Receipt, path: "/expenses" },
-      { title: "Stock Management", icon: Package, path: "/inventory" },
-      { title: "Users Log", icon: ClipboardList, path: "/order-audit" },
+      // { title: "Stock Management", icon: Package, path: "/inventory" },
+      // { title: "Users Log", icon: ClipboardList, path: "/order-audit" },
       { title: "Manage Users", icon: Users, path: "/admin" },
       { title: "Licence Verification", icon: ShieldCheck, path: "/licence-verification" },
     ],

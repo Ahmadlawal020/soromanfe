@@ -535,8 +535,10 @@ function DepotForm() {
           <div className="flex items-center space-x-2 border-b pb-3">
             <Layers className="size-5 text-primary" />
             <div>
-              <h2 className="text-lg font-normal">Product Holding Capacities*</h2>
-              <p className="text-xs text-muted-foreground">Map products directly from the database to their storage capacities at this depot (at least 1 required)</p>
+              <h2 className="text-lg font-normal">Product Holding Capacities (Tank Storage Limits)*</h2>
+              <p className="text-xs text-muted-foreground">
+                Define the physical tank storage limits for each product at this depot. Actual in-stock inventory is allocated separately by assigning PFIs to the depot. (At least 1 required)
+              </p>
               {errors.productCapacities && <p className="text-sm text-destructive flex items-center gap-1.5 mt-1.5"><AlertCircle className="size-3.5" />{errors.productCapacities}</p>}
             </div>
           </div>
@@ -565,8 +567,8 @@ function DepotForm() {
               </Select>
             </div>
 
-            <div className="w-full sm:w-[200px] space-y-2">
-              <Label>Capacity (Liters / Units)</Label>
+            <div className="w-full sm:w-[220px] space-y-2">
+              <Label>Max Tank Capacity (Liters / Units)</Label>
               <Input
                 type="number"
                 min="1"
@@ -574,14 +576,14 @@ function DepotForm() {
                 value={productCapacityVal}
                 onChange={(e) => setProductCapacityVal(e.target.value)}
                 className="bg-background"
- />
+              />
             </div>
 
             <Button
               type="button"
               onClick={handleAddProductCapacity}
               className="w-full sm:w-auto"
- >
+            >
               <Plus className="size-4 mr-2" /> Add Capacity
             </Button>
           </div>
@@ -603,7 +605,7 @@ function DepotForm() {
                       </div>
                       <div className="flex items-center gap-4">
                         <span className="text-sm font-mono font-semibold bg-secondary px-2.5 py-1 rounded">
-                          {pc.capacity.toLocaleString()} Max Units
+                          {pc.capacity.toLocaleString()} Max Capacity
                         </span>
                         <Button
                           type="button"
@@ -611,7 +613,7 @@ function DepotForm() {
                           size="icon"
                           className="text-destructive hover:bg-destructive/10 hover:text-destructive size-8"
                           onClick={() => handleRemoveProductCapacity(pId)}
- >
+                        >
                           <Trash2 className="size-4" />
                         </Button>
                       </div>

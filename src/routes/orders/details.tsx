@@ -8,13 +8,14 @@ import { Input } from '#/components/ui/input'
 import {
   ArrowLeft, Loader2, AlertCircle, ShoppingBag,
   User, Warehouse, Package, MapPin,
-  Calendar, Info, Phone, Mail, Building2, Truck, FileCheck, Banknote, Copy, CheckCircle, Ticket as TicketIcon, XCircle, Hourglass, Plus, RefreshCw, Send
+  Calendar, Info, Phone, Mail, Building2, Truck, FileCheck, Banknote, Copy, CheckCircle, Ticket as TicketIcon, XCircle, Hourglass, Plus, RefreshCw, Send, Wallet,
 } from 'lucide-react'
-import { useOrderDetails, useReleaseOrder, useCancelOrder } from '#/lib/hooks/useOrders'
+import { useOrderDetails, useReleaseOrder, useCancelOrder, usePayOrder } from '#/lib/hooks/useOrders'
 import { OrderStatusBadge } from './-order-status'
 import { Breadcrumbs } from '#/components/Breadcrumbs'
 import { ConfirmDialog } from '#/components/ConfirmDialog'
 import { OrderExpiryBadge } from './-order-expiry'
+import { isOrderPayable } from './-orders-utils'
 import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/orders/details')({
@@ -53,12 +54,20 @@ function RouteComponent() {
   const [copied, setCopied] = useState(false)
   const releaseMutation = useReleaseOrder()
   const cancelMutation = useCancelOrder()
+  const payMutation = usePayOrder()
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [showCancelDialog, setShowCancelDialog] = useState(false)
+  const [showPayConfirmDialog, setShowPayConfirmDialog] = useState(false)
   const [cancelReason, setCancelReason] = useState('')
 
   const handleBack = () => {
     window.history.length > 1 ? window.history.back() : navigate({ to: '/orders/' as any })
+  }
+
+  const handlePayOrder = async () => {
+    if (!order) return
+    await payMutation.mutateAsync(order._id || order.id)
+    setShowPayConfirmDialog(false)
   }
 
   const handleUpdateStatus = () => {
@@ -466,6 +475,16 @@ function RouteComponent() {
           <CardDescription className="text-xs">Update order status or view generated pickup tickets.</CardDescription>
         </CardHeader>
         <CardContent className="pt-6 flex flex-wrap gap-4 items-center">
+          {isOrderPayable(order) && (
+            <Button
+              className="bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 cursor-pointer shadow-none"
+              onClick={() => setShowPayConfirmDialog(true)}
+              disabled={payMutation.isPending}
+            >
+              <Wallet className="size-4 mr-2" /> Pay Now from Wallet
+            </Button>
+          )}
+
           {order.status === 'Paid' && order.deliveryType === 'pickup' && (
             <Button
               className="bg-info text-info-foreground hover:bg-info/90 cursor-pointer"
@@ -523,6 +542,43 @@ function RouteComponent() {
           )}
         </CardContent>
       </Card>
+
+      <ConfirmDialog
+        open={showPayConfirmDialog}
+        onOpenChange={setShowPayConfirmDialog}
+        title={`Pay Order ${order.orderNumber || ''}`}
+        description="Process payment directly from the customer's available wallet balance."
+        confirmLabel="Confirm & Pay"
+        onConfirm={handlePayOrder}
+        loading={payMutation.isPending}
+      >
+        <div className="my-2 space-y-3 rounded-lg border border-foreground/10 bg-muted/30 p-3.5 text-sm">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-muted-foreground">Customer:</span>
+            <span className="font-medium text-foreground">
+              {order.customerName || order.companyName || order.customerCompanyName || '—'}
+            </span>
+          </div>
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-muted-foreground">Order Total:</span>
+            <span className="font-semibold text-foreground">
+              {formatCurrency(toNum(order.totalAmount))}
+            </span>
+          </div>
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-muted-foreground">Wallet Balance:</span>
+            <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+              {formatCurrency(toNum(order.customerBalance))}
+            </span>
+          </div>
+          <div className="flex items-center justify-between border-t border-foreground/10 pt-2 text-xs">
+            <span className="text-muted-foreground">Balance After Payment:</span>
+            <span className="font-semibold text-foreground">
+              {formatCurrency(Math.max(0, toNum(order.customerBalance) - toNum(order.totalAmount)))}
+            </span>
+          </div>
+        </div>
+      </ConfirmDialog>
 
       <ConfirmDialog
         open={showConfirmDialog}

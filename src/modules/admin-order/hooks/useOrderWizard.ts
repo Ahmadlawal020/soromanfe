@@ -142,11 +142,15 @@ export function useOrderWizard() {
       if (!selectedProduct) errs.push('Please select a product')
       if (!orderQuantity || Number(orderQuantity) <= 0) errs.push('Please enter a valid quantity')
       if (selectedProduct && orderQuantity && Number(orderQuantity) > 0) {
+        const prodKey = selectedProduct.product?._id || selectedProduct.product?.id || selectedProduct.productId
         const capacityEntry = selectedDepot?.productCapacities?.find(
-          (pc: any) => (pc.product?._id || pc.product?.id) === (selectedProduct.product?._id || selectedProduct.product?.id)
+          (pc: any) => String(pc.product?._id || pc.product?.id || pc.productId) === String(prodKey)
         )
-        if (capacityEntry && capacityEntry.capacity < Number(orderQuantity)) {
-          errs.push(`Insufficient capacity. Available: ${capacityEntry.capacity.toLocaleString()} ${selectedProduct.product?.unit || 'Liters'}`)
+        const availableStock = Number(capacityEntry?.availableStock ?? 0)
+        if (availableStock <= 0) {
+          errs.push(`This product is currently out of stock at ${selectedDepot?.name || 'this depot'} (no active PFI stock assigned).`)
+        } else if (Number(orderQuantity) > availableStock) {
+          errs.push(`Insufficient stock. Only ${availableStock.toLocaleString()} ${selectedProduct.product?.unit || 'Liters'} available in stock from assigned PFIs.`)
         }
       }
       return errs

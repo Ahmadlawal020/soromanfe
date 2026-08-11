@@ -8,10 +8,18 @@ import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
 import { CommaInput } from '#/components/ui/comma-input'
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '#/components/ui/select'
+import {
   ArrowLeft, Package, MapPin, Truck, DollarSign, Calendar, Clock, CheckCircle, XCircle,
-  User, FileText, Mail, Phone, ShieldPlus, AlertTriangle, Hourglass,
+  User, FileText, Mail, Phone, ShieldPlus, AlertTriangle, Hourglass, Landmark, Copy,
 } from 'lucide-react'
 import { useDangoteOrderRequestDetails, useReviewDangoteOrderRequest } from '#/lib/hooks/useDangoteOrders'
+import { useBankAccounts } from '#/lib/hooks/useBankAccounts'
 import { PageLoader } from '#/components/PageLoader'
 import { PageError } from '#/components/PageError'
 import { Breadcrumbs } from '#/components/Breadcrumbs'
@@ -79,15 +87,29 @@ function ReviewPage() {
 
   const { data: request, isLoading, isError, error, refetch } = useDangoteOrderRequestDetails(id)
   const reviewMutation = useReviewDangoteOrderRequest()
+  const { data: bankAccounts = [] } = useBankAccounts({ status: 'Active' })
 
   const [pricePerUnit, setPricePerUnit] = useState('')
   const [deliveryPrice, setDeliveryPrice] = useState('')
   const [expectedDate, setExpectedDate] = useState('')
+  const [bankName, setBankName] = useState('')
+  const [accountName, setAccountName] = useState('')
+  const [accountNumber, setAccountNumber] = useState('')
+  const [copied, setCopied] = useState(false)
   const [showApproveConfirm, setShowApproveConfirm] = useState(false)
   const [showRejectConfirm, setShowRejectConfirm] = useState(false)
 
+  const handleSelectBankPreset = (bankId: string) => {
+    const selected = bankAccounts.find((b) => String(b.id) === bankId)
+    if (selected) {
+      setBankName(selected.bankName || '')
+      setAccountName(selected.accountName || '')
+      setAccountNumber(selected.accountNumber || '')
+    }
+  }
+
   const handleApprove = async () => {
-    if (!request || !pricePerUnit) return
+    if (!request || !pricePerUnit || !bankName.trim() || !accountName.trim() || !accountNumber.trim()) return
     try {
       await reviewMutation.mutateAsync({
         id: request.id,
@@ -95,6 +117,9 @@ function ReviewPage() {
           pricePerUnit: parseFloat(pricePerUnit) || 0,
           deliveryPrice: parseFloat(deliveryPrice) || 0,
           expectedArrivalDate: expectedDate || new Date(Date.now() + 3 * 86400000).toISOString().split('T')[0],
+          bankName: bankName.trim(),
+          accountName: accountName.trim(),
+          accountNumber: accountNumber.trim(),
           action: 'approve',
         },
       })
@@ -141,6 +166,11 @@ function ReviewPage() {
   const reviewerName = [request.reviewerFirstName, request.reviewerSurname].filter(Boolean).join(' ') || 'N/A'
   const hasLicense = !!request.licenseId
   const licenseApproved = !hasLicense || request.licenseStatus === 'approved'
+  const isApproveReady = !!pricePerUnit && !!bankName.trim() && !!accountName.trim() && !!accountNumber.trim() && licenseApproved
+
+  const displayBankName = request.bankName || request.virtualAccountBank || ''
+  const displayAccountNumber = request.accountNumber || request.virtualAccountNumber || ''
+  const displayAccountName = request.accountName || request.virtualAccountName || ''
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -151,15 +181,15 @@ function ReviewPage() {
 
       {/* Header */}
       <PageHeader
-      eyebrow="Dangote Delivery"
-      title="Review Delivery Order Request"
-      description={`{request.requestNumber}`}
-      actions={
-        <>
-          {statusBadge(request.status)}
-        </>
-      }
-    />
+        eyebrow="Dangote Delivery"
+        title="Review Delivery Order Request"
+        description={request.requestNumber}
+        actions={
+          <>
+            {statusBadge(request.status)}
+          </>
+        }
+      />
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Request Details */}
@@ -287,7 +317,7 @@ function ReviewPage() {
               <div>
                 <CardTitle className="text-sm">Pricing & Approval</CardTitle>
                 <CardDescription className="text-xs">
-                  {request.status === 'Pending Review' ? 'Set pricing and approve or reject this request' : 'Review details and outcome'}
+                  {request.status === 'Pending Review' ? 'Set pricing, bank account details, and approve or reject this request' : 'Review details and outcome'}
                 </CardDescription>
               </div>
             </div>
@@ -327,6 +357,62 @@ function ReviewPage() {
                     value={expectedDate}
                     onChange={(e) => setExpectedDate(e.target.value)}
                   />
+                </div>
+
+                {/* Bank Account Details */}
+                <div className="pt-3 border-t border-border space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Landmark className="size-4 text-primary" />
+                    <span className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">Payment Receiving Account</span>
+                  </div>
+
+                  {bankAccounts.length > 0 && (
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Select from active bank accounts (optional)</Label>
+                      <Select onValueChange={handleSelectBankPreset}>
+                        <SelectTrigger className="h-9 mt-1">
+                          <SelectValue placeholder="Choose a preset bank account..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {bankAccounts.map((b) => (
+                            <SelectItem key={b.id} value={String(b.id)}>
+                              {b.bankName} - {b.accountNumber} ({b.accountName})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div>
+                      <Label className="text-xs">Bank Name *</Label>
+                      <Input
+                        placeholder="e.g. Zenith Bank"
+                        className="h-9 mt-1"
+                        value={bankName}
+                        onChange={(e) => setBankName(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs">Account Number *</Label>
+                      <Input
+                        placeholder="e.g. 1012345678"
+                        className="h-9 mt-1 font-mono"
+                        value={accountNumber}
+                        onChange={(e) => setAccountNumber(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-xs">Account Name *</Label>
+                    <Input
+                      placeholder="e.g. Soroman Nigeria Ltd"
+                      className="h-9 mt-1"
+                      value={accountName}
+                      onChange={(e) => setAccountName(e.target.value)}
+                    />
+                  </div>
                 </div>
 
                 {/* Computed Total */}
@@ -373,7 +459,7 @@ function ReviewPage() {
                   <Button
                     className="flex-1 gap-2"
                     onClick={() => setShowApproveConfirm(true)}
-                    disabled={!pricePerUnit || !licenseApproved || reviewMutation.isPending}
+                    disabled={!isApproveReady || reviewMutation.isPending}
                   >
                     <CheckCircle className="size-4" />
                     Approve Request
@@ -416,6 +502,45 @@ function ReviewPage() {
                       <span className="font-normal">{formatDate(request.reviewedAt)}</span>
                     </div>
                   )}
+
+                  {/* Payment Bank Details */}
+                  {(displayBankName || displayAccountNumber) && (
+                    <div className="mt-4 pt-4 border-t border-border space-y-3 rounded-lg bg-muted/40 p-3">
+                      <div className="flex items-center gap-2">
+                        <Landmark className="size-4 text-primary" />
+                        <span className="text-xs font-semibold uppercase text-muted-foreground">Payment Account Details</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Bank</span>
+                        <span className="font-semibold text-foreground">{displayBankName || 'N/A'}</span>
+                      </div>
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-muted-foreground">Account Number</span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono font-semibold text-foreground">{displayAccountNumber}</span>
+                          {displayAccountNumber && (
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(displayAccountNumber)
+                                setCopied(true)
+                                setTimeout(() => setCopied(false), 2000)
+                              }}
+                              className="size-6 rounded border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                              title="Copy account number"
+                            >
+                              {copied ? <CheckCircle className="size-3 text-success" /> : <Copy className="size-3" />}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                      {displayAccountName && (
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Account Name</span>
+                          <span className="font-semibold text-foreground">{displayAccountName}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 <div className="pt-4">
@@ -441,7 +566,11 @@ function ReviewPage() {
           `Product: ${request.product}\n` +
           `Quantity: ${Number(request.quantity).toLocaleString()} ${request.quantityUnit}\n` +
           `Total: ${formatCurrency(computedTotal)}\n\n` +
-          `A confirmation email will be sent to the customer.`
+          `Payment Account:\n` +
+          `Bank: ${bankName.trim()}\n` +
+          `Account Number: ${accountNumber.trim()}\n` +
+          `Account Name: ${accountName.trim()}\n\n` +
+          `A confirmation email and SMS will be sent to the customer with these payment details.`
         }
         confirmLabel="Approve & Send Confirmation"
         onConfirm={handleApprove}

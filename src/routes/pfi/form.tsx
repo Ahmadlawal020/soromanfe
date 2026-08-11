@@ -10,6 +10,7 @@ import { useCreatePfi, useDepotsForFilter, useUpdatePfi } from '#/lib/hooks/useP
 import { useProductList } from '#/lib/hooks/useProducts'
 import { useAdminList } from '#/lib/hooks/useAdmin'
 import { routeGuard } from '#/lib/route-guard'
+import { getErrorMessage } from '#/lib/utils'
 
 export const Route = createFileRoute('/pfi/form')({
   beforeLoad: () => routeGuard('/pfi'),
@@ -164,7 +165,7 @@ function PFIForm() {
       }
       setSubmitted(true)
     } catch (err: any) {
-      setError(err?.response?.data?.message || err.message || 'Failed to save PFI details')
+      setError(getErrorMessage(err) || 'Failed to save PFI details')
     } finally {
       setIsSubmitting(false)
     }
