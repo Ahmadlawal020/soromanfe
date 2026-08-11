@@ -6,6 +6,7 @@ import {
   Package, CheckCircle2, Clock, DollarSign, Droplets, Truck, Hourglass,
   Search, Plus, X, RefreshCw, FileSpreadsheet, FileText, Eye, Pencil,
   Wallet,
+  Trash2,
 } from 'lucide-react'
 
 import { Button } from '#/components/ui/button'
@@ -33,6 +34,11 @@ import {
 } from './-orders-utils'
 import { OrderStatusBadge } from './-order-status'
 import { OrderExpiryBadge } from './-order-expiry'
+import { useDeleteOrder } from '#/lib/hooks/useOrders'
+import { useRoles } from '#/lib/hooks/useRoles'
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+} from '#/components/ui/dialog'
 import { OrderDetailsDialog, OrderEditDialog } from './-order-dialogs'
 import { exportOrdersExcel, exportOrdersPdf } from './-order-exports'
 
@@ -77,6 +83,13 @@ function OrdersDashboard() {
    * which meant guessing which screen an order was on; it is a filter here so
    * there is one register and one place to look.
    */
+  const deleteOrderMutation = useDeleteOrder()
+  // Deleting an order destroys its payment trail, so the server restricts it
+  // to super_admin; the button follows the same rule rather than offering
+  // something that will 403.
+  const { isSuperAdmin: canDelete } = useRoles()
+  const [deleteTarget, setDeleteTarget] = useState<any>(null)
+
   const [payableOnly, setPayableOnly] = useState(() => {
     // TanStack serialises search values as JSON, so an incoming ?payable=1
     // can arrive as "1" with the quotes. Strip them before comparing.
@@ -509,6 +522,17 @@ function OrdersDashboard() {
                                     <Eye />
                                     <span className="sr-only">View {o.orderNumber}</span>
                                   </Button>
+                                  {canDelete && (
+                                    <Button
+                                      variant="ghost"
+                                      size="icon-sm"
+                                      className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                                      onClick={() => setDeleteTarget(o)}
+                                    >
+                                      <Trash2 />
+                                      <span className="sr-only">Delete {o.orderNumber}</span>
+                                    </Button>
+                                  )}
                                   <Button variant="ghost" size="icon-sm" onClick={() => setEditOrder(o)}>
                                     <Pencil />
                                     <span className="sr-only">Edit {o.orderNumber}</span>
@@ -605,6 +629,44 @@ function OrdersDashboard() {
         open={editOrder !== null}
         onOpenChange={(o) => { if (!o) setEditOrder(null) }}
       />
+      {/* Names what goes with it. This is not a cancel — nothing is recoverable
+          afterwards except the audit entry. */}
+      <Dialog open={deleteTarget != null} onOpenChange={(open: boolean) => !open && setDeleteTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete {deleteTarget?.orderNumber}?</DialogTitle>
+            <DialogDescription>
+              <span className="block space-y-2">
+                <span className="block">
+                  This permanently removes the order and everything attached to it — its
+                  tickets, allocated trucks, commissions, wallet holds and stock movements.
+                </span>
+                {deleteTarget?.paymentStatus === 'Paid' && (
+                  <span className="mt-2 block rounded-lg border border-destructive/25 bg-destructive/5 p-2.5 text-destructive">
+                    This order is paid. Deleting it also removes its payment trail, so any
+                    wallet debit behind it can no longer be reconciled.
+                  </span>
+                )}
+                <span className="block">Only the audit entry survives. This cannot be undone.</span>
+              </span>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteTarget(null)}>Keep it</Button>
+            <Button
+              variant="destructive"
+              disabled={deleteOrderMutation.isPending}
+              onClick={async () => {
+                await deleteOrderMutation.mutateAsync(deleteTarget.id ?? deleteTarget._id)
+                setDeleteTarget(null)
+              }}
+            >
+              Delete permanently
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
     </div>
   )
 }
