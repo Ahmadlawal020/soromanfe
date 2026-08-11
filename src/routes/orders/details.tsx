@@ -514,7 +514,7 @@ function RouteComponent() {
               variant="outline"
               className="border-primary text-primary hover:bg-primary/10 cursor-pointer"
               onClick={() => {
-                const suffix = order.orderNumber.replace("ORD-", "")
+                const suffix = order.id || order.orderNumber.replace(/^.*[\/]/, "")
                 navigate({ to: '/ticket/details' as any, search: { id: `TCK-${suffix}` } as any })
               }}
             >
