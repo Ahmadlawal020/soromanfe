@@ -8,14 +8,19 @@ import {
   ArrowLeft, AlertCircle, Package, MapPin,
   Calendar, Phone, Mail, Building2, Truck, FileCheck,
   Banknote, Copy, CheckCircle, Clock, XCircle, User, CircleDollarSign,
-  ShieldPlus, FileText, Hourglass,
+  ShieldPlus, FileText, Hourglass, Wallet,
 } from 'lucide-react'
-import { useDangoteOrderRequestDetails, useUpdateDangoteOrderCollectionStatus } from '#/lib/hooks/useDangoteOrders'
+import {
+  useDangoteOrderRequestDetails,
+  useUpdateDangoteOrderCollectionStatus,
+  usePayDangoteOrder,
+} from '#/lib/hooks/useDangoteOrders'
 import { Breadcrumbs } from '#/components/Breadcrumbs'
 import { ConfirmDialog } from '#/components/ConfirmDialog'
 import { PageLoader } from '#/components/PageLoader'
 import { PageError } from '#/components/PageError'
 import { routeGuard } from '#/lib/route-guard'
+import { isDangoteOrderPayable, formatCurrency } from './-dangote-orders-utils'
 
 export const Route = createFileRoute('/dangote-orders/details')({
   beforeLoad: () => routeGuard('/dangote-orders'),
@@ -24,10 +29,6 @@ export const Route = createFileRoute('/dangote-orders/details')({
   }),
   component: DangoteOrderDetails,
 })
-
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 2 }).format(value)
-}
 
 function formatAccountName(name?: string) {
   if (!name) return 'N/A'
@@ -112,9 +113,11 @@ function DangoteOrderDetails() {
 
   const { data: request, isLoading, isError, error, refetch } = useDangoteOrderRequestDetails(id)
   const updateCollectionMutation = useUpdateDangoteOrderCollectionStatus()
+  const payMutation = usePayDangoteOrder()
 
   const [copied, setCopied] = useState(false)
   const [showCollectionConfirm, setShowCollectionConfirm] = useState(false)
+  const [showPayConfirmDialog, setShowPayConfirmDialog] = useState(false)
   const [pendingCollectionStatus, setPendingCollectionStatus] = useState('')
 
   const handleUpdateCollection = (status: string) => {
@@ -127,6 +130,16 @@ function DangoteOrderDetails() {
     await updateCollectionMutation.mutateAsync({ id: request.id, collectionStatus: pendingCollectionStatus })
     setShowCollectionConfirm(false)
     setPendingCollectionStatus('')
+  }
+
+  const handlePayOrder = async () => {
+    if (!request) return
+    try {
+      await payMutation.mutateAsync(request.id)
+      setShowPayConfirmDialog(false)
+    } catch {
+      // Handled by usePayDangoteOrder toast
+    }
   }
 
   if (isLoading) {
@@ -282,6 +295,14 @@ function DangoteOrderDetails() {
                 </p>
               </div>
             </div>
+            {request.customerBalance !== undefined && (
+              <div className="pt-2 border-t border-border/50">
+                <p className="text-xs text-muted-foreground font-normal uppercase">Wallet Balance</p>
+                <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5">
+                  {formatCurrency(Number(request.customerBalance))}
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -512,7 +533,17 @@ function DangoteOrderDetails() {
           <CardTitle className="text-sm font-semibold text-primary">Order Actions</CardTitle>
           <CardDescription className="text-xs">Update payment and collection status</CardDescription>
         </CardHeader>
-        <CardContent className="pt-6 flex flex-wrap gap-4">
+        <CardContent className="pt-6 flex flex-wrap gap-4 items-center">
+          {isDangoteOrderPayable(request) && (
+            <Button
+              className="bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 shadow-none cursor-pointer"
+              onClick={() => setShowPayConfirmDialog(true)}
+              disabled={payMutation.isPending}
+            >
+              <Wallet className="size-4 mr-2" /> Pay Now from Wallet
+            </Button>
+          )}
+
           {request.paymentStatus === 'Paid' && request.collectionStatus === 'Pending' && (
             <Button
               className="bg-foreground text-background hover:bg-foreground cursor-pointer"
@@ -552,6 +583,44 @@ function DangoteOrderDetails() {
       </Card>
 
       {/* Confirm Dialogs */}
+      <ConfirmDialog
+        open={showPayConfirmDialog}
+        onOpenChange={setShowPayConfirmDialog}
+        title={`Pay Order ${request.requestNumber || ''}`}
+        description="Process payment directly from the customer's available wallet balance."
+        confirmLabel="Confirm & Pay"
+        cancelLabel="Cancel"
+        onConfirm={handlePayOrder}
+        loading={payMutation.isPending}
+      >
+        <div className="my-2 space-y-3 rounded-lg border border-foreground/10 bg-muted/30 p-3.5 text-sm">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-muted-foreground">Customer:</span>
+            <span className="font-medium text-foreground">
+              {request.customerName || request.companyName || '—'}
+            </span>
+          </div>
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-muted-foreground">Order Total:</span>
+            <span className="font-semibold text-foreground">
+              {formatCurrency(Number(request.totalAmount) || 0)}
+            </span>
+          </div>
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-muted-foreground">Wallet Balance:</span>
+            <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+              {formatCurrency(Number(request.customerBalance) || 0)}
+            </span>
+          </div>
+          <div className="flex items-center justify-between border-t border-foreground/10 pt-2 text-xs">
+            <span className="text-muted-foreground">Balance After Payment:</span>
+            <span className="font-semibold text-foreground">
+              {formatCurrency(Math.max(0, (Number(request.customerBalance) || 0) - (Number(request.totalAmount) || 0)))}
+            </span>
+          </div>
+        </div>
+      </ConfirmDialog>
+
       <ConfirmDialog
         open={showCollectionConfirm}
         onOpenChange={setShowCollectionConfirm}

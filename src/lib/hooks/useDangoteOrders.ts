@@ -43,7 +43,14 @@ export function useCreateDangoteProduct() {
   })
 }
 
-export function useDangoteOrderRequests(params?: { search?: string; status?: string; page?: number; limit?: number }) {
+export function useDangoteOrderRequests(params?: {
+  search?: string
+  status?: string
+  paymentStatus?: string
+  payable?: number | string | boolean
+  page?: number
+  limit?: number
+}) {
   return useQuery({
     queryKey: ['dangote-order-requests', params],
     queryFn: async () => {
@@ -160,16 +167,24 @@ export function usePayDangoteOrder() {
 
   return useMutation({
     retry: false,
-    mutationFn: async (orderId: number) => {
+    mutationFn: async (orderId: number | string) => {
       const res = await api.put(`/dangote-order-requests/${orderId}/pay`)
       return res.data
     },
     onSuccess: (data) => {
       toast.success(data?.message || 'Dangote order paid successfully')
       queryClient.invalidateQueries({ queryKey: ['dangote-order-requests'] })
+      queryClient.invalidateQueries({ queryKey: ['dangote-payable-orders'] })
       queryClient.invalidateQueries({ queryKey: ['customers'] })
     },
     onError: (err: any) => {
+      const status = err?.response?.status
+      const msg = String(err?.response?.data?.message || err?.message || '')
+      if (status === 409 && msg.toLowerCase().includes('expired')) {
+        toast.error('This Dangote order has expired and can no longer be paid.')
+        queryClient.invalidateQueries({ queryKey: ['dangote-order-requests'] })
+        return
+      }
       toast.error(getErrorMessage(err))
     },
   })
