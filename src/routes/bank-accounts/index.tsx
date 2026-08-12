@@ -232,7 +232,7 @@ function BankAccountsIndex() {
               onClearFilters={() => { setSearchTerm(''); setStatusFilter('ALL') }}
  />
           ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
               {filteredAccounts.map((account) => {
                 const assignedDepots = account.depots || []
                 const assignedStations = account.lpgStations || []
