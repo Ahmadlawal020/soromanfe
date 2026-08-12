@@ -85,7 +85,7 @@ function CustomerDashboard() {
     />
 
       {!isLoading && !isError && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
           <StatCard icon={<Users />} label="Total Customers" value={stats.total} />
           <StatCard icon={<UserCheck />} label="Active" value={stats.active} />
           <StatCard tone="amber" icon={<UserX />} label="Inactive" value={stats.inactive} />
@@ -139,7 +139,7 @@ function CustomerDashboard() {
                       <TableHead>Company</TableHead>
                       <TableHead className="hidden md:table-cell">Contact</TableHead>
                       <TableHead>Balance</TableHead>
-                      <TableHead className="hidden lg:table-cell">Deposit</TableHead>
+                      {/* <TableHead className="hidden lg:table-cell">Deposit</TableHead> */}
                       <TableHead>Status</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -148,14 +148,14 @@ function CustomerDashboard() {
                       <TableRow key={customer._id || customer.id} tabIndex={0} role="link" aria-label={`View ${customer.name}`} className="cursor-pointer hover:bg-muted transition" onClick={() => navigate({ to: '/customers/details' as any, search: { id: customer._id || customer.id } as any, state: { customer } } as any)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate({ to: '/customers/details' as any, search: { id: customer._id || customer.id } as any, state: { customer } } as any) } }}>
                         <TableCell>
                           <div className="flex items-center gap-3">
-                            <div className="size-10 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-normal">{getInitials(customer.name)}</div>
-                            <p className="font-normal">{customer.name}</p>
+                            {/* <div className="size-10 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-normal">{getInitials(customer.name)}</div> */}
+                            <p className="font-normal uppercase">{customer.name}</p>
                           </div>
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-1.5">
                             <Building2 className="size-3.5 text-muted-foreground" />
-                            <span className="font-normal">{customer.companyName || '—'}</span>
+                            <span className="font-normal uppercase">{customer.companyName || '—'}</span>
                           </div>
                         </TableCell>
                         <TableCell className="text-xs text-muted-foreground hidden md:table-cell">
@@ -165,12 +165,12 @@ function CustomerDashboard() {
                         <TableCell>
                           <span className="font-semibold">{formatCurrency(customer.balance || 0)}</span>
                         </TableCell>
-                        <TableCell className="hidden lg:table-cell">
+                        {/* <TableCell className="hidden lg:table-cell">
                           <div className="space-y-0.5">
                             <div className="flex items-center gap-1 text-sm"><Banknote className="size-3 text-success" /><span className="font-normal">{formatCurrency(customer.deposit || 0)}</span></div>
                             <div className="text-xs text-muted-foreground">Prev: {formatCurrency(customer.previousDeposit || 0)}</div>
                           </div>
-                        </TableCell>
+                        </TableCell> */}
                         <TableCell>{getStatusBadge(customer.status)}</TableCell>
                       </TableRow>
                     ))}

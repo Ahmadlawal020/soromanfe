@@ -10,14 +10,14 @@ const OPTIONS = [
   {
     value: 'pickup' as const,
     icon: <Warehouse />,
-    title: 'Self pickup',
+    title: 'Customer loads with their truck',
     subtitle: 'The customer sends their own trucks to load at the depot.',
   },
   {
     value: 'delivery' as const,
     icon: <Truck />,
-    title: 'Company delivery',
-    subtitle: 'Soroman moves it. Trucks are allocated when the order is released.',
+    title: 'Delivery by Soroman',
+    subtitle: 'Soroman delivers it with our trucks to the customer.',
   },
 ]
 

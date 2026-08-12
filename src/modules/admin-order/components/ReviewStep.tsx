@@ -127,7 +127,7 @@ export function ReviewStep({ wizard }: ReviewStepProps) {
         <div className="p-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Truck className="size-4 text-primary" />
-            <span className="text-xs font-semibold text-muted-foreground uppercase">Delivery Method</span>
+            <span className="text-xs font-semibold text-muted-foreground uppercase">Loading Method</span>
           </div>
           <Button variant="ghost" size="sm" className="h-7 text-xs text-primary" onClick={() => goToStep(4)}>
             <Pencil className="size-3 mr-1" /> Edit
@@ -136,7 +136,7 @@ export function ReviewStep({ wizard }: ReviewStepProps) {
         <div className="p-4 text-sm">
           <div className="flex items-center gap-2">
             {deliveryType === 'pickup' ? <Warehouse className="size-4 text-primary" /> : <Truck className="size-4 text-primary" />}
-            <span className="font-semibold text-foreground capitalize">{deliveryType === 'pickup' ? 'Self Pickup' : 'Company Delivery'}</span>
+            <span className="font-semibold text-foreground capitalize">{deliveryType === 'pickup' ? 'Depot Pickup' : 'Soroman Delivery'}</span>
           </div>
         </div>
       </div>
