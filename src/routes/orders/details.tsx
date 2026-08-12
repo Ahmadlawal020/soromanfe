@@ -501,7 +501,15 @@ function RouteComponent() {
             </span>
           )}
 
-          {(order.status === 'Released' || order.status === 'Loading') && (
+          {/* Payment releases an order on its own now, so Released is where a
+              paid order lands — cleared, but with no tickets cut yet. */}
+          {order.status === 'Released' && (
+            <span className="text-sm text-info font-medium flex items-center gap-1.5">
+              <Truck className="size-4" /> Released for loading — generate the tickets to send trucks in
+            </span>
+          )}
+
+          {order.status === 'Loading' && (
             <span className="text-sm text-info font-medium flex items-center gap-1.5">
               <Truck className="size-4" /> Order is at the depot — loading in progress
             </span>

@@ -32,11 +32,14 @@ const emptyTruck = (): TruckDraft => ({
 
 const qty = (n: number) => Number(n || 0).toLocaleString('en-NG')
 
+// The ticket is what makes a load `loaded`, so a truck sits there from the
+// moment it is generated until security takes it in at the gate. `pending` is
+// only ever a release-time fleet allocation that has not been ticketed yet.
 const LOAD_STATUS: Record<string, { label: string; icon: typeof Truck; tone: 'accent' | 'warning' | 'inert' }> = {
-  pending:   { label: 'Awaiting gate', icon: CircleDashed, tone: 'inert' },
-  gated_in:  { label: 'At depot',      icon: LogIn,        tone: 'warning' },
-  loaded:    { label: 'Loaded',        icon: PackageCheck, tone: 'warning' },
-  gated_out: { label: 'Departed',      icon: LogOut,       tone: 'accent' },
+  pending:   { label: 'Awaiting ticket', icon: CircleDashed, tone: 'inert' },
+  loaded:    { label: 'Ticketed',        icon: PackageCheck, tone: 'warning' },
+  gated_in:  { label: 'At depot',        icon: LogIn,        tone: 'warning' },
+  gated_out: { label: 'Departed',        icon: LogOut,       tone: 'accent' },
 }
 
 function GenerateTicketsPage() {
