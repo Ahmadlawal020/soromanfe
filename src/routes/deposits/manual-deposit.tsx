@@ -1,19 +1,21 @@
 import { useState, useMemo } from 'react'
+import { format } from 'date-fns'
 import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '#/components/ui/card'
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
 import { Badge } from '#/components/ui/badge'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '#/components/ui/select'
-import { Landmark, User, DollarSign, Loader2, CheckCircle2, ShieldCheck, ArrowDownLeft } from 'lucide-react'
+import { Landmark, User, DollarSign, Loader2, CheckCircle2, ShieldCheck, ArrowDownLeft, Hourglass, Search, Check } from 'lucide-react'
 import { useCustomerList } from '#/lib/hooks/useCustomers'
 import { useBankAccounts } from '#/lib/hooks/useBankAccounts'
 import { useCreateDeposit } from '#/lib/hooks/useDeposits'
 import { StatementLinePicker } from '#/components/StatementLinePicker'
-import { useMatchStatementLines, type StatementLine } from '#/lib/hooks/useBankStatements'
-import { toNum } from '#/lib/utils'
+import { type StatementLine } from '#/lib/hooks/useBankStatements'
+import { useExpectedPayments, useResolveExpectedPayment } from '#/lib/hooks/useExpectedPayments'
+import { MICRO, PANEL, PANEL_RAIL, PANEL_BODY, PANEL_FOOTER } from '#/lib/panel'
+import { cn, toNum } from '#/lib/utils'
 import type { Customer, } from '#/lib/types'
 import { routeGuard } from '#/lib/route-guard'
 
@@ -26,14 +28,51 @@ function formatCurrency(val: number) {
     return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 2 }).format(val)
 }
 
+/** Bank depositor names can run long — a hard character cap keeps every row the same shape regardless of panel width. */
+const truncateText = (text: string, max = 50) =>
+    text.length > max ? `${text.slice(0, max).trimEnd()}…` : text
+
+/** A section's header rail — icon, title, one-line purpose. Shared shape across the three steps below. */
+function SectionHeader({
+    icon,
+    tone,
+    title,
+    description,
+}: {
+    icon: React.ReactNode
+    tone: string
+    title: string
+    description: string
+}) {
+    return (
+        <div className={PANEL_RAIL}>
+            <div className="flex items-center gap-3">
+                <span className={cn('flex size-8 shrink-0 items-center justify-center rounded-lg [&_svg]:size-4', tone)}>
+                    {icon}
+                </span>
+                <div>
+                    <h2 className="text-sm font-semibold text-foreground">{title}</h2>
+                    <p className="text-xs text-muted-foreground">{description}</p>
+                </div>
+            </div>
+        </div>
+    )
+}
+
 function ManualDepositPage() {
     const navigate = useNavigate()
     const { data: customerData, isLoading: isLoadingCustomers } = useCustomerList({ limit: 500 })
     const { data: bankAccounts, isLoading: isLoadingBanks } = useBankAccounts({ status: 'Active' })
     const createDepositMutation = useCreateDeposit()
-    const matchLines = useMatchStatementLines()
-    // The statement row this payment is being confirmed against, if any.
-    const [statementLine, setStatementLine] = useState<StatementLine | null>(null)
+    const resolveExpectedPayment = useResolveExpectedPayment()
+    // The statement row(s) this payment is being confirmed against, if any —
+    // several when a customer transferred in more than one tranche.
+    const [statementLines, setStatementLines] = useState<StatementLine[]>([])
+    const [statementQuery, setStatementQuery] = useState('')
+    // Which of the customer's pending expected-payment notes this deposit
+    // settles, if any — purely advisory bookkeeping, resolved after the
+    // deposit itself succeeds.
+    const [resolvingExpectedId, setResolvingExpectedId] = useState<number | null>(null)
 
     const customersList: Customer[] = useMemo(() => {
         if (!customerData) return []
@@ -41,6 +80,8 @@ function ManualDepositPage() {
     }, [customerData])
 
     const [selectedCustomerId, setSelectedCustomerId] = useState<string>('')
+    // Open while no customer is picked yet, or while "Change" is reopening it.
+    const [customerPickerOpen, setCustomerPickerOpen] = useState(true)
     const [customerSearchTerm, setCustomerSearchTerm] = useState<string>('')
     const [selectedBankId, setSelectedBankId] = useState<string>('')
     const [amount, setAmount] = useState<string>('')
@@ -59,6 +100,17 @@ function ManualDepositPage() {
             (c) => String(c._id || (c as any).id) === String(selectedCustomerId)
         )
     }, [customersList, selectedCustomerId])
+
+    const pickCustomer = (cust: Customer) => {
+        setSelectedCustomerId(String(cust._id || (cust as any).id))
+        setCustomerPickerOpen(false)
+        setCustomerSearchTerm('')
+        setResolvingExpectedId(null)
+        setErrors((prev) => ({ ...prev, customer: '' }))
+    }
+
+    const customerIdForLookup = selectedCustomer ? (selectedCustomer._id || (selectedCustomer as any).id) : undefined
+    const { data: pendingExpectedPayments = [] } = useExpectedPayments({ customerId: customerIdForLookup, status: 'pending' })
 
     const selectedBank = useMemo(() => {
         if (!bankAccounts) return undefined
@@ -103,30 +155,43 @@ function ManualDepositPage() {
         if (!numAmount || numAmount <= 0) {
             errs.amount = 'Deposit amount must be greater than zero'
         }
-        if (!depositorName.trim()) {
+        if (statementLines.length === 0 && !depositorName.trim()) {
             errs.depositorName = 'Payer/Depositor name is required'
         }
         setErrors(errs)
         return Object.keys(errs).length === 0
     }
 
-    /** Picking a statement row fills the payment from the bank's own record. */
-    const applyStatementLine = (line: StatementLine) => {
+    /** Recomputes the form from whichever statement rows are currently selected — sums the amount, joins depositor names/references, uses the latest date. */
+    const applyStatementLines = (lines: StatementLine[]) => {
+        if (lines.length === 0) return
+        const total = lines.reduce((sum, l) => sum + Number(l.amount), 0)
+        const depositors = [...new Set(lines.map((l) => l.depositor).filter(Boolean))]
+        const refs = [...new Set(lines.map((l) => l.bank_ref).filter(Boolean))]
+        const narrations = [...new Set(lines.map((l) => l.narration).filter(Boolean))]
+        const latest = lines.reduce((max, l) => (new Date(l.txn_date) > new Date(max.txn_date) ? l : max), lines[0])
+
         // The date field is datetime-local, which needs YYYY-MM-DDTHH:mm in
         // local time — an ISO string would be rejected as out of format.
-        const d = new Date(line.txn_date)
+        const d = new Date(latest.txn_date)
         const pad = (n: number) => String(n).padStart(2, '0')
         const localDateTime =
             `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}` +
             `T${pad(d.getHours())}:${pad(d.getMinutes())}`
 
-        setStatementLine(line)
-        setAmount(String(Number(line.amount)))
-        setDepositorName(line.depositor || '')
+        setAmount(String(total))
+        setDepositorName(depositors.join(', '))
         setPaymentDate(localDateTime)
-        setReference(line.bank_ref || '')
-        if (line.narration && !description.trim()) setDescription(line.narration)
+        setReference(refs.join(', '))
+        if (narrations.length && !description.trim()) setDescription(narrations.join('; '))
         setErrors({})
+    }
+
+    const toggleStatementLine = (line: StatementLine) => {
+        const exists = statementLines.some((l) => l.id === line.id)
+        const next = exists ? statementLines.filter((l) => l.id !== line.id) : [...statementLines, line]
+        setStatementLines(next)
+        if (next.length > 0) applyStatementLines(next)
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -137,6 +202,9 @@ function ManualDepositPage() {
         try {
             const res = await createDepositMutation.mutateAsync({
                 customer: selectedCustomer._id || (selectedCustomer as any).id,
+                // The server recomputes the total from the claimed lines itself
+                // when lineIds is set — this is still sent for the plain-entry
+                // path, and as a sanity display value either way.
                 amount: numAmount,
                 bankAccountId: selectedBank.id,
                 bankName: selectedBank.bankName,
@@ -146,20 +214,15 @@ function ManualDepositPage() {
                 paymentDate: paymentDate ? new Date(paymentDate).toISOString() : new Date().toISOString(),
                 reference: reference.trim(),
                 description: description.trim() || `Manual deposit into ${selectedBank.bankName} (${selectedBank.accountNumber}) by ${depositorName.trim()}`,
+                lineIds: statementLines.length > 0 ? statementLines.map((l) => l.id) : undefined,
             })
 
             if (res?.success) {
-                // Claim the statement row so no other payment can use it.
-                if (statementLine) {
-                    await matchLines
-                        .mutateAsync({
-                            lineIds: [statementLine.id],
-                            depositId: res?.data?.deposit?.id,
-                        })
-                        .catch(() => {
-                            // The deposit is already recorded; a failed claim
-                            // must not lose it. The row simply stays unmatched.
-                        })
+                // Advisory only: link the expected-payment note to this deposit,
+                // if the desk picked one. Never blocks the deposit that already
+                // succeeded above.
+                if (resolvingExpectedId) {
+                    resolveExpectedPayment.mutate({ id: resolvingExpectedId, depositId: res?.data?.deposit?.id })
                 }
                 navigate({ to: '/deposits/' as any })
             }
@@ -168,119 +231,192 @@ function ManualDepositPage() {
         }
     }
 
+    const lockedByStatement = statementLines.length > 0
+
     return (
-        <div className="max-w-4xl mx-auto space-y-6 animate-fade-in pb-12">
+        <div className="max-w-5xl mx-auto space-y-6 animate-fade-in pb-16">
             <PageHeader
-      eyebrow="Finance"
-      title="Record Manual Deposit"
-      description="Register direct bank transfer or teller deposit to customer account."
-    />
+                eyebrow="Finance"
+                title="Record Manual Deposit"
+                description="Register a direct bank transfer or teller deposit to a customer's account."
+            />
 
-            <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 space-y-6">
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-[1fr_360px] items-start gap-6">
+                <div className="space-y-6">
 
-                    {/* 1. Customer Selection */}
-                    <Card className="border-border">
-                        <CardHeader className="border-b border-border pb-4">
-                            <div className="flex items-center gap-2">
-                                <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                                    <User className="size-4" />
-                                </div>
-                                <div>
-                                    <CardTitle className="text-base">1. Select Customer</CardTitle>
-                                    <CardDescription className="text-xs">
-                                        Choose the customer receiving this deposit credit
-                                    </CardDescription>
-                                </div>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="pt-5 space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="customer-search" className="text-xs font-semibold uppercase text-muted-foreground">
-                                    Search & Select Customer *
-                                </Label>
-                                <div className="space-y-2">
-                                    <Input
-                                        id="customer-search"
-                                        type="text"
-                                        placeholder="Search by customer name, company, or phone..."
-                                        value={customerSearchTerm}
-                                        onChange={(e) => setCustomerSearchTerm(e.target.value)}
-                                        className="text-sm"
- />
-                                    <Select
-                                        value={selectedCustomerId}
-                                        onValueChange={(val) => {
-                                            setSelectedCustomerId(val)
-                                            setErrors((prev) => ({ ...prev, customer: '' }))
-                                        }}
- >
-                                        <SelectTrigger className={`w-full ${errors.customer ? 'border-destructive' : ''}`}>
-                                            <SelectValue placeholder={isLoadingCustomers ? 'Loading customers...' : 'Choose customer...'} />
-                                        </SelectTrigger>
-                                        <SelectContent className="max-h-60">
-                                            {filteredCustomers.length === 0 ? (
-                                                <div className="p-3 text-xs text-muted-foreground text-center">No matching customers found</div>
-                                            ) : (
-                                                filteredCustomers.map((cust) => (
-                                                    <SelectItem key={cust._id || (cust as any).id} value={String(cust._id || (cust as any).id)}>
-                                                        <div className="flex items-center justify-between gap-4 w-full text-left">
-                                                            <span className="font-normal">{cust.name}</span>
-                                                            {cust.companyName && (
-                                                                <span className="text-xs text-muted-foreground">({cust.companyName})</span>
-                                                            )}
-                                                            <span className="text-xs font-mono text-success ml-auto">
-                                                                Balance: {formatCurrency(toNum(cust.balance))}
-                                                            </span>
-                                                        </div>
-                                                    </SelectItem>
-                                                ))
-                                            )}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                {errors.customer && <p className="text-xs text-destructive mt-1">{errors.customer}</p>}
-                            </div>
-
-                            {selectedCustomer && (
-                                <div className="p-4 rounded-xl bg-muted/60 border border-border flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm font-semibold text-foreground">{selectedCustomer.name}</p>
-                                        <p className="text-xs text-muted-foreground">
-                                            {selectedCustomer.companyName ? `${selectedCustomer.companyName} • ` : ''}
-                                            {selectedCustomer.phone || 'No phone'}
-                                        </p>
+                    {/* 1. Customer */}
+                    <section className={PANEL}>
+                        <SectionHeader
+                            icon={<User />}
+                            tone="bg-primary/10 text-primary"
+                            title="Customer"
+                            description="Whose account this deposit credits"
+                        />
+                        <div className={cn(PANEL_BODY, 'space-y-4')}>
+                            {selectedCustomer && !customerPickerOpen ? (
+                                <div className="space-y-3 rounded-xl border border-foreground/15 bg-muted/30 p-4">
+                                    <div className="flex items-start justify-between gap-3">
+                                        <div className="min-w-0">
+                                            <p className="truncate text-sm font-semibold text-foreground">{selectedCustomer.name}</p>
+                                            <p className="truncate text-xs text-muted-foreground">
+                                                {selectedCustomer.companyName ? `${selectedCustomer.companyName} • ` : ''}
+                                                {selectedCustomer.phone || 'No phone'}
+                                            </p>
+                                        </div>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            className="shrink-0"
+                                            onClick={() => setCustomerPickerOpen(true)}
+                                        >
+                                            Change
+                                        </Button>
                                     </div>
-                                    <div className="text-right">
-                                        <p className="text-xs text-muted-foreground font-normal uppercase">Current Balance</p>
-                                        <p className="text-base font-semibold text-foreground font-mono">
+                                    <div className="flex items-center justify-between border-t border-foreground/10 pt-3">
+                                        <span className="text-xs text-muted-foreground uppercase">Current balance</span>
+                                        <span className={cn('font-mono text-base font-semibold', currentBalance < 0 ? 'text-destructive' : 'text-foreground')}>
                                             {formatCurrency(currentBalance)}
-                                        </p>
+                                        </span>
                                     </div>
+                                </div>
+                            ) : (
+                                <div className="space-y-2">
+                                    <Label htmlFor="customer-search" className={cn(MICRO, 'text-muted-foreground')}>
+                                        Search customer *
+                                    </Label>
+                                    <div className="relative">
+                                        <Search className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
+                                        <Input
+                                            id="customer-search"
+                                            type="text"
+                                            placeholder="Search by name, company, or phone…"
+                                            value={customerSearchTerm}
+                                            onChange={(e) => setCustomerSearchTerm(e.target.value)}
+                                            className={cn('pl-9', errors.customer && 'border-destructive')}
+                                            autoFocus={customerPickerOpen && !!selectedCustomer}
+                                        />
+                                    </div>
+
+                                    <ul className="max-h-64 divide-y divide-foreground/10 overflow-y-auto rounded-lg border border-foreground/15">
+                                        {isLoadingCustomers ? (
+                                            <li className="flex items-center justify-center gap-2 py-8 text-sm text-muted-foreground">
+                                                <Loader2 className="size-4 animate-spin" /> Loading customers…
+                                            </li>
+                                        ) : filteredCustomers.length === 0 ? (
+                                            <li className="py-8 text-center text-sm text-muted-foreground">
+                                                No customer matches that.
+                                            </li>
+                                        ) : (
+                                            filteredCustomers.map((cust) => {
+                                                const custId = String(cust._id || (cust as any).id)
+                                                const isSelected = custId === selectedCustomerId
+                                                const balance = toNum(cust.balance)
+                                                return (
+                                                    <li key={custId}>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => pickCustomer(cust)}
+                                                            aria-pressed={isSelected}
+                                                            className={cn(
+                                                                'flex w-full items-center gap-3 px-3.5 py-3 text-left transition-colors duration-250 ease-luxe outline-none hover:bg-muted/60 focus-visible:bg-muted/60',
+                                                                isSelected && 'bg-accent/10 hover:bg-accent/15',
+                                                            )}
+                                                        >
+                                                            <span
+                                                                className={cn(
+                                                                    'flex size-4 shrink-0 items-center justify-center rounded border',
+                                                                    isSelected ? 'border-accent bg-accent text-accent-foreground' : 'border-foreground/30',
+                                                                )}
+                                                            >
+                                                                {isSelected && <Check className="size-3" />}
+                                                            </span>
+                                                            <span className="min-w-0 flex-1">
+                                                                <p className="truncate text-sm font-normal">{cust.name}</p>
+                                                                <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                                                                    {cust.companyName || 'No company'} · {cust.phone || 'No phone'}
+                                                                </p>
+                                                            </span>
+                                                            <span className="shrink-0 text-right">
+                                                                <span className="block text-xs text-muted-foreground">Balance</span>
+                                                                <span className={cn('block text-sm font-semibold', balance < 0 ? 'text-destructive' : 'text-foreground')}>
+                                                                    {formatCurrency(balance)}
+                                                                </span>
+                                                            </span>
+                                                        </button>
+                                                    </li>
+                                                )
+                                            })
+                                        )}
+                                    </ul>
+                                    {errors.customer && <p className="text-xs text-destructive">{errors.customer}</p>}
                                 </div>
                             )}
-                        </CardContent>
-                    </Card>
 
-                    {/* 2. Destination Bank Account */}
-                    <Card className="border-border">
-                        <CardHeader className="border-b border-border pb-4">
-                            <div className="flex items-center gap-2">
-                                <div className="size-8 rounded-lg bg-info/10 flex items-center justify-center text-info">
-                                    <Landmark className="size-4" />
+                            {/* What this customer said they'd pay, ahead of the transfer
+                                actually showing up — purely advisory, never required. */}
+                            {selectedCustomer && pendingExpectedPayments.length > 0 && (
+                                <div className="space-y-2 border-t border-foreground/10 pt-4">
+                                    <Label className={cn(MICRO, 'flex items-center gap-1.5 text-muted-foreground')}>
+                                        <Hourglass className="size-3.5" /> {pendingExpectedPayments.length} pending expected payment{pendingExpectedPayments.length === 1 ? '' : 's'}
+                                    </Label>
+                                    <div className="space-y-2">
+                                        {pendingExpectedPayments.map((ep) => (
+                                            <div
+                                                key={ep.id}
+                                                className={cn(
+                                                    'flex items-center justify-between gap-3 rounded-lg border p-3 text-sm',
+                                                    resolvingExpectedId === ep.id ? 'border-accent bg-accent/5' : 'border-foreground/15',
+                                                )}
+                                            >
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setResolvingExpectedId((id) => (id === ep.id ? null : ep.id))}
+                                                    className="min-w-0 flex-1 text-left"
+                                                >
+                                                    <p className="font-normal text-foreground">
+                                                        {ep.expectedAmount ? formatCurrency(Number(ep.expectedAmount)) : 'Amount not given'}
+                                                    </p>
+                                                    <p className="truncate text-xs text-muted-foreground">
+                                                        {[ep.reference, ep.note].filter(Boolean).join(' — ') || 'No further detail'}
+                                                    </p>
+                                                </button>
+                                                {ep.expectedAmount && (
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        size="sm"
+                                                        className="shrink-0 gap-1.5 text-xs"
+                                                        onClick={() => setStatementQuery(String(Number(ep.expectedAmount)))}
+                                                    >
+                                                        <Search className="size-3" /> Search near this
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                    {resolvingExpectedId && (
+                                        <p className="text-xs text-muted-foreground">
+                                            This deposit will mark the selected note as resolved once submitted.
+                                        </p>
+                                    )}
                                 </div>
-                                <div>
-                                    <CardTitle className="text-base">2. Receiving Bank Account</CardTitle>
-                                    <CardDescription className="text-xs">
-                                        Select the company bank account where the money was deposited
-                                    </CardDescription>
-                                </div>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="pt-5 space-y-4">
+                            )}
+                        </div>
+                    </section>
+
+                    {/* 2. Destination bank account */}
+                    <section className={PANEL}>
+                        <SectionHeader
+                            icon={<Landmark />}
+                            tone="bg-info/10 text-info"
+                            title="Receiving bank account"
+                            description="Which company account the money landed in"
+                        />
+                        <div className={cn(PANEL_BODY, 'space-y-4')}>
                             <div className="space-y-2">
-                                <Label htmlFor="bank-account-select" className="text-xs font-semibold uppercase text-muted-foreground">
-                                    Select Company Bank Account *
+                                <Label htmlFor="bank-account-select" className={cn(MICRO, 'text-muted-foreground')}>
+                                    Company bank account *
                                 </Label>
                                 <Select
                                     value={selectedBankId}
@@ -288,12 +424,19 @@ function ManualDepositPage() {
                                         setSelectedBankId(val)
                                         // The pool is per-account, so a different bank
                                         // invalidates any row already picked.
-                                        setStatementLine(null)
+                                        setStatementLines([])
                                         setErrors((prev) => ({ ...prev, bankAccount: '' }))
                                     }}
- >
-                                    <SelectTrigger className={`w-full ${errors.bankAccount ? 'border-destructive' : ''}`}>
-                                        <SelectValue placeholder={isLoadingBanks ? 'Loading bank accounts...' : 'Choose bank account...'} />
+                                >
+                                    <SelectTrigger className={cn('w-full', errors.bankAccount && 'border-destructive')}>
+                                        <SelectValue placeholder={isLoadingBanks ? 'Loading bank accounts...' : 'Choose bank account...'}>
+                                            {selectedBank && (
+                                                <span className="truncate">
+                                                    <span className="font-semibold uppercase">{selectedBank.bankName}</span>
+                                                    <span className="text-muted-foreground"> — {selectedBank.accountNumber} • {selectedBank.accountName}</span>
+                                                </span>
+                                            )}
+                                        </SelectValue>
                                     </SelectTrigger>
                                     <SelectContent>
                                         {(!bankAccounts || bankAccounts.length === 0) ? (
@@ -301,9 +444,11 @@ function ManualDepositPage() {
                                         ) : (
                                             bankAccounts.map((bank) => (
                                                 <SelectItem key={bank.id} value={String(bank.id)}>
-                                                    <div className="flex items-center justify-between gap-4">
-                                                        <span className="font-normal">{bank.bankName}</span>
-                                                        <span className="text-xs text-muted-foreground font-mono">{bank.accountNumber} ({bank.accountName})</span>
+                                                    <div className="flex flex-col">
+                                                        <span className="font-semibold uppercase">{bank.bankName}</span>
+                                                        <span className="text-xs text-muted-foreground font-mono">
+                                                            {bank.accountNumber} • {bank.accountName}
+                                                        </span>
                                                     </div>
                                                 </SelectItem>
                                             ))
@@ -311,41 +456,14 @@ function ManualDepositPage() {
                                     </SelectContent>
                                 </Select>
                                 {errors.bankAccount && (
-                                    <p className="text-sm text-destructive" role="alert">{errors.bankAccount}</p>
+                                    <p className="text-xs text-destructive">{errors.bankAccount}</p>
                                 )}
-                            </div>
-
-                            {/* Match against the bank's own record rather than retyping it. */}
-                            <div className="space-y-2 border-t border-foreground/10 pt-4">
-                                <Label className="text-xs font-semibold uppercase text-muted-foreground">
-                                    Match to a bank statement deposit
-                                </Label>
-                                <p className="text-xs text-muted-foreground">
-                                    Pick the actual deposit row and the amount, payer, date and
-                                    reference fill themselves.
-                                </p>
-                                <StatementLinePicker
-                                    bankAccountId={selectedBankId || undefined}
-                                    selected={statementLine}
-                                    onSelect={applyStatementLine}
-                                    onClear={() => setStatementLine(null)}
-                                />
-                                {/* Once matched, those four fields are the bank's own record.
-                                    Letting the desk retype them is how a deposit ends up
-                                    disagreeing with the statement it was reconciled against. */}
-                                {statementLine && (
-                                    <p className="mt-2 text-xs text-muted-foreground">
-                                        Amount, depositor, date and reference are taken from the bank
-                                        statement and cannot be edited. Clear the match to enter them by hand.
-                                    </p>
-                                )}
-                                {errors.bankAccount && <p className="text-xs text-destructive mt-1">{errors.bankAccount}</p>}
                             </div>
 
                             {selectedBank && (
-                                <div className="p-4 rounded-xl bg-primary/5 border border-primary/20 flex items-center justify-between">
+                                <div className="flex items-center justify-between rounded-xl border border-primary/20 bg-primary/5 p-4">
                                     <div>
-                                        <p className="text-xs text-primary font-semibold uppercase">Destination Account</p>
+                                        <p className="text-xs font-semibold uppercase text-primary">Destination account</p>
                                         <p className="text-sm font-semibold text-foreground">{selectedBank.bankName}</p>
                                         <p className="text-xs text-muted-foreground font-mono">
                                             {selectedBank.accountNumber} • {selectedBank.accountName}
@@ -354,198 +472,158 @@ function ManualDepositPage() {
                                     <Badge variant="outline" className="text-xs font-mono">{selectedBank.currency || 'NGN'}</Badge>
                                 </div>
                             )}
-                        </CardContent>
-                    </Card>
 
-                    {/* 3. Deposit Details */}
-                    <Card className="border-border">
-                        <CardHeader className="border-b border-border pb-4">
-                            <div className="flex items-center gap-2">
-                                <div className="size-8 rounded-lg bg-success/10 flex items-center justify-center text-success">
-                                    <DollarSign className="size-4" />
-                                </div>
-                                <div>
-                                    <CardTitle className="text-base">3. Deposit & Payment Details</CardTitle>
-                                    <CardDescription className="text-xs">
-                                        Enter amount, depositor name, and payment reference
-                                    </CardDescription>
-                                </div>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="pt-5 space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-                                {/* Deposit Amount */}
-                                <div className="space-y-2">
-                                    <Label htmlFor="amount" className="text-xs font-semibold uppercase text-muted-foreground">
-                                        Deposit Amount (NGN ₦) *
-                                    </Label>
-                                    <div className="relative">
-                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm font-semibold">₦</span>
-                                        <Input
-                                            id="amount"
-                                            type="number"
-                                            step="0.01"
-                                            min="1"
-                                            placeholder="0.00"
-                                            value={amount}
-                                        readOnly={!!statementLine}
-                                        aria-readonly={!!statementLine}
-                                            onChange={(e) => {
-                                                setAmount(e.target.value)
-                                                setErrors((prev) => ({ ...prev, amount: '' }))
-                                            }}
-                                            className={`pl-8 text-base font-semibold font-mono ${errors.amount ? 'border-destructive' : ''}`}
- />
-                                    </div>
-                                    {errors.amount && <p className="text-xs text-destructive">{errors.amount}</p>}
-                                </div>
-
-                                {/* Depositor / Payer Name */}
-                                <div className="space-y-2">
-                                    <Label htmlFor="depositorName" className="text-xs font-semibold uppercase text-muted-foreground">
-                                        Payer / Depositor Name *
-                                    </Label>
-                                    <Input
-                                        id="depositorName"
-                                        type="text"
-                                        placeholder="e.g. John Doe (Transfer)"
-                                        value={depositorName}
-                                        readOnly={!!statementLine}
-                                        aria-readonly={!!statementLine}
-                                        onChange={(e) => {
-                                            setDepositorName(e.target.value)
-                                            setErrors((prev) => ({ ...prev, depositorName: '' }))
-                                        }}
-                                        className={errors.depositorName ? 'border-destructive' : ''}
- />
-                                    {errors.depositorName && <p className="text-xs text-destructive">{errors.depositorName}</p>}
-                                </div>
-
-                                {/* Date of Payment */}
-                                <div className="space-y-2">
-                                    <Label htmlFor="paymentDate" className="text-xs font-semibold uppercase text-muted-foreground">
-                                        Date & Time of Deposit
-                                    </Label>
-                                    <Input
-                                        id="paymentDate"
-                                        type="datetime-local"
-                                        value={paymentDate}
-                                        readOnly={!!statementLine}
-                                        aria-readonly={!!statementLine}
-                                        onChange={(e) => setPaymentDate(e.target.value)}
- />
-                                </div>
-
-                                {/* Reference */}
-                                <div className="space-y-2">
-                                    <Label htmlFor="reference" className="text-xs font-semibold uppercase text-muted-foreground">
-                                        Transaction / Teller Ref (Optional)
-                                    </Label>
-                                    <Input
-                                        id="reference"
-                                        type="text"
-                                        placeholder="e.g. TRX-9082319"
-                                        value={reference}
-                                        readOnly={!!statementLine}
-                                        aria-readonly={!!statementLine}
-                                        onChange={(e) => setReference(e.target.value)}
-                                        className="font-mono text-sm"
- />
-                                </div>
-                            </div>
-
-                            {/* Description / Notes */}
-                            <div className="space-y-2 pt-2">
-                                <Label htmlFor="description" className="text-xs font-semibold uppercase text-muted-foreground">
-                                    Description / Remarks (Optional)
+                            {/* Match against the bank's own record rather than retyping it. */}
+                            <div className="space-y-2 border-t border-foreground/10 pt-4">
+                                <Label className={cn(MICRO, 'text-muted-foreground')}>
+                                    Match to bank statement
                                 </Label>
-                                <Input
-                                    id="description"
-                                    type="text"
-                                    placeholder="e.g. Direct bank deposit received for diesel order"
-                                    value={description}
-                                    onChange={(e) => setDescription(e.target.value)}
- />
+                                <p className="text-xs text-muted-foreground">
+                                    Pick one or more unmatched deposit.
+                                </p>
+                                <StatementLinePicker
+                                    bankAccountId={selectedBankId || undefined}
+                                    selected={statementLines}
+                                    onToggle={toggleStatementLine}
+                                    onClear={() => setStatementLines([])}
+                                    query={statementQuery}
+                                    onQueryChange={setStatementQuery}
+                                />
+                                {/* {lockedByStatement && (
+                                    <p className="text-xs text-muted-foreground">
+                                        {statementLines.length === 1
+                                            ? 'Amount, depositor, date and reference below are taken from that bank statement line and locked. Clear the selection to enter them by hand.'
+                                            : `This records ${statementLines.length} separate deposits, one per line — the fields below preview the combined total and are locked. Clear the selection to enter a deposit by hand instead.`}
+                                    </p>
+                                )} */}
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </section>
+
+                    {/* 3. Deposit details */}
+                    <section className={PANEL}>
+                        <SectionHeader
+                            icon={<DollarSign />}
+                            tone="bg-success/10 text-success"
+                            title="Deposit & payment details"
+                            description="Pulled from the matched statement line(s)"
+                        />
+                        <div className={cn(PANEL_BODY, 'space-y-3')}>
+                            {!lockedByStatement ? (
+                                <p className="py-6 text-center text-sm text-muted-foreground">
+                                    Select one or more statement lines above to populate the deposit details.
+                                </p>
+                            ) : (
+                                <>
+                                    <ul className="divide-y divide-foreground/10 rounded-lg border border-foreground/15">
+                                        {statementLines.map((line) => (
+                                            <li key={line.id} className="flex items-start justify-between gap-3 px-3.5 py-3">
+                                                <div className="min-w-0">
+                                                    <p className="truncate text-sm font-semibold text-foreground" title={line.depositor || 'Unnamed depositor'}>
+                                                        {truncateText(line.depositor || 'Unnamed depositor')}
+                                                    </p>
+                                                    <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                                                        {format(new Date(line.txn_date), 'd MMM yyyy, HH:mm')}
+                                                        {line.bank_ref ? ` · ${line.bank_ref}` : ''}
+                                                    </p>
+                                                </div>
+                                                <span className="shrink-0 font-mono text-sm font-semibold">
+                                                    {formatCurrency(Number(line.amount))}
+                                                </span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                    {statementLines.length > 1 && (
+                                        <div className="flex items-center justify-between rounded-lg bg-muted/30 px-3.5 py-2.5">
+                                            <span className="text-xs text-muted-foreground uppercase">Combined total</span>
+                                            <span className="font-mono text-sm font-semibold">{formatCurrency(numAmount)}</span>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    </section>
 
                 </div>
 
-                {/* Right Side Summary Column */}
-                <div className="space-y-6">
-                    <Card className="border-border sticky top-6">
-                        <CardHeader className="bg-muted/40 border-b border-border pb-4">
+                {/* Right side: live summary + submit */}
+                <div className="lg:sticky lg:top-6">
+                    <section className={PANEL}>
+                        <div className={PANEL_RAIL}>
                             <div className="flex items-center gap-2">
                                 <ShieldCheck className="size-4 text-success" />
-                                <CardTitle className="text-base">Transaction Summary</CardTitle>
+                                <h2 className="text-sm font-semibold text-foreground">Transaction summary</h2>
                             </div>
-                        </CardHeader>
-                        <CardContent className="pt-5 space-y-4">
-
+                        </div>
+                        <div className={cn(PANEL_BODY, 'space-y-4')}>
                             <div className="space-y-3 text-sm">
-                                <div className="flex justify-between items-center text-muted-foreground">
+                                <div className="flex items-center justify-between text-muted-foreground">
                                     <span>Customer</span>
-                                    <span className="font-semibold text-foreground truncate max-w-[150px]">
+                                    <span className="max-w-[150px] truncate font-semibold text-foreground">
                                         {selectedCustomer?.name || '—'}
                                     </span>
                                 </div>
 
-                                <div className="flex justify-between items-center text-muted-foreground">
-                                    <span>Receiving Bank</span>
-                                    <span className="font-semibold text-foreground truncate max-w-[150px]">
-                                        {selectedBank ? `${selectedBank.bankName}` : '—'}
+                                <div className="flex items-center justify-between text-muted-foreground">
+                                    <span>Receiving bank</span>
+                                    <span className="max-w-[150px] truncate font-semibold text-foreground">
+                                        {selectedBank ? selectedBank.bankName : '—'}
                                     </span>
                                 </div>
 
-                                <div className="flex justify-between items-center text-muted-foreground">
-                                    <span>Current Balance</span>
-                                    <span className="font-mono text-foreground font-normal">
+                                <div className="flex items-center justify-between text-muted-foreground">
+                                    <span>Current balance</span>
+                                    <span className="font-mono font-normal text-foreground">
                                         {formatCurrency(currentBalance)}
                                     </span>
                                 </div>
 
-                                <div className="flex justify-between items-center text-muted-foreground">
-                                    <span>Deposit Credit</span>
-                                    <span className="font-mono text-success font-semibold">
+                                <div className="flex items-center justify-between text-muted-foreground">
+                                    <span>{statementLines.length > 1 ? `Deposit credit (${statementLines.length} entries)` : 'Deposit credit'}</span>
+                                    <span className="font-mono font-semibold text-success">
                                         +{formatCurrency(numAmount)}
                                     </span>
                                 </div>
 
-                                <div className="border-t border-border pt-3 flex justify-between items-center">
-                                    <span className="font-semibold text-foreground">Updated Balance</span>
+                                <div className="flex items-center justify-between border-t border-foreground/10 pt-3">
+                                    <span className="font-semibold text-foreground">Updated balance</span>
                                     <span className="font-mono text-lg font-semibold text-success">
                                         {formatCurrency(newBalance)}
                                     </span>
                                 </div>
                             </div>
 
-                            <div className="p-3 rounded-lg bg-success/10 border border-success/20 text-xs text-success-foreground flex items-start gap-2">
-                                <ArrowDownLeft className="size-4 text-success shrink-0 mt-0.5" />
+                            <div className="flex items-start gap-2 rounded-lg border border-success/20 bg-success/10 p-3 text-xs text-success">
+                                <ArrowDownLeft className="size-4 shrink-0 text-success" />
                                 <p>
-                                    Upon submission, the customer&apos;s account balance will be updated automatically and any pending orders will be processed.
+                                    {statementLines.length > 1
+                                        ? `Upon submission, ${statementLines.length} separate deposits are recorded — one per statement line — and the customer's account balance updates by their combined total.`
+                                        : 'Upon submission, the customer’s account balance updates automatically and any pending orders are processed.'}
                                 </p>
                             </div>
-                        </CardContent>
-                        <CardFooter className="border-t border-border pt-4 bg-muted/20">
+                        </div>
+                        <div className={cn(PANEL_FOOTER, 'border-t border-foreground/15')}>
                             <Button
                                 type="submit"
-                                className="w-full font-normal gap-2"
+                                className="w-full gap-2 font-normal"
                                 disabled={createDepositMutation.isPending}
- >
+                            >
                                 {createDepositMutation.isPending ? (
                                     <>
-                                        <Loader2 className="size-4 animate-spin" /> Recording Deposit...
+                                        <Loader2 className="size-4 animate-spin" /> Recording deposit…
+                                    </>
+                                ) : statementLines.length > 1 ? (
+                                    <>
+                                        <CheckCircle2 className="size-4" /> Submit {statementLines.length} deposits
                                     </>
                                 ) : (
                                     <>
-                                        <CheckCircle2 className="size-4" /> Submit & Credit Balance
+                                        <CheckCircle2 className="size-4" /> Submit & credit balance
                                     </>
                                 )}
                             </Button>
-                        </CardFooter>
-                    </Card>
+                        </div>
+                    </section>
                 </div>
             </form>
         </div>
