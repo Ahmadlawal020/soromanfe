@@ -1,4 +1,3 @@
-import { Button } from '#/components/ui/button'
 import {
   AlertCircle,
   User,
@@ -6,7 +5,6 @@ import {
   Package,
   Truck,
   Warehouse,
-  Pencil,
   CircleDollarSign,
 } from 'lucide-react'
 import { formatCurrency } from '../utils/formatters'
@@ -16,6 +14,11 @@ interface ReviewStepProps {
   wizard: OrderWizardReturn
 }
 
+/**
+ * The order recap. Reads only — nothing here is a jump-to target, since the
+ * form it summarises sits directly above it on the same page. To change
+ * anything, scroll up and edit it there.
+ */
 export function ReviewStep({ wizard }: ReviewStepProps) {
   const {
     selectedCustomer,
@@ -25,7 +28,6 @@ export function ReviewStep({ wizard }: ReviewStepProps) {
     selectedProduct,
     orderQuantity,
     deliveryType,
-    goToStep,
   } = wizard
 
   return (
@@ -33,14 +35,9 @@ export function ReviewStep({ wizard }: ReviewStepProps) {
 
       {/* Customer Section */}
       <div className="border rounded-xl divide-y divide-border">
-        <div className="p-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <User className="size-4 text-primary" />
-            <span className="text-xs font-semibold text-muted-foreground uppercase">Customer</span>
-          </div>
-          <Button variant="ghost" size="sm" className="h-7 text-xs text-primary" onClick={() => goToStep(1)}>
-            <Pencil className="size-3 mr-1" /> Edit
-          </Button>
+        <div className="p-4 flex items-center gap-2">
+          <User className="size-4 text-primary" />
+          <span className="text-xs font-semibold text-muted-foreground uppercase">Customer</span>
         </div>
         <div className="p-4 grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
           <div>
@@ -66,14 +63,9 @@ export function ReviewStep({ wizard }: ReviewStepProps) {
 
       {/* Location Section */}
       <div className="border rounded-xl divide-y divide-border">
-        <div className="p-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <MapPin className="size-4 text-primary" />
-            <span className="text-xs font-semibold text-muted-foreground uppercase">Location & Depot</span>
-          </div>
-          <Button variant="ghost" size="sm" className="h-7 text-xs text-primary" onClick={() => goToStep(2)}>
-            <Pencil className="size-3 mr-1" /> Edit
-          </Button>
+        <div className="p-4 flex items-center gap-2">
+          <MapPin className="size-4 text-primary" />
+          <span className="text-xs font-semibold text-muted-foreground uppercase">Location & Depot</span>
         </div>
         <div className="p-4 grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
           <div>
@@ -93,14 +85,9 @@ export function ReviewStep({ wizard }: ReviewStepProps) {
 
       {/* Product Section */}
       <div className="border rounded-xl divide-y divide-border">
-        <div className="p-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Package className="size-4 text-primary" />
-            <span className="text-xs font-semibold text-muted-foreground uppercase">Product & Quantity</span>
-          </div>
-          <Button variant="ghost" size="sm" className="h-7 text-xs text-primary" onClick={() => goToStep(3)}>
-            <Pencil className="size-3 mr-1" /> Edit
-          </Button>
+        <div className="p-4 flex items-center gap-2">
+          <Package className="size-4 text-primary" />
+          <span className="text-xs font-semibold text-muted-foreground uppercase">Product & Quantity</span>
         </div>
         <div className="p-4 grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
           <div>
@@ -124,14 +111,9 @@ export function ReviewStep({ wizard }: ReviewStepProps) {
 
       {/* Delivery Section */}
       <div className="border rounded-xl divide-y divide-border">
-        <div className="p-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Truck className="size-4 text-primary" />
-            <span className="text-xs font-semibold text-muted-foreground uppercase">Loading Method</span>
-          </div>
-          <Button variant="ghost" size="sm" className="h-7 text-xs text-primary" onClick={() => goToStep(4)}>
-            <Pencil className="size-3 mr-1" /> Edit
-          </Button>
+        <div className="p-4 flex items-center gap-2">
+          <Truck className="size-4 text-primary" />
+          <span className="text-xs font-semibold text-muted-foreground uppercase">Loading Method</span>
         </div>
         <div className="p-4 text-sm">
           <div className="flex items-center gap-2">

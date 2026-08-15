@@ -16,6 +16,8 @@ import {
   usePfiDetail, useAddPfiExpense, useDeleteExpense,
   type PfiFinancials,
 } from '#/lib/hooks/usePfis'
+import { useCreateVendor } from '#/lib/hooks/useVendors'
+import { VendorField, type VendorFieldValue } from '#/components/VendorField'
 import {
   naira, litres, pct, moneyTone, SurplusDeficit, SellThroughBar, profitCaveat,
 } from '#/routes/pfi/-pfi-utils'
@@ -84,22 +86,37 @@ export function PfiDetailDialog({
   const { data, isLoading } = usePfiDetail(open ? pfiId : null)
   const addExpense = useAddPfiExpense()
   const deleteExpense = useDeleteExpense()
+  const createVendor = useCreateVendor()
 
-  const [draft, setDraft] = useState({ description: '', vendor: '', amount: '', bank: '' })
+  const [draft, setDraft] = useState({ description: '', vendor: '', vendor_id: '', amount: '', bank: '' })
+  const [saveNewVendor, setSaveNewVendor] = useState(true)
   const ready = draft.description.trim() && Number(draft.amount) > 0
 
   const submit = async () => {
     if (!pfiId) return
+
+    let vendorId = draft.vendor_id ? Number(draft.vendor_id) : null
+    if (!vendorId && draft.vendor.trim() && saveNewVendor) {
+      try {
+        const savedVendor = await createVendor.mutateAsync({ name: draft.vendor.trim() })
+        vendorId = savedVendor?.id ? Number(savedVendor.id) : null
+      } catch {
+        // The vendor failed to save — the expense still goes through.
+      }
+    }
+
     await addExpense.mutateAsync({
       pfiId,
       data: {
         description: draft.description,
         vendor: draft.vendor,
+        vendor_id: vendorId,
         amount: Number(draft.amount),
         bank_paid_from: draft.bank,
       },
     })
-    setDraft({ description: '', vendor: '', amount: '', bank: '' })
+    setDraft({ description: '', vendor: '', vendor_id: '', amount: '', bank: '' })
+    setSaveNewVendor(true)
   }
 
   const pfi = data?.pfi
@@ -289,10 +306,15 @@ export function PfiDetailDialog({
                     {addExpense.isPending ? <Loader2 className="animate-spin" /> : <Plus data-icon="inline-start" />}
                     Add
                   </Button>
-                  <Input
-                    className="sm:col-span-1" placeholder="Vendor (optional)" value={draft.vendor}
-                    onChange={(e) => setDraft((d) => ({ ...d, vendor: e.target.value }))}
-                  />
+                  <div className="sm:col-span-1">
+                    <VendorField
+                      value={{ vendor: draft.vendor, vendor_id: draft.vendor_id, saveNew: saveNewVendor }}
+                      onChange={(v: VendorFieldValue) => {
+                        setDraft((d) => ({ ...d, vendor: v.vendor, vendor_id: v.vendor_id }))
+                        setSaveNewVendor(v.saveNew)
+                      }}
+                    />
+                  </div>
                   <Input
                     className="sm:col-span-2" placeholder="Bank paid from (optional)" value={draft.bank}
                     onChange={(e) => setDraft((d) => ({ ...d, bank: e.target.value }))}

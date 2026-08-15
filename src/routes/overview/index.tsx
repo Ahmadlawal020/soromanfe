@@ -131,35 +131,35 @@ function OverviewDashboard() {
           label="Revenue"
           value={formatCurrency(combinedRevenue)}
           tone="green"
-          description={`${formatCurrency(rev.orders?.total || 0)} from orders`}
+          // description={`${formatCurrency(rev.orders?.total || 0)} from orders`}
         />
         <StatCard
           icon={<ShoppingCart />}
           label="Orders"
           value={formatNumber(totalOrders)}
           tone="blue"
-          description={`${formatCurrency(orders.totals?.paidValue || 0)} collected`}
+          // description={`${formatCurrency(orders.totals?.paidValue || 0)} collected`}
         />
         <StatCard
           icon={<Users />}
-          label="Active Customers"
+          label="Total Customers"
           value={formatNumber(cust.total)}
           tone="green"
-          description={`${cust.newThisPeriod || 0} new ${data?.period?.label?.toLowerCase() || 'this month'}`}
+          // description={`${cust.newThisPeriod || 0} new ${data?.period?.label?.toLowerCase() || 'this month'}`}
         />
-        <StatCard
+        {/* <StatCard
           icon={<Truck />}
           label="Fleet Utilization"
           value={formatPercent(fleetUtilization)}
           tone={fleetUtilization > 60 ? 'green' : fleetUtilization > 30 ? 'amber' : 'red'}
           description={`${fleet.inTransit || 0} of ${fleet.total} in use`}
-        />
+        /> */}
         <StatCard
           icon={<AlertTriangle />}
-          label="Outstanding"
+          label="Delivery Customers Outstanding"
           value={formatCurrency(totalOutstanding)}
           tone={totalOutstanding > 0 ? 'amber' : 'green'}
-          description={`${outstanding.customers?.length || 0} customers owe`}
+          // description={`${outstanding.customers?.length || 0} customers owe`}
         />
       </StatCardGrid>
 
@@ -174,7 +174,7 @@ function OverviewDashboard() {
           <div className={PANEL_BODY}>
             <RevenueTrendChart data={trend} />
           </div>
-          <div className={cn(PANEL_FOOTER, 'gap-4')}>
+          {/* <div className={cn(PANEL_FOOTER, 'gap-4')}>
             <span className="text-xs text-muted-foreground">
               Orders: <span className="font-semibold text-foreground">{formatCurrency(rev.orders?.total || 0)}</span>
             </span>
@@ -184,10 +184,10 @@ function OverviewDashboard() {
             <span className="text-xs text-muted-foreground">
               Delivery: <span className="font-semibold text-foreground">{formatCurrency(rev.deliverySales?.paymentAmount || 0)}</span>
             </span>
-          </div>
+          </div> */}
         </section>
 
-        <section className={PANEL} aria-label="Orders by status">
+        {/* <section className={PANEL} aria-label="Orders by status">
           <div className={PANEL_RAIL}>
             <span className={MICRO}>Orders by status</span>
           </div>
@@ -197,9 +197,49 @@ function OverviewDashboard() {
           <div className={cn(PANEL_FOOTER, 'justify-end')}>
             <HoverArrowLink to={'/orders' as any}>View all orders</HoverArrowLink>
           </div>
+        </section> */}
+
+        <section className={PANEL} aria-label="Financial summary">
+          <div className={PANEL_RAIL}>
+            <span className={MICRO}>Financial summary</span>
+          </div>
+          <div className="divide-y divide-foreground/10">
+            <div className="flex items-center justify-between px-6 py-3.5">
+              <span className="text-sm">Total revenue</span>
+              <span className="text-sm font-semibold">{formatCurrency(combinedRevenue)}</span>
+            </div>
+            <div className="flex items-center justify-between px-6 py-3.5">
+              <span className="text-sm">Order revenue</span>
+              <span className="text-sm font-semibold">{formatCurrency(rev.orders?.total || 0)}</span>
+            </div>
+            {/* <div className="flex items-center justify-between px-6 py-3.5">
+              <span className="text-sm">Offline sales</span>
+              <span className="text-sm font-semibold">{formatCurrency(rev.offlineSales?.total || 0)}</span>
+            </div> */}
+            {/* <div className="flex items-center justify-between px-6 py-3.5">
+              <span className="text-sm">Delivery payments</span>
+              <span className="text-sm font-semibold">{formatCurrency(rev.deliverySales?.paymentAmount || 0)}</span>
+            </div> */}
+            <div className="flex items-center justify-between px-6 py-3.5">
+              <span className="text-sm">Customer wallets</span>
+              <span className="text-sm font-semibold">{formatCurrency(Number(wallet.balances?.totalBalance || 0))}</span>
+            </div>
+            <div className="flex items-center justify-between px-6 py-3.5">
+              <span className="text-sm">Active holds</span>
+              <span className="text-sm font-semibold text-warning">{formatCurrency(Number(wallet.activeHolds?.totalHeld || 0))}</span>
+            </div>
+          </div>
+          <div className={cn(PANEL_FOOTER, 'justify-between')}>
+            <span className="text-xs text-muted-foreground">
+              Manual Deposits: <span className="font-semibold text-foreground">{formatCurrency(Number(wallet.movement?.credits || 0))}</span>
+            </span>
+            <HoverArrowLink to={'/deposits' as any}>View deposits</HoverArrowLink>
+          </div>
         </section>
+
       </div>
 
+      {false && (
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <section className={PANEL} aria-label="Financial summary">
           <div className={PANEL_RAIL}>
@@ -214,14 +254,14 @@ function OverviewDashboard() {
               <span className="text-sm">Order revenue</span>
               <span className="text-sm font-semibold">{formatCurrency(rev.orders?.total || 0)}</span>
             </div>
-            <div className="flex items-center justify-between px-6 py-3.5">
+            {/* <div className="flex items-center justify-between px-6 py-3.5">
               <span className="text-sm">Offline sales</span>
               <span className="text-sm font-semibold">{formatCurrency(rev.offlineSales?.total || 0)}</span>
-            </div>
-            <div className="flex items-center justify-between px-6 py-3.5">
+            </div> */}
+            {/* <div className="flex items-center justify-between px-6 py-3.5">
               <span className="text-sm">Delivery payments</span>
               <span className="text-sm font-semibold">{formatCurrency(rev.deliverySales?.paymentAmount || 0)}</span>
-            </div>
+            </div> */}
             <div className="flex items-center justify-between px-6 py-3.5">
               <span className="text-sm">Customer wallets</span>
               <span className="text-sm font-semibold">{formatCurrency(Number(wallet.balances?.totalBalance || 0))}</span>
@@ -239,7 +279,7 @@ function OverviewDashboard() {
           </div>
         </section>
 
-        <section className={PANEL} aria-label="Fleet and operations">
+        {/* <section className={PANEL} aria-label="Fleet and operations">
           <div className={PANEL_RAIL}>
             <span className={MICRO}>Fleet &amp; Operations</span>
             <StatusChip tone="accent" size="rail">
@@ -267,8 +307,9 @@ function OverviewDashboard() {
           <div className={cn(PANEL_FOOTER, 'justify-end')}>
             <HoverArrowLink to={'/fleet-trucks' as any}>View fleet</HoverArrowLink>
           </div>
-        </section>
+        </section> */}
       </div>
+      )}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <section className={PANEL} aria-label="PFI and inventory">
@@ -276,12 +317,12 @@ function OverviewDashboard() {
             <span className={MICRO}>PFI &amp; Inventory</span>
           </div>
           <div className="divide-y divide-foreground/10">
-            <div className="flex items-center justify-between px-6 py-3.5">
+            {/* <div className="flex items-center justify-between px-6 py-3.5">
               <span className="text-sm">Active PFIs</span>
               <span className="text-sm font-semibold">{activePfis.length}</span>
-            </div>
+            </div> */}
             <div className="flex items-center justify-between px-6 py-3.5">
-              <span className="text-sm">Litres remaining</span>
+              <span className="text-sm">Total Quantity remaining</span>
               <span className="text-sm font-semibold">{formatLitres(totalRemainingLitres)}</span>
             </div>
             <div className="flex items-center justify-between px-6 py-3.5">
@@ -342,7 +383,7 @@ function OverviewDashboard() {
 
       <section className={PANEL} aria-label="Depot leaderboard">
         <div className={PANEL_RAIL}>
-          <span className={MICRO}>Depot leaderboard</span>
+          <span className={MICRO}>Depot Ranking</span>
           <StatusChip tone="accent" size="rail">
             By revenue
           </StatusChip>

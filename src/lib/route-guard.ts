@@ -80,6 +80,8 @@ export function getCurrentUserRolesFromStorage(): number[] {
       lpg_viewer: 41,
       lpg_operator: 42,
       lpg_manager: 43,
+
+      expenditure_officer: 44,
     }
 
     return roles

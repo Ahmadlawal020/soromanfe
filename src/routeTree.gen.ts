@@ -106,6 +106,9 @@ import { Route as SecurityExitRouteImport } from './routes/security/exit'
 import { Route as TicketIndexRouteImport } from './routes/ticket/index'
 import { Route as TicketDetailsRouteImport } from './routes/ticket/details'
 import { Route as TicketGenerateRouteImport } from './routes/ticket/generate'
+import { Route as VendorsIndexRouteImport } from './routes/vendors/index'
+import { Route as VendorsDetailsRouteImport } from './routes/vendors/details'
+import { Route as VendorsFormRouteImport } from './routes/vendors/form'
 import { Route as LpgDashboardIndexRouteImport } from './routes/lpg/dashboard/index'
 import { Route as LpgPlantsIndexRouteImport } from './routes/lpg/plants/index'
 import { Route as LpgSalesIndexRouteImport } from './routes/lpg/sales/index'
@@ -608,6 +611,21 @@ const TicketGenerateRoute = TicketGenerateRouteImport.update({
   path: '/ticket/generate',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VendorsIndexRoute = VendorsIndexRouteImport.update({
+  id: '/vendors/',
+  path: '/vendors/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VendorsDetailsRoute = VendorsDetailsRouteImport.update({
+  id: '/vendors/details',
+  path: '/vendors/details',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VendorsFormRoute = VendorsFormRouteImport.update({
+  id: '/vendors/form',
+  path: '/vendors/form',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LpgDashboardIndexRoute = LpgDashboardIndexRouteImport.update({
   id: '/lpg/dashboard/',
   path: '/lpg/dashboard/',
@@ -676,6 +694,8 @@ export interface FileRoutesByFullPath {
   '/security/exit': typeof SecurityExitRoute
   '/ticket/details': typeof TicketDetailsRoute
   '/ticket/generate': typeof TicketGenerateRoute
+  '/vendors/details': typeof VendorsDetailsRoute
+  '/vendors/form': typeof VendorsFormRoute
   '/admin-order/': typeof AdminOrderIndexRoute
   '/admin-reports/': typeof AdminReportsIndexRoute
   '/admin/': typeof AdminIndexRoute
@@ -727,6 +747,7 @@ export interface FileRoutesByFullPath {
   '/sales-manager-view/': typeof SalesManagerViewIndexRoute
   '/security-report/': typeof SecurityReportIndexRoute
   '/ticket/': typeof TicketIndexRoute
+  '/vendors/': typeof VendorsIndexRoute
   '/lpg/dashboard/': typeof LpgDashboardIndexRoute
   '/lpg/plants/': typeof LpgPlantsIndexRoute
   '/lpg/sales/': typeof LpgSalesIndexRoute
@@ -779,6 +800,8 @@ export interface FileRoutesByTo {
   '/security/exit': typeof SecurityExitRoute
   '/ticket/details': typeof TicketDetailsRoute
   '/ticket/generate': typeof TicketGenerateRoute
+  '/vendors/details': typeof VendorsDetailsRoute
+  '/vendors/form': typeof VendorsFormRoute
   '/admin-order': typeof AdminOrderIndexRoute
   '/admin-reports': typeof AdminReportsIndexRoute
   '/admin': typeof AdminIndexRoute
@@ -830,6 +853,7 @@ export interface FileRoutesByTo {
   '/sales-manager-view': typeof SalesManagerViewIndexRoute
   '/security-report': typeof SecurityReportIndexRoute
   '/ticket': typeof TicketIndexRoute
+  '/vendors': typeof VendorsIndexRoute
   '/lpg/dashboard': typeof LpgDashboardIndexRoute
   '/lpg/plants': typeof LpgPlantsIndexRoute
   '/lpg/sales': typeof LpgSalesIndexRoute
@@ -883,6 +907,8 @@ export interface FileRoutesById {
   '/security/exit': typeof SecurityExitRoute
   '/ticket/details': typeof TicketDetailsRoute
   '/ticket/generate': typeof TicketGenerateRoute
+  '/vendors/details': typeof VendorsDetailsRoute
+  '/vendors/form': typeof VendorsFormRoute
   '/admin-order/': typeof AdminOrderIndexRoute
   '/admin-reports/': typeof AdminReportsIndexRoute
   '/admin/': typeof AdminIndexRoute
@@ -934,6 +960,7 @@ export interface FileRoutesById {
   '/sales-manager-view/': typeof SalesManagerViewIndexRoute
   '/security-report/': typeof SecurityReportIndexRoute
   '/ticket/': typeof TicketIndexRoute
+  '/vendors/': typeof VendorsIndexRoute
   '/lpg/dashboard/': typeof LpgDashboardIndexRoute
   '/lpg/plants/': typeof LpgPlantsIndexRoute
   '/lpg/sales/': typeof LpgSalesIndexRoute
@@ -988,6 +1015,8 @@ export interface FileRouteTypes {
     | '/security/exit'
     | '/ticket/details'
     | '/ticket/generate'
+    | '/vendors/details'
+    | '/vendors/form'
     | '/admin-order/'
     | '/admin-reports/'
     | '/admin/'
@@ -1039,6 +1068,7 @@ export interface FileRouteTypes {
     | '/sales-manager-view/'
     | '/security-report/'
     | '/ticket/'
+    | '/vendors/'
     | '/lpg/dashboard/'
     | '/lpg/plants/'
     | '/lpg/sales/'
@@ -1091,6 +1121,8 @@ export interface FileRouteTypes {
     | '/security/exit'
     | '/ticket/details'
     | '/ticket/generate'
+    | '/vendors/details'
+    | '/vendors/form'
     | '/admin-order'
     | '/admin-reports'
     | '/admin'
@@ -1142,6 +1174,7 @@ export interface FileRouteTypes {
     | '/sales-manager-view'
     | '/security-report'
     | '/ticket'
+    | '/vendors'
     | '/lpg/dashboard'
     | '/lpg/plants'
     | '/lpg/sales'
@@ -1194,6 +1227,8 @@ export interface FileRouteTypes {
     | '/security/exit'
     | '/ticket/details'
     | '/ticket/generate'
+    | '/vendors/details'
+    | '/vendors/form'
     | '/admin-order/'
     | '/admin-reports/'
     | '/admin/'
@@ -1245,6 +1280,7 @@ export interface FileRouteTypes {
     | '/sales-manager-view/'
     | '/security-report/'
     | '/ticket/'
+    | '/vendors/'
     | '/lpg/dashboard/'
     | '/lpg/plants/'
     | '/lpg/sales/'
@@ -1298,6 +1334,8 @@ export interface RootRouteChildren {
   SecurityExitRoute: typeof SecurityExitRoute
   TicketDetailsRoute: typeof TicketDetailsRoute
   TicketGenerateRoute: typeof TicketGenerateRoute
+  VendorsDetailsRoute: typeof VendorsDetailsRoute
+  VendorsFormRoute: typeof VendorsFormRoute
   AdminOrderIndexRoute: typeof AdminOrderIndexRoute
   AdminReportsIndexRoute: typeof AdminReportsIndexRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -1349,6 +1387,7 @@ export interface RootRouteChildren {
   SalesManagerViewIndexRoute: typeof SalesManagerViewIndexRoute
   SecurityReportIndexRoute: typeof SecurityReportIndexRoute
   TicketIndexRoute: typeof TicketIndexRoute
+  VendorsIndexRoute: typeof VendorsIndexRoute
   LpgDashboardIndexRoute: typeof LpgDashboardIndexRoute
   LpgPlantsIndexRoute: typeof LpgPlantsIndexRoute
   LpgSalesIndexRoute: typeof LpgSalesIndexRoute
@@ -2036,6 +2075,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TicketGenerateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/vendors/': {
+      id: '/vendors/'
+      path: '/vendors'
+      fullPath: '/vendors/'
+      preLoaderRoute: typeof VendorsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vendors/details': {
+      id: '/vendors/details'
+      path: '/vendors/details'
+      fullPath: '/vendors/details'
+      preLoaderRoute: typeof VendorsDetailsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vendors/form': {
+      id: '/vendors/form'
+      path: '/vendors/form'
+      fullPath: '/vendors/form'
+      preLoaderRoute: typeof VendorsFormRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lpg/dashboard/': {
       id: '/lpg/dashboard/'
       path: '/lpg/dashboard'
@@ -2115,6 +2175,8 @@ const rootRouteChildren: RootRouteChildren = {
   SecurityExitRoute: SecurityExitRoute,
   TicketDetailsRoute: TicketDetailsRoute,
   TicketGenerateRoute: TicketGenerateRoute,
+  VendorsDetailsRoute: VendorsDetailsRoute,
+  VendorsFormRoute: VendorsFormRoute,
   AdminOrderIndexRoute: AdminOrderIndexRoute,
   AdminReportsIndexRoute: AdminReportsIndexRoute,
   AdminIndexRoute: AdminIndexRoute,
@@ -2166,6 +2228,7 @@ const rootRouteChildren: RootRouteChildren = {
   SalesManagerViewIndexRoute: SalesManagerViewIndexRoute,
   SecurityReportIndexRoute: SecurityReportIndexRoute,
   TicketIndexRoute: TicketIndexRoute,
+  VendorsIndexRoute: VendorsIndexRoute,
   LpgDashboardIndexRoute: LpgDashboardIndexRoute,
   LpgPlantsIndexRoute: LpgPlantsIndexRoute,
   LpgSalesIndexRoute: LpgSalesIndexRoute,

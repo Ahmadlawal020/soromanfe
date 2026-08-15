@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Truck, Building2, Package, ClipboardCheck, User, Flame, CreditCard, Zap } from 'lucide-react'
+import { Truck, Package, ClipboardCheck, User, Flame, Zap, Check } from 'lucide-react'
 
-import { SegmentedChoice } from '#/components/ui/segmented-choice'
+// SegmentedChoice + Building2 back out once the order-type picker below is
+// restored — both only served that commented-out block.
 import { MICRO } from '#/lib/panel'
 import { cn } from '#/lib/utils'
 
@@ -49,23 +50,17 @@ type Group = {
   sections?: string[]
 }
 
-const DEPOT_GROUPS: Group[] = [
-  {
-    title: 'Customer', shortTitle: 'Customer', icon: User,
-    description: 'Find an existing customer or register a new one.',
-    steps: [1],
-  },
-  {
-    title: 'Order details', shortTitle: 'Details', icon: Package,
-    description: 'Depot, product, quantity and how it leaves the yard.',
-    steps: [2, 3, 4],
-    sections: ['Location & depot', 'Product & quantity', 'Delivery'],
-  },
-  {
-    title: 'Review', shortTitle: 'Review', icon: ClipboardCheck,
-    description: 'Check everything before placing the order.',
-    steps: [5],
-  },
+/**
+ * The depot flow's own sections — no longer grouped into screens, since it
+ * now runs as one continuous form. `label` sits above each section as it
+ * reveals; `step` is the id `validateStep`/`useRevealed` key off.
+ */
+const DEPOT_SECTIONS = [
+  { step: 1, label: 'Customer' },
+  { step: 2, label: 'Location & depot' },
+  { step: 3, label: 'Product & quantity' },
+  { step: 4, label: 'Delivery method' },
+  { step: 5, label: 'Review & submit' },
 ]
 
 const DANGOTE_GROUPS: Group[] = [
@@ -116,11 +111,14 @@ const LPG_GROUPS: Group[] = [
 function Section({
   label,
   index,
+  complete,
   children,
 }: {
   label?: string
   /** 1-based position, shown as a rail number when a screen holds several. */
   index?: number
+  /** Swaps the number for a check once a later section has already appeared. */
+  complete?: boolean
   children: React.ReactNode
 }) {
   return (
@@ -128,8 +126,13 @@ function Section({
       {label && (
         <div className="flex items-center gap-2.5 border-b border-foreground/10 pb-2">
           {index != null && (
-            <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground">
-              {index}
+            <span
+              className={cn(
+                'flex size-5 shrink-0 items-center justify-center rounded-full text-xs font-semibold',
+                complete ? 'bg-success/15 text-success' : 'bg-muted text-muted-foreground',
+              )}
+            >
+              {complete ? <Check className="size-3" /> : index}
             </span>
           )}
           <p className={cn(MICRO, 'text-muted-foreground')}>{label}</p>
@@ -205,11 +208,19 @@ function useGroupNav(
   return { index, group, isLast, next, back, goTo }
 }
 
+/**
+ * The depot order form: one continuous page rather than a paged wizard.
+ *
+ * Sections still gate on `validateStep` the same way the old grouped screens
+ * did, but instead of a Continue button advancing between screens, the next
+ * section simply appears below the last as it's satisfied — so the whole
+ * order flows top to bottom into a single "Place order" at the end.
+ */
 function DepotFlow() {
   const wizard = useOrderWizard()
   const { step, errors, handlePlaceOrder, createOrderMutation } = wizard
-  const nav = useGroupNav(wizard, DEPOT_GROUPS)
-  const revealed = useRevealed(wizard, nav.group.steps)
+  const revealed = useRevealed(wizard, DEPOT_SECTIONS.map((s) => s.step))
+  const allRevealed = revealed.length === DEPOT_SECTIONS.length
   const done = step > 5
 
   if (done) {
@@ -221,50 +232,43 @@ function DepotFlow() {
   }
 
   return (
-    <div className="space-y-8">
-      <WizardStepper
-        steps={DEPOT_GROUPS.map((g) => ({ title: g.title, shortTitle: g.shortTitle, icon: g.icon }))}
-        step={nav.index + 1}
-        onStepClick={nav.goTo}
-      />
-
-      <WizardShell
-        title={nav.group.title}
-        description={nav.group.description}
-        errors={errors}
-        onBack={nav.back}
-        backDisabled={nav.index === 0}
-        onNext={nav.isLast ? handlePlaceOrder : nav.next}
-        nextLabel={nav.isLast ? 'Place order' : 'Continue'}
-        nextPending={createOrderMutation.isPending}
-      >
-        <div className="p-3.5 rounded-lg bg-primary/5 border border-primary/20 flex items-start gap-3 mb-6">
-          <Zap className="size-4 text-primary shrink-0 mt-0.5" />
-          <div className="text-xs text-muted-foreground">
-            <span className="font-semibold text-foreground">DVA Auto-Subaccount Settlement:</span> Upon placing this depot order, the customer&apos;s Dedicated Virtual Account (DVA) is automatically switched to the selected depot&apos;s Paystack Subaccount so all payments land directly in the depot&apos;s account.
-          </div>
+    <WizardShell
+      title="New depot order"
+      description="Find the customer, then fill in the order below — each part opens once the one above it is ready."
+      errors={errors}
+      onNext={handlePlaceOrder}
+      nextLabel="Place order"
+      nextDisabled={!allRevealed}
+      nextPending={createOrderMutation.isPending}
+      hint={!allRevealed ? 'Complete the sections above to place the order.' : undefined}
+    >
+      <div className="p-3.5 rounded-lg bg-primary/5 border border-primary/20 flex items-start gap-3 mb-8">
+        <Zap className="size-4 text-primary shrink-0 mt-0.5" />
+        <div className="text-xs text-muted-foreground">
+          <span className="font-semibold text-foreground">DVA Auto-Subaccount Settlement:</span> Upon placing this depot order, the customer&apos;s Dedicated Virtual Account (DVA) is automatically switched to the selected depot&apos;s Paystack Subaccount so all payments land directly in the depot&apos;s account.
         </div>
+      </div>
 
-        <div className="space-y-8">
-          {revealed.map((s) => {
-            const i = nav.group.steps.indexOf(s)
-            return (
+      <div className="space-y-10">
+        {DEPOT_SECTIONS.filter((s) => revealed.includes(s.step)).map((s) => {
+          const posInRevealed = revealed.indexOf(s.step)
+          return (
             <Section
-              key={s}
-              label={nav.group.sections?.[i]}
-              index={nav.group.sections ? i + 1 : undefined}
+              key={s.step}
+              label={s.label}
+              index={s.step}
+              complete={posInRevealed < revealed.length - 1}
             >
-              {s === 1 && <CustomerStep wizard={wizard} />}
-              {s === 2 && <LocationDepotStep wizard={wizard} />}
-              {s === 3 && <ProductStep wizard={wizard} />}
-              {s === 4 && <DeliveryStep wizard={wizard} />}
-              {s === 5 && <ReviewStep wizard={wizard} />}
+              {s.step === 1 && <CustomerStep wizard={wizard} />}
+              {s.step === 2 && <LocationDepotStep wizard={wizard} />}
+              {s.step === 3 && <ProductStep wizard={wizard} />}
+              {s.step === 4 && <DeliveryStep wizard={wizard} />}
+              {s.step === 5 && <ReviewStep wizard={wizard} />}
             </Section>
-            )
-          })}
-        </div>
-      </WizardShell>
-    </div>
+          )
+        })}
+      </div>
+    </WizardShell>
   )
 }
 
@@ -390,17 +394,21 @@ function LpgFlow() {
 
 function CreateOrderPage() {
   const navigate = useNavigate()
-  const [orderType, setOrderType] = useState<OrderType | null>(null)
+  // Depot is the only order type on offer for now. `useState` (rather than a
+  // plain const) keeps this a real, unnarrowed OrderType so the Dangote/LPG
+  // branches below stay valid comparisons — reopening either is then just a
+  // matter of uncommenting its option and passing setOrderType back in.
+  const [orderType] = useState<OrderType>('depot')
 
   return (
     <div className="animate-fade-in mx-auto w-full max-w-3xl space-y-8 py-2">
       <PageHeader
-      eyebrow="Customer Orders"
-      title="Place order for a customer"
-      description="Choose where the order is lifted from — the steps appear below."
+      eyebrow="Orders"
+      title="Place Order for Customer"
+      description="Find the customer, then fill in the order below — it flows straight through to Place order."
     />
 
-      <div className="space-y-2">
+      {/* <div className="space-y-2">
         <p className={cn(MICRO, 'text-muted-foreground')}>Order type</p>
         <SegmentedChoice
           label="Order type"
@@ -409,37 +417,34 @@ function CreateOrderPage() {
           options={[
             {
               value: 'depot',
-              label: 'Buy from Our Depots',
-              hint: 'Order petroleum products from Soroman depots across Nigeria for pickup or delivery.',
+              label: 'Place Depot Order',
+              hint: 'Place an order on behalf of a customer from any Soroman depot across Nigeria, for pickup or delivery.',
               icon: <Truck />,
             },
             {
               value: 'dangote',
-              label: 'Dangote Delivery',
-              hint: 'Place bulk orders for petroleum products delivered directly from Dangote Refinery.',
+              label: 'Place Dangote Delivery Order',
+              hint: 'Place a bulk order on behalf of a customer for direct delivery from Dangote Refinery to their site.',
               icon: <Building2 />,
             },
-            // {
-            //   value: 'lpg',
-            //   label: 'Cooking Gas',
-            //   hint: 'Get cooking gas delivered safely and conveniently to your doorstep.',
-            //   icon: <Flame />,
-            // },
+            {
+              value: 'lpg',
+              label: 'Cooking Gas',
+              hint: 'Get cooking gas delivered safely and conveniently to your doorstep.',
+              icon: <Flame />,
+            },
           ]}
         />
-      </div>
+      </div> */}
 
       {/* The wizard mounts in place. Switching type remounts it, which is the
-          honest behaviour — the two flows share no fields. */}
+          honest behaviour — the flows share no fields. orderType never
+          reaches 'dangote' or 'lpg' while their picker option stays
+          commented above, but the branches stay live so restoring either is
+          a matter of uncommenting, not rebuilding. */}
       {orderType === 'depot' && <DepotFlow key="depot" />}
       {orderType === 'dangote' && <DangoteFlow key="dangote" />}
       {orderType === 'lpg' && <LpgFlow key="lpg" />}
-
-      {!orderType && (
-        <p className="pt-2 text-center text-sm text-muted-foreground">
-          Pick an order type to begin.
-        </p>
-      )}
     </div>
   )
 }

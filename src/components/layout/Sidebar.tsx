@@ -27,6 +27,8 @@ import {
   Percent,
   Home,
   MessageSquare,
+  Store,
+  Wallet,
 } from "lucide-react";
 import { useAuthStore, useAdminLogout } from "#/modules/auth";
 import { useLayoutStore } from "#/stores/layoutStore";
@@ -86,7 +88,8 @@ const navCategories: NavCategory[] = [
     category: "Finance",
     items: [
       // { title: "Verify Payments", icon: ShieldCheck, path: "/payment-verify" },
-      // { title: "Finance Report", icon: FileSpreadsheet, path: "/confirmed-payments" },
+      { title: "Finance Report", icon: FileSpreadsheet, path: "/confirmed-payments" },
+      { title: "Pending Payments", icon: Wallet, path: "/payable-orders" },
       { title: "Deposits", icon: Receipt, path: "/deposits" },
       // { title: "Overpayment Refunds", icon: DollarSign, path: "/overpayment-refunds" },
       // { title: "Transfer Requests", icon: DollarSign, path: "/overpayment-requests" },
@@ -149,6 +152,7 @@ const navCategories: NavCategory[] = [
       { title: "Product Pricing", icon: Fuel, path: "/product-pricing" },
       { title: "PFI Tracking", icon: FileText, path: "/pfi" },
       { title: "Expenses", icon: Receipt, path: "/expenses" },
+      { title: "Vendors", icon: Store, path: "/vendors" },
       // { title: "Stock Management", icon: Package, path: "/inventory" },
       // { title: "Users Log", icon: ClipboardList, path: "/order-audit" },
       { title: "Manage Users", icon: Users, path: "/admin" },

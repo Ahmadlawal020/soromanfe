@@ -59,6 +59,10 @@ export const Roles = {
   LPG_VIEWER: 41,
   LPG_OPERATOR: 42,
   LPG_MANAGER: 43,
+
+  // Verifies and pays expenses — the "Expenses Officer" stage of the expense
+  // approval chain.
+  EXPENDITURE_OFFICER: 44,
 } as const;
 export type Roles = (typeof Roles)[keyof typeof Roles];
 
@@ -125,6 +129,8 @@ export const ROLE_LABELS: Record<number, string> = {
   [Roles.LPG_VIEWER]: 'LPG Viewer',
   [Roles.LPG_OPERATOR]: 'LPG Operator',
   [Roles.LPG_MANAGER]: 'LPG Manager',
+
+  [Roles.EXPENDITURE_OFFICER]: 'Expenditure Officer',
 };
 
 export const ALL_ROLES = Object.entries(ROLE_LABELS).map(([id, label]) => ({
@@ -134,7 +140,7 @@ export const ALL_ROLES = Object.entries(ROLE_LABELS).map(([id, label]) => ({
 
 export const ROLE_GROUPS: { label: string; roles: number[] }[] = [
   { label: 'Admin', roles: [Roles.SUPERADMIN, Roles.ADMIN, Roles.AUDIT] },
-  { label: 'Finance', roles: [Roles.FINANCE, Roles.COMMISSIONS, Roles.COMMISSION_OFFICER] },
+  { label: 'Finance', roles: [Roles.FINANCE, Roles.COMMISSIONS, Roles.COMMISSION_OFFICER, Roles.EXPENDITURE_OFFICER] },
   { label: 'Finance (Tiered)', roles: [Roles.FINANCE_VIEWER, Roles.FINANCE_OPERATOR, Roles.FINANCE_MANAGER] },
   { label: 'Operations', roles: [Roles.TICKETING, Roles.RELEASE, Roles.DISPATCH, Roles.SECURITY_ENTRY, Roles.SECURITY_EXIT, Roles.TRANSPORT, Roles.SALES_MANAGER, Roles.PRODUCT_MANAGER, Roles.TRUCK_SALES] },
   { label: 'Transport (Tiered)', roles: [Roles.TRANSPORT_VIEWER, Roles.TRANSPORT_OPERATOR, Roles.TRANSPORT_MANAGER] },
@@ -208,6 +214,8 @@ export const roleColorMap: Record<number, string> = {
   [Roles.LPG_VIEWER]: 'text-amber-400',
   [Roles.LPG_OPERATOR]: 'text-amber-500',
   [Roles.LPG_MANAGER]: 'text-amber-700',
+
+  [Roles.EXPENDITURE_OFFICER]: 'text-blue-600',
 };
 
 // Reads the current user's roles from the auth store.

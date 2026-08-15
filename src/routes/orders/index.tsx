@@ -5,7 +5,6 @@ import { format, isWithinInterval } from 'date-fns'
 import {
   Package, CheckCircle2, Clock, DollarSign, Droplets, Truck, Hourglass,
   Search, Plus, X, RefreshCw, FileSpreadsheet, FileText, Eye, Pencil,
-  Wallet,
   Trash2,
 } from 'lucide-react'
 
@@ -22,14 +21,13 @@ import { PageLoader } from '#/components/PageLoader'
 import { PageError } from '#/components/PageError'
 import { PageEmpty } from '#/components/PageEmpty'
 import { Pagination } from '#/components/Pagination'
-import { ConfirmDialog } from '#/components/ConfirmDialog'
 import { PANEL, MICRO, PANEL_RAIL } from '#/lib/panel'
 import { cn } from '#/lib/utils'
-import { useAllOrders, usePayOrder } from '#/lib/hooks/useOrders'
+import { useAllOrders } from '#/lib/hooks/useOrders'
 import { routeGuard } from '#/lib/route-guard'
 
 import {
-  DATE_PRESETS, resolveRange, toNumber, formatNaira, formatQty, isPaid, isOrderPayable, groupByDay,
+  DATE_PRESETS, resolveRange, toNumber, formatNaira, formatQty, isPaid, groupByDay,
   type DatePreset,
 } from './-orders-utils'
 import { OrderStatusBadge } from './-order-status'
@@ -77,12 +75,6 @@ function OrdersDashboard() {
   const [customFrom, setCustomFrom] = useState('')
   const [customTo, setCustomTo] = useState('')
   const [statusFilter, setStatusFilter] = useState(ALL)
-  /**
-   * Payable is not a status — it is an unpaid pending order the customer
-   * already has the wallet balance to cover. It used to be its own page,
-   * which meant guessing which screen an order was on; it is a filter here so
-   * there is one register and one place to look.
-   */
   const deleteOrderMutation = useDeleteOrder()
   // Deleting an order destroys its payment trail, so the server restricts it
   // to super_admin; the button follows the same rule rather than offering
@@ -90,12 +82,6 @@ function OrdersDashboard() {
   const { isSuperAdmin: canDelete } = useRoles()
   const [deleteTarget, setDeleteTarget] = useState<any>(null)
 
-  const [payableOnly, setPayableOnly] = useState(() => {
-    // TanStack serialises search values as JSON, so an incoming ?payable=1
-    // can arrive as "1" with the quotes. Strip them before comparing.
-    const raw = new URLSearchParams(window.location.search).get('payable') ?? ''
-    return ['1', 'true'].includes(raw.replace(/^"|"$/g, ''))
-  })
   const [locationFilter, setLocationFilter] = useState(ALL)
   const [productFilter, setProductFilter] = useState(ALL)
   const [pfiFilter, setPfiFilter] = useState(ALL)
@@ -104,27 +90,11 @@ function OrdersDashboard() {
   const [pageSize, setPageSize] = useState(25)
   const [detailsOrder, setDetailsOrder] = useState<any | null>(null)
   const [editOrder, setEditOrder] = useState<any | null>(null)
-  const [payTargetOrder, setPayTargetOrder] = useState<any | null>(null)
   const [exporting, setExporting] = useState<'excel' | 'pdf' | null>(null)
-
-  const payOrderMutation = usePayOrder()
-
-  const handleConfirmPayment = async () => {
-    if (!payTargetOrder) return
-    const id = payTargetOrder.id ?? payTargetOrder._id
-    try {
-      await payOrderMutation.mutateAsync(id)
-      setPayTargetOrder(null)
-    } catch {
-      // Handled by usePayOrder toast
-    }
-  }
 
   // Filtering and the summary totals run client-side so the cards can
   // recalculate against the filtered set, which needs the whole result.
-  const { data, isLoading, isError, error, refetch, isFetching } = useAllOrders(
-    payableOnly ? { payable: 1 } : undefined,
-  )
+  const { data, isLoading, isError, error, refetch, isFetching } = useAllOrders()
   const orders: any[] = data?.orders || []
   const isTruncated = data?.truncated === true
   const totalAvailable = data?.totalAvailable ?? orders.length
@@ -239,8 +209,8 @@ function OrdersDashboard() {
     <div className="animate-fade-in space-y-6">
       <PageHeader
       eyebrow="Orders"
-      title="Order register"
-      description="Every customer product order, its payment state and fulfilment status."
+      title="Orders Overview"
+      description="Every customer product order, its payment status and fulfilment status."
       actions={
         <>
           <div className="flex flex-wrap gap-2">
@@ -274,18 +244,18 @@ function OrdersDashboard() {
           <StatCardGrid count={7}>
             <StatCard
               icon={<Package />} label="Total orders" value={formatQty(totals.count)}
-              description={`${formatQty(totals.paidCount)} paid & ${formatQty(totals.releasedCount)} released`}
+              // description={`${formatQty(totals.paidCount)} paid & ${formatQty(totals.releasedCount)} released`}
             />
             <StatCard
               // Goes amber the moment anything is unconfirmed.
               tone={totals.unpaidCount > 0 ? 'amber' : 'green'}
               icon={<Clock />} label="Payment not confirmed" value={formatQty(totals.unpaidCount)}
-              description={totals.unpaidCount > 0 ? 'Awaiting confirmation' : 'All confirmed'}
+              // description={totals.unpaidCount > 0 ? 'Awaiting confirmation' : 'All confirmed'}
             />
             <StatCard
               tone={totals.expiredCount > 0 ? 'red' : undefined}
-              icon={<Hourglass />} label="Expired" value={formatQty(totals.expiredCount)}
-              description={totals.expiredCount > 0 ? 'Unpaid & lapsed' : 'None'}
+              icon={<Hourglass />} label="Expired Orders" value={formatQty(totals.expiredCount)}
+              // description={totals.expiredCount > 0 ? 'Unpaid & lapsed' : 'None'}
             />
             <StatCard
               icon={<Droplets />} label="Total qty ordered"
@@ -297,16 +267,16 @@ function OrdersDashboard() {
               }
             />
             <StatCard
-              icon={<DollarSign />} label="Total amount" value={formatNaira(totals.amount)}
-              description={`${formatNaira(totals.amountPaid)} paid`}
+              icon={<DollarSign />} label="Total revenue" value={formatNaira(totals.amount)}
+              // description={`${formatNaira(totals.amountPaid)} paid`}
             />
             {/* Loading is a status, not a truck-ticket count — see the note in
                 -orders-utils. It is the closest honest figure available. */}
             <StatCard
-              icon={<Truck />} label="Loading" value={formatQty(totals.loadingCount)}
+              icon={<Truck />} label="Currently Loading" value={formatQty(totals.loadingCount)}
               description={`${formatQty(totals.loadingQty)} L on trucks`}
             />
-            <StatCard
+            {/* <StatCard
               icon={<CheckCircle2 />} label="Released qty"
               value={
                 <>
@@ -315,17 +285,17 @@ function OrdersDashboard() {
                 </>
               }
               description={`${formatNaira(totals.releasedValue)} released`}
-            />
+            /> */}
           </StatCardGrid>
 
-          {isTruncated && (
+          {/* {isTruncated && (
             <div className="rounded-lg border border-warning/30 bg-warning/5 px-4 py-3 text-sm text-warning-foreground">
               <p className="font-semibold">Showing {orders.length.toLocaleString()} of {totalAvailable.toLocaleString()} orders</p>
               <p className="text-xs text-muted-foreground mt-0.5">
                 Data is capped at 5,000 orders. Use filters to narrow results or export the full dataset from the backend.
               </p>
             </div>
-          )}
+          )} */}
 
           <section className={PANEL}>
             <div className={PANEL_RAIL}>
@@ -342,52 +312,36 @@ function OrdersDashboard() {
             </div>
 
             <div className="space-y-4 px-6 pt-5 pb-6">
-              {/* Replaces the old Payable Orders page. Same rule the server
-                  applies: unpaid, pending, and the customer's wallet already
-                  covers it. */}
-              <button
-                type="button"
-                onClick={() => { setPayableOnly((v) => !v); setCurrentPage(1) }}
-                aria-pressed={payableOnly}
-                className={cn(
-                  'inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors duration-250 ease-luxe',
-                  payableOnly
-                    ? 'border-accent bg-accent/10 text-accent'
-                    : 'border-foreground/15 text-muted-foreground hover:border-foreground/30',
-                )}
-              >
-                <Wallet className="size-3.5" />
-                Ready to pay from wallet
-                {payableOnly && <X className="size-3" />}
-              </button>
-
               <div className="relative">
                 <Search className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   value={searchTerm}
                   onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1) }}
-                  placeholder="Search reference, customer, location, product, PFI or order ID…"
+                  placeholder="Search order reference, customer or location…"
                   className="pl-9"
                 />
               </div>
 
-              <div className="flex flex-wrap items-center gap-2">
-                {DATE_PRESETS.map((p) => (
-                  <button
-                    key={p.value}
-                    type="button"
-                    onClick={() => { setDatePreset(p.value); setCurrentPage(1) }}
-                    className={cn(
-                      'rounded-full border px-3 py-1 text-xs transition-colors duration-250 ease-luxe outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
-                      datePreset === p.value
-                        ? 'border-accent/40 bg-accent/10 text-accent'
-                        : 'border-border text-muted-foreground hover:bg-muted hover:text-foreground',
-                    )}
-                  >
-                    {p.label}
-                  </button>
-                ))}
-                <div className="flex items-center gap-1.5">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  {DATE_PRESETS.map((p) => (
+                    <button
+                      key={p.value}
+                      type="button"
+                      onClick={() => { setDatePreset(p.value); setCurrentPage(1) }}
+                      className={cn(
+                        'rounded-full border px-3 py-1 text-xs transition-colors duration-250 ease-luxe outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
+                        datePreset === p.value
+                          ? 'border-accent/40 bg-accent/10 text-accent'
+                          : 'border-border text-muted-foreground hover:bg-muted hover:text-foreground',
+                      )}
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="flex shrink-0 items-center gap-1.5">
                   <Input
                     type="date" value={customFrom} aria-label="Custom range start"
                     onChange={(e) => { setCustomFrom(e.target.value); setDatePreset('custom'); setCurrentPage(1) }}
@@ -507,17 +461,6 @@ function OrdersDashboard() {
                               <TableCell className="text-muted-foreground">{o.pfiNumber || '—'}</TableCell>
                               <TableCell>
                                 <div className="flex items-center justify-end gap-1.5">
-                                  {isOrderPayable(o) && (
-                                    <Button
-                                      size="sm"
-                                      className="h-7 gap-1 bg-emerald-600 px-2.5 text-xs font-medium text-white hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 shadow-none cursor-pointer"
-                                      onClick={() => setPayTargetOrder(o)}
-                                      disabled={payOrderMutation.isPending && (payTargetOrder?.id ?? payTargetOrder?._id) === (o.id ?? o._id)}
-                                    >
-                                      <Wallet className="size-3" />
-                                      <span>Pay Now</span>
-                                    </Button>
-                                  )}
                                   <Button variant="ghost" size="icon-sm" onClick={() => setDetailsOrder(o)}>
                                     <Eye />
                                     <span className="sr-only">View {o.orderNumber}</span>
@@ -578,46 +521,6 @@ function OrdersDashboard() {
           </section>
         </>
       )}
-
-      <ConfirmDialog
-        open={payTargetOrder !== null}
-        onOpenChange={(open) => { if (!open) setPayTargetOrder(null) }}
-        title={`Pay Order ${payTargetOrder?.orderNumber || ''}`}
-        description="Process payment directly from the customer's available wallet balance."
-        confirmLabel="Confirm & Pay"
-        cancelLabel="Cancel"
-        loading={payOrderMutation.isPending}
-        onConfirm={handleConfirmPayment}
-      >
-        {payTargetOrder && (
-          <div className="my-2 space-y-3 rounded-lg border border-foreground/10 bg-muted/30 p-3.5 text-sm">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-muted-foreground">Customer:</span>
-              <span className="font-medium text-foreground">
-                {payTargetOrder.customerName || payTargetOrder.companyName || payTargetOrder.customerCompanyName || '—'}
-              </span>
-            </div>
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-muted-foreground">Order Total:</span>
-              <span className="font-semibold text-foreground">
-                {formatNaira(toNumber(payTargetOrder.totalAmount))}
-              </span>
-            </div>
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-muted-foreground">Wallet Balance:</span>
-              <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-                {formatNaira(toNumber(payTargetOrder.customerBalance))}
-              </span>
-            </div>
-            <div className="flex items-center justify-between border-t border-foreground/10 pt-2 text-xs">
-              <span className="text-muted-foreground">Balance After Payment:</span>
-              <span className="font-semibold text-foreground">
-                {formatNaira(Math.max(0, toNumber(payTargetOrder.customerBalance) - toNumber(payTargetOrder.totalAmount)))}
-              </span>
-            </div>
-          </div>
-        )}
-      </ConfirmDialog>
 
       <OrderDetailsDialog
         order={detailsOrder}

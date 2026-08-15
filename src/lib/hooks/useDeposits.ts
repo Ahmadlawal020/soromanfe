@@ -26,7 +26,7 @@ export function useCreateDeposit() {
     retry: false,
     mutationFn: async (data: {
       customer: string | number
-      amount: number
+      amount?: number
       description?: string
       reference?: string
       bankAccountId?: string | number
@@ -36,6 +36,8 @@ export function useCreateDeposit() {
       depositorName?: string
       paymentDate?: string
       paystackDetails?: Record<string, any>
+      /** Claim these unmatched bank-statement lines and sum them server-side, instead of a typed amount. */
+      lineIds?: number[]
     }) => {
       const res = await api.post('/deposits', {
         ...data,

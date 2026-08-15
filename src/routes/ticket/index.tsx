@@ -37,7 +37,7 @@ export const Route = createFileRoute('/ticket/')({
 })
 
 const ALL = 'all'
-const PAGE_SIZE = 100
+const PAGE_SIZE = 10000
 
 function LoadingTicketsPage() {
   const [search, setSearch] = useState('')
@@ -198,17 +198,17 @@ function LoadingTicketsPage() {
           <StatCardGrid count={4}>
             <StatCard
               icon={<Droplets />} label="Quantity sold" value={formatQty(totals.sold)}
-              description="Ordered, loaded or not"
+              // description="Ordered, loaded or not"
             />
             <StatCard
               // Amber while short, green once everything is out.
               tone={totals.shortfall > 0 ? 'amber' : 'green'}
               icon={<PackageCheck />} label="Quantity loaded" value={formatQty(totals.loaded)}
-              description={
-                totals.shortfall > 0
-                  ? `${formatQty(totals.shortfall)} litres not yet loaded`
-                  : 'All loaded'
-              }
+              // description={
+              //   totals.shortfall > 0
+              //     ? `${formatQty(totals.shortfall)} litres not yet loaded`
+              //     : 'All loaded'
+              // }
             />
             <StatCard icon={<Truck />} label="Trucks loaded" value={formatQty(totals.trucksLoaded)} />
             <StatCard

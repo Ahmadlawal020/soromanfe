@@ -93,6 +93,8 @@ export function useRoles(routePath?: string) {
       lpg_viewer: 41,
       lpg_operator: 42,
       lpg_manager: 43,
+
+      expenditure_officer: 44,
     }
     return user.roles
       .map(r => ROLE_STRING_TO_ID[r])
@@ -209,6 +211,8 @@ export function useCurrentUserRoles(): number[] {
       lpg_viewer: 41,
       lpg_operator: 42,
       lpg_manager: 43,
+
+      expenditure_officer: 44,
     }
     return user.roles
       .map(r => ROLE_STRING_TO_ID[r])

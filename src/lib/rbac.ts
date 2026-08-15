@@ -65,6 +65,8 @@ export const ROLE_STRING_TO_ID: Record<string, number> = {
   lpg_viewer: 41,
   lpg_operator: 42,
   lpg_manager: 43,
+
+  expenditure_officer: 44,
 }
 
 // Numeric ID to backend role string mapping
@@ -199,10 +201,16 @@ export const ROUTE_PERMISSIONS: Record<string, RoutePermissions> = {
     export: [...ADMIN_SUPERADMIN, Roles.FINANCE, Roles.FINANCE_OPERATOR, Roles.FINANCE_MANAGER],
   },
   '/expenses': {
-    view: [...ADMIN_SUPERADMIN, Roles.FINANCE, Roles.AUDIT, Roles.FINANCE_VIEWER, Roles.FINANCE_OPERATOR, Roles.FINANCE_MANAGER],
+    view: [...ADMIN_SUPERADMIN, Roles.FINANCE, Roles.AUDIT, Roles.FINANCE_VIEWER, Roles.FINANCE_OPERATOR, Roles.FINANCE_MANAGER, Roles.EXPENDITURE_OFFICER],
     create: [...ADMIN_SUPERADMIN, Roles.FINANCE, Roles.FINANCE_OPERATOR, Roles.FINANCE_MANAGER],
     edit: [...ADMIN_SUPERADMIN, Roles.FINANCE, Roles.FINANCE_MANAGER],
     delete: [Roles.SUPERADMIN],
+  },
+  '/vendors': {
+    view: [...ADMIN_SUPERADMIN, Roles.FINANCE, Roles.AUDIT, Roles.FINANCE_VIEWER, Roles.FINANCE_OPERATOR, Roles.FINANCE_MANAGER, Roles.EXPENDITURE_OFFICER],
+    create: [...ADMIN_SUPERADMIN, Roles.FINANCE, Roles.FINANCE_OPERATOR, Roles.FINANCE_MANAGER],
+    edit: [...ADMIN_SUPERADMIN, Roles.FINANCE, Roles.FINANCE_MANAGER],
+    delete: [],
   },
   '/deposits': {
     view: [...ADMIN_SUPERADMIN, Roles.FINANCE, Roles.AUDIT, Roles.FINANCE_VIEWER, Roles.FINANCE_OPERATOR, Roles.FINANCE_MANAGER],

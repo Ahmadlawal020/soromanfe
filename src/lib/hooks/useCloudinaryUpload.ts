@@ -71,3 +71,34 @@ export async function uploadFile(
   const signature = await getUploadSignature(folder)
   return uploadToCloudinary(file, signature)
 }
+
+/** What the expense-attachment endpoints store for one uploaded file. */
+export type ExpenseUploadedFile = {
+  url: string
+  publicId: string
+  fileName: string
+  contentType: string
+  sizeBytes: number
+}
+
+/**
+ * Upload straight to Cloudinary with a signature scoped to expenses.
+ *
+ * The general `/uploads/signature` route sits behind `verifyStaff`, which
+ * admits only admin and super_admin — so the person actually holding the
+ * receipt could not upload it. This fetches the same signature under the same
+ * rule as raising a request: if you can raise one, you can attach its
+ * paperwork.
+ */
+export async function uploadExpenseFile(file: File): Promise<ExpenseUploadedFile> {
+  const res = await api.get('/expenses/attachments/signature')
+  const signature = res.data.data as CloudinarySignature
+  const up = await uploadToCloudinary(file, signature)
+  return {
+    url: up.url,
+    publicId: up.publicId,
+    fileName: file.name,
+    contentType: file.type || '',
+    sizeBytes: file.size,
+  }
+}

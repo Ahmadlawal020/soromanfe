@@ -65,6 +65,8 @@ const ROLE_MAP_REVERSE: Record<string, number> = {
   lpg_viewer: 41,
   lpg_operator: 42,
   lpg_manager: 43,
+
+  expenditure_officer: 44,
 };
 
 function mapAdminToStaffMember(admin: any): StaffMember {

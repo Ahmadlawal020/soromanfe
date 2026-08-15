@@ -5,11 +5,18 @@ import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '#/components/ui/card'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '#/components/ui/table'
-import { User, ArrowLeft, Edit, Trash2, Calendar, AlertCircle, Phone, Mail, Building2, MapPin, Wallet, Banknote, TrendingUp, Package, Loader2, SearchX, Warehouse, Clock, DollarSign, ArrowDownLeft, ArrowUpRight, Copy, CheckCircle, CreditCard, Hash, Fuel } from 'lucide-react'
+import { Input } from '#/components/ui/input'
+import { Textarea } from '#/components/ui/textarea'
+import { Label } from '#/components/ui/label'
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+} from '#/components/ui/dialog'
+import { User, ArrowLeft, Edit, Trash2, Calendar, AlertCircle, Phone, Mail, Building2, MapPin, Wallet, Banknote, TrendingUp, Package, Loader2, SearchX, Warehouse, Clock, DollarSign, ArrowDownLeft, ArrowUpRight, Copy, CheckCircle, CreditCard, Hash, Fuel, Hourglass, Plus, X } from 'lucide-react'
 import { useCustomerDetails, useDeleteCustomer } from '#/lib/hooks/useCustomers'
 import { useOrderList } from '#/lib/hooks/useOrders'
 import { useDepositList } from '#/lib/hooks/useDeposits'
 import { useCommissions, useCommissionSummary } from '#/lib/hooks/useCommissions'
+import { useExpectedPayments, useCreateExpectedPayment, useCancelExpectedPayment } from '#/lib/hooks/useExpectedPayments'
 import { useToast } from '#/lib/hooks/useToast'
 import { toNum } from '#/lib/utils'
 import { Breadcrumbs } from '#/components/Breadcrumbs'
@@ -38,6 +45,119 @@ function getStatusBadge(status: string) {
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 0 }).format(value)
+}
+
+/** How this customer said they'd pay, ahead of the transfer showing up. Purely advisory. */
+function ExpectedPaymentsCard({ customerId }: { customerId: string | number | undefined }) {
+  const { data: expectedPayments = [], isLoading } = useExpectedPayments({ customerId, status: 'pending' })
+  const createExpectedPayment = useCreateExpectedPayment()
+  const cancelExpectedPayment = useCancelExpectedPayment()
+  const [open, setOpen] = useState(false)
+  const [expectedAmount, setExpectedAmount] = useState('')
+  const [reference, setReference] = useState('')
+  const [note, setNote] = useState('')
+
+  const submit = async () => {
+    if (!customerId) return
+    await createExpectedPayment.mutateAsync({
+      customerId,
+      expectedAmount: expectedAmount ? Number(expectedAmount) : undefined,
+      reference: reference.trim(),
+      note: note.trim(),
+    })
+    setExpectedAmount('')
+    setReference('')
+    setNote('')
+    setOpen(false)
+  }
+
+  return (
+    <Card>
+      <CardHeader className="border-b border-border">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="size-8 rounded-lg bg-warning/10 flex items-center justify-center text-warning">
+              <Hourglass className="size-4" />
+            </div>
+            <div>
+              <CardTitle className="text-sm">Expected Payments</CardTitle>
+              <CardDescription className="text-xs">How the customer said they'd pay, before the transfer shows up</CardDescription>
+            </div>
+          </div>
+          <Button variant="outline" size="sm" onClick={() => setOpen(true)} disabled={!customerId}>
+            <Plus className="size-3.5 mr-1.5" /> Add
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent className="pt-6">
+        {isLoading ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="size-5 animate-spin text-muted-foreground" />
+          </div>
+        ) : expectedPayments.length === 0 ? (
+          <p className="py-6 text-center text-sm text-muted-foreground">
+            Nothing pending. Add a note when this customer says they're about to pay.
+          </p>
+        ) : (
+          <ul className="space-y-2">
+            {expectedPayments.map((ep) => (
+              <li key={ep.id} className="flex items-center justify-between gap-3 rounded-lg border border-border p-3 text-sm">
+                <div className="min-w-0">
+                  <p className="font-normal text-foreground">
+                    {ep.expectedAmount ? formatCurrency(Number(ep.expectedAmount)) : 'Amount not given'}
+                    {ep.orderNumber && <span className="ml-2 text-xs text-muted-foreground font-mono">for {ep.orderNumber}</span>}
+                  </p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {[ep.reference, ep.note].filter(Boolean).join(' — ') || 'No further detail'}
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  disabled={cancelExpectedPayment.isPending}
+                  onClick={() => cancelExpectedPayment.mutate(ep.id)}
+                  title="Cancel — this note is no longer relevant"
+                >
+                  <X className="size-3.5" />
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </CardContent>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Note an expected payment</DialogTitle>
+            <DialogDescription>
+              Optional detail that makes this customer's bank transfer easy to spot later.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="cust-ep-amount" className="text-xs">Expected amount</Label>
+              <Input id="cust-ep-amount" type="number" step="0.01" placeholder="0.00" value={expectedAmount} onChange={(e) => setExpectedAmount(e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="cust-ep-ref" className="text-xs">Reference they'll use</Label>
+              <Input id="cust-ep-ref" placeholder="e.g. their phone number" value={reference} onChange={(e) => setReference(e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="cust-ep-note" className="text-xs">Note</Label>
+              <Textarea id="cust-ep-note" rows={2} placeholder="e.g. Says she'll transfer today" value={note} onChange={(e) => setNote(e.target.value)} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+            <Button disabled={createExpectedPayment.isPending} onClick={submit}>
+              {createExpectedPayment.isPending ? 'Saving…' : 'Save note'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </Card>
+  )
 }
 
 function CustomerDetailPage() {
@@ -643,6 +763,9 @@ function CustomerDetailPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Expected Payments */}
+      <ExpectedPaymentsCard customerId={customerId} />
 
       {/* Commission History */}
       <Card>

@@ -589,6 +589,45 @@ export interface BankAccount {
   updatedAt?: string
 }
 
+export interface Vendor {
+  id: string | number
+  name: string
+  contactPerson?: string
+  phone?: string
+  email?: string
+  address?: string
+  bankName?: string
+  accountNumber?: string
+  accountName?: string
+  taxId?: string
+  status: 'Active' | 'Inactive'
+  createdAt?: string
+  updatedAt?: string
+}
+
+export interface VendorSummary {
+  expenseCount: number
+  totalRequested: number
+  totalApproved: number
+  totalPaid: number
+  outstanding: number
+  lastPaymentDate: string | null
+}
+
+export interface VendorExpenseRow {
+  id: string | number
+  reference_number: string
+  expense_date: string
+  description: string
+  amount: number
+  amount_paid: number | null
+  bank_paid_from: string
+  status: string
+  category_name: string
+  gl_code: string | null
+  pfi_number: string | null
+}
+
 export interface CommissionRate {
   id: number
   depotId: number

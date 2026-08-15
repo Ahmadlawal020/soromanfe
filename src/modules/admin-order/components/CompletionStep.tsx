@@ -1,4 +1,8 @@
+import { useState } from 'react'
 import { Button } from '#/components/ui/button'
+import { Input } from '#/components/ui/input'
+import { Textarea } from '#/components/ui/textarea'
+import { Label } from '#/components/ui/label'
 import { useNavigate } from '@tanstack/react-router'
 import {
   CheckCircle,
@@ -11,12 +15,93 @@ import {
   Phone,
   Banknote,
   FileCheck,
+  Hourglass,
 } from 'lucide-react'
 import { formatCurrency, formatAccountName } from '../utils/formatters'
 import type { OrderWizardReturn } from '../hooks/useOrderWizard'
+import { useCreateExpectedPayment } from '#/lib/hooks/useExpectedPayments'
 
 interface CompletionStepProps {
   wizard: OrderWizardReturn
+}
+
+/**
+ * Optional, skippable: how the customer says they'll pay, noted while it's
+ * fresh so a later anonymous bank transfer has something to be matched
+ * against. Never blocks — closing this card without submitting is fine.
+ */
+function ExpectedPaymentNote({ customerId, orderId }: { customerId: number; orderId: number }) {
+  const [open, setOpen] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [expectedAmount, setExpectedAmount] = useState('')
+  const [reference, setReference] = useState('')
+  const [note, setNote] = useState('')
+  const createExpectedPayment = useCreateExpectedPayment()
+
+  if (saved) {
+    return (
+      <div className="max-w-2xl mx-auto flex items-center gap-2 rounded-xl border border-success/20 bg-success/5 p-4 text-sm text-success-foreground">
+        <CheckCircle className="size-4 text-success shrink-0" />
+        Noted — this'll show up when the desk reconciles bank transfers for this customer.
+      </div>
+    )
+  }
+
+  if (!open) {
+    return (
+      <div className="max-w-2xl mx-auto">
+        <Button type="button" variant="outline" size="sm" onClick={() => setOpen(true)}>
+          <Hourglass className="size-4 mr-2" /> Customer told you how they'll pay?
+        </Button>
+      </div>
+    )
+  }
+
+  const submit = async () => {
+    await createExpectedPayment.mutateAsync({
+      customerId,
+      orderId,
+      expectedAmount: expectedAmount ? Number(expectedAmount) : undefined,
+      reference: reference.trim(),
+      note: note.trim(),
+    })
+    setSaved(true)
+  }
+
+  return (
+    <div className="max-w-2xl mx-auto space-y-3 rounded-xl border border-border bg-card p-5">
+      <div className="flex items-center gap-2">
+        <div className="size-8 rounded-lg bg-warning/15 flex items-center justify-center text-warning">
+          <Hourglass className="size-4" />
+        </div>
+        <span className="font-semibold text-sm text-foreground">Expected payment</span>
+      </div>
+      <p className="text-xs text-muted-foreground">
+        Optional — a quick note on how the customer says they'll pay makes their bank
+        transfer easy to spot later. Skip if you don't know yet.
+      </p>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="space-y-1.5">
+          <Label htmlFor="ep-amount" className="text-xs">Expected amount</Label>
+          <Input id="ep-amount" type="number" step="0.01" placeholder="0.00" value={expectedAmount} onChange={(e) => setExpectedAmount(e.target.value)} />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="ep-ref" className="text-xs">Reference they'll use</Label>
+          <Input id="ep-ref" placeholder="e.g. their phone number" value={reference} onChange={(e) => setReference(e.target.value)} />
+        </div>
+      </div>
+      <div className="space-y-1.5">
+        <Label htmlFor="ep-note" className="text-xs">Note</Label>
+        <Textarea id="ep-note" rows={2} placeholder="e.g. Says she'll transfer from GTBank this afternoon" value={note} onChange={(e) => setNote(e.target.value)} />
+      </div>
+      <div className="flex items-center justify-end gap-2">
+        <Button type="button" variant="ghost" size="sm" onClick={() => setOpen(false)}>Skip</Button>
+        <Button type="button" size="sm" disabled={createExpectedPayment.isPending} onClick={submit}>
+          {createExpectedPayment.isPending ? 'Saving…' : 'Save note'}
+        </Button>
+      </div>
+    </div>
+  )
 }
 
 export function CompletionStep({ wizard }: CompletionStepProps) {
@@ -162,6 +247,10 @@ export function CompletionStep({ wizard }: CompletionStepProps) {
           </div>
         </div>
       </div>
+
+      {placedOrder.customerId && (
+        <ExpectedPaymentNote customerId={Number(placedOrder.customerId)} orderId={Number(placedOrder.id)} />
+      )}
 
       {/* Actions */}
       <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2 pb-4">

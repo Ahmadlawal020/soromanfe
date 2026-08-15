@@ -1,20 +1,29 @@
 import { useState } from 'react'
 import { format } from 'date-fns'
-import { Loader2, Paperclip } from 'lucide-react'
+import { Loader2, Send, ExternalLink } from 'lucide-react'
+import { useNavigate } from '@tanstack/react-router'
 
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from '#/components/ui/dialog'
 import { Button } from '#/components/ui/button'
+import { Input } from '#/components/ui/input'
+import { NativeSelect } from '#/components/ui/native-select'
 import { Textarea } from '#/components/ui/textarea'
 import { Badge } from '#/components/ui/badge'
 import { MICRO } from '#/lib/panel'
-import { cn } from '#/lib/utils'
+import { cn, getErrorMessage } from '#/lib/utils'
 import {
-  useExpenseDetail, useReviewExpense, ACTION_META, STATUS_TONE,
+  useExpenseDetail, useReviewExpense, useAddExpenseComment, useAttachFiles, ACTION_META, STATUS_TONE,
   type PfiExpense, type ExpenseAction,
 } from '#/lib/hooks/usePfis'
+import { useBankAccounts } from '#/lib/hooks/useBankAccounts'
+import { ExpenseAttachments, FileButton, FileRow, type PendingFile } from '#/components/ExpenseAttachments'
+import { uploadExpenseFile } from '#/lib/hooks/useCloudinaryUpload'
+import { useToast } from '#/lib/hooks/useToast'
 import { naira } from '#/routes/pfi/-pfi-utils'
+
+const PAYMENT_METHODS = ['Bank Transfer', 'Cash', 'Cheque', 'Card', 'Other']
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -48,22 +57,136 @@ export function ExpenseReviewDrawer({
   onOpenChange: (o: boolean) => void
   onEdit: (e: PfiExpense) => void
 }) {
+  const navigate = useNavigate()
   const { data: expense, isLoading } = useExpenseDetail(open ? expenseId : null)
+  const { data: banks } = useBankAccounts({ status: 'Active' })
   const review = useReviewExpense()
+  const addComment = useAddExpenseComment()
+  const attach = useAttachFiles()
+  const toast = useToast()
   const [pending, setPending] = useState<ExpenseAction | null>(null)
   const [note, setNote] = useState('')
+  const [comment, setComment] = useState('')
+  /** What the Expenditure Officer fills in at the moment of payment. */
+  const [pay, setPay] = useState({
+    bank_paid_from: '', amount_paid: '', payment_reference: '',
+    payment_date: '', payment_method: '', payment_notes: '',
+  })
+  const [evidence, setEvidence] = useState<PendingFile[]>([])
+  const [uploadingEvidence, setUploadingEvidence] = useState(false)
+  const payVariance =
+    Number(pay.amount_paid) > 0
+      ? Math.round((Number(pay.amount_paid) - Number(expense?.amount ?? 0)) * 100) / 100
+      : 0
+  // A payment that settles for something other than what was approved needs a
+  // reason on the record — mirrors the server-side check in paymentFor().
+  const payReady =
+    !!pay.bank_paid_from.trim() &&
+    Number(pay.amount_paid) > 0 &&
+    (payVariance === 0 || !!pay.payment_notes.trim())
 
   const run = async (action: ExpenseAction) => {
     const meta = ACTION_META[action]
     // Reject and send-back are refused server-side without a reason, so ask
     // for it here rather than round-tripping to be told.
     if (meta.needsNote && !note.trim()) { setPending(action); return }
-    await review.mutateAsync({ id: expense!.id, action, note })
+    // Marking paid is the one action that records facts of its own. First click
+    // opens the form, seeded with the amount requested — usually right, and the
+    // officer changes it when it is not.
+    if (meta.capturesPayment) {
+      if (pending !== action) {
+        setPay({
+          bank_paid_from: expense?.bank_paid_from || '',
+          amount_paid: String(Number(expense?.amount ?? 0)),
+          payment_reference: '',
+          payment_date: format(new Date(), 'yyyy-MM-dd'),
+          payment_method: '',
+          payment_notes: '',
+        })
+        setEvidence([])
+        setPending(action)
+        return
+      }
+      if (!payReady) return
+    }
+
+    await review.mutateAsync({
+      id: expense!.id,
+      action,
+      note,
+      payment: meta.capturesPayment
+        ? {
+            bank_paid_from: pay.bank_paid_from.trim(),
+            amount_paid: Number(pay.amount_paid),
+            payment_reference: pay.payment_reference.trim(),
+            payment_date: pay.payment_date || undefined,
+            payment_method: pay.payment_method,
+            payment_notes: pay.payment_notes.trim(),
+          }
+        : undefined,
+    })
+
+    // Proof of payment is registered after the transition succeeds — a failed
+    // upload must never be the reason a real payment goes unrecorded.
+    if (meta.capturesPayment && evidence.length > 0) {
+      await attach
+        .mutateAsync({
+          id: expense!.id,
+          files: evidence.map((f) => ({ ...f, type: 'payment_evidence' })),
+        })
+        .catch((err) => toast.error(getErrorMessage(err)))
+    }
+
     setNote('')
     setPending(null)
+    setEvidence([])
   }
 
-  const reasons = (expense?.history || []).filter((h) => h.changes?.note)
+  const onEvidenceFiles = async (list: FileList) => {
+    setUploadingEvidence(true)
+    try {
+      const uploaded = await Promise.all([...list].map(uploadExpenseFile))
+      setEvidence((prev) => [...prev, ...uploaded])
+    } catch (err) {
+      toast.error(getErrorMessage(err))
+    } finally {
+      setUploadingEvidence(false)
+    }
+  }
+
+  const say = async () => {
+    if (!comment.trim()) return
+    await addComment.mutateAsync({ id: expense!.id, body: comment.trim() })
+    setComment('')
+  }
+
+  /**
+   * One conversation, not two.
+   *
+   * Review reasons live in the audit trail and comments in their own table, but
+   * to anyone reading the request they are the same thread — a query and its
+   * answer are meaningless apart.
+   */
+  const thread = [
+    ...(expense?.history || [])
+      .filter((h) => h.changes?.note)
+      .map((h) => ({
+        at: h.created_at,
+        who: h.actor_name || 'Someone',
+        body: h.changes!.note as string,
+        action: h.action,
+      })),
+    ...(expense?.comments || []).map((c) => ({
+      at: c.created_at,
+      who: c.author_name || 'Someone',
+      body: c.body,
+      action: '',
+    })),
+  ].sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime())
+
+  const requested = Number(expense?.amount ?? 0)
+  const settled = expense?.amount_paid == null ? null : Number(expense.amount_paid)
+  const variance = settled == null ? 0 : Math.round((settled - requested) * 100) / 100
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -75,9 +198,26 @@ export function ExpenseReviewDrawer({
             <DialogHeader>
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <DialogTitle>{naira(Number(expense.amount))}</DialogTitle>
-                  <DialogDescription>
-                    {expense.vendor || 'Unnamed payee'} · {expense.category_name}
+                  {expense.reference_number && (
+                    <p className={cn(MICRO, 'font-mono text-muted-foreground')}>{expense.reference_number}</p>
+                  )}
+                  {/* Once settled, the headline figure is what actually left
+                      the bank — not what was asked for. */}
+                  <DialogTitle>{naira(settled ?? requested)}</DialogTitle>
+                  <DialogDescription className="flex items-center gap-1.5">
+                    <span>
+                      {expense.vendor || 'Unnamed payee'} ·{' '}
+                      {[expense.gl_code, expense.category_name].filter(Boolean).join(' · ')}
+                    </span>
+                    {expense.vendor_id && (
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-0.5 text-xs text-primary hover:underline"
+                        onClick={() => navigate({ to: '/vendors/details' as any, search: { id: String(expense.vendor_id) } as any })}
+                      >
+                        View vendor <ExternalLink className="size-3" />
+                      </button>
+                    )}
                   </DialogDescription>
                 </div>
                 <StepBadge expense={expense} />
@@ -87,52 +227,140 @@ export function ExpenseReviewDrawer({
             <div className="divide-y divide-foreground/10">
               <div className="pb-2">
                 <Row label="Date" value={format(new Date(expense.expense_date), 'd MMM yyyy')} />
-                <Row label="Description" value={expense.description} />
+                <Row label="Purpose" value={expense.description} />
+                <Row
+                  label="GL account"
+                  value={[expense.gl_code, expense.category_name].filter(Boolean).join(' · ')}
+                />
                 <Row label="Cargo" value={expense.pfi_number || 'General overhead'} />
                 <Row label="Raised by" value={expense.submitted_by_name} />
               </div>
 
+              {/* Only shown when there is an invoice behind the payment. An
+                  approver seeing ₦0 ex-VAT would read it as a zero-rated
+                  invoice rather than as no invoice at all. */}
+              {expense.amount_ex_vat != null && (
+                <div className="py-2">
+                  <p className={cn(MICRO, 'pb-1 text-muted-foreground')}>Invoice</p>
+                  <Row label="Invoice no." value={expense.invoice_number} />
+                  <Row label="TIN" value={expense.tin_number} />
+                  <Row label="Amount ex VAT" value={naira(Number(expense.amount_ex_vat))} />
+                  <Row
+                    label="VAT"
+                    value={expense.vat_amount == null ? '—' : naira(Number(expense.vat_amount))}
+                  />
+                  <Row
+                    label="Invoice amount"
+                    value={expense.invoice_amount == null ? '—' : naira(Number(expense.invoice_amount))}
+                  />
+                  {/* The rate is shown beside the amount because the amount
+                      alone cannot be checked: ₦5,000 on ₦100,000 is either a
+                      correct 5% or a mis-keyed 2%. */}
+                  <Row
+                    label={
+                      expense.wht_rate ? `WHT withheld (${Number(expense.wht_rate)}%)` : 'WHT withheld'
+                    }
+                    value={Number(expense.wht_deduction) ? naira(Number(expense.wht_deduction)) : '—'}
+                  />
+                </div>
+              )}
+
               <div className="py-2">
                 <p className={cn(MICRO, 'pb-1 text-muted-foreground')}>Payment</p>
-                <Row label="From" value={expense.bank_paid_from} />
+                <Row label="Amount requested" value={naira(requested)} />
+                {settled != null && (
+                  <>
+                    <Row label="Amount paid" value={naira(settled)} />
+                    {/* Only worth a line when the two differ — which is exactly
+                        when someone needs to see it. */}
+                    {variance !== 0 && (
+                      <Row
+                        label={variance < 0 ? 'Paid short by' : 'Paid over by'}
+                        value={
+                          <span className={variance < 0 ? 'text-warning' : 'text-info'}>
+                            {naira(Math.abs(variance))}
+                          </span>
+                        }
+                      />
+                    )}
+                  </>
+                )}
+                <Row label="Paid from" value={expense.bank_paid_from} />
+                <Row label="Payment reference" value={expense.payment_reference} />
+                {settled != null && (
+                  <>
+                    <Row
+                      label="Payment date"
+                      value={expense.payment_date ? format(new Date(expense.payment_date), 'd MMM yyyy') : undefined}
+                    />
+                    <Row label="Payment method" value={expense.payment_method} />
+                    {expense.payment_notes && <Row label="Payment notes" value={expense.payment_notes} />}
+                  </>
+                )}
                 <Row label="To" value={expense.payee_account_name} />
                 <Row
                   label="Account"
-                  value={[expense.payee_bank_name, expense.payee_account_number].filter(Boolean).join(' · ')}
+                  value={[expense.payee_bank_name, expense.bank_code, expense.payee_account_number]
+                    .filter(Boolean).join(' · ')}
                 />
-                <Row label="Reference" value={expense.receipt_reference} />
+                <Row label="Receipt reference" value={expense.receipt_reference} />
               </div>
 
-              {expense.attachment_count ? (
-                <div className="flex items-center gap-2 py-3 text-sm text-muted-foreground">
-                  <Paperclip className="size-4" />
-                  {expense.attachment_count} attachment{expense.attachment_count === 1 ? '' : 's'}
-                </div>
-              ) : null}
+              {/* Approvers ask for the invoice constantly, so the files live in
+                  the drawer rather than behind a count. */}
+              <div className="py-3">
+                <ExpenseAttachments expenseId={expense.id} />
+              </div>
 
-              {/* Read from the audit trail, not review_note — that column holds
-                  only the latest reason and is wiped when a corrected request
-                  is resubmitted. */}
-              {reasons.length > 0 && (
-                <div className="space-y-2 py-3">
-                  <p className={cn(MICRO, 'text-muted-foreground')}>Review history</p>
-                  {reasons.map((h, i) => (
-                    <div key={i} className="rounded-lg border border-foreground/15 p-2.5">
-                      <p className="text-xs text-muted-foreground">
-                        {h.actor_name || 'Someone'} · {format(new Date(h.created_at), 'd MMM, HH:mm')}
-                      </p>
-                      <p className="text-sm">{h.changes?.note}</p>
-                    </div>
-                  ))}
+              {/* Reasons are read from the audit trail, not review_note — that
+                  column holds only the latest one and is wiped when a corrected
+                  request is resubmitted. Comments sit in the same thread. */}
+              <div className="space-y-2 py-3">
+                <p className={cn(MICRO, 'text-muted-foreground')}>Conversation</p>
+                {thread.length === 0 && (
+                  <p className="text-sm text-muted-foreground/70">
+                    Nothing said yet. Ask a question here and everyone on the request sees it.
+                  </p>
+                )}
+                {thread.map((t, i) => (
+                  <div key={i} className="rounded-lg border border-foreground/15 p-2.5">
+                    <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <span>{t.who}</span>
+                      {t.action && (
+                        <Badge variant="secondary" className="px-1.5 py-0 text-[10px]">
+                          {t.action.replace(/_/g, ' ')}
+                        </Badge>
+                      )}
+                      <span>· {format(new Date(t.at), 'd MMM, HH:mm')}</span>
+                    </p>
+                    <p className="whitespace-pre-wrap text-sm">{t.body}</p>
+                  </div>
+                ))}
+
+                <div className="flex items-start gap-2 pt-1">
+                  <Textarea
+                    rows={2}
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    placeholder="Reply to the request…"
+                  />
+                  <Button
+                    size="icon" variant="outline" title="Send"
+                    disabled={!comment.trim() || addComment.isPending}
+                    onClick={say}
+                  >
+                    {addComment.isPending ? <Loader2 className="animate-spin" /> : <Send />}
+                    <span className="sr-only">Send</span>
+                  </Button>
                 </div>
-              )}
+              </div>
             </div>
 
             {/* The page renders whatever the server says is allowed and decides
                 nothing itself — including why there is nothing to do. */}
             {expense.available_actions.length > 0 ? (
               <div className="space-y-3">
-                {pending && (
+                {pending && ACTION_META[pending].needsNote && (
                   <div className="space-y-1.5">
                     <label className={cn(MICRO, 'block text-muted-foreground')}>
                       Reason for {ACTION_META[pending].label.toLowerCase()}
@@ -144,17 +372,129 @@ export function ExpenseReviewDrawer({
                     />
                   </div>
                 )}
+
+                {/* Settlement, captured at the moment it happens. The account
+                    and the amount are both required: a payment nobody can trace
+                    to an account, for an amount nobody recorded, is a rumour. */}
+                {pending && ACTION_META[pending].capturesPayment && (
+                  <div className="grid gap-3 rounded-lg border border-foreground/15 p-3 sm:grid-cols-2">
+                    <div className="space-y-1.5 sm:col-span-2">
+                      <label className={cn(MICRO, 'block text-muted-foreground')}>Paid from</label>
+                      {banks && banks.length > 0 ? (
+                        <NativeSelect
+                          autoFocus
+                          value={pay.bank_paid_from}
+                          onChange={(e) => setPay((p) => ({ ...p, bank_paid_from: e.target.value }))}
+                        >
+                          <option value="">Select the account this left…</option>
+                          {banks.map((b) => {
+                            const label = [b.bankName, b.accountNumber].filter(Boolean).join(' · ')
+                            return <option key={String(b.id)} value={label}>{label}</option>
+                          })}
+                        </NativeSelect>
+                      ) : (
+                        <Input
+                          autoFocus value={pay.bank_paid_from}
+                          onChange={(e) => setPay((p) => ({ ...p, bank_paid_from: e.target.value }))}
+                          placeholder="Which account did this leave?"
+                        />
+                      )}
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className={cn(MICRO, 'block text-muted-foreground')}>Amount paid</label>
+                      <Input
+                        type="number" value={pay.amount_paid}
+                        onChange={(e) => setPay((p) => ({ ...p, amount_paid: e.target.value }))}
+                      />
+                      <p className="text-xs leading-tight text-muted-foreground/70">
+                        {naira(requested)} requested
+                        {Number(pay.amount_paid) > 0 && Number(pay.amount_paid) !== requested
+                          ? ` · ${naira(Math.abs(Number(pay.amount_paid) - requested))} ${
+                              Number(pay.amount_paid) < requested ? 'short' : 'over'
+                            }`
+                          : ''}
+                      </p>
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className={cn(MICRO, 'block text-muted-foreground')}>
+                        Payment reference
+                      </label>
+                      <Input
+                        value={pay.payment_reference}
+                        onChange={(e) => setPay((p) => ({ ...p, payment_reference: e.target.value }))}
+                        placeholder="Teller or transfer ref"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className={cn(MICRO, 'block text-muted-foreground')}>Payment date</label>
+                      <Input
+                        type="date"
+                        value={pay.payment_date}
+                        onChange={(e) => setPay((p) => ({ ...p, payment_date: e.target.value }))}
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className={cn(MICRO, 'block text-muted-foreground')}>Payment method</label>
+                      <NativeSelect
+                        value={pay.payment_method}
+                        onChange={(e) => setPay((p) => ({ ...p, payment_method: e.target.value }))}
+                      >
+                        <option value="">Select…</option>
+                        {PAYMENT_METHODS.map((m) => <option key={m} value={m}>{m}</option>)}
+                      </NativeSelect>
+                    </div>
+                    <div className="space-y-1.5 sm:col-span-2">
+                      <label className={cn(MICRO, 'block text-muted-foreground')}>
+                        Payment notes{payVariance !== 0 ? ' — required, amount differs from what was requested' : ' (optional)'}
+                      </label>
+                      <Textarea
+                        rows={2}
+                        value={pay.payment_notes}
+                        onChange={(e) => setPay((p) => ({ ...p, payment_notes: e.target.value }))}
+                        placeholder={payVariance !== 0 ? 'Explain the difference' : 'Anything worth noting about this payment'}
+                      />
+                    </div>
+                    <div className="space-y-1.5 sm:col-span-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <label className={cn(MICRO, 'block text-muted-foreground')}>
+                          Payment evidence{evidence.length ? ` (${evidence.length})` : ' (optional)'}
+                        </label>
+                        <FileButton busy={uploadingEvidence} onFiles={onEvidenceFiles} label="Attach proof" />
+                      </div>
+                      {evidence.length > 0 && (
+                        <div className="space-y-1.5">
+                          {evidence.map((f) => (
+                            <FileRow
+                              key={f.publicId}
+                              name={f.fileName}
+                              size={f.sizeBytes}
+                              href={f.url}
+                              onRemove={() => setEvidence((prev) => prev.filter((x) => x.publicId !== f.publicId))}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 <div className="flex flex-wrap gap-2">
                   {expense.available_actions.map((a) => (
                     <Button
                       key={a}
                       className={cn(!ACTION_META[a].needsNote && ACTION_META[a].tone)}
                       variant={ACTION_META[a].needsNote ? 'outline' : 'default'}
-                      disabled={review.isPending || (pending === a && !note.trim())}
+                      disabled={
+                        review.isPending ||
+                        (pending === a && ACTION_META[a].needsNote && !note.trim()) ||
+                        (pending === a && ACTION_META[a].capturesPayment && !payReady)
+                      }
                       onClick={() => run(a)}
                     >
                       {review.isPending && <Loader2 className="animate-spin" />}
-                      {ACTION_META[a].label}
+                      {pending === a && ACTION_META[a].capturesPayment
+                        ? 'Confirm payment'
+                        : ACTION_META[a].label}
                     </Button>
                   ))}
                 </div>
