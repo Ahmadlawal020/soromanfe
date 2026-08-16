@@ -16,6 +16,8 @@ export type { Pfi }
 export type PfiFinancials = {
   /** Documented quantity from the shipping papers — what you are charged for. */
   blQtyLitres: number | null
+  /** The same BL figure in MT, alongside the litres one. */
+  blQtyMt: number | null
   /** Measured quantity in the tank — what you can actually sell. */
   tankQtyLitres: number
   /** Tank − BL. Negative is a deficit. Null until BL is entered. */
@@ -24,7 +26,14 @@ export type PfiFinancials = {
   /** BL × price. Never the tank quantity. */
   pfiValue: number | null
   totalExpenses: number
+  /** PFI value + expenses. Gross — before the credit balance below. */
   totalCost: number | null
+  /** A rebate, discount or claim credited back against the cargo. */
+  creditBalance: number
+  /** totalCost − creditBalance. What profit is actually computed against. */
+  grandTotalCost: number | null
+  /** grandTotalCost ÷ tank quantity. Null until totalCost is known. */
+  landingCostPerLitre: number | null
   revenue: number
   profitLoss: number | null
   margin: number | null

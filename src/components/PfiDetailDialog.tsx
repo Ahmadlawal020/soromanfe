@@ -185,6 +185,18 @@ export function PfiDetailDialog({
                   value={naira(f.totalExpenses)}
                 />
                 <Row label="Total cost" value={naira(f.totalCost)} />
+                {f.creditBalance > 0 && (
+                  <>
+                    <Row
+                      label="Credit balance" value={`-${naira(f.creditBalance)}`}
+                      hint="Rebate, discount or claim credited back"
+                    />
+                    <Row
+                      label="Grand total cost" value={naira(f.grandTotalCost)}
+                      hint="Total cost minus credit balance — what profit is computed against"
+                    />
+                  </>
+                )}
                 <Row
                   label={`Revenue (${pfi.orderCount} order${pfi.orderCount === 1 ? '' : 's'})`}
                   value={naira(f.revenue)}

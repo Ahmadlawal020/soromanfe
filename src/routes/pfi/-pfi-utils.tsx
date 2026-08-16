@@ -37,6 +37,16 @@ export function moneyTone(v: number | null | undefined): string {
 }
 
 /**
+ * Background + border for a card's profit/loss hero block. Pairs with
+ * {@link moneyTone} on the figure inside it — the tint carries the same
+ * verdict the text colour does, so it reads before anyone parses the number.
+ */
+export function profitTint(v: number | null | undefined): string {
+  if (v == null || !Number.isFinite(v) || v === 0) return 'border-foreground/10 bg-muted/40'
+  return v > 0 ? 'border-accent/25 bg-accent/5' : 'border-destructive/25 bg-destructive/5'
+}
+
+/**
  * The gap between the tank and the papers.
  *
  * A surplus is product you got for free; a deficit is money paid for product

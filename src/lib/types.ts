@@ -285,10 +285,13 @@ export interface Pfi {
   productName?: string
   productUnit?: string
   startingQtyLitres?: number
+  blQtyLitres?: number | null
+  blQtyMt?: number | null
   qtyVolumeMt?: number
   soldQtyLitres?: number
   totalAmount?: string | number
   unitPrice?: string | number
+  creditBalance?: string | number
   auditOfficerId?: number | null
   auditOfficerName?: string
   productOfficerId?: number | null

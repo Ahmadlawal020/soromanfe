@@ -87,6 +87,12 @@ export async function downloadPfiReport(pfiId: number) {
     ['Cargo value (BL × price)', f.pfiValue ?? '—', NGN],
     ['Total expenses', f.totalExpenses, NGN],
     ['Total cost', f.totalCost ?? '—', NGN],
+    ...(f.creditBalance > 0
+      ? ([
+        ['Credit balance', -f.creditBalance, NGN],
+        ['Grand total cost', f.grandTotalCost ?? '—', NGN],
+      ] as Array<[string, any, string?]>)
+      : []),
     ['Revenue', f.revenue, NGN],
     ['Profit / loss', f.profitLoss ?? '—', NGN],
     ['Margin', f.margin != null ? f.margin / 100 : '—', PCT],

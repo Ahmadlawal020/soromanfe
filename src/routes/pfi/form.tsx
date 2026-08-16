@@ -1,28 +1,70 @@
 import { useState, useEffect, useMemo } from 'react'
 import { PageHeader } from '#/components/PageHeader'
-import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import {
+  Loader2, Save, CheckCircle, AlertCircle, FileText, Banknote, Users, Ship,
+} from 'lucide-react'
+
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '#/components/ui/select'
-import { Loader2, Save, CheckCircle, AlertCircle, FileText, User, Package, Search, Warehouse, X } from 'lucide-react'
-import { useCreatePfi, useDepotsForFilter, useUpdatePfi } from '#/lib/hooks/usePfis'
+import { NativeSelect } from '#/components/ui/native-select'
+import { CommaInput } from '#/components/ui/comma-input'
+import { PageLoader } from '#/components/PageLoader'
+import { MICRO, PANEL, PANEL_RAIL, PANEL_BODY } from '#/lib/panel'
+import { cn, getErrorMessage } from '#/lib/utils'
+import {
+  useCreatePfi, useUpdatePfi, useDepotsForFilter, usePfiDetails,
+} from '#/lib/hooks/usePfis'
 import { useProductList } from '#/lib/hooks/useProducts'
 import { useAdminList } from '#/lib/hooks/useAdmin'
 import { routeGuard } from '#/lib/route-guard'
-import { getErrorMessage } from '#/lib/utils'
+import { naira, SurplusDeficit } from '#/routes/pfi/-pfi-utils'
 
 export const Route = createFileRoute('/pfi/form')({
   beforeLoad: () => routeGuard('/pfi'),
+  validateSearch: (search: Record<string, unknown>) => ({
+    id: (search.id as string) || '',
+  }),
   component: PFIForm,
 })
 
-interface Depot {
-  id: string
-  name: string
-  code: string
-  address: string
+const EMPTY_FORM = {
+  id: '',
+  pfiDate: '',
+  pfiNumber: '',
+  description: '',
+  locationId: '',
+  productId: '',
+  productUnit: '',
+  startingQtyLitres: '',
+  qtyVolumeMt: '',
+  blQtyLitres: '',
+  blQtyMt: '',
+  unitPrice: '',
+  creditBalance: '',
+  auditOfficerId: '',
+  productOfficerId: '',
+  itComplianceOfficerId: '',
+  securityExitOfficerId: '',
+  commissionOfficerId: '',
+  salesManagerId: '',
+  vesselBroker: '',
+  vesselName: '',
+  surveyorName: '',
+  surveyorPhone: '',
 }
+
+type FormState = typeof EMPTY_FORM
+
+const OFFICER_FIELDS: Array<{ label: string; key: keyof FormState }> = [
+  { label: 'Audit Officer', key: 'auditOfficerId' },
+  { label: 'Product Officer', key: 'productOfficerId' },
+  { label: 'IT Compliance Officer', key: 'itComplianceOfficerId' },
+  { label: 'Security Exit Officer', key: 'securityExitOfficerId' },
+  { label: 'Commission Officer', key: 'commissionOfficerId' },
+  { label: 'Sales Manager', key: 'salesManagerId' },
+]
 
 function formatDateToInput(dateStr: string | null | undefined): string {
   if (!dateStr) return ''
@@ -35,73 +77,106 @@ function formatDateToInput(dateStr: string | null | undefined): string {
   }
 }
 
+/** Field-level messages from a Zod validation failure — `{errors:[{path,message}]}`. */
+function getFieldErrors(err: any): Record<string, string> {
+  const errors = err?.response?.data?.errors
+  if (!Array.isArray(errors)) return {}
+  const map: Record<string, string> = {}
+  for (const e of errors) {
+    if (e?.path && e?.message) map[String(e.path)] = String(e.message)
+  }
+  return map
+}
+
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null
+  return <p className="text-xs text-destructive">{message}</p>
+}
+
+function Field({
+  label, required, hint, error, children,
+}: {
+  label: string
+  required?: boolean
+  hint?: string
+  error?: string
+  children: React.ReactNode
+}) {
+  return (
+    <div className="space-y-1.5">
+      <Label>
+        {label}
+        {required && <span className="text-destructive">*</span>}
+      </Label>
+      {children}
+      {error ? <FieldError message={error} /> : hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
+    </div>
+  )
+}
+
+function Section({
+  icon, title, description, children,
+}: {
+  icon: React.ReactNode
+  title: string
+  description?: string
+  children: React.ReactNode
+}) {
+  return (
+    <section className={PANEL}>
+      <div className={PANEL_RAIL}>
+        <div className="flex items-center gap-2.5">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground [&_svg]:size-4">
+            {icon}
+          </span>
+          <div>
+            <p className="text-sm font-normal">{title}</p>
+            {description && <p className="text-xs text-muted-foreground">{description}</p>}
+          </div>
+        </div>
+      </div>
+      <div className={cn(PANEL_BODY, 'space-y-4')}>{children}</div>
+    </section>
+  )
+}
+
 function PFIForm() {
   const navigate = useNavigate()
-  const router = useRouter()
+  const { id } = Route.useSearch()
+  const isEdit = !!id
   const createPfi = useCreatePfi()
   const updatePfi = useUpdatePfi()
 
-  const stateData = router.history.location.state as { pfi?: any; isEdit?: boolean } | undefined
-  const isEdit = stateData?.isEdit || false
-  const editingPfi = stateData?.pfi
+  const { data: editingPfi, isLoading: isLoadingPfi } = usePfiDetails(id)
 
-  // Data for dropdowns
   const { data: statesData } = useDepotsForFilter()
   const { data: productsData } = useProductList()
   const { data: adminsData } = useAdminList()
 
-  const locations = Array.isArray(statesData) ? statesData : ((statesData as any)?.depots || (statesData as any)?.results || [])
+  const depots = Array.isArray(statesData) ? statesData : ((statesData as any)?.depots || (statesData as any)?.results || [])
   const products = Array.isArray(productsData) ? productsData : ((productsData as any)?.products || (productsData as any)?.results || [])
   const staff = Array.isArray(adminsData) ? adminsData : []
 
-  // Depots list for location dropdown
-  const depots = useMemo<Depot[]>(() => {
-    return locations.map((d: any) => ({
-      id: String(d.id || d._id),
-      name: d.name || '',
-      code: d.code || '',
-      address: d.address || d.city || '',
-    }))
-  }, [locations])
-
-  const [form, setForm] = useState({
-    id: '',
-    pfiDate: '',
-    pfiNumber: '',
-    description: '',
-    locationId: '',
-    productId: '',
-    productUnit: '',
-    startingQtyLitres: '',
-    blQtyLitres: '',
-    qtyVolumeMt: '',
-    unitPrice: '',
-    auditOfficerId: '',
-    productOfficerId: '',
-    itComplianceOfficerId: '',
-    securityExitOfficerId: '',
-    commissionOfficerId: '',
-    salesManagerId: '',
-    vesselBroker: '',
-    vesselName: '',
-    surveyorName: '',
-    surveyorPhone: '',
-  })
+  const [form, setForm] = useState<FormState>(EMPTY_FORM)
+  const set = <K extends keyof FormState>(key: K, value: FormState[K]) =>
+    setForm((f) => ({ ...f, [key]: value }))
 
   useEffect(() => {
     if (isEdit && editingPfi) {
       setForm({
-        id: editingPfi._id || editingPfi.id || '',
+        id: String(editingPfi._id || editingPfi.id || ''),
         pfiDate: formatDateToInput(editingPfi.pfiDate),
         pfiNumber: editingPfi.pfiNumber || '',
         description: editingPfi.description || '',
         locationId: editingPfi.locationId ? String(editingPfi.locationId) : '',
-        productId: String(editingPfi.productId || ''),
+        productId: editingPfi.productId ? String(editingPfi.productId) : '',
         productUnit: editingPfi.productUnit || '',
-        startingQtyLitres: String(editingPfi.startingQtyLitres || ''),
-        blQtyLitres: (editingPfi as any).blQtyLitres != null ? String((editingPfi as any).blQtyLitres) : '',
-        qtyVolumeMt: String(editingPfi.qtyVolumeMt || ''),
-        unitPrice: editingPfi.unitPrice !== undefined && editingPfi.unitPrice !== null ? String(editingPfi.unitPrice) : '',
+        startingQtyLitres: editingPfi.startingQtyLitres != null ? String(editingPfi.startingQtyLitres) : '',
+        qtyVolumeMt: editingPfi.qtyVolumeMt != null ? String(editingPfi.qtyVolumeMt) : '',
+        blQtyLitres: editingPfi.blQtyLitres != null ? String(editingPfi.blQtyLitres) : '',
+        blQtyMt: editingPfi.blQtyMt != null ? String(editingPfi.blQtyMt) : '',
+        unitPrice: editingPfi.unitPrice != null ? String(editingPfi.unitPrice) : '',
+        creditBalance: editingPfi.creditBalance != null ? String(editingPfi.creditBalance) : '',
         auditOfficerId: editingPfi.auditOfficerId ? String(editingPfi.auditOfficerId) : '',
         productOfficerId: editingPfi.productOfficerId ? String(editingPfi.productOfficerId) : '',
         itComplianceOfficerId: editingPfi.itComplianceOfficerId ? String(editingPfi.itComplianceOfficerId) : '',
@@ -117,17 +192,47 @@ function PFIForm() {
   }, [isEdit, editingPfi])
 
   const [error, setError] = useState('')
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [submitted, setSubmitted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [locationSearch, setLocationSearch] = useState('')
-  const [isLocationOpen, setIsLocationOpen] = useState(false)
+
+  // The live preview: appears as soon as either figure is entered, because
+  // that's the earliest point a surplus/deficit or a cargo value means
+  // anything — waiting for both fields to be complete would hide the number
+  // exactly when someone is checking it against the papers as they type.
+  const preview = useMemo(() => {
+    const bl = form.blQtyLitres === '' ? null : Number(form.blQtyLitres)
+    const tank = form.startingQtyLitres === '' ? null : Number(form.startingQtyLitres)
+    const price = form.unitPrice === '' ? null : Number(form.unitPrice)
+    return {
+      show: bl != null || tank != null,
+      surplusDeficit: bl != null && tank != null ? tank - bl : null,
+      pfiValue: bl != null && price != null ? bl * price : null,
+    }
+  }, [form.blQtyLitres, form.startingQtyLitres, form.unitPrice])
+
+  const resetForm = () => {
+    setForm(EMPTY_FORM)
+    setError('')
+    setFieldErrors({})
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setFieldErrors({})
 
-    if (!form.pfiNumber || !form.productId || (!form.startingQtyLitres && !form.qtyVolumeMt)) {
-      setError('Please fill in all required fields (PFI No, Product, and Quantity).')
+    const nextErrors: Record<string, string> = {}
+    if (!form.pfiNumber.trim()) nextErrors.pfiNumber = 'PFI number is required.'
+    if (!form.locationId) nextErrors.locationId = 'Location is required.'
+    if (!form.productId) nextErrors.productId = 'Product is required.'
+    if (!form.startingQtyLitres || Number(form.startingQtyLitres) <= 0) {
+      nextErrors.startingQtyLitres = 'Quantity (Ltr) is required and must be greater than 0.'
+    }
+
+    if (Object.keys(nextErrors).length > 0) {
+      setFieldErrors(nextErrors)
+      setError('Please fix the highlighted fields.')
       return
     }
 
@@ -135,17 +240,19 @@ function PFIForm() {
     try {
       const payload = {
         pfiDate: form.pfiDate || null,
-        pfiNumber: form.pfiNumber,
+        pfiNumber: form.pfiNumber.trim(),
         description: form.description,
-        locationId: form.locationId ? form.locationId : null,
+        locationId: form.locationId || null,
         productId: form.productId,
         productUnit: form.productUnit || undefined,
         startingQtyLitres: Number(form.startingQtyLitres) || 0,
-        // Blank means unknown, not zero — a false 0 would make every downstream
-        // money figure compute against it instead of reading "—".
+        qtyVolumeMt: form.qtyVolumeMt === '' ? null : Number(form.qtyVolumeMt),
+        // Blank means unknown, not zero — a false 0 would make every
+        // downstream money figure compute against it instead of reading "—".
         blQtyLitres: form.blQtyLitres === '' ? null : Number(form.blQtyLitres),
-        qtyVolumeMt: form.qtyVolumeMt ? Number(form.qtyVolumeMt) : null,
-        unitPrice: form.unitPrice ? Number(form.unitPrice) : 0,
+        blQtyMt: form.blQtyMt === '' ? null : Number(form.blQtyMt),
+        unitPrice: form.unitPrice === '' ? 0 : Number(form.unitPrice),
+        creditBalance: form.creditBalance === '' ? 0 : Number(form.creditBalance),
         auditOfficerId: form.auditOfficerId || null,
         productOfficerId: form.productOfficerId || null,
         itComplianceOfficerId: form.itComplianceOfficerId || null,
@@ -165,437 +272,232 @@ function PFIForm() {
       }
       setSubmitted(true)
     } catch (err: any) {
-      setError(getErrorMessage(err) || 'Failed to save PFI details')
+      const status = err?.response?.status
+      if (status === 409) {
+        const msg = err?.response?.data?.message || 'A PFI with this number already exists.'
+        setFieldErrors({ pfiNumber: msg })
+        setError(msg)
+      } else {
+        const apiFieldErrors = getFieldErrors(err)
+        if (Object.keys(apiFieldErrors).length > 0) {
+          setFieldErrors(apiFieldErrors)
+          setError('Please fix the highlighted fields.')
+        } else {
+          setError(getErrorMessage(err) || 'Failed to save PFI details')
+        }
+      }
     } finally {
       setIsSubmitting(false)
     }
   }
 
+  if (isEdit && isLoadingPfi) return <PageLoader />
+
   if (submitted) {
     return (
-      <div className="flex flex-col items-center justify-center py-24 gap-5 text-center">
-        <div className="size-16 rounded-full bg-success/10 flex items-center justify-center text-success border border-success/20">
+      <div className="flex flex-col items-center justify-center gap-5 py-24 text-center">
+        <div className="flex size-16 items-center justify-center rounded-full border border-accent/20 bg-accent/10 text-accent">
           <CheckCircle className="size-8" />
         </div>
-        <h2 className="text-lg md:text-xl font-semibold text-foreground tracking-tight">PFI {isEdit ? 'Updated' : 'Registered'} Successfully!</h2>
-        <p className="text-muted-foreground max-w-sm">Pro Forma Invoice {form.pfiNumber} has been saved successfully.</p>
-        <div className="flex gap-3 mt-2">
+        <h2 className="text-xl font-semibold tracking-tight text-foreground">
+          PFI {isEdit ? 'updated' : 'registered'} successfully
+        </h2>
+        <p className="max-w-sm text-muted-foreground">
+          Pro Forma Invoice {form.pfiNumber} has been saved.
+        </p>
+        <div className="mt-2 flex gap-3">
           {!isEdit && (
-            <Button variant="outline" onClick={() => {
-              setSubmitted(false)
-              setForm({
-                id: '',
-                pfiDate: '',
-                pfiNumber: '',
-                description: '',
-                locationId: '',
-                productId: '',
-                productUnit: '',
-                startingQtyLitres: '',
-                blQtyLitres: '',
-                qtyVolumeMt: '',
-                unitPrice: '',
-                auditOfficerId: '',
-                productOfficerId: '',
-                itComplianceOfficerId: '',
-                securityExitOfficerId: '',
-                commissionOfficerId: '',
-                salesManagerId: '',
-                vesselBroker: '',
-                vesselName: '',
-                surveyorName: '',
-                surveyorPhone: '',
-              })
-              setError('')
-            }}>
-              Add Another
+            <Button variant="outline" onClick={() => { setSubmitted(false); resetForm() }}>
+              Add another
             </Button>
           )}
-          <Button onClick={() => navigate({ to: '/pfi' as any })}>Back to PFI List</Button>
+          <Button onClick={() => navigate({ to: '/pfi' })}>Back to PFI list</Button>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6 animate-fade-in ">
+    <div className="animate-fade-in space-y-6">
       <PageHeader
         eyebrow="Admin"
         title={isEdit ? 'Edit PFI' : 'Add New PFI'}
-        description={isEdit ? 'Modify information, officers, and vessel credentials of this PFI' : 'Register a new Pro Forma Invoice'}
+        description={isEdit ? 'Modify quantities, cost, officers and vessel details for this batch.' : 'Register a new Pro Forma Invoice.'}
       />
 
       <form onSubmit={handleSubmit} noValidate className="space-y-6">
         {error && (
-          <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm font-normal flex items-center gap-2 max-w-3xl">
+          <div className="flex items-center gap-2 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
             <AlertCircle className="size-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-
-          {/* Section 1: PFI Identity & Specs */}
-          <div className="space-y-4 border rounded-lg p-5 bg-card">
-            <div className="flex items-center space-x-2 border-b pb-2">
-              <FileText className="size-5 text-primary" />
-              <h2 className="text-lg font-semibold">Identity & Specs</h2>
-            </div>
-            <div className="space-y-3">
-              <div>
-                <Label>PFI Date</Label>
-                <Input type="date" value={form.pfiDate} onChange={e => setForm({ ...form, pfiDate: e.target.value })} />
+        <div className="grid items-start gap-6 lg:grid-cols-2">
+          <div className="space-y-6">
+            <Section icon={<FileText />} title="Identity" description="What this batch is and where it's going.">
+              <div className="grid grid-cols-2 gap-4">
+                <Field label="Date">
+                  <Input type="date" value={form.pfiDate} onChange={(e) => set('pfiDate', e.target.value)} />
+                </Field>
+                <Field label="PFI No" required error={fieldErrors.pfiNumber}>
+                  <Input
+                    placeholder="e.g. PFI-50" value={form.pfiNumber}
+                    aria-invalid={!!fieldErrors.pfiNumber}
+                    onChange={(e) => set('pfiNumber', e.target.value)}
+                  />
+                </Field>
               </div>
 
-              <div>
-                <Label>PFI No *</Label>
-                <Input placeholder="e.g. PFI-001" value={form.pfiNumber} onChange={e => setForm({ ...form, pfiNumber: e.target.value })} required />
-              </div>
+              <Field label="Description">
+                <Input
+                  placeholder="e.g. AGO bulk supply" value={form.description}
+                  onChange={(e) => set('description', e.target.value)}
+                />
+              </Field>
 
-              <div>
-                <Label>Description</Label>
-                <Input placeholder="e.g. AGO bulk supply" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
-              </div>
-
-              <div>
-                <Label>Depot Location (Optional)</Label>
-                {(() => {
-                  const selected = form.locationId ? depots.find((d: Depot) => d.id === form.locationId) : null
-
-                  if (selected && !isLocationOpen) {
-                    return (
-                      <div className="mt-1 p-3 border rounded-lg bg-muted/30 flex items-center gap-3">
-                        <div className="size-9 rounded-lg flex items-center justify-center shrink-0 bg-primary/10 text-primary">
-                          <Warehouse className="size-4" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-sm text-foreground truncate">{selected.name}</p>
-                          <p className="text-xs text-muted-foreground">{selected.code} &bull; Depot</p>
-                        </div>
-                        <Button type="button" variant="outline" size="sm" onClick={() => { setIsLocationOpen(true); setLocationSearch('') }}>Change</Button>
-                      </div>
-                    )
-                  }
-
-                  const filtered = locationSearch.trim()
-                    ? depots.filter((d: Depot) =>
-                      d.name.toLowerCase().includes(locationSearch.toLowerCase()) ||
-                      d.code.toLowerCase().includes(locationSearch.toLowerCase()) ||
-                      d.address.toLowerCase().includes(locationSearch.toLowerCase())
-                    )
-                    : depots
-
-                  return (
-                    <div className="space-y-2 mt-1">
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground size-4" />
-                        <Input
-                          placeholder="Search depots..."
-                          className="pl-10 pr-9"
-                          value={locationSearch}
-                          onChange={(e) => { setLocationSearch(e.target.value); setIsLocationOpen(true) }}
-                          autoFocus
-                        />
-                        {locationSearch && (
-                          <button type="button" onClick={() => setLocationSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                            <X className="size-4" />
-                          </button>
-                        )}
-                      </div>
-                      <div className="border rounded-lg max-h-[200px] overflow-y-auto">
-                        <div
-                          className="p-2.5 hover:bg-muted cursor-pointer text-sm text-muted-foreground border-b"
-                          onClick={() => { setForm({ ...form, locationId: '' }); setIsLocationOpen(false); setLocationSearch('') }}
-                        >
-                          No Depot Selected
-                        </div>
-                        {filtered.length === 0 ? (
-                          <div className="p-4 text-center text-sm text-muted-foreground">No depots found</div>
-                        ) : (
-                          filtered.map((d: Depot) => {
-                            const isSelected = form.locationId === d.id
-                            return (
-                              <div
-                                key={d.id}
-                                className={`p-2.5 flex items-center gap-3 cursor-pointer hover:bg-muted transition-colors ${isSelected ? 'bg-primary/5' : ''}`}
-                                onClick={() => {
-                                  setForm({ ...form, locationId: d.id })
-                                  setIsLocationOpen(false)
-                                  setLocationSearch('')
-                                }}
-                              >
-                                <div className="size-8 rounded-lg flex items-center justify-center shrink-0 bg-primary/10 text-primary">
-                                  <Warehouse className="size-3.5" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="font-normal text-sm text-foreground truncate">{d.name}</p>
-                                  <p className="text-xs text-muted-foreground truncate">{d.code} {d.address ? `• ${d.address}` : ''}</p>
-                                </div>
-                                <span className="text-xs font-normal px-1.5 py-0.5 rounded bg-primary/10 text-primary">
-                                  Depot
-                                </span>
-                              </div>
-                            )
-                          })
-                        )}
-                      </div>
-                    </div>
-                  )
-                })()}
-              </div>
-
-              <div>
-                <Label>Product *</Label>
-                <Select value={form.productId} onValueChange={v => {
-                  const selected = products.find((p: any) => String(p.id || p._id) === String(v))
-                  setForm(prev => ({
-                    ...prev,
-                    productId: v,
-                    productUnit: selected?.unit || 'Litres'
-                  }))
-                }}>
-                  <SelectTrigger><SelectValue placeholder="Select product" /></SelectTrigger>
-                  <SelectContent>
-                    {products.map((p: any) => (
-                      <SelectItem key={p.id || p._id} value={String(p.id || p._id)}>
-                        {p.name} {p.unit ? `(${p.unit})` : ''}
-                      </SelectItem>
+              <div className="grid grid-cols-2 gap-4">
+                <Field label="Location" required error={fieldErrors.locationId}>
+                  <NativeSelect
+                    value={form.locationId} aria-invalid={!!fieldErrors.locationId}
+                    onChange={(e) => set('locationId', e.target.value)}
+                  >
+                    <option value="">Select location</option>
+                    {depots.map((d: any) => (
+                      <option key={d.id || d._id} value={String(d.id || d._id)}>
+                        {d.name}{d.code ? ` (${d.code})` : ''}
+                      </option>
                     ))}
-                  </SelectContent>
-                </Select>
+                  </NativeSelect>
+                </Field>
+                <Field label="Product" required error={fieldErrors.productId}>
+                  <NativeSelect
+                    value={form.productId} aria-invalid={!!fieldErrors.productId}
+                    onChange={(e) => {
+                      const v = e.target.value
+                      const selected = products.find((p: any) => String(p.id || p._id) === v)
+                      setForm((f) => ({ ...f, productId: v, productUnit: selected?.unit || f.productUnit }))
+                    }}
+                  >
+                    <option value="">Select product</option>
+                    {products.map((p: any) => (
+                      <option key={p.id || p._id} value={String(p.id || p._id)}>
+                        {p.name}{p.unit ? ` (${p.unit})` : ''}
+                      </option>
+                    ))}
+                  </NativeSelect>
+                </Field>
               </div>
 
-              {(() => {
-                const selectedProd = products.find((p: any) => String(p.id || p._id) === String(form.productId))
-                const unitName = selectedProd?.unit || form.productUnit || 'Litres'
-                const uLower = unitName.toLowerCase()
-                const isWeightProd = uLower.includes('mt') || uLower.includes('ton') || uLower.includes('kg') || uLower.includes('weight')
+              <div className="grid grid-cols-2 gap-4">
+                <Field
+                  label="Qty Volume (Ltr)" required error={fieldErrors.startingQtyLitres}
+                  hint="The tank figure — what measured into the tank."
+                >
+                  <CommaInput
+                    value={form.startingQtyLitres} aria-invalid={!!fieldErrors.startingQtyLitres}
+                    placeholder="e.g. 1,000,000"
+                    onValueChange={(v) => set('startingQtyLitres', v)}
+                  />
+                </Field>
+                <Field label="Qty Volume (MT)">
+                  <CommaInput
+                    value={form.qtyVolumeMt} placeholder="e.g. 820"
+                    onValueChange={(v) => set('qtyVolumeMt', v)}
+                  />
+                </Field>
+              </div>
+            </Section>
 
-                const activeQty = isWeightProd
-                  ? (Number(form.qtyVolumeMt) || Number(form.startingQtyLitres) || 0)
-                  : (Number(form.startingQtyLitres) || Number(form.qtyVolumeMt) || 0)
+            <Section icon={<Banknote />} title="Cargo Cost" description="What the shipping papers say you're billed for.">
+              <div className="grid grid-cols-2 gap-4">
+                <Field label="BL Figures (Ltr)">
+                  <CommaInput
+                    value={form.blQtyLitres} placeholder="e.g. 1,000,000"
+                    onValueChange={(v) => set('blQtyLitres', v)}
+                  />
+                </Field>
+                <Field label="BL Figures (MT)">
+                  <CommaInput
+                    value={form.blQtyMt} placeholder="e.g. 820"
+                    onValueChange={(v) => set('blQtyMt', v)}
+                  />
+                </Field>
+              </div>
 
-                const unitPriceVal = Number(form.unitPrice) || 0
-                const projectedCost = activeQty * unitPriceVal
+              <div className="grid grid-cols-2 gap-4">
+                <Field label="Price / Litre (₦)">
+                  <CommaInput
+                    value={form.unitPrice} placeholder="e.g. 950.00"
+                    onValueChange={(v) => set('unitPrice', v)}
+                  />
+                </Field>
+                <Field
+                  label="Credit Balance (₦)"
+                  hint="Rebate, discount or claim credited back. Reduces the grand total cost."
+                >
+                  <CommaInput
+                    value={form.creditBalance} placeholder="0.00"
+                    onValueChange={(v) => set('creditBalance', v)}
+                  />
+                </Field>
+              </div>
 
-                return (
-                  <div className="space-y-4 pt-1">
-                    {/* Primary Quantity Input matching product unit */}
-                    <div className="space-y-1.5">
-                      <div className="flex justify-between items-center">
-                        <Label className="font-semibold text-foreground">
-                          Quantity ({unitName}) *
-                        </Label>
-                        <span className="text-xs font-normal text-primary bg-primary/10 px-2 py-0.5 rounded-md">
-                          Unit: {unitName}
-                        </span>
-                      </div>
-                      <div className="relative">
-                        <Input
-                          type="number"
-                          step={isWeightProd ? "0.001" : "1"}
-                          min="0"
-                          placeholder={isWeightProd ? "e.g. 820" : "e.g. 1000000"}
-                          value={isWeightProd ? form.qtyVolumeMt : form.startingQtyLitres}
-                          onChange={e => {
-                            if (isWeightProd) {
-                              setForm({ ...form, qtyVolumeMt: e.target.value })
-                            } else {
-                              setForm({ ...form, startingQtyLitres: e.target.value })
-                            }
-                          }}
-                          required
-                          className="pr-16 font-normal"
-                        />
-                        <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-xs font-semibold text-muted-foreground bg-muted px-2 py-1 rounded">
-                          {unitName}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/*
-                      BL quantity — the documented figure from the shipping
-                      papers, which is what you are billed for. The quantity
-                      above is what measured into the tank, which is what you
-                      can sell. Cargo value is computed from this one, so
-                      leaving it blank is what makes a PFI read as unpriced.
-                    */}
-                    <div className="space-y-1.5">
-                      <Label className="text-xs font-normal">
-                        BL Quantity — from the shipping papers
-                      </Label>
-                      <div className="relative">
-                        <Input
-                          type="number"
-                          step="1"
-                          min="0"
-                          placeholder="e.g. 1000000"
-                          value={form.blQtyLitres}
-                          onChange={e => setForm({ ...form, blQtyLitres: e.target.value })}
-                          className="pr-16 font-normal"
-                        />
-                        <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-xs font-semibold text-muted-foreground bg-muted px-2 py-1 rounded">
-                          Litres
-                        </div>
-                      </div>
-                      {(() => {
-                        const bl = Number(form.blQtyLitres)
-                        const tank = Number(form.startingQtyLitres)
-                        if (!form.blQtyLitres || !bl || !tank) {
-                          return (
-                            <p className="text-xs text-muted-foreground">
-                              What you pay for. Cargo value is computed from this, not the tank
-                              quantity — leave it blank and every money figure will read “—”.
-                            </p>
-                          )
-                        }
-                        const gap = tank - bl
-                        if (gap === 0) {
-                          return <p className="text-xs text-muted-foreground">Tank matches the papers exactly.</p>
-                        }
-                        const price = Number(form.unitPrice) || 0
-                        const worth = price > 0
-                          ? ` — worth ₦${(Math.abs(gap) * price).toLocaleString('en-NG', { maximumFractionDigits: 0 })}`
-                          : ''
-                        return gap > 0 ? (
-                          <p className="text-xs text-accent">
-                            Surplus of {gap.toLocaleString()} L — more landed than the papers say.
-                          </p>
-                        ) : (
-                          <p className="text-xs text-destructive">
-                            Deficit of {Math.abs(gap).toLocaleString()} L{worth} — you are billed for
-                            product that never arrived.
-                          </p>
-                        )
-                      })()}
-                    </div>
-
-                    {/* Secondary Equivalent Input (Optional) */}
-                    <div className="space-y-1.5">
-                      <Label className="text-xs text-muted-foreground font-normal">
-                        {isWeightProd ? 'Equivalent Volume in Litres (Optional)' : 'Equivalent Weight in MT / kg (Optional)'}
-                      </Label>
-                      <div className="relative">
-                        <Input
-                          type="number"
-                          step={isWeightProd ? "1" : "0.001"}
-                          min="0"
-                          placeholder={isWeightProd ? "e.g. 1000000" : "e.g. 820"}
-                          value={isWeightProd ? form.startingQtyLitres : form.qtyVolumeMt}
-                          onChange={e => {
-                            if (isWeightProd) {
-                              setForm({ ...form, startingQtyLitres: e.target.value })
-                            } else {
-                              setForm({ ...form, qtyVolumeMt: e.target.value })
-                            }
-                          }}
-                          className="pr-16 text-xs text-muted-foreground"
-                        />
-                        <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-xs font-normal text-muted-foreground bg-muted/60 px-2 py-0.5 rounded">
-                          {isWeightProd ? 'Litres' : 'MT / kg'}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Unit Price Input */}
-                    <div className="space-y-1.5 pt-1">
-                      <Label className="font-semibold text-foreground">
-                        Unit Price (₦ per {unitName})
-                      </Label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-semibold text-muted-foreground">₦</span>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          placeholder="e.g. 950.00"
-                          value={form.unitPrice}
-                          onChange={e => setForm({ ...form, unitPrice: e.target.value })}
-                          className="pl-8 font-normal"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Dynamic Cost Projection Summary */}
-                    {activeQty > 0 && unitPriceVal > 0 && (
-                      <div className="p-3 rounded-lg bg-primary/5 border border-primary/20 text-xs flex justify-between items-center">
-                        <span className="text-muted-foreground">
-                          Projected Cumulative Cost ({activeQty.toLocaleString()} {unitName} × ₦{unitPriceVal.toLocaleString()}):
-                        </span>
-                        <span className="font-semibold text-primary text-sm">
-                          ₦{projectedCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </span>
-                      </div>
-                    )}
+              {preview.show && (
+                <div className="grid grid-cols-2 gap-4 rounded-lg border border-foreground/10 bg-muted/30 p-3">
+                  <div>
+                    <p className={cn(MICRO, 'text-muted-foreground')}>Surplus / deficit</p>
+                    <div className="mt-1"><SurplusDeficit litres={preview.surplusDeficit} className="text-sm" /></div>
                   </div>
-                )
-              })()}
-            </div>
-          </div>
-
-          {/* Section 2: Assigned Officers */}
-          <div className="space-y-4 border rounded-lg p-5 bg-card">
-            <div className="flex items-center space-x-2 border-b pb-2">
-              <User className="size-5 text-primary" />
-              <h2 className="text-lg font-semibold">Assigned Officers</h2>
-            </div>
-            <div className="space-y-3">
-              {[
-                { label: 'Audit Officer', key: 'auditOfficerId' },
-                { label: 'Product Officer', key: 'productOfficerId' },
-                { label: 'IT Compliance', key: 'itComplianceOfficerId' },
-                { label: 'Security Exit', key: 'securityExitOfficerId' },
-                { label: 'Commission Officer', key: 'commissionOfficerId' },
-                { label: 'Sales Manager', key: 'salesManagerId' },
-              ].map((field) => (
-                <div key={field.key}>
-                  <Label>{field.label}</Label>
-                  <Select value={(form as any)[field.key] || "none"} onValueChange={v => setForm({ ...form, [field.key]: v === 'none' ? '' : v })}>
-                    <SelectTrigger><SelectValue placeholder="Unassigned" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Unassigned</SelectItem>
-                      {staff.map((u: any) => (
-                        <SelectItem key={u.id} value={String(u.id)}>{u.full_name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div>
+                    <p className={cn(MICRO, 'text-muted-foreground')}>PFI value (cargo cost)</p>
+                    <p className="mt-1 text-sm font-semibold">{naira(preview.pfiValue)}</p>
+                  </div>
                 </div>
-              ))}
-            </div>
+              )}
+            </Section>
           </div>
 
-          {/* Section 3: Vessel & Surveyor */}
-          <div className="space-y-4 border rounded-lg p-5 bg-card">
-            <div className="flex items-center space-x-2 border-b pb-2">
-              <Package className="size-5 text-primary" />
-              <h2 className="text-lg font-semibold">Vessel & Surveyor</h2>
-            </div>
-            <div className="space-y-3">
-              <div>
-                <Label>Vessel Broker</Label>
-                <Input placeholder="Broker name" value={form.vesselBroker} onChange={e => setForm({ ...form, vesselBroker: e.target.value })} />
+          <div className="space-y-6">
+            <Section icon={<Users />} title="Officers" description="All optional — leave unassigned and fill in later.">
+              <div className="grid grid-cols-2 gap-4">
+                {OFFICER_FIELDS.map(({ label, key }) => (
+                  <Field key={key} label={label}>
+                    <NativeSelect value={form[key]} onChange={(e) => set(key, e.target.value)}>
+                      <option value="">Unassigned</option>
+                      {staff.map((u: any) => (
+                        <option key={u.id} value={String(u.id)}>{u.full_name}</option>
+                      ))}
+                    </NativeSelect>
+                  </Field>
+                ))}
               </div>
-              <div>
-                <Label>Vessel Name</Label>
-                <Input placeholder="e.g. MV Lagos Star" value={form.vesselName} onChange={e => setForm({ ...form, vesselName: e.target.value })} />
-              </div>
-              <div>
-                <Label>Surveyor Name</Label>
-                <Input placeholder="Surveyor full name" value={form.surveyorName} onChange={e => setForm({ ...form, surveyorName: e.target.value })} />
-              </div>
-              <div>
-                <Label>Surveyor Phone</Label>
-                <Input type="tel" placeholder="e.g. 08012345678" value={form.surveyorPhone} onChange={e => setForm({ ...form, surveyorPhone: e.target.value })} />
-              </div>
-            </div>
-          </div>
+            </Section>
 
+            <Section icon={<Ship />} title="Vessel & Surveyor" description="All optional.">
+              <div className="grid grid-cols-2 gap-4">
+                <Field label="Vessel Broker">
+                  <Input placeholder="Broker name" value={form.vesselBroker} onChange={(e) => set('vesselBroker', e.target.value)} />
+                </Field>
+                <Field label="Vessel Name">
+                  <Input placeholder="e.g. MV Lagos Star" value={form.vesselName} onChange={(e) => set('vesselName', e.target.value)} />
+                </Field>
+                <Field label="Surveyor Name">
+                  <Input placeholder="Surveyor full name" value={form.surveyorName} onChange={(e) => set('surveyorName', e.target.value)} />
+                </Field>
+                <Field label="Surveyor Phone">
+                  <Input type="tel" placeholder="e.g. 08012345678" value={form.surveyorPhone} onChange={(e) => set('surveyorPhone', e.target.value)} />
+                </Field>
+              </div>
+            </Section>
+          </div>
         </div>
 
-        <div className="flex justify-end gap-3 border-t pt-4">
-          <Button type="button" variant="outline" onClick={() => navigate({ to: '/pfi' as any })}>Cancel</Button>
-          <Button type="submit" disabled={isSubmitting} className="min-w-[150px]">
-            {isSubmitting ? <><Loader2 className="size-4 animate-spin mr-2" />Saving...</> : <><Save className="size-4 mr-2" />{isEdit ? 'Update PFI' : 'Save PFI'}</>}
+        <div className="flex justify-end gap-3 border-t border-foreground/10 pt-4">
+          <Button type="button" variant="outline" onClick={() => navigate({ to: '/pfi' })}>Cancel</Button>
+          <Button type="submit" disabled={isSubmitting} className="min-w-[9rem]">
+            {isSubmitting ? <Loader2 className="animate-spin" /> : <Save data-icon="inline-start" />}
+            {isSubmitting ? 'Saving…' : isEdit ? 'Update PFI' : 'Save PFI'}
           </Button>
         </div>
       </form>

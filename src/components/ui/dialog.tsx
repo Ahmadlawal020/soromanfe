@@ -43,7 +43,10 @@ function DialogContent({ className, children, ...props }: React.ComponentProps<t
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          "fixed top-1/2 left-1/2 z-50 grid w-full max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4",
+          // grid-cols-1, not bare `grid` — an implicit auto column has no
+          // minmax(0,…) floor, so unwrappable content anywhere inside (a long
+          // figure, an input) blows the column past max-w and off the edge.
+          "fixed top-1/2 left-1/2 z-50 grid grid-cols-1 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4",
           "rounded-xl border border-foreground/15 bg-popover p-6 text-popover-foreground",
           " duration-200 ease-luxe",
           "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",

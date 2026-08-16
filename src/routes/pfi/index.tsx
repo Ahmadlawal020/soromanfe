@@ -3,26 +3,25 @@ import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import {
   Search, Plus, Package, Banknote, Droplets, TriangleAlert,
-  ArrowUpDown, Lock, Pencil, Download, X,
+  ArrowUpDown, Lock, Pencil, Download, X, TrendingUp, TrendingDown,
 } from 'lucide-react'
 
 import { StatCard, StatCardGrid } from '#/components/ui/stat-card'
-import { Badge } from '#/components/ui/badge'
+import { StatusChip } from '#/components/ui/status-chip'
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
 import { NativeSelect } from '#/components/ui/native-select'
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '#/components/ui/table'
 import { PageLoader } from '#/components/PageLoader'
 import { PageError } from '#/components/PageError'
 import { PageEmpty } from '#/components/PageEmpty'
 import { FilterBar } from '#/components/FilterBar'
 import { PfiDetailDialog } from '#/components/PfiDetailDialog'
 import { PfiCloseDialog } from '#/components/PfiCloseDialog'
-import { MICRO, PANEL } from '#/lib/panel'
+import { MICRO, PANEL, PANEL_RAIL, PANEL_FOOTER } from '#/lib/panel'
 import { cn, getErrorMessage } from '#/lib/utils'
 import { usePfiList, type PfiWithFinancials } from '#/lib/hooks/usePfis'
 import {
-  naira, litres, moneyTone, SurplusDeficit, SellThroughBar,
+  naira, litres, moneyTone, profitTint, SurplusDeficit, SellThroughBar,
 } from '#/routes/pfi/-pfi-utils'
 import { downloadPfiReport, downloadMasterReport } from '#/routes/pfi/-pfi-report'
 import { routeGuard } from '#/lib/route-guard'
@@ -34,10 +33,13 @@ export const Route = createFileRoute('/pfi/')({
 
 type SortKey = 'pfiNumber' | 'cost' | 'revenue' | 'profit' | 'remaining' | 'sellThrough'
 
-const COLUMNS: Array<{ key: SortKey; label: string; numeric?: boolean }> = [
-  { key: 'cost', label: 'Total cost', numeric: true },
-  { key: 'revenue', label: 'Revenue', numeric: true },
-  { key: 'profit', label: 'Profit / loss', numeric: true },
+const SORT_OPTIONS: Array<{ key: SortKey; label: string }> = [
+  { key: 'profit', label: 'Profit / loss' },
+  { key: 'revenue', label: 'Revenue' },
+  { key: 'cost', label: 'Total cost' },
+  { key: 'remaining', label: 'Stock remaining' },
+  { key: 'sellThrough', label: 'Sell-through' },
+  { key: 'pfiNumber', label: 'PFI number' },
 ]
 
 /**
@@ -114,8 +116,8 @@ function PFIDashboard() {
     }
   }, [pfis])
 
-  const toggleSort = (key: SortKey) =>
-    setSort((s) => (s.key === key ? { key, dir: s.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'desc' }))
+  const setSortKey = (key: SortKey) => setSort((s) => (s.key === key ? s : { key, dir: 'desc' }))
+  const toggleSortDir = () => setSort((s) => ({ ...s, dir: s.dir === 'asc' ? 'desc' : 'asc' }))
 
   if (isLoading) return <PageLoader />
   if (isError) return <PageError message={getErrorMessage(error)} onRetry={() => refetch()} />
@@ -142,23 +144,36 @@ function PFIDashboard() {
       }
     />
 
-      <StatCardGrid count={4}>
+      <StatCardGrid count={6}>
         <StatCard
-          icon={<Package />} label="Batches" value={stats.count}
-          description={`${stats.active} active · ${stats.count - stats.active} finished`}
+          icon={<Package />} label="Active batches" value={stats.active}
+          tone="blue"
+          description={`${stats.count} total`}
         />
         <StatCard
-          icon={<Banknote />} label="Total cost" value={naira(stats.cost, { compact: true })}
+          icon={<Lock />} label="Finished batches" value={stats.count - stats.active}
+          tone="neutral"
+          description={stats.count > 0 ? `${Math.round(((stats.count - stats.active) / stats.count) * 100)}% of portfolio` : 'None yet'}
+        />
+        <StatCard
+          icon={<Banknote />} label="Total cost" value={naira(stats.cost)}
           tone="neutral"
           description={
             stats.uncosted > 0
               ? `${stats.uncosted} batch${stats.uncosted === 1 ? '' : 'es'} not yet priced — excluded`
-              : `Cargo + ${naira(stats.expenses, { compact: true })} expenses`
+              : `Cargo + ${naira(stats.expenses)} expenses`
           }
         />
         <StatCard
-          icon={<Banknote />} label="Revenue" value={naira(stats.revenue, { compact: true })}
+          icon={<Banknote />} label="Revenue" value={naira(stats.revenue)}
+          tone="blue"
           description="Invoiced on paid, released, loading and completed orders"
+        />
+        <StatCard
+          icon={stats.profit == null || stats.profit === 0 ? <Banknote /> : stats.profit > 0 ? <TrendingUp /> : <TrendingDown />}
+          label="Profit / loss" value={naira(stats.profit)}
+          tone={stats.profit == null || stats.profit === 0 ? 'neutral' : stats.profit > 0 ? 'green' : 'red'}
+          description={stats.uncosted > 0 ? `Across ${stats.costed} costed batch${stats.costed === 1 ? '' : 'es'}` : 'Across the whole portfolio'}
         />
         <StatCard
           icon={<Droplets />} label="Stock remaining" value={litres(stats.remaining)}
@@ -197,6 +212,18 @@ function PFIDashboard() {
         <option value="active">Active</option>
         <option value="finished">Finished</option>
         </NativeSelect>
+        <div className="flex items-center gap-1">
+        <NativeSelect className="w-44" value={sort.key} onChange={(e) => setSortKey(e.target.value as SortKey)}>
+        {SORT_OPTIONS.map((o) => <option key={o.key} value={o.key}>Sort: {o.label}</option>)}
+        </NativeSelect>
+        <Button
+        variant="outline" size="icon" onClick={toggleSortDir}
+        title={sort.dir === 'asc' ? 'Ascending — click for descending' : 'Descending — click for ascending'}
+        >
+        <ArrowUpDown />
+        <span className="sr-only">Toggle sort direction</span>
+        </Button>
+        </div>
         {hasFilters && (
         <Button variant="ghost" size="sm" onClick={() => { setSearch(''); setStatus('all') }}>
         <X data-icon="inline-start" />
@@ -205,9 +232,8 @@ function PFIDashboard() {
         )}
       </FilterBar>
 
-      <div className={cn(PANEL)}>
-
-        {rows.length === 0 ? (
+      {rows.length === 0 ? (
+        <div className={cn(PANEL)}>
           <PageEmpty
             icon={<Package />}
             title={hasFilters ? 'No PFIs match those filters' : 'No PFIs yet'}
@@ -217,112 +243,130 @@ function PFIDashboard() {
                 : 'Create one to start tracking a cargo batch.'
             }
           />
-        ) : (
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>PFI</TableHead>
-                  <TableHead className="hidden lg:table-cell">BL vs tank</TableHead>
-                  <TableHead className="hidden md:table-cell">Sell-through</TableHead>
-                  {COLUMNS.map((c) => (
-                    <TableHead key={c.key} className="text-right">
-                      <button
-                        type="button"
-                        className="ml-auto inline-flex items-center gap-1 hover:text-foreground"
-                        onClick={() => toggleSort(c.key)}
-                      >
-                        {c.label}
-                        <ArrowUpDown className={cn('size-3', sort.key === c.key ? 'opacity-100' : 'opacity-30')} />
-                      </button>
-                    </TableHead>
-                  ))}
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {rows.map((p) => {
-                  const f = p.financials
-                  return (
-                    <TableRow
-                      key={p.id}
-                      className="cursor-pointer"
-                      onClick={() => setDetailId(Number(p.id))}
-                    >
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <span className="font-normal">{p.pfiNumber}</span>
-                          <Badge variant={p.status === 'active' ? 'default' : 'secondary'} className="shrink-0">
-                            {p.status === 'active' ? 'Active' : 'Finished'}
-                          </Badge>
-                        </div>
-                        <p className="truncate text-xs text-muted-foreground">
-                          {[p.productName, p.locationName].filter(Boolean).join(' · ') || '—'}
-                        </p>
-                      </TableCell>
-
-                      <TableCell className="hidden lg:table-cell">
-                        <p className="text-sm">{litres(f.blQtyLitres)}</p>
-                        <SurplusDeficit litres={f.surplusDeficitLitres} className="text-xs" />
-                      </TableCell>
-
-                      <TableCell className="hidden md:table-cell">
-                        <SellThroughBar value={f.sellThrough} className="min-w-[7rem]" />
-                        <p className="mt-0.5 text-xs text-muted-foreground">{litres(f.remaining)} left</p>
-                      </TableCell>
-
-                      <TableCell className="text-right">{naira(f.totalCost, { compact: true })}</TableCell>
-                      <TableCell className="text-right">{naira(f.revenue, { compact: true })}</TableCell>
-                      <TableCell className={cn('text-right', moneyTone(f.profitLoss))}>
-                        {naira(f.profitLoss, { compact: true })}
-                        {/* A part-sold batch charges full cost against partial
-                            revenue, so the figure beside this is not yet real. */}
-                        {!f.profitIsMeaningful && f.sellThrough != null && (
-                          <span
-                            className="ml-1 cursor-help text-muted-foreground"
-                            title={`Only ${Math.round(f.sellThrough * 100)}% sold — full cargo cost is charged against partial revenue, so this is not yet a real figure.`}
-                          >
-                            *
-                          </span>
-                        )}
-                      </TableCell>
-
-                      <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center justify-end gap-0.5">
-                          {p.status === 'active' && (
-                            <Button variant="ghost" size="icon-sm" onClick={() => setClosing(p)} title="Close PFI">
-                              <Lock /><span className="sr-only">Close</span>
-                            </Button>
-                          )}
-                          <Button
-                            variant="ghost" size="icon-sm" title="Edit"
-                            onClick={() => navigate({ to: '/pfi/form', search: { id: String(p.id) } as any })}
-                          >
-                            <Pencil /><span className="sr-only">Edit</span>
-                          </Button>
-                          <Button
-                            variant="ghost" size="icon-sm" title="Download report"
-                            onClick={() => downloadPfiReport(Number(p.id))}
-                          >
-                            <Download /><span className="sr-only">Report</span>
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  )
-                })}
-              </TableBody>
-            </Table>
-          </div>
-        )}
-
-        {rows.length > 0 && (
-          <p className={cn(MICRO, 'border-t border-foreground/10 p-3 text-muted-foreground')}>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          <p className={cn(MICRO, 'text-muted-foreground')}>
             {rows.length} batch{rows.length === 1 ? '' : 'es'}
             {stats.partSold > 0 && <> · * profit not yet meaningful on {stats.partSold}</>}
           </p>
-        )}
-      </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {rows.map((p) => {
+              const f = p.financials
+              const finished = p.status === 'finished'
+              const uncosted = f.totalCost == null
+              const heroLabel = uncosted
+                ? 'Cost'
+                : f.profitLoss == null || f.profitLoss === 0 ? 'Profit / loss'
+                  : f.profitLoss > 0 ? 'Profit' : 'Loss'
+
+              return (
+                <div key={p.id} className={cn(PANEL, 'flex flex-col transition-colors duration-250 ease-luxe hover:border-foreground/30')}>
+                  <div className="cursor-pointer" onClick={() => setDetailId(Number(p.id))}>
+                    <div className={cn(PANEL_RAIL, 'items-start')}>
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="font-semibold">{p.pfiNumber}</span>
+                          <StatusChip tone={finished ? 'inert' : 'accent'}>
+                            {finished ? 'Finished' : 'Active'}
+                          </StatusChip>
+                        </div>
+                        <p className="mt-0.5 truncate text-sm text-muted-foreground">
+                          {[p.productName, p.locationName].filter(Boolean).join(' · ') || '—'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4 px-6 pt-5 pb-4">
+                      <div className={cn('rounded-lg border p-3', profitTint(uncosted ? null : f.profitLoss))}>
+                        <p className={cn(MICRO, 'text-muted-foreground')}>{heroLabel}</p>
+                        <p
+                          className={cn(
+                            'mt-1 text-2xl leading-tight font-semibold tracking-tight break-words',
+                            uncosted ? 'text-muted-foreground' : moneyTone(f.profitLoss),
+                          )}
+                        >
+                          {uncosted ? 'Awaiting cost data' : naira(f.profitLoss)}
+                        </p>
+                        {/* A part-sold batch charges full cost against partial
+                            revenue, so the figure above is not yet real. */}
+                        {!uncosted && !f.profitIsMeaningful && f.sellThrough != null && (
+                          <p className="mt-1 text-xs leading-snug text-muted-foreground">
+                            Only {Math.round(f.sellThrough * 100)}% sold — full cost is charged against
+                            partial revenue, so this is not a real figure yet.
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-x-3 gap-y-3">
+                        <div className="min-w-0">
+                          <p className="text-xs text-muted-foreground">Total cost</p>
+                          <p className="truncate text-sm font-normal">{naira(f.totalCost)}</p>
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs text-muted-foreground">Revenue</p>
+                          <p className="truncate text-sm font-normal">{naira(f.revenue)}</p>
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs text-muted-foreground">BL quantity</p>
+                          <p className="truncate text-sm font-normal">{litres(f.blQtyLitres)}</p>
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs text-muted-foreground">Tank quantity</p>
+                          <p className="truncate text-sm font-normal">{litres(f.tankQtyLitres)}</p>
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs text-muted-foreground">Surplus / deficit</p>
+                          <SurplusDeficit litres={f.surplusDeficitLitres} className="text-sm" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs text-muted-foreground">Total expenses</p>
+                          <p className="truncate text-sm font-normal">{naira(f.totalExpenses)}</p>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="mb-1.5 flex items-center justify-between text-xs text-muted-foreground">
+                          <span>Sell-through</span>
+                          <span>{litres(f.remaining)} left</span>
+                        </div>
+                        <SellThroughBar value={f.sellThrough} />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
+                    className={cn(PANEL_FOOTER, 'mt-auto flex-wrap gap-2')}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Button
+                      variant="outline" size="sm"
+                      onClick={() => navigate({ to: '/pfi/form', search: { id: String(p.id) } as any })}
+                    >
+                      <Pencil data-icon="inline-start" />
+                      Edit details
+                    </Button>
+                    {!finished && (
+                      <Button variant="outline" size="sm" onClick={() => setClosing(p)}>
+                        <Lock data-icon="inline-start" />
+                        Close PFI
+                      </Button>
+                    )}
+                    <Button
+                      variant="outline" size="sm" className="ml-auto"
+                      onClick={() => downloadPfiReport(Number(p.id))}
+                    >
+                      <Download data-icon="inline-start" />
+                      Download report
+                    </Button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       <PfiDetailDialog
         pfiId={detailId}

@@ -131,7 +131,7 @@ function PFIDetails() {
   }
 
   const handleEdit = () => {
-    navigate({ to: '/pfi/form', state: { pfi, isEdit: true } as any })
+    navigate({ to: '/pfi/form', search: { id: String(pfi._id || pfi.id) } as any })
   }
 
   const handleDelete = () => { setShowDeleteDialog(true) }
