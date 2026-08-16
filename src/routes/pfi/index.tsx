@@ -127,13 +127,13 @@ function PFIDashboard() {
       <PageHeader
       eyebrow="Admin"
       title="PFI Tracking"
-      description="One cargo batch each — what it cost, what you spent moving it, and what it sold for."
+      description="Everything about each PFI - what it cost, what you spent moving it, and what it sold for."
       actions={
         <>
           <div className="flex gap-2">
           <Button variant="outline" onClick={() => downloadMasterReport(pfis)} disabled={pfis.length === 0}>
           <Download data-icon="inline-start" />
-          Master report
+          Full report
           </Button>
           <Button onClick={() => navigate({ to: '/pfi/form' })}>
           <Plus data-icon="inline-start" />
@@ -144,51 +144,52 @@ function PFIDashboard() {
       }
     />
 
-      <StatCardGrid count={6}>
+      <StatCardGrid count={2}>
         <StatCard
-          icon={<Package />} label="Active batches" value={stats.active}
+          icon={<Package />} label="Active PFIs" value={stats.active}
           tone="blue"
-          description={`${stats.count} total`}
+          // description={`${stats.count} total`}
         />
         <StatCard
+          icon={<Droplets />} label="Quantity remaining" value={litres(stats.remaining)}
+          tone={stats.remaining > 0 ? 'amber' : 'green'}
+          // description={
+          //   stats.partSold > 0
+          //     ? `${stats.partSold} batch${stats.partSold === 1 ? '' : 'es'} part-sold — profit not yet real`
+          //     : 'Every batch fully sold'
+          // }
+        />
+        {/* <StatCard
           icon={<Lock />} label="Finished batches" value={stats.count - stats.active}
           tone="neutral"
           description={stats.count > 0 ? `${Math.round(((stats.count - stats.active) / stats.count) * 100)}% of portfolio` : 'None yet'}
-        />
+        /> */}
         <StatCard
           icon={<Banknote />} label="Total cost" value={naira(stats.cost)}
           tone="neutral"
-          description={
-            stats.uncosted > 0
-              ? `${stats.uncosted} batch${stats.uncosted === 1 ? '' : 'es'} not yet priced — excluded`
-              : `Cargo + ${naira(stats.expenses)} expenses`
-          }
+          // description={
+          //   stats.uncosted > 0
+          //     ? `${stats.uncosted} batch${stats.uncosted === 1 ? '' : 'es'} not yet priced — excluded`
+          //     : `Cargo + ${naira(stats.expenses)} expenses`
+          // }
         />
         <StatCard
-          icon={<Banknote />} label="Revenue" value={naira(stats.revenue)}
+          icon={<Banknote />} label="Total Revenue" value={naira(stats.revenue)}
           tone="blue"
-          description="Invoiced on paid, released, loading and completed orders"
+          // description="Invoiced on paid, released, loading and completed orders"
         />
-        <StatCard
+        {/* <StatCard
           icon={stats.profit == null || stats.profit === 0 ? <Banknote /> : stats.profit > 0 ? <TrendingUp /> : <TrendingDown />}
           label="Profit / loss" value={naira(stats.profit)}
           tone={stats.profit == null || stats.profit === 0 ? 'neutral' : stats.profit > 0 ? 'green' : 'red'}
           description={stats.uncosted > 0 ? `Across ${stats.costed} costed batch${stats.costed === 1 ? '' : 'es'}` : 'Across the whole portfolio'}
-        />
-        <StatCard
-          icon={<Droplets />} label="Stock remaining" value={litres(stats.remaining)}
-          tone={stats.remaining > 0 ? 'amber' : 'green'}
-          description={
-            stats.partSold > 0
-              ? `${stats.partSold} batch${stats.partSold === 1 ? '' : 'es'} part-sold — profit not yet real`
-              : 'Every batch fully sold'
-          }
-        />
+        /> */}
+        
       </StatCardGrid>
 
       {/* A deficit is money paid for product that never arrived, and nothing
           else in the system reports it as a cost. */}
-      {stats.deficitCost > 0 && (
+      {/* {stats.deficitCost > 0 && (
         <div className="flex items-start gap-2.5 rounded-lg border border-destructive/25 bg-destructive/5 p-3">
           <TriangleAlert className="mt-0.5 size-4 shrink-0 text-destructive" />
           <p className="text-sm text-muted-foreground">
@@ -197,7 +198,7 @@ function PFIDashboard() {
             not measure into the tank. It is already inside the loss figures, but nothing else names it.
           </p>
         </div>
-      )}
+      )} */}
 
       <FilterBar>
         <div className="relative min-w-[12rem] flex-1">
@@ -246,10 +247,10 @@ function PFIDashboard() {
         </div>
       ) : (
         <div className="space-y-3">
-          <p className={cn(MICRO, 'text-muted-foreground')}>
+          {/* <p className={cn(MICRO, 'text-muted-foreground')}>
             {rows.length} batch{rows.length === 1 ? '' : 'es'}
             {stats.partSold > 0 && <> · * profit not yet meaningful on {stats.partSold}</>}
-          </p>
+          </p> */}
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {rows.map((p) => {
@@ -291,12 +292,12 @@ function PFIDashboard() {
                         </p>
                         {/* A part-sold batch charges full cost against partial
                             revenue, so the figure above is not yet real. */}
-                        {!uncosted && !f.profitIsMeaningful && f.sellThrough != null && (
+                        {/* {!uncosted && !f.profitIsMeaningful && f.sellThrough != null && (
                           <p className="mt-1 text-xs leading-snug text-muted-foreground">
                             Only {Math.round(f.sellThrough * 100)}% sold — full cost is charged against
                             partial revenue, so this is not a real figure yet.
                           </p>
-                        )}
+                        )} */}
                       </div>
 
                       <div className="grid grid-cols-2 gap-x-3 gap-y-3">
@@ -309,26 +310,26 @@ function PFIDashboard() {
                           <p className="truncate text-sm font-normal">{naira(f.revenue)}</p>
                         </div>
                         <div className="min-w-0">
-                          <p className="text-xs text-muted-foreground">BL quantity</p>
+                          <p className="text-xs text-muted-foreground">BL Quantity</p>
                           <p className="truncate text-sm font-normal">{litres(f.blQtyLitres)}</p>
                         </div>
                         <div className="min-w-0">
-                          <p className="text-xs text-muted-foreground">Tank quantity</p>
+                          <p className="text-xs text-muted-foreground">Tank Quantity</p>
                           <p className="truncate text-sm font-normal">{litres(f.tankQtyLitres)}</p>
                         </div>
                         <div className="min-w-0">
-                          <p className="text-xs text-muted-foreground">Surplus / deficit</p>
+                          <p className="text-xs text-muted-foreground">Surplus/Deficit</p>
                           <SurplusDeficit litres={f.surplusDeficitLitres} className="text-sm" />
                         </div>
                         <div className="min-w-0">
-                          <p className="text-xs text-muted-foreground">Total expenses</p>
+                          <p className="text-xs text-muted-foreground">Total Expenses</p>
                           <p className="truncate text-sm font-normal">{naira(f.totalExpenses)}</p>
                         </div>
                       </div>
 
                       <div>
                         <div className="mb-1.5 flex items-center justify-between text-xs text-muted-foreground">
-                          <span>Sell-through</span>
+                          <span>Sales Progress</span>
                           <span>{litres(f.remaining)} left</span>
                         </div>
                         <SellThroughBar value={f.sellThrough} />

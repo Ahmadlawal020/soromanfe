@@ -134,7 +134,7 @@ export function PfiDetailDialog({
           <>
             <DialogHeader>
               <div className="flex flex-wrap items-center gap-2">
-                <DialogTitle className="break-all">{pfi.pfiNumber}</DialogTitle>
+                <DialogTitle className="break-all font-semibold">{pfi.pfiNumber}</DialogTitle>
                 <Badge variant={pfi.status === 'active' ? 'default' : 'secondary'}>
                   {pfi.status === 'active' ? 'Active' : 'Finished'}
                 </Badge>
@@ -148,7 +148,7 @@ export function PfiDetailDialog({
               <QuantityPair f={f} />
 
               {/* A deficit is a real cost and nothing else in the system says so. */}
-              {f.deficitCost != null && (
+              {/* {f.deficitCost != null && (
                 <div className="flex items-start gap-2.5 rounded-lg border border-destructive/25 bg-destructive/5 p-3">
                   <TriangleAlert className="mt-0.5 size-4 shrink-0 text-destructive" />
                   <div className="min-w-0 text-sm">
@@ -161,13 +161,13 @@ export function PfiDetailDialog({
                     </p>
                   </div>
                 </div>
-              )}
+              )} */}
 
-              <Section title="Stock">
-                <Row label="Sold" value={litres(f.sold)} hint="From the movement ledger, not order status" />
-                <Row label="Remaining" value={litres(f.remaining)} />
+              <Section title="Stock Details">
+                <Row label="Total Quantity Sold" value={litres(f.sold)} />
+                <Row label="Quantity Remaining" value={litres(f.remaining)} />
                 <div className="py-2.5">
-                  <p className="mb-1.5 text-sm text-muted-foreground">Sell-through</p>
+                  <p className="mb-1.5 text-sm text-muted-foreground">Sales Progress</p>
                   <SellThroughBar value={f.sellThrough} />
                 </div>
               </Section>
@@ -177,37 +177,39 @@ export function PfiDetailDialog({
                   label="Price per litre" value={naira(f.pricePerLitre)}
                 />
                 <Row
-                  label="Cargo value" value={naira(f.pfiValue)}
-                  hint="BL quantity × price per litre"
+                  label="PFI (Cargo) Value" value={naira(f.pfiValue)}
+                  // hint="BL quantity × price per litre"
                 />
                 <Row
-                  label={`Expenses (${data.expenses.length} line${data.expenses.length === 1 ? '' : 's'})`}
+                  label={`Total Expenses`}
+                  // label={`Total Expenses (${data.expenses.length} line${data.expenses.length === 1 ? '' : 's'})`}
                   value={naira(f.totalExpenses)}
                 />
-                <Row label="Total cost" value={naira(f.totalCost)} />
+                <Row label="Total Cost" value={naira(f.totalCost)} />
                 {f.creditBalance > 0 && (
                   <>
                     <Row
-                      label="Credit balance" value={`-${naira(f.creditBalance)}`}
-                      hint="Rebate, discount or claim credited back"
+                      label="Credit Balance" value={`-${naira(f.creditBalance)}`}
+                      // hint="Rebate, discount or claim credited back"
                     />
                     <Row
-                      label="Grand total cost" value={naira(f.grandTotalCost)}
-                      hint="Total cost minus credit balance — what profit is computed against"
+                      label="Grand Total Cost" value={naira(f.grandTotalCost)}
+                      // hint="Total cost minus credit balance — what profit is computed against"
                     />
                   </>
                 )}
                 <Row
-                  label={`Revenue (${pfi.orderCount} order${pfi.orderCount === 1 ? '' : 's'})`}
+                  label={`Total Revenue`}
+                  // label={`Total Revenue (${pfi.orderCount} order${pfi.orderCount === 1 ? '' : 's'})`}
                   value={naira(f.revenue)}
-                  hint="Invoiced value on paid, released, loading and completed orders"
+                  // hint="Invoiced value on paid, released, loading and completed orders"
                 />
                 <Row
-                  label="Profit / loss" value={naira(f.profitLoss)} tone={moneyTone(f.profitLoss)}
+                  label="Balance" value={naira(f.profitLoss)} tone={moneyTone(f.profitLoss)}
                 />
                 <Row label="Margin" value={pct(f.margin)} tone={moneyTone(f.margin)} />
                 <Row
-                  label="Surplus / deficit"
+                  label="Surplus/Deficit"
                   value={<SurplusDeficit litres={f.surplusDeficitLitres} />}
                 />
               </Section>
@@ -217,16 +219,16 @@ export function PfiDetailDialog({
                 <div className="flex items-start gap-2.5 rounded-lg border border-warning/30 bg-warning/5 p-3">
                   <Info className="mt-0.5 size-4 shrink-0 text-warning" />
                   <div className="min-w-0 text-sm">
-                    <p className="font-normal text-warning">Profit is not meaningful yet</p>
+                    <p className="font-normal text-warning">Balance is not meaningful yet</p>
                     <p className="text-muted-foreground">{caveat}</p>
-                    {f.costOfSold != null && (
+                    {/* {f.costOfSold != null && (
                       <p className="mt-1.5 text-muted-foreground">
                         Cost of the portion actually sold: <span className="font-normal">{naira(f.costOfSold)}</span>
                         {f.marginOnSold != null && (
                           <> · margin on that portion <span className={cn('font-normal', moneyTone(f.marginOnSold))}>{pct(f.marginOnSold)}</span></>
                         )}
                       </p>
-                    )}
+                    )} */}
                   </div>
                 </div>
               )}
@@ -236,12 +238,12 @@ export function PfiDetailDialog({
               {pfi.status === 'finished' && (
                 <Section title="Closure">
                   <Row label="Closed on" value={pfi.closureDate ? format(new Date(pfi.closureDate), 'd MMM yyyy') : '—'} />
-                  <Row label="Handler" value={pfi.closureHandler || '—'} />
+                  <Row label="Confirmed By" value={pfi.closureHandler || '—'} />
                   <Row label="Bank" value={pfi.closureBank || '—'} />
-                  <Row label="Total inflow" value={naira(Number(pfi.totalInflow) || null)} />
+                  <Row label="Total Inflow" value={naira(Number(pfi.totalInflow) || null)} />
                   <Row
-                    label="Purchase cost (entered)" value={naira(Number(pfi.purchaseCost) || null)}
-                    hint={`System computes ${naira(f.pfiValue)}`}
+                    label="Purchase cost" value={naira(Number(pfi.purchaseCost) || null)}
+                    // hint={`System computes ${naira(f.pfiValue)}`}
                     tone={
                       Number(pfi.purchaseCost) > 0 && f.pfiValue != null &&
                       Math.abs(Number(pfi.purchaseCost) - f.pfiValue) >= 0.01
@@ -249,8 +251,8 @@ export function PfiDetailDialog({
                     }
                   />
                   <Row
-                    label="Aggregate expenses (entered)" value={naira(Number(pfi.aggregateExpenses) || null)}
-                    hint={`System computes ${naira(f.totalExpenses)}`}
+                    label="Aggregate expenses" value={naira(Number(pfi.aggregateExpenses) || null)}
+                    // hint={`System computes ${naira(f.totalExpenses)}`}
                     tone={
                       Number(pfi.aggregateExpenses) > 0 &&
                       Math.abs(Number(pfi.aggregateExpenses) - f.totalExpenses) >= 0.01
@@ -305,7 +307,7 @@ export function PfiDetailDialog({
 
                 {/* Quick-add. The category is this PFI's own, resolved server-side,
                     so the row is identical to one added on the expenses page. */}
-                <div className="grid gap-2 pt-3 sm:grid-cols-[1fr_9rem_auto]">
+                {/* <div className="grid gap-2 pt-3 sm:grid-cols-[1fr_9rem_auto]">
                   <Input
                     placeholder="What was it for" value={draft.description}
                     onChange={(e) => setDraft((d) => ({ ...d, description: e.target.value }))}
@@ -331,26 +333,26 @@ export function PfiDetailDialog({
                     className="sm:col-span-2" placeholder="Bank paid from (optional)" value={draft.bank}
                     onChange={(e) => setDraft((d) => ({ ...d, bank: e.target.value }))}
                   />
-                </div>
+                </div> */}
               </Section>
 
               <Section title="Officers">
-                <Row label="Sales manager" value={pfi.salesManagerName || '—'} />
-                <Row label="Audit officer" value={pfi.auditOfficerName || '—'} />
-                <Row label="Product officer" value={pfi.productOfficerName || '—'} />
-                <Row label="IT / compliance" value={pfi.itComplianceOfficerName || '—'} />
-                <Row label="Security exit" value={pfi.securityExitOfficerName || '—'} />
-                <Row label="Commission officer" value={pfi.commissionOfficerName || '—'} />
+                <Row label="Audit/Finance" value={pfi.auditOfficerName || '—'} />
+                <Row label="Sales Manager" value={pfi.salesManagerName || '—'} />
+                <Row label="Product Manager" value={pfi.productOfficerName || '—'} />
+                <Row label="IT Compliance" value={pfi.itComplianceOfficerName || '—'} />
+                <Row label="Exit Gate" value={pfi.securityExitOfficerName || '—'} />
+                <Row label="Commission Officer" value={pfi.commissionOfficerName || '—'} />
               </Section>
 
-              <Section title="Vessel & surveyor">
-                <Row label="Vessel" value={pfi.vesselName || '—'} />
-                <Row label="Broker" value={pfi.vesselBroker || '—'} />
-                <Row label="Surveyor" value={pfi.surveyorName || '—'} />
-                <Row label="Surveyor phone" value={pfi.surveyorPhone || '—'} />
+              <Section title="Vessel Details">
+                <Row label="Vessel Name" value={pfi.vesselName || '—'} />
+                <Row label="Vessel Broker" value={pfi.vesselBroker || '—'} />
+                <Row label="Surveyor'" value={pfi.surveyorName || '—'} />
+                <Row label="Surveyor's Phone No." value={pfi.surveyorPhone || '—'} />
               </Section>
 
-              <Section title={`Movements · ${data.movements.length}`}>
+              <Section title={`Orders · ${data.movements.length}`}>
                 {data.movements.length === 0 ? (
                   <p className="py-3 text-sm text-muted-foreground">
                     No stock has been released against this PFI.
@@ -380,7 +382,7 @@ export function PfiDetailDialog({
 
               {/* Closed with stock on the books almost always means unrecorded
                   releases rather than genuinely unsold product. */}
-              {pfi.status === 'finished' && f.remaining > 0 && (
+              {/* {pfi.status === 'finished' && f.remaining > 0 && (
                 <div className="flex items-start gap-2.5 rounded-lg border border-warning/30 bg-warning/5 p-3">
                   <AlertTriangle className="mt-0.5 size-4 shrink-0 text-warning" />
                   <p className="text-sm text-muted-foreground">
@@ -389,7 +391,7 @@ export function PfiDetailDialog({
                     never recorded against it — worth checking before the loss is reported upward.
                   </p>
                 </div>
-              )}
+              )} */}
             </div>
           </>
         )}

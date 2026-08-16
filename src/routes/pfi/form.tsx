@@ -322,7 +322,7 @@ function PFIForm() {
       <PageHeader
         eyebrow="Admin"
         title={isEdit ? 'Edit PFI' : 'Add New PFI'}
-        description={isEdit ? 'Modify quantities, cost, officers and vessel details for this batch.' : 'Register a new Pro Forma Invoice.'}
+        description={isEdit ? 'Modify quantities, cost, officers and vessel details for this PFI.' : 'Register a new PFI.'}
       />
 
       <form onSubmit={handleSubmit} noValidate className="space-y-6">
@@ -333,7 +333,7 @@ function PFIForm() {
           </div>
         )}
 
-        <div className="grid items-start gap-6 lg:grid-cols-2">
+        <div className="grid items-start gap-6 lg:grid-cols-1">
           <div className="space-y-6">
             <Section icon={<FileText />} title="Identity" description="What this batch is and where it's going.">
               <div className="grid grid-cols-2 gap-4">
@@ -351,7 +351,7 @@ function PFIForm() {
 
               <Field label="Description">
                 <Input
-                  placeholder="e.g. AGO bulk supply" value={form.description}
+                  placeholder="e.g. PMS" value={form.description}
                   onChange={(e) => set('description', e.target.value)}
                 />
               </Field>
@@ -391,8 +391,8 @@ function PFIForm() {
 
               <div className="grid grid-cols-2 gap-4">
                 <Field
-                  label="Qty Volume (Ltr)" required error={fieldErrors.startingQtyLitres}
-                  hint="The tank figure — what measured into the tank."
+                  label="Tank Quantity (Litres)" required error={fieldErrors.startingQtyLitres}
+                  // hint="The tank figure — what measured into the tank."
                 >
                   <CommaInput
                     value={form.startingQtyLitres} aria-invalid={!!fieldErrors.startingQtyLitres}
@@ -400,7 +400,7 @@ function PFIForm() {
                     onValueChange={(v) => set('startingQtyLitres', v)}
                   />
                 </Field>
-                <Field label="Qty Volume (MT)">
+                <Field label="Tank Quantity (MT)">
                   <CommaInput
                     value={form.qtyVolumeMt} placeholder="e.g. 820"
                     onValueChange={(v) => set('qtyVolumeMt', v)}
@@ -411,7 +411,7 @@ function PFIForm() {
 
             <Section icon={<Banknote />} title="Cargo Cost" description="What the shipping papers say you're billed for.">
               <div className="grid grid-cols-2 gap-4">
-                <Field label="BL Figures (Ltr)">
+                <Field label="BL Figures (Litres)">
                   <CommaInput
                     value={form.blQtyLitres} placeholder="e.g. 1,000,000"
                     onValueChange={(v) => set('blQtyLitres', v)}
@@ -426,7 +426,7 @@ function PFIForm() {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <Field label="Price / Litre (₦)">
+                <Field label="Price per Litre (₦)">
                   <CommaInput
                     value={form.unitPrice} placeholder="e.g. 950.00"
                     onValueChange={(v) => set('unitPrice', v)}
@@ -434,7 +434,7 @@ function PFIForm() {
                 </Field>
                 <Field
                   label="Credit Balance (₦)"
-                  hint="Rebate, discount or claim credited back. Reduces the grand total cost."
+                  // hint="Rebate, discount or claim credited back. Reduces the grand total cost."
                 >
                   <CommaInput
                     value={form.creditBalance} placeholder="0.00"
@@ -446,11 +446,11 @@ function PFIForm() {
               {preview.show && (
                 <div className="grid grid-cols-2 gap-4 rounded-lg border border-foreground/10 bg-muted/30 p-3">
                   <div>
-                    <p className={cn(MICRO, 'text-muted-foreground')}>Surplus / deficit</p>
+                    <p className={cn(MICRO, 'text-muted-foreground')}>Surplus/Deficit</p>
                     <div className="mt-1"><SurplusDeficit litres={preview.surplusDeficit} className="text-sm" /></div>
                   </div>
                   <div>
-                    <p className={cn(MICRO, 'text-muted-foreground')}>PFI value (cargo cost)</p>
+                    <p className={cn(MICRO, 'text-muted-foreground')}>PFI (Cargo) Cost</p>
                     <p className="mt-1 text-sm font-semibold">{naira(preview.pfiValue)}</p>
                   </div>
                 </div>
@@ -459,7 +459,7 @@ function PFIForm() {
           </div>
 
           <div className="space-y-6">
-            <Section icon={<Users />} title="Officers" description="All optional — leave unassigned and fill in later.">
+            <Section icon={<Users />} title="Officers" description="Assign staff for each role.">
               <div className="grid grid-cols-2 gap-4">
                 {OFFICER_FIELDS.map(({ label, key }) => (
                   <Field key={key} label={label}>
@@ -474,7 +474,7 @@ function PFIForm() {
               </div>
             </Section>
 
-            <Section icon={<Ship />} title="Vessel & Surveyor" description="All optional.">
+            <Section icon={<Ship />} title="Vessel & Surveyor" description="Details about the vessel and surveryor">
               <div className="grid grid-cols-2 gap-4">
                 <Field label="Vessel Broker">
                   <Input placeholder="Broker name" value={form.vesselBroker} onChange={(e) => set('vesselBroker', e.target.value)} />

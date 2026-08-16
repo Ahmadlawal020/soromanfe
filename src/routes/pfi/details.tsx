@@ -236,9 +236,9 @@ function PFIDetails() {
             </div>
           </CardHeader>
           <CardContent className="space-y-4 pt-4 text-sm">
-            <dl className="grid grid-cols-2 gap-4">
+            <dl className="grid grid-cols-1 gap-4">
               <div>
-                <dt className="text-muted-foreground font-normal">PFI Date</dt>
+                <dt className="text-muted-foreground font-normal">Date Created</dt>
                 <dd className="font-semibold text-foreground mt-0.5">{pfi.pfiDate ? new Date(pfi.pfiDate).toLocaleDateString() : '—'}</dd>
               </div>
               <div>
@@ -246,7 +246,7 @@ function PFIDetails() {
                 <dd className="font-semibold text-foreground mt-0.5">{pfi.locationName || '—'}</dd>
               </div>
               <div>
-                <dt className="text-muted-foreground font-normal">Product Type</dt>
+                <dt className="text-muted-foreground font-normal">Product</dt>
                 <dd className="font-semibold text-foreground mt-0.5">{pfi.productName || '—'}</dd>
               </div>
               <div>

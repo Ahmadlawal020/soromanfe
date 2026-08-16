@@ -109,5 +109,6 @@ export function SellThroughBar({ value, className }: { value: number | null; cla
 export function profitCaveat(f: PfiFinancials): string | null {
   if (f.profitIsMeaningful || f.sellThrough == null) return null
   const share = Math.round(f.sellThrough * 100)
-  return `Only ${share}% of this batch has been sold. The full cargo cost is charged against ${share}% of the revenue, so this is not yet a real loss — read it as "have we recovered the cargo cost".`
+  return `Only ${share}% of this PFI has been sold so this is not yet a real loss.`
+  // return `Only ${share}% of this PFI has been sold. The full cargo cost is charged against ${share}% of the revenue, so this is not yet a real loss — read it as "have we recovered the cargo cost".`
 }
