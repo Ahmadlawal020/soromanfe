@@ -6,7 +6,7 @@ import type { Deposit } from '#/lib/types'
 
 export type { Deposit }
 
-export function useDepositList(params?: { customer?: string; page?: number; limit?: number; refetchInterval?: number }) {
+export function useDepositList(params?: { customer?: string; pfiId?: string | number; page?: number; limit?: number; refetchInterval?: number }) {
   const { refetchInterval, ...queryParams } = params || {}
   return useQuery({
     queryKey: ['deposits', queryParams],

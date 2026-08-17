@@ -10,6 +10,8 @@ import {
   Moon,
   Monitor,
   Check,
+  SidebarCloseIcon,
+  SidebarOpenIcon,
 } from 'lucide-react'
 import { Button } from '#/components/ui/button'
 import { Separator } from '#/components/ui/separator'
@@ -97,7 +99,7 @@ export default function Navbar() {
             onClick={toggleCollapsed}
             className="-ml-1 hidden text-muted-foreground hover:text-foreground md:flex"
           >
-            {isCollapsed ? <ChevronsRight /> : <ChevronsLeft />}
+            {isCollapsed ? <SidebarOpenIcon /> : <SidebarCloseIcon />}
             <span className="sr-only">
               {isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             </span>

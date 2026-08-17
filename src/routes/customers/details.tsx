@@ -12,7 +12,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from '#/components/ui/dialog'
 import { User, ArrowLeft, Edit, Trash2, Calendar, AlertCircle, Phone, Mail, Building2, MapPin, Wallet, Banknote, TrendingUp, Package, Loader2, SearchX, Warehouse, Clock, DollarSign, ArrowDownLeft, ArrowUpRight, Copy, CheckCircle, CreditCard, Hash, Fuel, Hourglass, Plus, X } from 'lucide-react'
-import { useCustomerDetails, useDeleteCustomer } from '#/lib/hooks/useCustomers'
+import { useCustomerDetails, useDeleteCustomer, useUpdateCustomer } from '#/lib/hooks/useCustomers'
 import { useOrderList } from '#/lib/hooks/useOrders'
 import { useDepositList } from '#/lib/hooks/useDeposits'
 import { useCommissions, useCommissionSummary } from '#/lib/hooks/useCommissions'
@@ -165,6 +165,7 @@ function CustomerDetailPage() {
   const router = useRouter()
   const search = Route.useSearch()
   const deleteCustomer = useDeleteCustomer()
+  const updateCustomer = useUpdateCustomer()
   const toast = useToast()
   const [copiedField, setCopiedField] = useState<string | null>(null)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
@@ -512,6 +513,21 @@ function CustomerDetailPage() {
                   {customer.updatedAt ? new Date(customer.updatedAt).toLocaleDateString() : 'N/A'}
                 </p>
               </div>
+            </div>
+            <div className="mt-6 pt-4 border-t border-border">
+              <label className="flex items-start gap-3 cursor-pointer select-none w-fit">
+                <input
+                  type="checkbox"
+                  checked={!!customer.marketingOptOut}
+                  disabled={updateCustomer.isPending}
+                  onChange={(e) => updateCustomer.mutate({ id: String(customer.id ?? customer._id), data: { marketingOptOut: e.target.checked } })}
+                  className="mt-1 size-4 rounded border-input text-primary accent-primary cursor-pointer"
+                />
+                <div className="flex flex-col gap-1">
+                  <span className="text-sm font-normal text-foreground">Do not send marketing messages</span>
+                  <span className="text-xs text-muted-foreground">Excludes this customer from Messaging segment sends (price updates, announcements). Transactional order/ticket messages are unaffected.</span>
+                </div>
+              </label>
             </div>
           </CardContent>
         </Card>
