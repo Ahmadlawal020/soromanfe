@@ -273,6 +273,11 @@ export const pfisList: PfiOption[] = [
   { id: 6, pfi_number: 'PFI-2025-006', location_name: 'Abuja', product_name: 'PMS' },
 ];
 
+export interface PageOverride {
+  route_path: string;
+  allowed: boolean;
+}
+
 export interface StaffMember {
   id: string | number;
   email: string;
@@ -287,6 +292,9 @@ export interface StaffMember {
   pfis: number[];
   pfi_numbers: string[];
   can_view_all_locations: boolean;
+  depot_ids: number[];
+  lpg_station_ids: number[];
+  page_overrides: PageOverride[];
   suspended: boolean;
   email_verified: boolean;
   plain_password: string | null;

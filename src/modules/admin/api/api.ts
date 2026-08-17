@@ -8,6 +8,11 @@ export interface CreateAdminPayload {
   phone_number?: string
   roles: number[]
   suspended?: boolean
+  can_view_all_locations?: boolean
+  depot_ids?: number[]
+  lpg_station_ids?: number[]
+  pfi_ids?: number[]
+  page_overrides?: { route_path: string; allowed: boolean }[]
 }
 
 export const createAdmin = async (payload: CreateAdminPayload) => {

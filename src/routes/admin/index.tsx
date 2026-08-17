@@ -4,6 +4,7 @@ import { PageHeader } from '#/components/PageHeader'
 import { StatCard } from '#/components/ui/stat-card'
 import { StatusChip } from '#/components/ui/status-chip'
 import { useAdminList, useDeleteAdmin } from '#/lib/hooks/useAdmin'
+import { useDepots } from '#/lib/hooks/useDepots'
 import { useToast } from '#/lib/hooks/useToast'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
@@ -50,7 +51,6 @@ import {
   ROLE_LABELS,
   ROLE_GROUPS,
   roleColorMap,
-  statesList,
   type StaffMember,
 } from './-roles'
 
@@ -99,6 +99,7 @@ function StaffManagement() {
   const navigate = useNavigate()
   const toast = useToast()
   const { data: admins = [], isLoading, isError, error, refetch } = useAdminList()
+  const { data: depots = [] } = useDepots()
   const deleteAdmin = useDeleteAdmin()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedLocation, setSelectedLocation] = useState('all')
@@ -117,7 +118,7 @@ function StaffManagement() {
         (staff.full_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
         (staff.email || '').toLowerCase().includes(searchTerm.toLowerCase())
       const matchesLocation =
-        selectedLocation === 'all' || staff.location === selectedLocation
+        selectedLocation === 'all' || (staff.location_names || []).includes(selectedLocation)
       const matchesRole =
         roleFilter === 'all' ||
         (() => {
@@ -256,8 +257,8 @@ function StaffManagement() {
         </SelectTrigger>
         <SelectContent>
         <SelectItem value="all">All Locations</SelectItem>
-        {statesList.map((s) => (
-        <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
+        {depots.map((d) => (
+        <SelectItem key={d.id} value={d.name}>{d.name}</SelectItem>
         ))}
         </SelectContent>
         </Select>
@@ -342,9 +343,11 @@ function StaffManagement() {
                             )}
                           </TableCell>
                           <TableCell className="hidden lg:table-cell text-xs text-foreground">
-                            {staff.location_names?.length
-                              ? staff.location_names.join(', ')
-                              : <span className="text-muted-foreground inline-flex items-center gap-1 text-xs"><Globe className="size-3" /> Full Access</span>
+                            {staff.can_view_all_locations
+                              ? <span className="text-muted-foreground inline-flex items-center gap-1 text-xs"><Globe className="size-3" /> Full Access</span>
+                              : staff.location_names?.length
+                                ? staff.location_names.join(', ')
+                                : <span className="text-muted-foreground text-xs">No locations assigned</span>
                             }
                           </TableCell>
                           <TableCell>

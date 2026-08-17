@@ -7,6 +7,8 @@ export interface AdminUser {
   firstName: string
   surname: string
   roles: string[]
+  canViewAllLocations?: boolean
+  pageOverrides?: { routePath: string; allowed: boolean }[]
   profilePicture?: {
     url: string
     publicId: string

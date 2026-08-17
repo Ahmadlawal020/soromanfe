@@ -1,16 +1,121 @@
 import { useState } from 'react'
 import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
-import { Mail, Shield, CheckCircle, Loader2, AlertCircle, UserCheck, Send } from 'lucide-react'
+import { Mail, Shield, CheckCircle, Loader2, AlertCircle, UserCheck, Send, Globe, Warehouse, Flame, FileText, LayoutGrid, Search, Check, X } from 'lucide-react'
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
+import { Badge } from '#/components/ui/badge'
 import {
   ROLE_LABELS,
   ROLE_GROUPS,
 } from './-roles'
 import { useCreateAdmin, useUpdateAdmin } from '#/modules/admin/hooks/hook'
+import { useDepots } from '#/lib/hooks/useDepots'
+import { useLpgStations } from '#/lib/hooks/useLpgStations'
+import { usePfiList } from '#/lib/hooks/usePfis'
+import { navCategories } from '#/components/layout/nav-config'
+import { canAccessRoute } from '#/lib/rbac'
 import { routeGuard } from '#/lib/route-guard'
+
+type ScopeOption = { id: number; primary: string; secondary?: string }
+
+/** One depot/LPG-station/PFI multi-select — search, select-all/clear, chips, checkbox grid. */
+function ScopePicker({
+  icon: Icon,
+  title,
+  description,
+  items,
+  selectedIds,
+  searchTerm,
+  onSearchChange,
+  onToggle,
+  onSelectAll,
+  onClear,
+  isLoading,
+  emptyMessage,
+}: {
+  icon: React.ComponentType<{ className?: string }>
+  title: string
+  description: string
+  items: ScopeOption[]
+  selectedIds: number[]
+  searchTerm: string
+  onSearchChange: (v: string) => void
+  onToggle: (id: number) => void
+  onSelectAll: () => void
+  onClear: () => void
+  isLoading?: boolean
+  emptyMessage: string
+}) {
+  const filtered = items.filter((i) =>
+    i.primary.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (i.secondary || '').toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
+  return (
+    <div className="space-y-3 border rounded-lg p-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Icon className="size-4 text-primary" />
+          <div>
+            <p className="text-sm font-normal text-foreground">{title}</p>
+            <p className="text-xs text-muted-foreground">{description}</p>
+          </div>
+        </div>
+        <Badge variant="secondary" className="text-xs px-2 py-1 font-semibold">{selectedIds.length} selected</Badge>
+      </div>
+
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+          <Input value={searchTerm} onChange={(e) => onSearchChange(e.target.value)} placeholder="Search..." className="pl-9 h-9 text-xs" />
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <Button type="button" variant="outline" size="sm" onClick={onSelectAll} className="h-9 text-xs">Select All</Button>
+          <Button type="button" variant="ghost" size="sm" onClick={onClear} className="h-9 text-xs text-muted-foreground">Clear</Button>
+        </div>
+      </div>
+
+      {selectedIds.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {selectedIds.map((id) => {
+            const item = items.find((i) => i.id === id)
+            return (
+              <Badge key={id} variant="secondary" className="text-xs font-normal py-1 px-2.5 flex items-center gap-1.5">
+                {item ? item.primary : `#${id}`}
+                <button type="button" onClick={() => onToggle(id)} className="hover:text-destructive"><X className="size-3" /></button>
+              </Badge>
+            )
+          })}
+        </div>
+      )}
+
+      {isLoading ? (
+        <div className="flex items-center justify-center py-6"><Loader2 className="size-4 animate-spin text-primary mr-2" /><span className="text-xs text-muted-foreground">Loading...</span></div>
+      ) : filtered.length === 0 ? (
+        <div className="p-4 text-center text-xs text-muted-foreground border border-dashed rounded-lg">{emptyMessage}</div>
+      ) : (
+        <div className="grid gap-2 sm:grid-cols-2 max-h-56 overflow-y-auto pr-1">
+          {filtered.map((item) => {
+            const checked = selectedIds.includes(item.id)
+            return (
+              <div key={item.id} onClick={() => onToggle(item.id)} className={`p-2.5 rounded-lg border cursor-pointer flex items-center justify-between select-none ${checked ? 'border-primary/50 bg-primary/10' : 'border-border/40 hover:bg-muted/30'}`}>
+                <div className="min-w-0 flex-1 pr-2">
+                  <p className={`text-xs font-normal truncate ${checked ? 'text-primary' : 'text-foreground'}`}>{item.primary}</p>
+                  {item.secondary && <p className="text-xs text-muted-foreground truncate">{item.secondary}</p>}
+                </div>
+                <div className={`size-4 rounded border flex items-center justify-center shrink-0 ${checked ? 'bg-primary border-primary text-primary-foreground' : 'border-border'}`}>
+                  {checked && <Check className="size-3 stroke-[3]" />}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
 
 export const Route = createFileRoute('/admin/form')({
   beforeLoad: () => routeGuard('/admin'),
@@ -47,6 +152,40 @@ function AdminForm() {
   const [submitted, setSubmitted] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<string>(ROLE_GROUPS[0].label)
   const [submitError, setSubmitError] = useState<string | null>(null)
+
+  const { data: depots = [], isLoading: isLoadingDepots } = useDepots()
+  const { data: lpgStations = [], isLoading: isLoadingStations } = useLpgStations({ limit: 100 })
+  const { data: pfiListData, isLoading: isLoadingPfis } = usePfiList({ limit: 200 })
+  const pfis = pfiListData?.pfis || []
+
+  const [canViewAllLocations, setCanViewAllLocations] = useState<boolean>(editingStaff?.can_view_all_locations ?? true)
+  const [selectedDepotIds, setSelectedDepotIds] = useState<number[]>(editingStaff?.depot_ids || [])
+  const [selectedLpgStationIds, setSelectedLpgStationIds] = useState<number[]>(editingStaff?.lpg_station_ids || [])
+  const [selectedPfiIds, setSelectedPfiIds] = useState<number[]>(editingStaff?.pfis || [])
+  const [depotSearchTerm, setDepotSearchTerm] = useState('')
+  const [stationSearchTerm, setStationSearchTerm] = useState('')
+  const [pfiSearchTerm, setPfiSearchTerm] = useState('')
+
+  // Sparse: only paths where the admin explicitly diverged from what the
+  // selected role(s) already grant. Keeping it a diff means a later role
+  // change still "just works" for every page the admin never touched.
+  const [pageOverrides, setPageOverrides] = useState<Record<string, boolean>>(() => {
+    const map: Record<string, boolean> = {}
+    for (const o of editingStaff?.page_overrides || []) map[o.route_path] = o.allowed
+    return map
+  })
+
+  const toggleInList = (list: number[], id: number) => (list.includes(id) ? list.filter((v) => v !== id) : [...list, id])
+
+  const togglePage = (path: string, checked: boolean) => {
+    const roleDefault = canAccessRoute(formData.roles, path)
+    setPageOverrides((prev) => {
+      const next = { ...prev }
+      if (checked === roleDefault) delete next[path]
+      else next[path] = checked
+      return next
+    })
+  }
 
   const validate = () => {
     const newErrors: Record<string, string> = {}
@@ -113,6 +252,11 @@ function AdminForm() {
         phone_number: formData.phone_number.trim() || undefined,
         roles: formData.roles,
         suspended: formData.suspended,
+        can_view_all_locations: canViewAllLocations,
+        depot_ids: canViewAllLocations ? [] : selectedDepotIds,
+        lpg_station_ids: canViewAllLocations ? [] : selectedLpgStationIds,
+        pfi_ids: canViewAllLocations ? [] : selectedPfiIds,
+        page_overrides: Object.entries(pageOverrides).map(([route_path, allowed]) => ({ route_path, allowed })),
       }
       if (isEdit && editingStaff?.id) {
         await updateAdmin.mutateAsync({ id: editingStaff.id, data: payload })
@@ -276,6 +420,103 @@ function AdminForm() {
                     </label>
                   )
                 })}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-4 border rounded-lg p-4">
+          <div className="flex items-center space-x-2">
+            <Globe className="size-5 text-primary" />
+            <h2 className="text-lg font-normal">Location & PFI Scope</h2>
+          </div>
+          <p className="text-sm text-muted-foreground -mt-2">
+            Beyond the role, narrow what data this user can see and act on to specific depots, LPG stations and/or PFIs. Leave "Full access" on for a user who should see everything their role permits.
+          </p>
+
+          <label className="flex items-start gap-3 cursor-pointer select-none group">
+            <input type="checkbox" checked={canViewAllLocations} onChange={(e) => setCanViewAllLocations(e.target.checked)} className="mt-1 size-4 rounded border-input text-primary accent-primary cursor-pointer" />
+            <div className="flex flex-col gap-1">
+              <span className="font-normal text-foreground">Full access (all locations & PFIs)</span>
+              <span className="text-sm text-muted-foreground">When off, this user only sees data for the depots, LPG stations and PFIs selected below.</span>
+            </div>
+          </label>
+
+          {!canViewAllLocations && (
+            <div className="grid gap-4 lg:grid-cols-3">
+              <ScopePicker
+                icon={Warehouse}
+                title="Depots"
+                description="Orders, PFIs and finance data at these depots"
+                items={depots.map((d): ScopeOption => ({ id: Number(d.id), primary: d.name, secondary: d.code }))}
+                selectedIds={selectedDepotIds}
+                searchTerm={depotSearchTerm}
+                onSearchChange={setDepotSearchTerm}
+                onToggle={(id) => setSelectedDepotIds((prev) => toggleInList(prev, id))}
+                onSelectAll={() => setSelectedDepotIds(depots.map((d) => Number(d.id)))}
+                onClear={() => setSelectedDepotIds([])}
+                isLoading={isLoadingDepots}
+                emptyMessage="No depots match your search."
+              />
+              <ScopePicker
+                icon={Flame}
+                title="LPG Stations"
+                description="LPG home-delivery data at these stations"
+                items={lpgStations.map((s: any): ScopeOption => ({ id: Number(s.id || s._id), primary: s.name, secondary: s.code }))}
+                selectedIds={selectedLpgStationIds}
+                searchTerm={stationSearchTerm}
+                onSearchChange={setStationSearchTerm}
+                onToggle={(id) => setSelectedLpgStationIds((prev) => toggleInList(prev, id))}
+                onSelectAll={() => setSelectedLpgStationIds(lpgStations.map((s: any) => Number(s.id || s._id)))}
+                onClear={() => setSelectedLpgStationIds([])}
+                isLoading={isLoadingStations}
+                emptyMessage="No LPG stations match your search."
+              />
+              <ScopePicker
+                icon={FileText}
+                title="PFIs"
+                description="Specific cargo batches this user may work with"
+                items={pfis.map((p): ScopeOption => ({ id: Number(p.id), primary: p.pfiNumber, secondary: [p.locationName, p.productName].filter(Boolean).join(' • ') }))}
+                selectedIds={selectedPfiIds}
+                searchTerm={pfiSearchTerm}
+                onSearchChange={setPfiSearchTerm}
+                onToggle={(id) => setSelectedPfiIds((prev) => toggleInList(prev, id))}
+                onSelectAll={() => setSelectedPfiIds(pfis.map((p) => Number(p.id)))}
+                onClear={() => setSelectedPfiIds([])}
+                isLoading={isLoadingPfis}
+                emptyMessage="No PFIs match your search."
+              />
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-4 border rounded-lg p-4">
+          <div className="flex items-center space-x-2">
+            <LayoutGrid className="size-5 text-primary" />
+            <h2 className="text-lg font-normal">Page Access</h2>
+          </div>
+          <p className="text-sm text-muted-foreground -mt-2">
+            Pre-checked from the roles above — untick a page to hide it for this user specifically, or tick one their role wouldn't normally show.
+          </p>
+
+          <div className="border border-border rounded-lg divide-y divide-border max-h-[28rem] overflow-y-auto">
+            {navCategories.filter((cat) => cat.category && cat.items.length > 0).map((cat) => (
+              <div key={cat.category} className="p-3">
+                <p className="text-xs font-semibold uppercase text-muted-foreground mb-2">{cat.category}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                  {cat.items.map((item) => {
+                    const roleDefault = canAccessRoute(formData.roles, item.path)
+                    const checked = pageOverrides[item.path] ?? roleDefault
+                    const isOverridden = pageOverrides[item.path] !== undefined
+                    return (
+                      <label key={item.path} className={`flex items-center gap-2 p-2 rounded-lg text-sm cursor-pointer border ${checked ? 'border-primary/40 bg-primary/5' : 'border-border/40'}`}>
+                        <input type="checkbox" checked={checked} onChange={(e) => togglePage(item.path, e.target.checked)} className="size-4 rounded border-input text-primary accent-primary cursor-pointer" />
+                        <span className={`font-normal truncate ${checked ? 'text-primary' : 'text-foreground'}`}>{item.title}</span>
+                        {isOverridden && <span className="text-xs text-muted-foreground shrink-0">(custom)</span>}
+                      </label>
+                    )
+                  })}
+                </div>
               </div>
             ))}
           </div>

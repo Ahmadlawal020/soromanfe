@@ -430,6 +430,21 @@ export function hasAllRoles(userRoles: number[], requiredRoles: number[]): boole
 }
 
 /**
+ * Per-user page-visibility exceptions on top of the role-derived default —
+ * see the admin form's "Page Access" section. Only `view` is overridable;
+ * create/edit/delete/etc. stay role-derived (see canPerformAction).
+ */
+function resolveOverride(overrides: Record<string, boolean> | undefined, routePath: string): boolean | undefined {
+  if (!overrides) return undefined
+  if (routePath in overrides) return overrides[routePath]
+  const sortedPaths = Object.keys(overrides).sort((a, b) => b.length - a.length)
+  for (const basePath of sortedPaths) {
+    if (routePath.startsWith(basePath + '/')) return overrides[basePath]
+  }
+  return undefined
+}
+
+/**
  * Get the permissions for a specific route
  * Supports both exact matches and prefix matches for nested routes
  */
@@ -451,9 +466,18 @@ export function getRoutePermissions(routePath: string): RoutePermissions | null 
 }
 
 /**
- * Check if user can access a route (has view permission)
+ * Check if user can access a route (has view permission).
+ *
+ * `overrides` (routePath -> allowed) is the per-user page-access exception
+ * list from the admin form; it wins over the role default either way, but
+ * never over superadmin.
  */
-export function canAccessRoute(userRoles: number[], routePath: string): boolean {
+export function canAccessRoute(userRoles: number[], routePath: string, overrides?: Record<string, boolean>): boolean {
+  if (isSuperAdmin(userRoles)) return true
+
+  const override = resolveOverride(overrides, routePath)
+  if (override !== undefined) return override
+
   const permissions = getRoutePermissions(routePath)
   if (!permissions) return true // No permissions defined = public to authenticated users
   return hasAnyRole(userRoles, permissions.view)
@@ -497,12 +521,13 @@ export function getAccessibleRoutes(userRoles: number[]): string[] {
  */
 export function getFilteredNavCategories<T extends { items: { path: string }[] }>(
   categories: T[],
-  userRoles: number[]
+  userRoles: number[],
+  overrides?: Record<string, boolean>
 ): T[] {
   return categories
     .map(category => ({
       ...category,
-      items: category.items.filter(item => canAccessRoute(userRoles, item.path)),
+      items: category.items.filter(item => canAccessRoute(userRoles, item.path, overrides)),
     }))
     .filter(category => category.items.length > 0)
 }

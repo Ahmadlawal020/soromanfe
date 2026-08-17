@@ -93,6 +93,29 @@ export function getCurrentUserRolesFromStorage(): number[] {
 }
 
 /**
+ * Get the current user's per-page access overrides from session storage,
+ * keyed by routePath -> allowed. See the admin form's "Page Access" section.
+ */
+export function getCurrentUserOverridesFromStorage(): Record<string, boolean> {
+  try {
+    const stored = sessionStorage.getItem('dashboard-auth-storage')
+    if (!stored) return {}
+
+    const parsed = JSON.parse(stored)
+    const overrides = parsed?.state?.user?.pageOverrides
+    if (!Array.isArray(overrides)) return {}
+
+    const map: Record<string, boolean> = {}
+    for (const o of overrides) {
+      if (o && typeof o.routePath === 'string') map[o.routePath] = !!o.allowed
+    }
+    return map
+  } catch {
+    return {}
+  }
+}
+
+/**
  * Helper to check if user has active session in storage
  */
 export function isAuthenticatedFromStorage(): boolean {
@@ -127,12 +150,12 @@ export function routeGuard(routePath: string): void {
   }
 
   const userRoles = getCurrentUserRolesFromStorage()
-  
+
   // SUPERADMIN bypasses all checks
   if (isSuperAdmin(userRoles)) return
-  
+
   // Check if user can access the route
-  if (!canAccessRoute(userRoles, routePath)) {
+  if (!canAccessRoute(userRoles, routePath, getCurrentUserOverridesFromStorage())) {
     if (routePath === '/overview') {
       throw redirect({ to: '/login' })
     }
@@ -194,14 +217,15 @@ export function getFilteredNavCategories<T extends { items: { path: string }[] }
   userRoles?: number[]
 ): T[] {
   const roles = userRoles ?? getCurrentUserRolesFromStorage()
-  
+
   // SUPERADMIN sees everything
   if (isSuperAdmin(roles)) return categories
-  
+
+  const overrides = getCurrentUserOverridesFromStorage()
   return categories
     .map(category => ({
       ...category,
-      items: category.items.filter(item => canAccessRoute(roles, item.path)),
+      items: category.items.filter(item => canAccessRoute(roles, item.path, overrides)),
     }))
     .filter(category => category.items.length > 0)
 }

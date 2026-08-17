@@ -104,6 +104,15 @@ export function useRoles(routePath?: string) {
   const isSuperAdminUser = useMemo(() => isSuperAdmin(userRoles), [userRoles])
   const isAuditUser = useMemo(() => isAuditRole(userRoles), [userRoles])
 
+  // Per-page visibility exceptions on top of the role default — see the
+  // admin form's "Page Access" section. Only view access is overridable;
+  // create/edit/delete etc. below stay role-derived.
+  const pageOverrides = useMemo(() => {
+    const map: Record<string, boolean> = {}
+    for (const o of user?.pageOverrides || []) map[o.routePath] = o.allowed
+    return map
+  }, [user?.pageOverrides])
+
   const permissions = useMemo(() => {
     if (!routePath) return null
     return getRoutePermissions(routePath)
@@ -119,7 +128,7 @@ export function useRoles(routePath?: string) {
     hasRole: (roles: number[]) => hasAnyRole(userRoles, roles),
 
     // Route access check
-    canAccess: routePath ? canAccessRoute(userRoles, routePath) : true,
+    canAccess: routePath ? canAccessRoute(userRoles, routePath, pageOverrides) : true,
 
     // Action-specific checks (only available when routePath is provided)
     canView: routePath ? canPerformAction(userRoles, routePath, 'view') : true,

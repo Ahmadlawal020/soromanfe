@@ -71,6 +71,12 @@ const ROLE_MAP_REVERSE: Record<string, number> = {
 
 function mapAdminToStaffMember(admin: any): StaffMember {
   const numericRoles = (admin.roles || []).map((r: string) => ROLE_MAP_REVERSE[r]).filter((r: number | undefined) => r !== undefined);
+  // Depots and LPG stations are both "location" scope from the user's point of
+  // view; the StaffMember shape doesn't distinguish them, so they're merged.
+  const depotIds: number[] = admin.depotIds || []
+  const depotNames: string[] = admin.depotNames || []
+  const lpgStationIds: number[] = admin.lpgStationIds || []
+  const lpgStationNames: string[] = admin.lpgStationNames || []
   return {
     id: String(admin.id ?? admin._id),
     email: admin.email,
@@ -79,12 +85,15 @@ function mapAdminToStaffMember(admin: any): StaffMember {
     username: admin.email,
     role: numericRoles.length > 0 ? numericRoles[0] : 1,
     roles: numericRoles,
-    location: 'Headquarters',
-    locations: [],
-    location_names: [],
-    pfis: [],
-    pfi_numbers: [],
-    can_view_all_locations: true,
+    location: (depotNames[0] as any) || 'Headquarters',
+    locations: [...depotIds, ...lpgStationIds],
+    location_names: [...depotNames, ...lpgStationNames],
+    pfis: admin.pfiIds || [],
+    pfi_numbers: admin.pfiNumbers || [],
+    can_view_all_locations: admin.canViewAllLocations ?? true,
+    depot_ids: depotIds,
+    lpg_station_ids: lpgStationIds,
+    page_overrides: (admin.pageOverrides || []).map((o: any) => ({ route_path: o.routePath, allowed: o.allowed })),
     suspended: admin.suspended || false,
     email_verified: admin.isPasswordSet || false,
     plain_password: null,
