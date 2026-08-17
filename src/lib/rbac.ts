@@ -395,7 +395,7 @@ export const ROUTE_PERMISSIONS: Record<string, RoutePermissions> = {
   '/lpg/sales': { view: [0, 1, 8, 11, 13, 14], create: [], edit: [], delete: [] },
   '/delivery-inventory': { view: [0, 1, 3, 6, 8], create: [], edit: [], delete: [] },
   '/admin-reports': { view: [0, 1, 8], create: [], edit: [], delete: [] },
-  '/messaging': { view: [0, 1], create: [], edit: [], delete: [] },
+  '/messaging': { view: [0, 1], create: [Roles.SUPERADMIN, Roles.ADMIN], edit: [], delete: [] },
   '/orders-pfi': { view: [0], create: [], edit: [], delete: [] },
   '/inventory': { view: [0], create: [], edit: [], delete: [] },
   '/order-audit': { view: [0, 1, 8], create: [], edit: [], delete: [] },

@@ -28,6 +28,7 @@ export interface Customer {
   companyName: string
   address: string
   status: 'Active' | 'Inactive'
+  marketingOptOut?: boolean
   balance: string | number
   deposit: string | number
   previousDeposit: string | number

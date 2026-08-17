@@ -125,6 +125,7 @@ export const navCategories: NavCategory[] = [
       { title: "Dangote Orders", icon: ShoppingBag, path: "/dangote-orders" },
       { title: "Order Requests", icon: FileText, path: "/dangote-order-request" },
       { title: "Dangote Products", icon: Package, path: "/dangote-products" },
+      { title: "Licence Verification", icon: ShieldCheck, path: "/licence-verification" },
     ],
   },
   {
@@ -140,8 +141,8 @@ export const navCategories: NavCategory[] = [
   {
     category: "Admin",
     items: [
-      // { title: "Reports Hub", icon: FileSpreadsheet, path: "/admin-reports" },
-      // { title: "Messaging", icon: FileText, path: "/messaging" },
+      { title: "Reports Hub", icon: FileSpreadsheet, path: "/admin-reports" },
+      { title: "Messaging", icon: FileText, path: "/messaging" },
       // { title: "Assign PFI", icon: FileText, path: "/orders-pfi" },
       { title: "Product Pricing", icon: Fuel, path: "/product-pricing" },
       { title: "PFI Tracking", icon: FileText, path: "/pfi" },
@@ -150,7 +151,6 @@ export const navCategories: NavCategory[] = [
       // { title: "Stock Management", icon: Package, path: "/inventory" },
       // { title: "Users Log", icon: ClipboardList, path: "/order-audit" },
       { title: "Manage Users", icon: Users, path: "/admin" },
-      { title: "Licence Verification", icon: ShieldCheck, path: "/licence-verification" },
     ],
   },
   {
