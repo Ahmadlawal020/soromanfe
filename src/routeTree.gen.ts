@@ -57,6 +57,7 @@ import { Route as DepotsFormRouteImport } from './routes/depots/form'
 import { Route as DriversIndexRouteImport } from './routes/drivers/index'
 import { Route as DriversDetailsRouteImport } from './routes/drivers/details'
 import { Route as DriversFormRouteImport } from './routes/drivers/form'
+import { Route as ExpenseRequestsIndexRouteImport } from './routes/expense-requests/index'
 import { Route as ExpensesIndexRouteImport } from './routes/expenses/index'
 import { Route as FeedbackDashboardIndexRouteImport } from './routes/feedback-dashboard/index'
 import { Route as FilingStationsIndexRouteImport } from './routes/filing-stations/index'
@@ -360,6 +361,11 @@ const DriversDetailsRoute = DriversDetailsRouteImport.update({
 const DriversFormRoute = DriversFormRouteImport.update({
   id: '/drivers/form',
   path: '/drivers/form',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExpenseRequestsIndexRoute = ExpenseRequestsIndexRouteImport.update({
+  id: '/expense-requests/',
+  path: '/expense-requests/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ExpensesIndexRoute = ExpensesIndexRouteImport.update({
@@ -716,6 +722,7 @@ export interface FileRoutesByFullPath {
   '/deposits/': typeof DepositsIndexRoute
   '/depots/': typeof DepotsIndexRoute
   '/drivers/': typeof DriversIndexRoute
+  '/expense-requests/': typeof ExpenseRequestsIndexRoute
   '/expenses/': typeof ExpensesIndexRoute
   '/feedback-dashboard/': typeof FeedbackDashboardIndexRoute
   '/filing-stations/': typeof FilingStationsIndexRoute
@@ -822,6 +829,7 @@ export interface FileRoutesByTo {
   '/deposits': typeof DepositsIndexRoute
   '/depots': typeof DepotsIndexRoute
   '/drivers': typeof DriversIndexRoute
+  '/expense-requests': typeof ExpenseRequestsIndexRoute
   '/expenses': typeof ExpensesIndexRoute
   '/feedback-dashboard': typeof FeedbackDashboardIndexRoute
   '/filing-stations': typeof FilingStationsIndexRoute
@@ -929,6 +937,7 @@ export interface FileRoutesById {
   '/deposits/': typeof DepositsIndexRoute
   '/depots/': typeof DepotsIndexRoute
   '/drivers/': typeof DriversIndexRoute
+  '/expense-requests/': typeof ExpenseRequestsIndexRoute
   '/expenses/': typeof ExpensesIndexRoute
   '/feedback-dashboard/': typeof FeedbackDashboardIndexRoute
   '/filing-stations/': typeof FilingStationsIndexRoute
@@ -1037,6 +1046,7 @@ export interface FileRouteTypes {
     | '/deposits/'
     | '/depots/'
     | '/drivers/'
+    | '/expense-requests/'
     | '/expenses/'
     | '/feedback-dashboard/'
     | '/filing-stations/'
@@ -1143,6 +1153,7 @@ export interface FileRouteTypes {
     | '/deposits'
     | '/depots'
     | '/drivers'
+    | '/expense-requests'
     | '/expenses'
     | '/feedback-dashboard'
     | '/filing-stations'
@@ -1249,6 +1260,7 @@ export interface FileRouteTypes {
     | '/deposits/'
     | '/depots/'
     | '/drivers/'
+    | '/expense-requests/'
     | '/expenses/'
     | '/feedback-dashboard/'
     | '/filing-stations/'
@@ -1356,6 +1368,7 @@ export interface RootRouteChildren {
   DepositsIndexRoute: typeof DepositsIndexRoute
   DepotsIndexRoute: typeof DepotsIndexRoute
   DriversIndexRoute: typeof DriversIndexRoute
+  ExpenseRequestsIndexRoute: typeof ExpenseRequestsIndexRoute
   ExpensesIndexRoute: typeof ExpensesIndexRoute
   FeedbackDashboardIndexRoute: typeof FeedbackDashboardIndexRoute
   FilingStationsIndexRoute: typeof FilingStationsIndexRoute
@@ -1730,6 +1743,13 @@ declare module '@tanstack/react-router' {
       path: '/drivers/form'
       fullPath: '/drivers/form'
       preLoaderRoute: typeof DriversFormRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/expense-requests/': {
+      id: '/expense-requests/'
+      path: '/expense-requests'
+      fullPath: '/expense-requests/'
+      preLoaderRoute: typeof ExpenseRequestsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/expenses/': {
@@ -2197,6 +2217,7 @@ const rootRouteChildren: RootRouteChildren = {
   DepositsIndexRoute: DepositsIndexRoute,
   DepotsIndexRoute: DepotsIndexRoute,
   DriversIndexRoute: DriversIndexRoute,
+  ExpenseRequestsIndexRoute: ExpenseRequestsIndexRoute,
   ExpensesIndexRoute: ExpensesIndexRoute,
   FeedbackDashboardIndexRoute: FeedbackDashboardIndexRoute,
   FilingStationsIndexRoute: FilingStationsIndexRoute,

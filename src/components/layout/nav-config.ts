@@ -65,7 +65,10 @@ export const navCategories: NavCategory[] = [
   },
   {
     category: "My Reports",
-    items: [{ title: "My Report", icon: FileText, path: "/my-report" }],
+    items: [
+      { title: "My Report", icon: FileText, path: "/my-report" },
+      { title: "My Requests", icon: Receipt, path: "/expense-requests" },
+    ],
   },
   {
     category: "Operations",

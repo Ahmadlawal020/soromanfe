@@ -118,6 +118,7 @@ export type PfiExpense = {
   bank_code?: string
   payee_account_number?: string
   payee_account_name?: string
+  submitted_by_id?: number | null
   submitted_by_name?: string | null
   reviewed_by_name?: string | null
   review_note?: string
@@ -183,6 +184,13 @@ export const STATUS_TONE: Record<ExpenseStatus, string> = {
   rejected: 'bg-destructive/15 text-destructive',
   changes_requested: 'bg-warning/15 text-warning',
 }
+
+/**
+ * Deletable up to "with CFO" — mirrors the server-side rule exactly. Past
+ * that the chain has already spent effort approving it, so reject or send it
+ * back instead of making the row vanish.
+ */
+export const DELETABLE_STATUSES = new Set<ExpenseStatus>(['pending', 'changes_requested', 'verified'])
 
 /** The four groups an expense may be booked to, plus income, which it may not. */
 export type GlGroupCode =
@@ -356,6 +364,9 @@ export type ExpenseFilters = {
   dateFrom?: string
   dateTo?: string
   page?: number
+  /** Forces "just what I raised", even for an oversight role — the My
+   * Requests page's whole reason for existing. */
+  mine?: boolean
 }
 
 export function useExpenses(filters?: ExpenseFilters) {

@@ -1,4 +1,5 @@
 import { format } from 'date-fns'
+import api from '#/lib/api/http'
 import { ALL_TYPES, REPORTS, allFields } from '#/routes/my-report/-report-config'
 import { naira } from '#/routes/pfi/-pfi-utils'
 import type { DailyReportRow } from './-hub-data'
@@ -45,11 +46,14 @@ function sheetName(location: string, used: Set<string>) {
  * reader can cross-check a sheet against the page it came from. Each sheet
  * stacks a coloured banner + header + rows per role, since the five report
  * types share no common column shape.
+ *
+ * Returns the raw buffer rather than triggering anything itself, so the same
+ * workbook can be downloaded or emailed without building it twice.
  */
-export async function exportReportsHub(
+export async function buildReportsHubWorkbook(
   rows: DailyReportRow[],
   opts: { date: string; location: string; pfi: string },
-) {
+): Promise<{ buffer: ArrayBuffer; filename: string }> {
   const ExcelJS = (await import('exceljs')).default
   const wb = new ExcelJS.Workbook()
   wb.creator = 'Soroman System'
@@ -161,9 +165,53 @@ export async function exportReportsHub(
     }
   }
 
-  const buf = await wb.xlsx.writeBuffer()
+  const buffer = await wb.xlsx.writeBuffer()
+  return { buffer, filename: `Soroman_Reports_${opts.date}.xlsx` }
+}
+
+/** Download button: build the workbook, hand it straight to the browser. */
+export async function exportReportsHub(
+  rows: DailyReportRow[],
+  opts: { date: string; location: string; pfi: string },
+) {
+  const { buffer, filename } = await buildReportsHubWorkbook(rows, opts)
   triggerDownload(
-    new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
-    `Soroman_Reports_${opts.date}.xlsx`,
+    new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
+    filename,
   )
+}
+
+function arrayBufferToBase64(buf: ArrayBuffer) {
+  const bytes = new Uint8Array(buf)
+  let binary = ''
+  // Chunked so a large workbook doesn't blow the call-stack String.fromCharCode
+  // would otherwise take one argument per byte.
+  const CHUNK = 0x8000
+  for (let i = 0; i < bytes.length; i += CHUNK) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + CHUNK))
+  }
+  return btoa(binary)
+}
+
+/**
+ * "Email report" button: same workbook, sent to whoever was just typed in
+ * rather than downloaded — the browser still does all the building, the
+ * server only relays the finished file to Resend.
+ */
+export async function emailReportsHub(
+  rows: DailyReportRow[],
+  opts: { date: string; location: string; pfi: string },
+  recipients: string[],
+): Promise<{ message: string }> {
+  const { buffer, filename } = await buildReportsHubWorkbook(rows, opts)
+  const res = await api.post('/daily-reports/email', {
+    recipients,
+    reportDate: opts.date,
+    filename,
+    attachmentBase64: arrayBufferToBase64(buffer),
+    reportCount: rows.length,
+    location: opts.location,
+    pfi: opts.pfi,
+  })
+  return res.data as { message: string }
 }
