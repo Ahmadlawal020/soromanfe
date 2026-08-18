@@ -647,7 +647,10 @@ function LpgStationDetailPage() {
             </CardContent>
           </Card>
 
-          {/* Paystack Subaccount Status */}
+          {/* Paystack Subaccount Status — disabled: Paystack DVA/subaccount funding was turned off
+              (wallet funding is now manual-deposit-only). subaccountActive/paystackSubaccountCode
+              will never update again, so this card is commented out rather than shown permanently
+              "Inactive". Re-enable if Paystack subaccounts are reinstated.
           <Card className="md:col-span-2">
             <CardHeader className="border-b border-border/50 pb-3">
               <div className="flex items-center justify-between">
@@ -709,6 +712,7 @@ function LpgStationDetailPage() {
               )}
             </CardContent>
           </Card>
+          */}
         </div>
       )}
 

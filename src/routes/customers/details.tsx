@@ -419,6 +419,10 @@ function CustomerDetailPage() {
           <CardContent className="space-y-4 pt-4">
             {customer.virtualAccountNumber ? (
               <div className="space-y-4">
+                <div className="p-2.5 rounded-lg bg-warning/10 border border-warning/20 text-xs text-warning flex items-start gap-2">
+                  <AlertCircle className="mt-0.5 size-3.5 shrink-0" />
+                  <span>Legacy account — no longer used for new payments. Do not tell customers to pay into this account; record new deposits manually against the depot/station's own bank account.</span>
+                </div>
                 <div className="p-4 rounded-xl border-2 border-primary/20 bg-primary/5 space-y-3">
                   <div>
                     <p className="text-xs text-muted-foreground uppercase font-normal">Account Number</p>
@@ -443,16 +447,19 @@ function CustomerDetailPage() {
                   </div>
                 </div>
                 {customer.dvaSubaccountCode ? (
-                  <div className="p-3 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-between text-xs">
+                  <div className="p-3 rounded-lg bg-muted/40 border border-border flex items-center justify-between text-xs text-muted-foreground">
                     <div>
-                      <p className="text-muted-foreground uppercase font-semibold text-[10px]">Active Settlement Route</p>
-                      <p className="font-mono font-semibold text-foreground mt-0.5">Paystack Subaccount: {customer.dvaSubaccountCode}</p>
+                      <p className="uppercase font-semibold text-[10px]">Legacy Settlement Route (Inactive)</p>
+                      <p className="font-mono font-normal mt-0.5">Paystack Subaccount: {customer.dvaSubaccountCode} — automatic settlement routing is disabled; deposits are recorded manually.</p>
                     </div>
-                    <Badge className="bg-accent/15 text-accent border-accent/30 font-normal">Active Depot Link</Badge>
+                    <Badge className="bg-muted text-muted-foreground border-border font-normal">Inactive</Badge>
                   </div>
                 ) : (
                   <div className="p-3 rounded-lg bg-muted/40 border border-border flex items-center gap-2 text-xs text-muted-foreground">
-                    <span>⚡ DVA Settlement: Auto-switches to the depot subaccount whenever an order is placed.</span>
+                    {/* Paystack DVA-to-subaccount auto-switching is disabled (wallet funding is now
+                        manual-deposit-only). Original copy, kept for quick reinstatement:
+                        "⚡ DVA Settlement: Auto-switches to the depot subaccount whenever an order is placed." */}
+                    <span>⚡ Automatic settlement routing is currently disabled — deposits for this customer are recorded manually.</span>
                   </div>
                 )}
                 {customer.paystackCustomerId && (
@@ -471,7 +478,10 @@ function CustomerDetailPage() {
                   <CreditCard className="size-5 text-muted-foreground" />
                 </div>
                 <p className="text-sm font-normal text-foreground">No Virtual Account</p>
-                <p className="text-xs text-muted-foreground mt-1">A virtual account will be generated when the customer places their first order.</p>
+                {/* Paystack DVA provisioning is disabled (wallet funding is now manual-deposit-only).
+                    Original copy, kept for quick reinstatement:
+                    "A virtual account will be generated when the customer places their first order." */}
+                <p className="text-xs text-muted-foreground mt-1">Virtual account provisioning is disabled. Fund this customer's wallet via a manual deposit instead.</p>
               </div>
             )}
           </CardContent>

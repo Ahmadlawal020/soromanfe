@@ -80,7 +80,7 @@ function DepositDetailPage() {
         <PageHeader
       eyebrow="Finance"
       title="Deposit Details"
-      description={`{isPaystack ? 'Paystack automated transaction details and customer information' : 'Manual bank deposit details and customer information'}`}
+      description={`${isPaystack ? 'Paystack automated transaction details and customer information' : 'Manual bank deposit details and customer information'}`}
       backAction={handleBack}
     />
       </header>
