@@ -135,7 +135,7 @@ function PFIDashboard() {
           <Download data-icon="inline-start" />
           Full report
           </Button>
-          <Button onClick={() => navigate({ to: '/pfi/form', search: { id: '' } as any })}>
+          <Button onClick={() => navigate({ to: '/pfi/form' })}>
           <Plus data-icon="inline-start" />
           New PFI
           </Button>
