@@ -9,13 +9,6 @@ import {
 /**
  * Get current user roles from session storage
  * Returns numeric role IDs
- *
- * The backend now sends these as Django's real role integers directly (see
- * Sman-Backend's middleware/verifyStaff.js / config/roleMapping.js) — no
- * string translation needed or possible here. A stale string->id table used
- * to live in this function; since the backend never sent strings, it always
- * mapped to an empty array, which made routeGuard() below treat every real
- * user as having zero roles and redirect-loop between /login and /overview.
  */
 export function getCurrentUserRolesFromStorage(): number[] {
   try {
@@ -26,7 +19,74 @@ export function getCurrentUserRolesFromStorage(): number[] {
     const roles = parsed?.state?.user?.roles
     if (!Array.isArray(roles)) return []
 
-    return roles.map(Number).filter((r: number) => !isNaN(r))
+    const ROLE_STRING_TO_ID: Record<string, number> = {
+      super_admin: 0,
+      admin: 1,
+      finance: 2,
+      truck_sales: 3,
+      ticketing: 4,
+      security_entry: 5,
+      transport: 6,
+      release: 7,
+      audit: 8,
+      sales_manager: 9,
+      product_manager: 10,
+      lpg_dashboard: 11,
+      lpg_plants: 12,
+      lpg_stock: 13,
+      lpg_sales: 14,
+      commissions: 15,
+      commission_officer: 16,
+      dispatch: 17,
+      it_compliance: 18,
+      security_exit: 19,
+
+      // Tiered Subroles - Finance Department
+      finance_viewer: 20,
+      finance_operator: 21,
+      finance_manager: 22,
+
+      // Tiered Subroles - Transport Department
+      transport_viewer: 23,
+      transport_operator: 24,
+      transport_manager: 25,
+
+      // Tiered Subroles - Security Department
+      security_viewer: 26,
+      security_operator: 27,
+      security_manager: 28,
+
+      // Tiered Subroles - Ticketing Department
+      ticketing_viewer: 29,
+      ticketing_operator: 30,
+      ticketing_manager: 31,
+
+      // Tiered Subroles - Orders Department
+      orders_viewer: 32,
+      orders_operator: 33,
+      orders_manager: 34,
+
+      // Tiered Subroles - Sales Department
+      sales_viewer: 35,
+      sales_operator: 36,
+      sales_manager_tier: 37,
+
+      // Tiered Subroles - Dangote Department
+      dangote_viewer: 38,
+      dangote_operator: 39,
+      dangote_manager: 40,
+
+      // Tiered Subroles - LPG Department
+      lpg_viewer: 41,
+      lpg_operator: 42,
+      lpg_manager: 43,
+
+      expenditure_officer: 44,
+    }
+
+    return roles
+      .map((r: string) => ROLE_STRING_TO_ID[r])
+      .filter((r): r is number => r !== undefined)
   } catch {
     return []
   }
