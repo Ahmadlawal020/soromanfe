@@ -242,12 +242,6 @@ function DepotFlow() {
       nextPending={createOrderMutation.isPending}
       hint={!allRevealed ? 'Complete the sections above to place the order.' : undefined}
     >
-      <div className="p-3.5 rounded-lg bg-primary/5 border border-primary/20 flex items-start gap-3 mb-8">
-        <Zap className="size-4 text-primary shrink-0 mt-0.5" />
-        <div className="text-xs text-muted-foreground">
-          <span className="font-semibold text-foreground">DVA Auto-Subaccount Settlement:</span> Upon placing this depot order, the customer&apos;s Dedicated Virtual Account (DVA) is automatically switched to the selected depot&apos;s Paystack Subaccount so all payments land directly in the depot&apos;s account.
-        </div>
-      </div>
 
       <div className="space-y-10">
         {DEPOT_SECTIONS.filter((s) => revealed.includes(s.step)).map((s) => {

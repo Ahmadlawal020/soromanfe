@@ -72,17 +72,17 @@ function CustomerDashboard() {
   return (
     <div className="space-y-6 animate-fade-in">
       <PageHeader
-      eyebrow="Orders"
-      title="Customers"
-      description="Manage customer profiles, deposits, balances, and account status."
-      actions={
-        <>
-          <Button size="sm"  onClick={() => navigate({ to: '/customers/form' })}>
-          <Plus className="size-4 mr-2" />Add New Customer
-          </Button>
-        </>
-      }
-    />
+        eyebrow="Orders"
+        title="Customers"
+        description="Manage customer profiles, deposits, balances, and account status."
+        actions={
+          <>
+            <Button size="sm" onClick={() => navigate({ to: '/customers/form' })}>
+              <Plus className="size-4 mr-2" />Add New Customer
+            </Button>
+          </>
+        }
+      />
 
       {!isLoading && !isError && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
@@ -95,25 +95,25 @@ function CustomerDashboard() {
 
       <FilterBar>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-        <div className="relative flex-1 sm:w-64">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground size-4" />
-        <Input type="text" placeholder="Search by name, company, phone..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
-        {searchTerm && <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 size-5 rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground flex items-center justify-center cursor-pointer transition-colors duration-250 ease-luxe" aria-label="Clear search"><X className="size-2.5" /></button>}
-        </div>
-        <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-        <SelectTrigger className="w-full sm:w-[180px]"><SelectValue placeholder="All Statuses" /></SelectTrigger>
-        <SelectContent>
-        <SelectItem value="all">All Statuses</SelectItem>
-        <SelectItem value="Active">Active</SelectItem>
-        <SelectItem value="Inactive">Inactive</SelectItem>
-        <SelectItem value="Pending">Pending</SelectItem>
-        </SelectContent>
-        </Select>
+          <div className="relative flex-1 sm:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground size-4" />
+            <Input type="text" placeholder="Search by name, company, phone..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
+            {searchTerm && <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 size-5 rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground flex items-center justify-center cursor-pointer transition-colors duration-250 ease-luxe" aria-label="Clear search"><X className="size-2.5" /></button>}
+          </div>
+          <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+            <SelectTrigger className="w-full sm:w-[180px]"><SelectValue placeholder="All Statuses" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="Active">Active</SelectItem>
+              <SelectItem value="Inactive">Inactive</SelectItem>
+              <SelectItem value="Pending">Pending</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </FilterBar>
 
       <Card>
-        
+
         <CardContent>
           {isLoading ? (
             <PageLoader message="Loading customers..." />
@@ -128,7 +128,7 @@ function CustomerDashboard() {
               onAction={hasFilters ? undefined : () => navigate({ to: '/customers/form' })}
               hasFilters={hasFilters}
               onClearFilters={() => { setSearchTerm(''); setSelectedStatus('all') }}
- />
+            />
           ) : (
             <>
               <div className="overflow-x-auto">
@@ -185,7 +185,7 @@ function CustomerDashboard() {
                 totalItems={totalItems}
                 onPageChange={setCurrentPage}
                 onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1) }}
- />
+              />
             </>
           )}
         </CardContent>

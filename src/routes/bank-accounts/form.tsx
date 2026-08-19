@@ -124,8 +124,12 @@ function BankAccountForm() {
     return assignedSet
   }, [allBankAccounts, isEdit, accountId])
 
-  const availableDepots = depots
-  const availableLpgStations = lpgStations
+  const availableDepots = depots.filter(
+    (d) => !alreadyAssignedDepotIds.has(Number(d.id))
+  )
+  const availableLpgStations = lpgStations.filter(
+    (s: any) => !alreadyAssignedStationIds.has(Number(s.id || s._id))
+  )
 
   // Form State
   const [selectedBankPreset, setSelectedBankPreset] = useState<string>(
