@@ -1,24 +1,44 @@
+// Values are Django's real Roles.IntegerChoices (soroman_backend-2/administration/
+// models.py) — the numbers administration_user.roles actually holds live, and
+// what Sman-Backend's config/roleMapping.js was rebuilt against on 2026-08-19.
+// This used to be a self-invented 0-44 scheme that never matched Django beyond
+// index 2; kept here for reference on what changed and why:
+//   - SALES_MANAGER moved 9 -> 3 (Django's real SALES role)
+//   - SECURITY_EXIT moved 19 -> 5 (Django has ONE Security role; Sman's
+//     entry/exit split has no backing distinction on the live schema, so
+//     holding it grants both rather than arbitrarily locking out either)
+//   - EXPENDITURE_OFFICER moved 44 -> 19 (Django's real value)
+//   - TRUCK_SALES and PRODUCT_MANAGER have no Django counterpart at all —
+//     left as unreachable sentinels rather than guessed, matching the
+//     backend's decision to leave them unmapped
+//   - LPG_PLANTS/LPG_STOCK/LPG_SALES: Django's LPG_ADMIN(11) alone can manage
+//     plants; LPG_ADMIN(11) and LPG_PLANT_MANAGER(13) can both reach
+//     stock/dashboard; LPG_ADMIN(11), LPG_PLANT_MANAGER(13) and
+//     LPG_CASHIER(14) can all reach sales. A single number per constant can't
+//     represent that overlap, so ROUTE_PERMISSIONS below lists the full
+//     grantee set explicitly wherever LPG_STOCK/LPG_SALES gate a route,
+//     rather than relying on membership of one number.
 export const Roles = {
   SUPERADMIN: 0,
   ADMIN: 1,
   FINANCE: 2,
-  TRUCK_SALES: 3,
+  TRUCK_SALES: -1, // no Django role maps to this — unreachable by design
   TICKETING: 4,
   SECURITY_ENTRY: 5,
   TRANSPORT: 6,
   RELEASE: 7,
   AUDIT: 8,
-  SALES_MANAGER: 9,
-  PRODUCT_MANAGER: 10,
+  SALES_MANAGER: 3,
+  PRODUCT_MANAGER: -2, // no Django role maps to this — unreachable by design
   LPG_DASHBOARD: 11,
-  LPG_PLANTS: 12,
+  LPG_PLANTS: 11,
   LPG_STOCK: 13,
   LPG_SALES: 14,
   COMMISSIONS: 15,
   COMMISSION_OFFICER: 16,
   DISPATCH: 17,
   IT_COMPLIANCE: 18,
-  SECURITY_EXIT: 19,
+  SECURITY_EXIT: 5,
 
   // Tiered Subroles - Finance Department
   FINANCE_VIEWER: 20,
@@ -61,8 +81,8 @@ export const Roles = {
   LPG_MANAGER: 43,
 
   // Verifies and pays expenses — the "Expenses Officer" stage of the expense
-  // approval chain.
-  EXPENDITURE_OFFICER: 44,
+  // approval chain. Django's real value (was wrongly 44).
+  EXPENDITURE_OFFICER: 19,
 } as const;
 export type Roles = (typeof Roles)[keyof typeof Roles];
 
@@ -72,23 +92,27 @@ export const ROLE_LABELS: Record<number, string> = {
   [Roles.SUPERADMIN]: 'Superadmin',
   [Roles.ADMIN]: 'Administration',
   [Roles.FINANCE]: 'Finance',
-  [Roles.TRUCK_SALES]: 'Truck Sales',
+  [Roles.TRUCK_SALES]: 'Truck Sales (no backend role — do not assign)',
   [Roles.TICKETING]: 'Ticketing',
-  [Roles.SECURITY_ENTRY]: 'Security (Entry Gate)',
+  // Django has one Security role (SECURITY_ENTRY and SECURITY_EXIT are both
+  // 5 now — see the comment above the Roles object), so this single label
+  // covers both gates rather than showing two checkboxes for what is really
+  // one underlying role.
+  [Roles.SECURITY_ENTRY]: 'Security (Entry/Exit Gate)',
   [Roles.TRANSPORT]: 'Transport',
   [Roles.RELEASE]: 'Release',
   [Roles.AUDIT]: 'Audit',
   [Roles.SALES_MANAGER]: 'Sales Manager',
-  [Roles.PRODUCT_MANAGER]: 'Product Manager',
-  [Roles.LPG_DASHBOARD]: 'LPG Dashboard',
-  [Roles.LPG_PLANTS]: 'LPG Plants',
-  [Roles.LPG_STOCK]: 'LPG Stock',
-  [Roles.LPG_SALES]: 'LPG Sales',
+  [Roles.PRODUCT_MANAGER]: 'Product Manager (no backend role — do not assign)',
+  // LPG_DASHBOARD and LPG_PLANTS are both 11 (Django's LPG Admin, the only
+  // role that can manage plants) — one label, same reasoning as Security above.
+  [Roles.LPG_DASHBOARD]: 'LPG Admin (Plants, Stock & Sales)',
+  [Roles.LPG_STOCK]: 'LPG Plant Manager (Stock & Sales)',
+  [Roles.LPG_SALES]: 'LPG Cashier (Sales only)',
   [Roles.COMMISSIONS]: 'Commissions',
   [Roles.COMMISSION_OFFICER]: 'Commission Officer',
   [Roles.DISPATCH]: 'Dispatch',
   [Roles.IT_COMPLIANCE]: 'IT Compliance',
-  [Roles.SECURITY_EXIT]: 'Security (Exit Gate)',
 
   // Tiered Subroles - Finance Department
   [Roles.FINANCE_VIEWER]: 'Finance Viewer',
@@ -142,13 +166,13 @@ export const ROLE_GROUPS: { label: string; roles: number[] }[] = [
   { label: 'Admin', roles: [Roles.SUPERADMIN, Roles.ADMIN, Roles.AUDIT] },
   { label: 'Finance', roles: [Roles.FINANCE, Roles.COMMISSIONS, Roles.COMMISSION_OFFICER, Roles.EXPENDITURE_OFFICER] },
   { label: 'Finance (Tiered)', roles: [Roles.FINANCE_VIEWER, Roles.FINANCE_OPERATOR, Roles.FINANCE_MANAGER] },
-  { label: 'Operations', roles: [Roles.TICKETING, Roles.RELEASE, Roles.DISPATCH, Roles.SECURITY_ENTRY, Roles.SECURITY_EXIT, Roles.TRANSPORT, Roles.SALES_MANAGER, Roles.PRODUCT_MANAGER, Roles.TRUCK_SALES] },
+  { label: 'Operations', roles: [Roles.TICKETING, Roles.RELEASE, Roles.DISPATCH, Roles.SECURITY_ENTRY, Roles.TRANSPORT, Roles.SALES_MANAGER] },
   { label: 'Transport (Tiered)', roles: [Roles.TRANSPORT_VIEWER, Roles.TRANSPORT_OPERATOR, Roles.TRANSPORT_MANAGER] },
   { label: 'Security (Tiered)', roles: [Roles.SECURITY_VIEWER, Roles.SECURITY_OPERATOR, Roles.SECURITY_MANAGER] },
   { label: 'Ticketing (Tiered)', roles: [Roles.TICKETING_VIEWER, Roles.TICKETING_OPERATOR, Roles.TICKETING_MANAGER] },
   { label: 'Orders (Tiered)', roles: [Roles.ORDERS_VIEWER, Roles.ORDERS_OPERATOR, Roles.ORDERS_MANAGER] },
   { label: 'Sales (Tiered)', roles: [Roles.SALES_VIEWER, Roles.SALES_OPERATOR, Roles.SALES_MANAGER_TIER] },
-  { label: 'LPG Division', roles: [Roles.LPG_DASHBOARD, Roles.LPG_PLANTS, Roles.LPG_STOCK, Roles.LPG_SALES] },
+  { label: 'LPG Division', roles: [Roles.LPG_DASHBOARD, Roles.LPG_STOCK, Roles.LPG_SALES] },
   { label: 'LPG (Tiered)', roles: [Roles.LPG_VIEWER, Roles.LPG_OPERATOR, Roles.LPG_MANAGER] },
   { label: 'Dangote (Tiered)', roles: [Roles.DANGOTE_VIEWER, Roles.DANGOTE_OPERATOR, Roles.DANGOTE_MANAGER] },
   { label: 'Others', roles: [Roles.IT_COMPLIANCE] },
@@ -166,14 +190,12 @@ export const roleColorMap: Record<number, string> = {
   [Roles.SALES_MANAGER]: 'text-indigo-600',
   [Roles.PRODUCT_MANAGER]: 'text-teal-600',
   [Roles.LPG_DASHBOARD]: 'text-soroman-orange',
-  [Roles.LPG_PLANTS]: 'text-soroman-orange',
   [Roles.LPG_STOCK]: 'text-soroman-orange',
   [Roles.LPG_SALES]: 'text-soroman-orange',
   [Roles.COMMISSIONS]: 'text-emerald-700',
   [Roles.COMMISSION_OFFICER]: 'text-green-700',
   [Roles.DISPATCH]: 'text-sky-600',
   [Roles.IT_COMPLIANCE]: 'text-zinc-600',
-  [Roles.SECURITY_EXIT]: 'text-rose-600',
 
   // Tiered Subroles - Finance Department
   [Roles.FINANCE_VIEWER]: 'text-blue-400',

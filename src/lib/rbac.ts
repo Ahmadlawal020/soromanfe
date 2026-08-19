@@ -329,22 +329,26 @@ export const ROUTE_PERMISSIONS: Record<string, RoutePermissions> = {
   // --------------------------------------------------------------------------
   // LPG HOME DELIVERY
   // --------------------------------------------------------------------------
+  // LPG_DASHBOARD (Django's LPG Admin, 11) and LPG_STOCK (Django's LPG Plant
+  // Manager, 13) are added alongside LPG_SALES throughout this section — per
+  // Sman-Backend's config/roleMapping.js, both of those Django roles can also
+  // reach LPG sales, not just the Cashier (LPG_SALES/14) role itself.
   '/lpg-orders': {
-    view: [...ADMIN_SUPERADMIN, Roles.LPG_DASHBOARD, Roles.LPG_SALES, Roles.AUDIT, Roles.LPG_VIEWER, Roles.LPG_OPERATOR, Roles.LPG_MANAGER],
+    view: [...ADMIN_SUPERADMIN, Roles.LPG_DASHBOARD, Roles.LPG_STOCK, Roles.LPG_SALES, Roles.AUDIT, Roles.LPG_VIEWER, Roles.LPG_OPERATOR, Roles.LPG_MANAGER],
     create: [],
     edit: [],
     delete: [],
-    dispatch: [Roles.LPG_SALES, Roles.SUPERADMIN, Roles.LPG_OPERATOR, Roles.LPG_MANAGER],
+    dispatch: [Roles.LPG_DASHBOARD, Roles.LPG_STOCK, Roles.LPG_SALES, Roles.SUPERADMIN, Roles.LPG_OPERATOR, Roles.LPG_MANAGER],
   },
   '/lpg-order-request': {
-    view: [...ADMIN_SUPERADMIN, Roles.LPG_DASHBOARD, Roles.LPG_SALES, Roles.LPG_VIEWER, Roles.LPG_OPERATOR, Roles.LPG_MANAGER],
+    view: [...ADMIN_SUPERADMIN, Roles.LPG_DASHBOARD, Roles.LPG_STOCK, Roles.LPG_SALES, Roles.LPG_VIEWER, Roles.LPG_OPERATOR, Roles.LPG_MANAGER],
     create: [...ADMIN_SUPERADMIN, Roles.LPG_OPERATOR, Roles.LPG_MANAGER],
     edit: [],
     delete: [],
-    review: [Roles.LPG_SALES, Roles.SUPERADMIN, Roles.LPG_OPERATOR, Roles.LPG_MANAGER],
+    review: [Roles.LPG_DASHBOARD, Roles.LPG_STOCK, Roles.LPG_SALES, Roles.SUPERADMIN, Roles.LPG_OPERATOR, Roles.LPG_MANAGER],
   },
   '/lpg-payable-orders': {
-    view: [...ADMIN_SUPERADMIN, Roles.FINANCE, Roles.LPG_SALES, Roles.LPG_VIEWER, Roles.LPG_OPERATOR, Roles.LPG_MANAGER, Roles.FINANCE_VIEWER, Roles.FINANCE_OPERATOR, Roles.FINANCE_MANAGER],
+    view: [...ADMIN_SUPERADMIN, Roles.FINANCE, Roles.LPG_DASHBOARD, Roles.LPG_STOCK, Roles.LPG_SALES, Roles.LPG_VIEWER, Roles.LPG_OPERATOR, Roles.LPG_MANAGER, Roles.FINANCE_VIEWER, Roles.FINANCE_OPERATOR, Roles.FINANCE_MANAGER],
     create: [],
     edit: [],
     delete: [],
