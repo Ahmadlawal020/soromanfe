@@ -475,6 +475,15 @@ export function getRoutePermissions(routePath: string): RoutePermissions | null 
 export function canAccessRoute(userRoles: number[], routePath: string, overrides?: Record<string, boolean>): boolean {
   if (isSuperAdmin(userRoles)) return true
 
+  // TEMPORARY: the overview/home is viewable by any authenticated user. The
+  // route guards send everyone to /overview after login and on any denied
+  // route; when a non-privileged staffer could not see it, that bounced them
+  // to /login and straight back — an infinite redirect that froze the tab.
+  // Opening /overview to all logged-in users breaks that loop. Revisit if the
+  // overview should be role-restricted again (then also fix the guards to land
+  // users on a page they can actually open, not /overview).
+  if (routePath === '/overview') return true
+
   const override = resolveOverride(overrides, routePath)
   if (override !== undefined) return override
 
