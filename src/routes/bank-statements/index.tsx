@@ -46,6 +46,7 @@ function BankStatementsPage() {
   const [grid, setGrid] = useState<Grid | null>(null)
   const [filename, setFilename] = useState('')
   const [reading, setReading] = useState(false)
+  const [editingFormat, setEditingFormat] = useState(false)
   const [draft, setDraft] = useState<ColumnMapping>({
     headerRow: 0, dateColumn: 0, amountColumn: null, creditColumn: null,
     depositorColumn: null, referenceColumn: null, narrationColumn: null,
@@ -73,8 +74,19 @@ function BankStatementsPage() {
     }
   }, [saved])
 
-  const headers = grid?.[draft.headerRow] ?? []
-  const preview = grid ? parseRows(grid, mapping ?? draft) : null
+  // Column selects read from the freshly uploaded file when there is one, and
+  // fall back to the headers captured the last time this account's format was
+  // saved — so the format can be edited without uploading a file first.
+  // Rows migrated from the legacy system store sample_headers as
+  // `{ keys: [...], legacy: {...} }` rather than a flat array — handle both.
+  const savedHeaders: string[] = Array.isArray(saved?.sample_headers)
+    ? saved.sample_headers
+    : (Array.isArray(saved?.sample_headers?.keys) ? saved.sample_headers.keys : [])
+  const liveHeaders = grid?.[draft.headerRow] ?? []
+  const headers = liveHeaders.length > 0 ? liveHeaders : savedHeaders
+  const showFormatPanel = (grid && !mapping) || editingFormat
+  const effectiveMapping = editingFormat ? draft : (mapping ?? draft)
+  const preview = grid ? parseRows(grid, effectiveMapping) : null
 
   const handleFile = async (file: File) => {
     setReading(true)
@@ -86,6 +98,16 @@ function BankStatementsPage() {
     } finally {
       setReading(false)
     }
+  }
+
+  const handleEditFormat = () => {
+    if (mapping) setDraft(mapping)
+    setEditingFormat(true)
+  }
+
+  const handleCancelEditFormat = () => {
+    setEditingFormat(false)
+    if (mapping) setDraft(mapping)
   }
 
   const handleUpload = async () => {
@@ -122,7 +144,22 @@ function BankStatementsPage() {
                 <section className={PANEL}>
                 <div className={PANEL_RAIL}>
                 <span className={MICRO}>Upload a statement</span>
-                {mapping && <StatusChip tone="accent" size="rail">Format saved</StatusChip>}
+                <div className="flex items-center gap-2">
+                {mapping && !editingFormat && (
+                <>
+                <StatusChip tone="accent" size="rail">Format saved</StatusChip>
+                <Button variant="ghost" size="xs" onClick={handleEditFormat}>
+                <Settings2 data-icon="inline-start" />
+                Edit format
+                </Button>
+                </>
+                )}
+                {editingFormat && mapping && (
+                <Button variant="ghost" size="xs" onClick={handleCancelEditFormat}>
+                Cancel
+                </Button>
+                )}
+                </div>
                 </div>
                 <div className={cn(PANEL_BODY, 'space-y-5')}>
                 <div className="grid gap-4 sm:grid-cols-2">
@@ -133,14 +170,16 @@ function BankStatementsPage() {
                 <NativeSelect
                 id="bank"
                 value={bankAccountId}
-                onChange={(e) => { setBankAccountId(e.target.value); setGrid(null) }}
+                onChange={(e) => {
+                  setBankAccountId(e.target.value); setGrid(null); setEditingFormat(false)
+                }}
                 >
                 <option value="">
                 {loadingBanks ? 'Loading…' : 'Choose an account'}
                 </option>
                 {banks.map((b: any) => (
                 <option key={b.id} value={b.id}>
-                {b.bankName} — {b.accountNumber}
+                {b.bankName} — {b.accountName} — {b.accountNumber}
                 </option>
                 ))}
                 </NativeSelect>
@@ -171,19 +210,23 @@ function BankStatementsPage() {
                 <Loader2 className="size-4 animate-spin" /> Reading the file…
                 </p>
                 )}
-                {/* Format setup — only when this account has no saved mapping. */}
-                {grid && !mapping && (
+                {/* Format setup — for a first upload, or when explicitly editing. */}
+                {showFormatPanel && (
                 <div className="space-y-4 rounded-lg border border-warning/40 bg-warning/5 p-4">
                 <div className="flex items-start gap-2">
                 <Settings2 className="mt-0.5 size-4 shrink-0 text-warning" />
                 <div>
-                <p className="text-sm font-normal">Set up this account's format</p>
+                <p className="text-sm font-normal">
+                {mapping ? "Edit this account's format" : "Set up this account's format"}
+                </p>
                 <p className="mt-0.5 text-xs text-muted-foreground">
-                Tell us which row holds the headers and what each column means. Saved once,
-                then reused for every future upload.
+                {mapping
+                  ? 'Pick which columns to use for this account. Saving overwrites the current format for every future upload.'
+                  : "Tell us which row holds the headers and what each column means. Saved once, then reused for every future upload."}
                 </p>
                 </div>
                 </div>
+                {grid && (
                 <div className="space-y-2">
                 <label className={cn(MICRO, 'block text-muted-foreground')}>Header row</label>
                 <NativeSelect
@@ -198,6 +241,13 @@ function BankStatementsPage() {
                 ))}
                 </NativeSelect>
                 </div>
+                )}
+                {!grid && (
+                <p className="text-xs text-muted-foreground/70">
+                Columns below are from the last uploaded file. Upload a new file instead if the
+                header row itself has moved.
+                </p>
+                )}
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {FIELDS.map((f) => (
                 <div key={f.key} className="space-y-1.5">
@@ -222,16 +272,26 @@ function BankStatementsPage() {
                 </div>
                 ))}
                 </div>
+                <div className="flex items-center gap-2">
                 <Button
                 size="sm"
                 disabled={saveMapping.isPending || (draft.amountColumn === null && draft.creditColumn === null)}
                 onClick={() =>
-                saveMapping.mutate({ bankAccountId, mapping: draft, sampleHeaders: headers })
+                saveMapping.mutate(
+                { bankAccountId, mapping: draft, sampleHeaders: headers },
+                { onSuccess: () => setEditingFormat(false) },
+                )
                 }
                 >
                 {saveMapping.isPending && <Loader2 className="animate-spin" />}
                 Save format
                 </Button>
+                {editingFormat && mapping && (
+                <Button variant="ghost" size="sm" onClick={handleCancelEditFormat}>
+                Cancel
+                </Button>
+                )}
+                </div>
                 {draft.amountColumn === null && draft.creditColumn === null && (
                 <p className="text-xs text-muted-foreground/70">
                 Choose either a credit column or a signed amount column.
@@ -279,7 +339,7 @@ function BankStatementsPage() {
                 )}
                 <Button
                 onClick={handleUpload}
-                disabled={!mapping || !preview.rows.length || upload.isPending}
+                disabled={!mapping || editingFormat || !preview.rows.length || upload.isPending}
                 >
                 {upload.isPending && <Loader2 className="animate-spin" />}
                 <Upload data-icon="inline-start" />
@@ -288,6 +348,11 @@ function BankStatementsPage() {
                 {!mapping && (
                 <p className="text-xs text-muted-foreground/70">
                 Save the format first — uploads are rejected until it exists.
+                </p>
+                )}
+                {mapping && editingFormat && (
+                <p className="text-xs text-muted-foreground/70">
+                Save or cancel the format change above before importing.
                 </p>
                 )}
                 </div>
@@ -322,7 +387,7 @@ function BankStatementsPage() {
                 <TableRow key={s.id}>
                 <TableCell className="font-normal">{s.filename || '—'}</TableCell>
                 <TableCell className="text-muted-foreground">
-                {s.bank_name} · {s.account_number}
+                {s.bank_name} · {s.account_name} · {s.account_number}
                 </TableCell>
                 <TableCell className="text-muted-foreground">
                 {s.period_start ? format(new Date(s.period_start), 'd MMM') : '—'}
