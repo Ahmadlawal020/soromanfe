@@ -36,8 +36,8 @@ export function OrderExpiryBadge({
   if (s === 'expired') {
     return (
       <span className="inline-flex w-fit items-center gap-1 text-xs text-destructive">
-        <Hourglass className="size-3 shrink-0" />
-        Expired{expiredAt ? ` · ${formatShortDate(expiredAt)}` : ''}
+        {/* <Hourglass className="size-3 shrink-0" /> */}
+        {/* Expired{expiredAt ? ` · ${formatShortDate(expiredAt)}` : ''} */}
       </span>
     )
   }
@@ -71,8 +71,8 @@ export function OrderExpiryBadge({
         urgent ? 'text-destructive' : 'text-muted-foreground',
       )}
     >
-      <Hourglass className="size-3 shrink-0" />
-      {label} left
+      {/* <Hourglass className="size-3 shrink-0" /> */}
+      {/* {label} left */}
     </span>
   )
 }

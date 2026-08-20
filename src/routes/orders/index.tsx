@@ -273,8 +273,14 @@ function OrdersDashboard() {
             {/* Loading is a status, not a truck-ticket count — see the note in
                 -orders-utils. It is the closest honest figure available. */}
             <StatCard
-              icon={<Truck />} label="Currently Loading" value={formatQty(totals.loadingCount)}
-              description={`${formatQty(totals.loadingQty)} L on trucks`}
+              icon={<Truck />} label="Currently Loading" 
+              value={
+                <>
+                  {formatQty(totals.loadingQty)}
+                  <span className="ml-1 text-base font-normal text-muted-foreground">L</span>
+                </>
+              }
+              // description={`${formatQty(totals.loadingQty)} L on trucks`}
             />
             {/* <StatCard
               icon={<CheckCircle2 />} label="Released qty"
