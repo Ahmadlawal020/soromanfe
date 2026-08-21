@@ -19,6 +19,7 @@ import { PageEmpty } from '#/components/PageEmpty'
 import { Pagination } from '#/components/Pagination'
 import { TicketGenerateDialog } from '#/components/TicketGenerateDialog'
 import { TicketPrintDialog } from '#/components/TicketPrintDialog'
+import { TruckEditDialog } from '#/components/TruckEditDialog'
 import { PANEL, MICRO, PANEL_RAIL } from '#/lib/panel'
 import { cn } from '#/lib/utils'
 import { useAllOrders } from '#/lib/hooks/useOrders'
@@ -55,6 +56,7 @@ function LoadingTicketsPage() {
 
   const [ticketOrder, setTicketOrder] = useState<any | null>(null)
   const [printOrderId, setPrintOrderId] = useState<number | null>(null)
+  const [editOrder, setEditOrder] = useState<any | null>(null)
   const [exporting, setExporting] = useState(false)
 
   const { data, isLoading, isError, error, refetch } = useAllOrders()
@@ -64,7 +66,7 @@ function LoadingTicketsPage() {
   }, [data?.orders])
 
   // Loads for whichever order currently has a dialog open.
-  const { data: openOrder } = useOrderForTicketing(ticketOrder?.id ?? printOrderId ?? undefined)
+  const { data: openOrder } = useOrderForTicketing(ticketOrder?.id ?? printOrderId ?? editOrder?.id ?? undefined)
   const openLoads: TruckLoad[] = openOrder?.trucks || []
 
   const options = useMemo(() => {
@@ -341,6 +343,7 @@ function LoadingTicketsPage() {
                           order={o}
                           onGenerate={() => setTicketOrder(o)}
                           onView={() => setPrintOrderId(o.id)}
+                          onEdit={() => setEditOrder(o)}
                         />
                       )
                     })}
@@ -378,6 +381,14 @@ function LoadingTicketsPage() {
         open={printOrderId !== null}
         onOpenChange={(o) => { if (!o) setPrintOrderId(null) }}
       />
+
+      <TruckEditDialog
+        orderId={editOrder?.id ?? null}
+        orderNumber={editOrder?.orderNumber}
+        loads={editOrder ? openLoads : []}
+        open={editOrder !== null}
+        onOpenChange={(o) => { if (!o) setEditOrder(null) }}
+      />
     </div>
   )
 }
@@ -391,12 +402,13 @@ function LoadingTicketsPage() {
  * ticketed. `allocated >= releasable` is the honest test.
  */
 function OrderRow({
-  sn, order, onGenerate, onView,
+  sn, order, onGenerate, onView, onEdit,
 }: {
   sn: number
   order: any
   onGenerate: () => void
   onView: () => void
+  onEdit: () => void
 }) {
   const { data } = useOrderForTicketing(order.id)
   const loads: TruckLoad[] = data?.trucks || []
@@ -411,7 +423,7 @@ function OrderRow({
       ? { label: 'Add Ticket', onClick: onGenerate, variant: allocated === 0 ? 'default' as const : 'outline' as const }
       : departed
         ? { label: 'View Ticket', onClick: onView, variant: 'outline' as const }
-        : { label: 'Edit Ticket', onClick: onView, variant: 'outline' as const }
+        : { label: 'Edit Ticket', onClick: onEdit, variant: 'outline' as const }
 
   return (
     <TableRow>

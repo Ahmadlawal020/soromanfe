@@ -126,6 +126,31 @@ export function useGenerateTickets() {
   })
 }
 
+/** Correct a load's own details after the fact — quantity, plate, driver. */
+export function useUpdateTruckLoad() {
+  const qc = useQueryClient()
+  const toast = useToast()
+  return useMutation({
+    retry: false,
+    mutationFn: async ({
+      orderId, loadId, data,
+    }: {
+      orderId: number | string
+      loadId: number
+      data: Partial<{ quantity: number; truckNumber: string; driverName: string; driverPhone: string }>
+    }) => {
+      const res = await api.patch(`/orders/${orderId}/trucks/${loadId}`, data)
+      return res.data
+    },
+    onSuccess: (res) => {
+      qc.invalidateQueries({ queryKey: ['orders'] })
+      qc.invalidateQueries({ queryKey: ['tickets'] })
+      toast.success(res?.message || 'Truck details updated')
+    },
+    onError: (err: any) => toast.error(getErrorMessage(err)),
+  })
+}
+
 /** Flattened print payload for one truck. */
 export function useTicketPrintData(orderId?: number | string, loadId?: number | null) {
   return useQuery({
