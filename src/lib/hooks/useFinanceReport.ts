@@ -28,6 +28,9 @@ export interface FinanceReportOrder {
   customerVirtualAccountBank?: string | null
   depotName?: string | null
   productName?: string | null
+  pfiNumber?: string | null
+  /** The location the selected PFI operates out of. */
+  pfiLocationName?: string | null
   quantity: number
   price: string | number
   totalAmount: string | number
@@ -45,6 +48,10 @@ export interface FinanceReportOrder {
   fundingTracked: boolean
   /** >0 only on a tracked order whose balance partly came from untracked deposits. */
   unattributedAmount: number
+  /** The customer's wallet balance the instant before this order took its amount — null if undeterminable (order predates wallet-hold tracking). */
+  walletBalanceBefore: number | null
+  /** The customer's wallet balance the instant after. walletBalanceBefore − totalAmount. */
+  walletBalanceAfter: number | null
 }
 
 export interface FinanceReportParams {
@@ -52,10 +59,23 @@ export interface FinanceReportParams {
   paymentStatus?: 'Paid' | 'Unpaid' | 'all'
   dateFrom?: string
   dateTo?: string
-  page?: number
-  limit?: number
+  depotId?: string | number
+  pfiId?: string | number
 }
 
+export interface FinanceReportTotals {
+  count: number
+  totalAmount: number
+  totalQuantity: number
+  trackedCount: number
+  notTrackedCount: number
+}
+
+/**
+ * Unpaginated by design — the whole filtered set in one fetch, newest first.
+ * The default date filter the page applies (today) is what keeps this fast;
+ * widening the range fetches more, on purpose.
+ */
 export function useFinanceReport(params: FinanceReportParams) {
   return useQuery({
     queryKey: ['finance-report', params],
@@ -63,15 +83,21 @@ export function useFinanceReport(params: FinanceReportParams) {
       const res = await api.get('/finance-report', { params })
       return res.data?.data as {
         orders: FinanceReportOrder[]
-        totals: { count: number; totalAmount: number; trackedCount: number; notTrackedCount: number }
-        pagination: { total: number; page: number; limit: number; pages: number }
+        totals: FinanceReportTotals
       }
     },
     placeholderData: (prev) => prev,
   })
 }
 
-/** Which way a funding entry's money came in — drives the badge/section split. */
+/**
+ * Which way a funding entry's money came in.
+ *
+ * Paystack is not a live integration — this only classifies historical
+ * deposit records that happen to carry that shape, it does not imply the
+ * gateway is in use today. See FundingCard for where that distinction is
+ * (deliberately) not surfaced any further.
+ */
 export function isPaystackFunding(f: OrderFunding): boolean {
   const ps = f.paystackDetails as Record<string, any> | null | undefined
   return Boolean(
@@ -80,4 +106,35 @@ export function isPaystackFunding(f: OrderFunding): boolean {
     (ps?.gatewayResponse && String(ps.gatewayResponse).toLowerCase() !== 'manual') ||
     (ps?.channel && ps.channel !== 'manual_bank_transfer' && ps.channel !== 'manual')
   )
+}
+
+/**
+ * Which bank the money landed in, for one funding entry — the same
+ * receiver-side fields for a manual transfer or a (legacy) Paystack DVA, so
+ * this needs no branch on isPaystackFunding: whichever shape the record
+ * carries, these are the fields that describe the receiving account.
+ */
+export function fundingBankInfo(f: OrderFunding): { bankName: string; accountNumber: string; accountName: string } {
+  const ps = (f.paystackDetails || {}) as Record<string, any>
+  return {
+    bankName: ps.bankName || ps.receiverBankName || '',
+    accountNumber: ps.accountNumber || ps.receiverAccountNumber || '',
+    accountName: ps.accountName || ps.receiverAccountName || '',
+  }
+}
+
+export function fundingRecorder(f: OrderFunding): string {
+  return f.recorderFirstName ? `${f.recorderFirstName} ${f.recorderSurname || ''}`.trim() : ''
+}
+
+/** Who actually paid the money in — the sender/depositor, not the receiver. */
+export function fundingDepositor(f: OrderFunding): string {
+  const ps = (f.paystackDetails || {}) as Record<string, any>
+  return ps.senderName || ps.depositorName || ''
+}
+
+/** "Zenith Bank · 1311924890" — the same "bank · account number" shape the Order DVA row already uses. */
+export function fundingAccountPaidTo(f: OrderFunding): string {
+  const { bankName, accountNumber } = fundingBankInfo(f)
+  return [bankName, accountNumber].filter(Boolean).join(' · ')
 }
