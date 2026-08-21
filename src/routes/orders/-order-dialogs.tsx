@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { Loader2 } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { Loader2, Search, Check } from 'lucide-react'
 import { format } from 'date-fns'
 
 import {
@@ -11,8 +11,80 @@ import { Label } from '#/components/ui/label'
 import { MICRO } from '#/lib/panel'
 import { cn } from '#/lib/utils'
 import { useUpdateOrder } from '#/lib/hooks/useOrders'
+import { useCustomerList } from '#/lib/hooks/useCustomers'
+import { usePfiList, type PfiWithFinancials } from '#/lib/hooks/usePfis'
+import type { Customer } from '#/lib/types'
 import { formatNaira, formatQty, toNumber } from './-orders-utils'
 import { OrderStatusBadge, PaymentBadge } from './-order-status'
+
+// A live payment hold sits on this order's customer, and once trucks are
+// allocated at release the stock reservation is a real gate action — see
+// order.service.js's updateOrder for the full reasoning these mirror.
+const LOCKED_STATUSES = new Set(['Completed', 'Cancelled', 'Expired'])
+const STOCK_EDITABLE_STATUSES = new Set(['Pending', 'Paid'])
+
+/** Search box + result list, picking one customer to reassign the order to. */
+function CustomerPicker({
+  customers, isLoading, selectedId, onSelect,
+}: {
+  customers: Customer[]
+  isLoading: boolean
+  selectedId: string
+  onSelect: (c: Customer) => void
+}) {
+  const [query, setQuery] = useState('')
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    const list = !q
+      ? customers.slice(0, 100)
+      : customers.filter((c) =>
+          [c.name, c.companyName, c.phone].some((f) => String(f || '').toLowerCase().includes(q)),
+        ).slice(0, 100)
+    return list
+  }, [customers, query])
+
+  return (
+    <div className="space-y-2">
+      <div className="relative">
+        <Search className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search by name, company or phone…"
+          className="pl-9"
+          autoFocus
+        />
+      </div>
+      <ul className="max-h-48 divide-y divide-foreground/10 overflow-y-auto rounded-lg border border-foreground/15">
+        {isLoading ? (
+          <li className="flex items-center justify-center gap-2 py-6 text-sm text-muted-foreground">
+            <Loader2 className="size-4 animate-spin" /> Loading customers…
+          </li>
+        ) : filtered.length === 0 ? (
+          <li className="py-6 text-center text-sm text-muted-foreground">No customer matches that.</li>
+        ) : (
+          filtered.map((c) => (
+            <li key={c._id}>
+              <button
+                type="button"
+                onClick={() => onSelect(c)}
+                className="flex w-full items-start gap-2.5 px-3 py-2.5 text-left transition-colors duration-250 ease-luxe outline-none hover:bg-muted/60"
+              >
+                <span className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-normal">{c.name}</p>
+                  <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                    {c.companyName || 'No company'} · {formatNaira(toNumber(c.balance))}
+                  </p>
+                </span>
+                {String(c._id) === selectedId && <Check className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />}
+              </button>
+            </li>
+          ))
+        )}
+      </ul>
+    </div>
+  )
+}
 
 /** A label/value pair in the read-only detail grid. */
 function Row({ label, value }: { label: string; value?: React.ReactNode }) {
@@ -102,8 +174,12 @@ export function OrderDetailsDialog({
 }
 
 /**
- * Edit form. Only fields the API actually accepts are exposed — the Node
- * backend's order model has no truck, driver or narration columns.
+ * Edit form — everything about an order a mistake can leave wrong, short of
+ * its status (that only ever moves through Release/Cancel/Pay). Reassigning
+ * the customer moves the order's payment hold with it (debit the new owner,
+ * refund the old one); reassigning the PFI moves its stock reservation.
+ * Both are backend invariants, not just UI convenience — see
+ * order.service.js's updateOrder.
  *
  * The form diffs against the original and sends only what changed.
  */
@@ -117,7 +193,28 @@ export function OrderEditDialog({
   onOpenChange: (o: boolean) => void
 }) {
   const updateOrder = useUpdateOrder()
-  const [form, setForm] = useState({ date: '', time: '', quantity: '', totalAmount: '' })
+  const [form, setForm] = useState({
+    date: '', time: '', quantity: '', totalAmount: '', customerId: '', pfiId: '',
+  })
+  const [pickingCustomer, setPickingCustomer] = useState(false)
+  const [pickingPfi, setPickingPfi] = useState(false)
+  const [pickedCustomerLabel, setPickedCustomerLabel] = useState('')
+  const [pickedPfiLabel, setPickedPfiLabel] = useState('')
+
+  // Both lists are heavy (thousands of customers, every PFI ever opened), so
+  // they only load once the matching picker is actually opened.
+  const { data: customerData, isLoading: loadingCustomers } = useCustomerList(
+    { limit: 5000 }, { enabled: open && pickingCustomer },
+  )
+  const customers: Customer[] = useMemo(() => {
+    if (!customerData) return []
+    return Array.isArray(customerData) ? customerData : customerData?.customers || []
+  }, [customerData])
+
+  // Capped at 200 active PFIs — cheap enough to just fetch, unlike the
+  // customer list above, and usePfiList has no conditional-fetch option.
+  const { data: pfiData, isLoading: loadingPfis } = usePfiList({ limit: 200, status: 'active' })
+  const pfis = pfiData?.pfis || []
 
   useEffect(() => {
     if (!order) return
@@ -127,23 +224,40 @@ export function OrderEditDialog({
       time: d ? format(d, 'HH:mm') : '',
       quantity: String(order.quantity ?? ''),
       totalAmount: String(order.totalAmount ?? ''),
+      customerId: String(order.customerId ?? ''),
+      pfiId: order.pfiId ? String(order.pfiId) : '',
     })
+    setPickingCustomer(false)
+    setPickingPfi(false)
+    setPickedCustomerLabel('')
+    setPickedPfiLabel('')
   }, [order])
 
   if (!order) return null
+
+  const locked = LOCKED_STATUSES.has(order.status)
+  const stockEditable = STOCK_EDITABLE_STATUSES.has(order.status)
 
   const original = {
     date: order.createdAt ? format(new Date(order.createdAt), 'yyyy-MM-dd') : '',
     time: order.createdAt ? format(new Date(order.createdAt), 'HH:mm') : '',
     quantity: String(order.quantity ?? ''),
     totalAmount: String(order.totalAmount ?? ''),
+    customerId: String(order.customerId ?? ''),
+    pfiId: order.pfiId ? String(order.pfiId) : '',
   }
 
   const changed =
     form.date !== original.date ||
     form.time !== original.time ||
     form.quantity !== original.quantity ||
-    form.totalAmount !== original.totalAmount
+    form.totalAmount !== original.totalAmount ||
+    form.customerId !== original.customerId ||
+    form.pfiId !== original.pfiId
+
+  const currentCustomerLabel = [order.companyName || order.customerCompanyName, order.customerName]
+    .filter(Boolean).join(' · ') || order.customerName || '—'
+  const currentPfiLabel = order.pfiNumber || 'No PFI assigned'
 
   const handleSave = async () => {
     // Send only what actually changed.
@@ -153,6 +267,8 @@ export function OrderEditDialog({
     if (form.date !== original.date || form.time !== original.time) {
       patch.createdAt = new Date(`${form.date}T${form.time || '00:00'}`).toISOString()
     }
+    if (form.customerId !== original.customerId) patch.customerId = Number(form.customerId)
+    if (form.pfiId !== original.pfiId) patch.pfiId = form.pfiId ? Number(form.pfiId) : null
     if (!Object.keys(patch).length) return onOpenChange(false)
 
     try {
@@ -165,55 +281,170 @@ export function OrderEditDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="max-h-[85svh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Edit {order.orderNumber}</DialogTitle>
           <DialogDescription>
-            Only changed fields are sent. Quantity and total price affect the ledger.
+            Only changed fields are sent. Reassigning the customer or PFI moves the
+            order's money and stock along with it.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="order-date">Order date</Label>
-            <Input
-              id="order-date" type="date" value={form.date}
-              onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
-            />
+        {locked ? (
+          <p className="rounded-lg border border-foreground/15 bg-muted/40 p-3 text-sm text-muted-foreground">
+            This order is {String(order.status).toLowerCase()} and can no longer be edited.
+          </p>
+        ) : (
+          <div className="space-y-5">
+            <div className="space-y-2">
+              <Label>Customer</Label>
+              {pickingCustomer ? (
+                <CustomerPicker
+                  customers={customers}
+                  isLoading={loadingCustomers}
+                  selectedId={form.customerId}
+                  onSelect={(c) => {
+                    setForm((f) => ({ ...f, customerId: String(c._id) }))
+                    setPickedCustomerLabel([c.companyName, c.name].filter(Boolean).join(' · '))
+                    setPickingCustomer(false)
+                  }}
+                />
+              ) : (
+                <div className="flex items-center justify-between gap-2 rounded-lg border border-foreground/15 bg-muted/30 p-3">
+                  <p className="min-w-0 truncate text-sm">
+                    {form.customerId !== original.customerId
+                      ? (pickedCustomerLabel || `Customer #${form.customerId}`)
+                      : currentCustomerLabel}
+                  </p>
+                  <Button type="button" variant="outline" size="sm" onClick={() => setPickingCustomer(true)}>
+                    Reassign
+                  </Button>
+                </div>
+              )}
+              {form.customerId !== original.customerId && (
+                <p className="text-xs leading-tight text-muted-foreground/70">
+                  Moves this order's payment hold to the new customer — debited from their
+                  balance, refunded to the current one.
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label>PFI</Label>
+              {!stockEditable ? (
+                <p className="rounded-lg border border-foreground/15 bg-muted/30 p-3 text-sm text-muted-foreground">
+                  {currentPfiLabel} — locked once an order is released for loading.
+                </p>
+              ) : pickingPfi ? (
+                <div className="space-y-2">
+                  <ul className="max-h-48 divide-y divide-foreground/10 overflow-y-auto rounded-lg border border-foreground/15">
+                    {loadingPfis ? (
+                      <li className="flex items-center justify-center gap-2 py-6 text-sm text-muted-foreground">
+                        <Loader2 className="size-4 animate-spin" /> Loading PFIs…
+                      </li>
+                    ) : pfis.length === 0 ? (
+                      <li className="py-6 text-center text-sm text-muted-foreground">No active PFIs.</li>
+                    ) : (
+                      pfis.map((p: PfiWithFinancials) => {
+                        const remaining = toNumber(p.startingQtyLitres) - toNumber(p.soldQtyLitres)
+                        return (
+                          <li key={String(p._id ?? p.id)}>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setForm((f) => ({ ...f, pfiId: String(p._id ?? p.id) }))
+                                setPickedPfiLabel(p.pfiNumber)
+                                setPickingPfi(false)
+                              }}
+                              className="flex w-full items-start justify-between gap-2.5 px-3 py-2.5 text-left transition-colors duration-250 ease-luxe outline-none hover:bg-muted/60"
+                            >
+                              <span className="min-w-0">
+                                <p className="truncate text-sm font-normal">{p.pfiNumber}</p>
+                                <p className="mt-0.5 truncate text-xs text-muted-foreground">{p.locationName || '—'}</p>
+                              </span>
+                              <span className="shrink-0 text-xs text-muted-foreground">{formatQty(remaining)} L left</span>
+                            </button>
+                          </li>
+                        )
+                      })
+                    )}
+                  </ul>
+                  <Button type="button" variant="ghost" size="sm" onClick={() => setPickingPfi(false)}>
+                    Cancel
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between gap-2 rounded-lg border border-foreground/15 bg-muted/30 p-3">
+                  <p className="min-w-0 truncate text-sm">
+                    {form.pfiId !== original.pfiId
+                      ? (pickedPfiLabel || `PFI #${form.pfiId}`)
+                      : currentPfiLabel}
+                  </p>
+                  <Button type="button" variant="outline" size="sm" onClick={() => setPickingPfi(true)}>
+                    Reassign
+                  </Button>
+                </div>
+              )}
+              {form.pfiId !== original.pfiId && (
+                <p className="text-xs leading-tight text-muted-foreground/70">
+                  Releases the reserved stock on the current PFI and reserves it on the new
+                  one — refused if the new PFI doesn't have enough remaining.
+                </p>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="order-date">Order date</Label>
+                <Input
+                  id="order-date" type="date" value={form.date}
+                  onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="order-time">Time</Label>
+                <Input
+                  id="order-time" type="time" value={form.time}
+                  onChange={(e) => setForm((f) => ({ ...f, time: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="order-qty">Quantity</Label>
+                <Input
+                  id="order-qty" type="number" inputMode="decimal" value={form.quantity}
+                  disabled={!stockEditable}
+                  onChange={(e) => setForm((f) => ({ ...f, quantity: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="order-total">Total price</Label>
+                <Input
+                  id="order-total" type="number" inputMode="decimal" value={form.totalAmount}
+                  onChange={(e) => setForm((f) => ({ ...f, totalAmount: e.target.value }))}
+                />
+              </div>
+            </div>
+            {!stockEditable && (
+              <p className="text-xs leading-tight text-muted-foreground/70">
+                Quantity is locked once an order is released for loading — the reserved
+                stock is already committed to a truck by then.
+              </p>
+            )}
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="order-time">Time</Label>
-            <Input
-              id="order-time" type="time" value={form.time}
-              onChange={(e) => setForm((f) => ({ ...f, time: e.target.value }))}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="order-qty">Quantity</Label>
-            <Input
-              id="order-qty" type="number" inputMode="decimal" value={form.quantity}
-              onChange={(e) => setForm((f) => ({ ...f, quantity: e.target.value }))}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="order-total">Total price</Label>
-            <Input
-              id="order-total" type="number" inputMode="decimal" value={form.totalAmount}
-              onChange={(e) => setForm((f) => ({ ...f, totalAmount: e.target.value }))}
-            />
-          </div>
-        </div>
+        )}
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={updateOrder.isPending}>
             Cancel
           </Button>
-          <Button onClick={handleSave} disabled={!changed || updateOrder.isPending}>
-            {updateOrder.isPending && <Loader2 className="animate-spin" />}
-            Save changes
-          </Button>
+          {!locked && (
+            <Button onClick={handleSave} disabled={!changed || updateOrder.isPending}>
+              {updateOrder.isPending && <Loader2 className="animate-spin" />}
+              Save changes
+            </Button>
+          )}
         </DialogFooter>
-        {!changed && (
+        {!locked && !changed && (
           <p className="text-right text-xs text-muted-foreground/70">
             Nothing changed yet
           </p>
