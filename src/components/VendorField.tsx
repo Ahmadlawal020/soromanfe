@@ -13,15 +13,18 @@ export interface VendorFieldValue {
 }
 
 /**
- * Select an existing vendor, or type a new one and optionally save it.
+ * Type a vendor name, or pick an existing one from the list.
  *
  * Deliberately a NativeSelect + a plain Input rather than a combobox — this
  * codebase has no autocomplete primitive, and a "select, or Other…" toggle
- * needs none.
+ * needs none. Typing is the default mode: most people know who they're
+ * paying before they know whether that vendor is already on file, and
+ * picking the wrong search field first was the actual complaint this fixed —
+ * a picked vendor (vendor_id already set) still opens showing that pick.
  */
 export function VendorField({ value, onChange }: { value: VendorFieldValue; onChange: (v: VendorFieldValue) => void }) {
   const { data: vendors = [] } = useVendors({ status: 'Active' })
-  const [mode, setMode] = useState<'select' | 'manual'>(value.vendor_id || !value.vendor ? 'select' : 'manual')
+  const [mode, setMode] = useState<'select' | 'manual'>(value.vendor_id ? 'select' : 'manual')
 
   if (mode === 'select') {
     return (

@@ -25,6 +25,27 @@ import { naira } from '#/routes/pfi/-pfi-utils'
 
 const PAYMENT_METHODS = ['Bank Transfer', 'Cash', 'Cheque', 'Card', 'Other']
 
+/**
+ * A history row's `action` is either a lifecycle verb the write path doesn't
+ * use for a status change ("created", "updated", "submitted", "delete") or,
+ * for a review transition, the status it moved TO — see reviewExpense on the
+ * server, which inserts the audit row with `action: to`. Unmapped values
+ * (there shouldn't be any) fall back to the raw string, spaced out.
+ */
+const HISTORY_LABELS: Record<string, string> = {
+  created: 'Raised',
+  updated: 'Edited',
+  submitted: 'Corrected and resubmitted',
+  delete: 'Deleted',
+  verified: 'Verified',
+  audit_approved: 'CFO approved',
+  admin_approved: 'Final approval given',
+  paid: 'Marked paid',
+  rejected: 'Rejected',
+  changes_requested: 'Sent back for changes',
+}
+const historyLabel = (action: string) => HISTORY_LABELS[action] || action.replace(/_/g, ' ')
+
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex items-baseline justify-between gap-4 py-1.5">
@@ -161,26 +182,25 @@ export function ExpenseReviewDrawer({
   }
 
   /**
-   * One conversation, not two.
-   *
-   * Review reasons live in the audit trail and comments in their own table, but
-   * to anyone reading the request they are the same thread — a query and its
-   * answer are meaningless apart.
+   * The full tracking cycle: every stage this request has moved through, who
+   * moved it and when — not just the ones somebody happened to leave a note
+   * on. Review reasons live in the audit trail and comments in their own
+   * table, but to anyone reading the request they are the same timeline — a
+   * query and its answer are meaningless apart, and so is a stage with no
+   * explanation from the stage before it.
    */
   const thread = [
-    ...(expense?.history || [])
-      .filter((h) => h.changes?.note)
-      .map((h) => ({
-        at: h.created_at,
-        who: h.actor_name || 'Someone',
-        body: h.changes!.note as string,
-        action: h.action,
-      })),
+    ...(expense?.history || []).map((h) => ({
+      at: h.created_at,
+      who: h.actor_name || 'Someone',
+      label: historyLabel(h.action) as string | null,
+      body: (h.changes?.note as string) || '',
+    })),
     ...(expense?.comments || []).map((c) => ({
       at: c.created_at,
       who: c.author_name || 'Someone',
+      label: null as string | null,
       body: c.body,
-      action: '',
     })),
   ].sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime())
 
@@ -228,10 +248,7 @@ export function ExpenseReviewDrawer({
               <div className="pb-2">
                 <Row label="Date" value={format(new Date(expense.expense_date), 'd MMM yyyy')} />
                 <Row label="Purpose" value={expense.description} />
-                <Row
-                  label="GL account"
-                  value={[expense.gl_code, expense.category_name].filter(Boolean).join(' · ')}
-                />
+                <Row label="Category" value={expense.category_name} />
                 <Row label="Cargo" value={expense.pfi_number || 'General overhead'} />
                 <Row label="Raised by" value={expense.submitted_by_name} />
               </div>
@@ -312,28 +329,28 @@ export function ExpenseReviewDrawer({
                 <ExpenseAttachments expenseId={expense.id} />
               </div>
 
-              {/* Reasons are read from the audit trail, not review_note — that
-                  column holds only the latest one and is wiped when a corrected
-                  request is resubmitted. Comments sit in the same thread. */}
+              {/* The tracking cycle: every stage this request has moved
+                  through, who moved it and when. Reasons are read from the
+                  audit trail, not review_note — that column holds only the
+                  latest one and is wiped when a corrected request is
+                  resubmitted. Comments sit in the same timeline. */}
               <div className="space-y-2 py-3">
-                <p className={cn(MICRO, 'text-muted-foreground')}>Conversation</p>
+                <p className={cn(MICRO, 'text-muted-foreground')}>Tracking</p>
                 {thread.length === 0 && (
-                  <p className="text-sm text-muted-foreground/70">
-                    Nothing said yet. Ask a question here and everyone on the request sees it.
-                  </p>
+                  <p className="text-sm text-muted-foreground/70">Nothing recorded yet.</p>
                 )}
                 {thread.map((t, i) => (
                   <div key={i} className="rounded-lg border border-foreground/15 p-2.5">
                     <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                      <span>{t.who}</span>
-                      {t.action && (
+                      <span className="font-normal text-foreground">{t.who}</span>
+                      {t.label && (
                         <Badge variant="secondary" className="px-1.5 py-0 text-[10px]">
-                          {t.action.replace(/_/g, ' ')}
+                          {t.label}
                         </Badge>
                       )}
-                      <span>· {format(new Date(t.at), 'd MMM, HH:mm')}</span>
+                      <span>· {format(new Date(t.at), 'd MMM yyyy, HH:mm')}</span>
                     </p>
-                    <p className="whitespace-pre-wrap text-sm">{t.body}</p>
+                    {t.body && <p className="mt-1 whitespace-pre-wrap text-sm">{t.body}</p>}
                   </div>
                 ))}
 

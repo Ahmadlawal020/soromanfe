@@ -3,7 +3,7 @@ import { PageHeader } from '#/components/PageHeader'
 import { createFileRoute } from '@tanstack/react-router'
 import { format } from 'date-fns'
 import {
-  Search, Plus, Receipt, Banknote, Building2, Hourglass, ListTree, Download, X, Trash2, Pencil,
+  Search, Plus, Receipt, Banknote, Building2, Hourglass, Download, X, Trash2, Pencil,
 } from 'lucide-react'
 
 import { StatCard, StatCardGrid } from '#/components/ui/stat-card'
@@ -24,8 +24,10 @@ import {
 } from '#/lib/hooks/usePfis'
 import { ExpenseDialog, cash, plain } from '#/components/ExpenseDialog'
 import { ExpenseReviewDrawer, StepBadge } from '#/components/ExpenseReviewDrawer'
-import { GlAccountsDialog } from '#/components/GlAccountsDialog'
-import { useCanManageChart } from '#/lib/hooks/useCanManageChart'
+// GL chart editor — commented out along with the rest of the GL chart for
+// now (it was never actually seeded in production, see ExpenseDialog).
+// import { GlAccountsDialog } from '#/components/GlAccountsDialog'
+// import { useCanManageChart } from '#/lib/hooks/useCanManageChart'
 import { naira } from '#/routes/pfi/-pfi-utils'
 import { routeGuard } from '#/lib/route-guard'
 
@@ -39,8 +41,8 @@ function ExpensesPage() {
   const [editing, setEditing] = useState<PfiExpense | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [reviewing, setReviewing] = useState<number | null>(null)
-  const [chartOpen, setChartOpen] = useState(false)
-  const canManageChart = useCanManageChart()
+  // const [chartOpen, setChartOpen] = useState(false)
+  // const canManageChart = useCanManageChart()
 
   const { data, isLoading, isError, error, refetch } = useExpenses(filters)
   const { data: cats } = useExpenseCategories()
@@ -54,13 +56,18 @@ function ExpensesPage() {
   const set = (k: keyof ExpenseFilters, v: string) =>
     setFilters((f) => ({ ...f, [k]: v || undefined }))
 
-  /** The payment schedule, column for column — the same columns as the table. */
+  /**
+   * The payment schedule, column for column — the same columns as the table.
+   * TIN, invoice number and GL code/name are commented out below along with
+   * their form fields — see ExpenseDialog — rather than deleted, in case the
+   * chart of accounts gets seeded for real later.
+   */
   const exportCsv = () => {
     const head = [
-      'S/N', 'Reference', 'Date', 'Vendor', 'TIN NUMBER', 'Invoice No.', 'Purpose',
+      'S/N', 'Reference', 'Date', 'Vendor', /* 'TIN NUMBER', 'Invoice No.', */ 'Purpose',
       'Amount-Ex VAT', `${(vatRate * 100).toFixed(1)}%`, 'Invoice Amount',
       'WHT rate %', 'WHT deduction', 'Amount requested', 'Amount paid',
-      'GL code', 'GL Name', 'Bank code', 'Bank Name', 'Paid from',
+      /* 'GL code', */ 'Category', /* 'Bank code', */ 'Bank Name', 'Paid from',
       'PFI', 'Status',
     ]
     const body = rows.map((e, i) => [
@@ -68,8 +75,8 @@ function ExpensesPage() {
       e.reference_number || '',
       format(new Date(e.expense_date), 'yyyy-MM-dd'),
       e.vendor,
-      e.tin_number || '',
-      e.invoice_number || '',
+      // e.tin_number || '',
+      // e.invoice_number || '',
       e.description,
       plain(e.amount_ex_vat),
       plain(e.vat_amount),
@@ -77,10 +84,10 @@ function ExpensesPage() {
       e.wht_rate ? String(Number(e.wht_rate)) : '',
       plain(e.wht_deduction),
       Number(e.amount).toFixed(2),
-      plain(e.amount_paid),
-      e.gl_code || '',
+      e.amount_paid != null ? plain(e.amount_paid) : (e.status === 'paid' ? Number(e.amount).toFixed(2) : ''),
+      // e.gl_code || '',
       e.category_name,
-      e.bank_code || '',
+      // e.bank_code || '',
       e.payee_bank_name || '',
       e.bank_paid_from || '',
       e.pfi_number || '',
@@ -112,14 +119,14 @@ function ExpensesPage() {
       actions={
         <>
           <div className="flex gap-2">
-          {/* Only an administrator or the CFO can reshape the chart, and the
-              server says so too — this just spares everyone else the door. */}
+          {/* GL accounts editor — commented out along with the rest of the GL
+              chart for now, see ExpenseDialog's header note.
           {canManageChart && (
           <Button variant="outline" onClick={() => setChartOpen(true)}>
           <ListTree data-icon="inline-start" />
           GL accounts
           </Button>
-          )}
+          )} */}
           <Button variant="outline" onClick={exportCsv} disabled={rows.length === 0}>
           <Download data-icon="inline-start" />
           Export CSV
@@ -137,19 +144,19 @@ function ExpensesPage() {
           invisible, and it is the one figure whoever runs payments is after. */}
       <StatCardGrid count={4}>
         <StatCard
-          icon={<Receipt />} label="Total Expenses" value={naira(totals?.total ?? 0, { compact: true })}
+          icon={<Receipt />} label="Total Expenses" value={naira(totals?.total ?? 0)}
           // description={`${totals?.count ?? 0} line${totals?.count === 1 ? '' : 's'} in view`}
         />
         <StatCard
-          icon={<Hourglass />} label="Awaiting Payment" value={naira(totals?.openTotal ?? 0, { compact: true })}
+          icon={<Hourglass />} label="Awaiting Payment" value={naira(totals?.openTotal ?? 0)}
           // description="Approved or still walking the chain"
         />
         <StatCard
-          icon={<Banknote />} label="PFI Expenses" value={naira(totals?.pfiTotal ?? 0, { compact: true })}
+          icon={<Banknote />} label="PFI Expenses" value={naira(totals?.pfiTotal ?? 0)}
           // description="Attached to a cargo batch"
         />
         <StatCard
-          icon={<Building2 />} label="Other Expenses" value={naira(totals?.generalTotal ?? 0, { compact: true })}
+          icon={<Building2 />} label="Other Expenses" value={naira(totals?.generalTotal ?? 0)}
           // tone="neutral" description="Overhead, not attached to a batch"
         />
       </StatCardGrid>
@@ -261,8 +268,8 @@ function ExpensesPage() {
                   <TableHead>Reference</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Vendor</TableHead>
-                  <TableHead>TIN number</TableHead>
-                  <TableHead>Invoice no.</TableHead>
+                  {/* <TableHead>TIN number</TableHead>
+                  <TableHead>Invoice no.</TableHead> */}
                   <TableHead>Purpose</TableHead>
                   <TableHead className="text-right">Amount ex VAT</TableHead>
                   <TableHead className="text-right">{(vatRate * 100).toFixed(1)}%</TableHead>
@@ -270,9 +277,9 @@ function ExpensesPage() {
                   <TableHead className="text-right">WHT</TableHead>
                   <TableHead className="text-right">Requested</TableHead>
                   <TableHead className="text-right">Amount paid</TableHead>
-                  <TableHead>GL code</TableHead>
-                  <TableHead>GL name</TableHead>
-                  <TableHead>Bank code</TableHead>
+                  {/* <TableHead>GL code</TableHead> */}
+                  <TableHead>Category</TableHead>
+                  {/* <TableHead>Bank code</TableHead> */}
                   <TableHead>Bank name</TableHead>
                   <TableHead>Paid from</TableHead>
                   <TableHead>Status</TableHead>
@@ -290,8 +297,8 @@ function ExpensesPage() {
                       {format(new Date(e.expense_date), 'd MMM yyyy')}
                     </TableCell>
                     <TableCell className="max-w-[12rem] truncate">{e.vendor || '—'}</TableCell>
-                    <TableCell className="whitespace-nowrap text-muted-foreground">{e.tin_number || '—'}</TableCell>
-                    <TableCell className="whitespace-nowrap text-muted-foreground">{e.invoice_number || '—'}</TableCell>
+                    {/* <TableCell className="whitespace-nowrap text-muted-foreground">{e.tin_number || '—'}</TableCell>
+                    <TableCell className="whitespace-nowrap text-muted-foreground">{e.invoice_number || '—'}</TableCell> */}
                     <TableCell className="max-w-[16rem] truncate">{e.description || '—'}</TableCell>
                     <TableCell className="text-right text-muted-foreground">{cash(e.amount_ex_vat) || '—'}</TableCell>
                     <TableCell className="text-right text-muted-foreground">{cash(e.vat_amount) || '—'}</TableCell>
@@ -304,17 +311,22 @@ function ExpensesPage() {
                     </TableCell>
                     <TableCell className="text-right whitespace-nowrap">{naira(Number(e.amount))}</TableCell>
                     {/* Blank until it is settled — a request awaiting payment
-                        has not paid ₦0. */}
+                        has not paid ₦0. Once actually paid, a still-blank
+                        amount_paid (legacy rows recorded before that column
+                        existed) falls back to the requested figure rather
+                        than showing a paid row as if nothing had cleared. */}
                     <TableCell className="text-right whitespace-nowrap font-medium">
-                      {cash(e.amount_paid) || '—'}
+                      {e.amount_paid != null
+                        ? cash(e.amount_paid)
+                        : (e.status === 'paid' ? naira(Number(e.amount)) : '—')}
                     </TableCell>
-                    <TableCell className="text-muted-foreground">{e.gl_code || '—'}</TableCell>
+                    {/* <TableCell className="text-muted-foreground">{e.gl_code || '—'}</TableCell> */}
                     <TableCell className="max-w-[14rem] truncate">
                       <Badge variant={e.pfi_id ? 'default' : 'secondary'} className="max-w-[13rem] truncate">
                         {e.category_name}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-muted-foreground">{e.bank_code || '—'}</TableCell>
+                    {/* <TableCell className="text-muted-foreground">{e.bank_code || '—'}</TableCell> */}
                     <TableCell className="max-w-[10rem] truncate text-muted-foreground">
                       {e.payee_bank_name || '—'}
                     </TableCell>
@@ -363,7 +375,7 @@ function ExpensesPage() {
 
       <ExpenseDialog expense={editing} open={dialogOpen} onOpenChange={setDialogOpen} />
 
-      <GlAccountsDialog open={chartOpen} onOpenChange={setChartOpen} />
+      {/* <GlAccountsDialog open={chartOpen} onOpenChange={setChartOpen} /> */}
 
       <ExpenseReviewDrawer
         expenseId={reviewing}

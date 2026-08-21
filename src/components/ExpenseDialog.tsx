@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { format } from 'date-fns'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Building2, Fuel } from 'lucide-react'
 
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
@@ -9,8 +9,8 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from '#/components/ui/dialog'
 import {
-  useExpenseCategories, useSaveExpense, usePfiList, useAttachFiles,
-  type PfiExpense, type GlGroup,
+  useExpenseCategories, useSaveExpense, useAttachFiles,
+  type PfiExpense,
 } from '#/lib/hooks/usePfis'
 import { useCreateVendor } from '#/lib/hooks/useVendors'
 import { VendorField, type VendorFieldValue } from '#/components/VendorField'
@@ -21,13 +21,13 @@ import { naira } from '#/routes/pfi/-pfi-utils'
 
 const BLANK = {
   expense_date: format(new Date(), 'yyyy-MM-dd'),
-  gl_group: '',
+  type: 'general' as 'general' | 'pfi',
   category_id: '',
-  pfi_id: '',
   vendor: '',
   vendor_id: '',
-  tin_number: '',
-  invoice_number: '',
+  // tin_number / invoice_number: dropped from the form (kept on the schema
+  // for the handful of legacy rows that have them) — see the note by
+  // includeTax below for the same reasoning applied to the invoice fields.
   description: '',
   amount: '',
   amount_ex_vat: '',
@@ -40,7 +40,6 @@ const BLANK = {
   // Where the money is going. Captured up front so an approver can see the
   // destination account before authorising rather than after.
   payee_bank_name: '',
-  bank_code: '',
   payee_account_number: '',
   payee_account_name: '',
 }
@@ -63,13 +62,16 @@ export const plain = (v: string | null | undefined) =>
   v === null || v === undefined || v === '' ? '' : Number(v).toFixed(2)
 
 /**
- * The form, in three parts: which account the cost is posted to, the invoice
- * behind it, and where the money goes.
+ * The form: what it's for (general overhead or a specific cargo), who it's
+ * paid to, and where the money goes.
  *
- * The account is picked in two steps — group, then GL account — because the
- * chart is 46 accounts deep and a single flat list of them is unreadable. Only
- * the PFI group asks which cargo; every other group books to overhead, and
- * naming a cargo there would quietly inflate that batch's landed cost.
+ * The GL chart of accounts this once walked (group → 46-account picker) was
+ * never actually seeded in production — every real category comes back with
+ * no gl_group at all, so that picker was rendering an empty tree for every
+ * real request. This reads the same categories through the plain general/PFI
+ * split the API has always also returned, which is what real data actually
+ * uses. GL code, TIN and invoice number are commented out below rather than
+ * deleted, in case the chart gets seeded for real later.
  *
  * Shared by both the officer-facing Expenses page and the My Requests page —
  * raising or correcting a request looks the same wherever it happens.
@@ -82,7 +84,6 @@ export function ExpenseDialog({
   onOpenChange: (o: boolean) => void
 }) {
   const { data: cats } = useExpenseCategories()
-  const { data: pfiList } = usePfiList({ limit: 200 })
   const save = useSaveExpense()
   const attach = useAttachFiles()
   const createVendor = useCreateVendor()
@@ -92,19 +93,19 @@ export function ExpenseDialog({
   // legacy free-text vendor is not — otherwise merely opening it for an
   // unrelated edit would quietly create a vendor record.
   const [saveNewVendor, setSaveNewVendor] = useState(!expense)
+  // The invoice/VAT/WHT breakdown is real accounting detail most requesters
+  // don't have on hand at the moment of asking — collapsed by default, and
+  // only sent if actually opened. Editing a request that already has one
+  // opens it automatically so the figures stay visible.
+  const [includeTax, setIncludeTax] = useState(!!expense?.amount_ex_vat)
 
   const seed = expense
     ? {
         expense_date: String(expense.expense_date).slice(0, 10),
-        // A row with no group predates the chart; 'legacy' selects the
-        // stand-in group built below so it still edits.
-        gl_group: expense.gl_group || 'legacy',
+        type: (expense.pfi_id ? 'pfi' : 'general') as 'general' | 'pfi',
         category_id: String(expense.category_id),
-        pfi_id: expense.pfi_id ? String(expense.pfi_id) : '',
         vendor: expense.vendor || '',
         vendor_id: expense.vendor_id ? String(expense.vendor_id) : '',
-        tin_number: expense.tin_number || '',
-        invoice_number: expense.invoice_number || '',
         description: expense.description || '',
         amount: String(Number(expense.amount)),
         amount_ex_vat: show(expense.amount_ex_vat),
@@ -114,7 +115,6 @@ export function ExpenseDialog({
         wht_deduction: show(expense.wht_deduction),
         receipt_reference: expense.receipt_reference || '',
         payee_bank_name: expense.payee_bank_name || '',
-        bank_code: expense.bank_code || '',
         payee_account_number: expense.payee_account_number || '',
         payee_account_name: expense.payee_account_name || '',
       }
@@ -128,61 +128,17 @@ export function ExpenseDialog({
     setForm(seed)
     setPendingFiles([])
     setSaveNewVendor(!expense)
+    setIncludeTax(!!expense?.amount_ex_vat)
   }
 
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }))
 
   const vatRate = cats?.vat_rate ?? 0.075
   const whtRates = cats?.wht_rates?.length ? cats.wht_rates : [0, 2, 2.5, 5, 10]
-  // Income accounts are seeded for a complete chart but are not expenses, so
-  // the form never offers them.
-  const chartGroups = (cats?.groups || []).filter((g) => !g.isIncome)
+  const categoryOptions = form.type === 'pfi' ? (cats?.pfi || []) : (cats?.general || [])
 
-  /**
-   * An API that predates the chart returns categories but no groups, and the
-   * picker would then offer nothing at all — the one failure people cannot work
-   * around. Fall back to the flat split the old endpoint always sent.
-   */
-  const groups: GlGroup[] =
-    chartGroups.length > 0
-      ? chartGroups
-      : ([
-          cats?.general?.length && {
-            code: 'administrative',
-            label: 'General categories',
-            hint: 'From an older server — no GL codes on these yet.',
-            accounts: cats.general,
-            subgroups: [{ label: '', accounts: cats.general }],
-          },
-          cats?.pfi?.length && {
-            code: 'pfi_direct',
-            label: 'PFIs',
-            hint: 'Books against the batch the category names.',
-            accounts: cats.pfi,
-            subgroups: [{ label: '', accounts: cats.pfi }],
-          },
-        ].filter(Boolean) as GlGroup[])
-
-  const chosen = cats?.categories.find((c) => String(c.id) === form.category_id)
-
-  /**
-   * A one-account stand-in for a line booked before the chart existed. Without
-   * it the account dropdown would come up empty on those rows and any edit —
-   * correcting an amount, say — would silently re-file the cost.
-   */
-  const legacy =
-    chosen && !chosen.gl_group
-      ? {
-          code: 'legacy',
-          label: chosen.pfi_id ? `Cargo · ${chosen.name}` : `Uncategorised · ${chosen.name}`,
-          hint: 'Recorded before the chart of accounts. Pick a GL account above to file it properly.',
-          requiresPfi: false,
-          accounts: [chosen],
-          subgroups: [{ label: '', accounts: [chosen] }],
-        }
-      : null
-
-  const group = form.gl_group === 'legacy' ? legacy : groups.find((g) => g.code === form.gl_group)
+  const setType = (type: 'general' | 'pfi') =>
+    setForm((f) => ({ ...f, type, category_id: '' }))
 
   /**
    * The invoice arithmetic, run forward from whatever was just edited:
@@ -221,12 +177,7 @@ export function ExpenseDialog({
       return next
     })
 
-  /** Changing the group invalidates the account under it, and any cargo with it. */
-  const setGroup = (code: string) =>
-    setForm((f) => ({ ...f, gl_group: code, category_id: '', pfi_id: '' }))
-
-  const needsPfi = !!group?.requiresPfi
-  const ready = form.category_id && Number(form.amount) > 0 && (!needsPfi || !!form.pfi_id)
+  const ready = form.category_id && Number(form.amount) > 0
 
   const submit = async () => {
     // A vendor picked from the list already carries an id; a freshly-typed
@@ -245,18 +196,21 @@ export function ExpenseDialog({
     const saved = await save.mutateAsync({
       id: expense?.id,
       data: {
-        ...form,
-        vendor_id: vendorId,
-        amount: Number(form.amount),
+        expense_date: form.expense_date,
         category_id: Number(form.category_id),
-        // Only the direct-cost group carries a cargo; the server refuses one
-        // anywhere else, so send null rather than a stale id.
-        pfi_id: needsPfi && form.pfi_id ? Number(form.pfi_id) : null,
-        amount_ex_vat: num(form.amount_ex_vat),
-        vat_amount: num(form.vat_amount),
-        invoice_amount: num(form.invoice_amount),
-        wht_deduction: num(form.wht_deduction) ?? 0,
-        wht_rate: num(form.wht_rate),
+        vendor: form.vendor,
+        vendor_id: vendorId,
+        description: form.description,
+        amount: Number(form.amount),
+        amount_ex_vat: includeTax ? num(form.amount_ex_vat) : null,
+        vat_amount: includeTax ? num(form.vat_amount) : null,
+        invoice_amount: includeTax ? num(form.invoice_amount) : null,
+        wht_deduction: includeTax ? (num(form.wht_deduction) ?? 0) : 0,
+        wht_rate: includeTax ? num(form.wht_rate) : null,
+        receipt_reference: form.receipt_reference,
+        payee_bank_name: form.payee_bank_name,
+        payee_account_number: form.payee_account_number,
+        payee_account_name: form.payee_account_name,
       },
     })
 
@@ -277,68 +231,52 @@ export function ExpenseDialog({
         <DialogHeader>
           <DialogTitle>{expense ? 'Edit request' : 'Raise a payment request'}</DialogTitle>
           <DialogDescription>
-            The GL account decides where this lands in the books. It goes to the
-            Expenditure Officer, then the CFO, then final approval.
+            It goes to the Expenditure Officer, then the CFO, then final approval.
           </DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-1.5 sm:col-span-2">
-            <label className={cn(MICRO, 'block text-muted-foreground')}>Expense category</label>
-            <NativeSelect value={form.gl_group} onChange={(e) => setGroup(e.target.value)}>
-              <option value="">Select a category…</option>
-              {groups.map((g) => <option key={g.code} value={g.code}>{g.label}</option>)}
-              {/* Offered only while editing a line that predates the chart, so
-                  it stays editable without being re-filed by accident. */}
-              {legacy && <option value="legacy">{legacy.label}</option>}
-            </NativeSelect>
-            {group && (
-              <p className="text-xs leading-tight text-muted-foreground/70">{group.hint}</p>
-            )}
+            <label className={cn(MICRO, 'block text-muted-foreground')}>What is this for?</label>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setType('general')}
+                className={cn(
+                  'flex items-center gap-2 rounded-lg border p-3 text-left text-sm transition-colors duration-250 ease-luxe outline-none',
+                  form.type === 'general'
+                    ? 'border-accent/40 bg-accent/10 text-accent'
+                    : 'border-foreground/15 text-muted-foreground hover:bg-muted/60',
+                )}
+              >
+                <Building2 className="size-4 shrink-0" />
+                General expense
+              </button>
+              <button
+                type="button"
+                onClick={() => setType('pfi')}
+                className={cn(
+                  'flex items-center gap-2 rounded-lg border p-3 text-left text-sm transition-colors duration-250 ease-luxe outline-none',
+                  form.type === 'pfi'
+                    ? 'border-accent/40 bg-accent/10 text-accent'
+                    : 'border-foreground/15 text-muted-foreground hover:bg-muted/60',
+                )}
+              >
+                <Fuel className="size-4 shrink-0" />
+                Attached to a PFI
+              </button>
+            </div>
           </div>
 
           <div className="space-y-1.5 sm:col-span-2">
-            <label className={cn(MICRO, 'block text-muted-foreground')}>GL account</label>
-            <NativeSelect
-              value={form.category_id}
-              disabled={!group}
-              onChange={(e) => set('category_id', e.target.value)}
-            >
-              <option value="">{group ? 'Select an account…' : 'Pick a category first'}</option>
-              {group?.subgroups.map((sub) =>
-                sub.label ? (
-                  <optgroup key={sub.label} label={sub.label}>
-                    {sub.accounts.map((c) => (
-                      <option key={c.id} value={c.id}>{c.gl_code} · {c.name}</option>
-                    ))}
-                  </optgroup>
-                ) : (
-                  sub.accounts.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.gl_code ? `${c.gl_code} · ` : ''}{c.name}
-                    </option>
-                  ))
-                ),
-              )}
+            <label className={cn(MICRO, 'block text-muted-foreground')}>
+              {form.type === 'pfi' ? 'Which PFI' : 'Category'}
+            </label>
+            <NativeSelect value={form.category_id} onChange={(e) => set('category_id', e.target.value)}>
+              <option value="">{form.type === 'pfi' ? 'Select the PFI…' : 'Select a category…'}</option>
+              {categoryOptions.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
             </NativeSelect>
           </div>
-
-          {needsPfi && (
-            <div className="space-y-1.5 sm:col-span-2">
-              <label className={cn(MICRO, 'block text-muted-foreground')}>PFI</label>
-              <NativeSelect value={form.pfi_id} onChange={(e) => set('pfi_id', e.target.value)}>
-                <option value="">Select the cargo this cost belongs to…</option>
-                {(pfiList?.pfis || []).map((p) => (
-                  <option key={String(p.id)} value={String(p.id)}>
-                    {p.pfiNumber}{p.status === 'finished' ? ' (finished)' : ''}
-                  </option>
-                ))}
-              </NativeSelect>
-              <p className="text-xs leading-tight text-muted-foreground/70">
-                Rolls into this batch's total expenses once the request is paid.
-              </p>
-            </div>
-          )}
 
           <div className="space-y-1.5">
             <label className={cn(MICRO, 'block text-muted-foreground')}>Date</label>
@@ -354,97 +292,91 @@ export function ExpenseDialog({
               }}
             />
           </div>
-          <div className="space-y-1.5">
-            <label className={cn(MICRO, 'block text-muted-foreground')}>TIN number</label>
-            <Input value={form.tin_number} onChange={(e) => set('tin_number', e.target.value)} />
-          </div>
-          <div className="space-y-1.5">
-            <label className={cn(MICRO, 'block text-muted-foreground')}>Invoice no.</label>
-            <Input value={form.invoice_number} onChange={(e) => set('invoice_number', e.target.value)} />
-          </div>
           <div className="space-y-1.5 sm:col-span-2">
             <label className={cn(MICRO, 'block text-muted-foreground')}>Purpose</label>
             <Input value={form.description} onChange={(e) => set('description', e.target.value)} />
           </div>
 
-          {/* The invoice. Every field stays editable after it is filled in —
-              plenty of vendors charge no VAT, and a part payment has to be
-              recordable — so these compute forward, not in a locked loop. */}
-          <div className="space-y-1.5 sm:col-span-2">
-            <p className={cn(MICRO, 'border-b border-foreground/10 pb-2 text-muted-foreground')}>
-              Invoice
-            </p>
-          </div>
-          <div className="space-y-1.5">
-            <label className={cn(MICRO, 'block text-muted-foreground')}>Amount ex VAT</label>
-            <Input
-              type="number" placeholder="0.00" value={form.amount_ex_vat}
-              onChange={(e) => apply({ amount_ex_vat: e.target.value })}
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label className={cn(MICRO, 'block text-muted-foreground')}>
-              VAT ({(vatRate * 100).toFixed(1)}%)
+          {/* Invoice/VAT/WHT: optional detail, folded away until asked for. */}
+          <div className="sm:col-span-2">
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                className="size-3.5"
+                checked={includeTax}
+                onChange={(e) => setIncludeTax(e.target.checked)}
+              />
+              Add invoice &amp; tax breakdown
+              <span className="text-xs text-muted-foreground">(optional)</span>
             </label>
-            <Input
-              type="number" placeholder="0.00" value={form.vat_amount}
-              onChange={(e) => apply({ vat_amount: e.target.value })}
-            />
-          </div>
-          <div className="space-y-1.5 sm:col-span-2">
-            <label className={cn(MICRO, 'block text-muted-foreground')}>Invoice amount</label>
-            <Input
-              type="number" placeholder="0.00" value={form.invoice_amount}
-              onChange={(e) => apply({ invoice_amount: e.target.value })}
-            />
           </div>
 
-          {/* Rate first, amount second. Which rate an invoice attracts is
-              Finance's call, so the options are bare percentages — this app
-              does not guess the transaction type on their behalf. */}
-          <div className="space-y-1.5">
-            <label className={cn(MICRO, 'block text-muted-foreground')}>WHT rate</label>
-            <NativeSelect
-              value={form.wht_rate}
-              onChange={(e) => apply({ wht_rate: e.target.value })}
-            >
-              <option value="">Enter amount manually</option>
-              {whtRates.map((r) => (
-                <option key={r} value={String(r)}>{r === 0 ? 'No WHT (0%)' : `${r}%`}</option>
-              ))}
-            </NativeSelect>
-            <p className="text-xs leading-tight text-muted-foreground/70">
-              Taken on the ex-VAT amount.
-            </p>
-          </div>
-          <div className="space-y-1.5">
-            <label className={cn(MICRO, 'block text-muted-foreground')}>WHT deduction</label>
-            <Input
-              type="number" placeholder="0.00" value={form.wht_deduction}
-              onChange={(e) => apply({ wht_deduction: e.target.value, wht_rate: '' })}
-            />
-          </div>
+          {includeTax && (
+            <>
+              <div className="space-y-1.5">
+                <label className={cn(MICRO, 'block text-muted-foreground')}>Amount ex VAT</label>
+                <Input
+                  type="number" placeholder="0.00" value={form.amount_ex_vat}
+                  onChange={(e) => apply({ amount_ex_vat: e.target.value })}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className={cn(MICRO, 'block text-muted-foreground')}>
+                  VAT ({(vatRate * 100).toFixed(1)}%)
+                </label>
+                <Input
+                  type="number" placeholder="0.00" value={form.vat_amount}
+                  onChange={(e) => apply({ vat_amount: e.target.value })}
+                />
+              </div>
+              <div className="space-y-1.5 sm:col-span-2">
+                <label className={cn(MICRO, 'block text-muted-foreground')}>Invoice amount</label>
+                <Input
+                  type="number" placeholder="0.00" value={form.invoice_amount}
+                  onChange={(e) => apply({ invoice_amount: e.target.value })}
+                />
+              </div>
+
+              {/* Rate first, amount second. Which rate an invoice attracts is
+                  Finance's call, so the options are bare percentages — this app
+                  does not guess the transaction type on their behalf. */}
+              <div className="space-y-1.5">
+                <label className={cn(MICRO, 'block text-muted-foreground')}>WHT rate</label>
+                <NativeSelect
+                  value={form.wht_rate}
+                  onChange={(e) => apply({ wht_rate: e.target.value })}
+                >
+                  <option value="">Enter amount manually</option>
+                  {whtRates.map((r) => (
+                    <option key={r} value={String(r)}>{r === 0 ? 'No WHT (0%)' : `${r}%`}</option>
+                  ))}
+                </NativeSelect>
+                <p className="text-xs leading-tight text-muted-foreground/70">
+                  Taken on the ex-VAT amount.
+                </p>
+              </div>
+              <div className="space-y-1.5">
+                <label className={cn(MICRO, 'block text-muted-foreground')}>WHT deduction</label>
+                <Input
+                  type="number" placeholder="0.00" value={form.wht_deduction}
+                  onChange={(e) => apply({ wht_deduction: e.target.value, wht_rate: '' })}
+                />
+              </div>
+            </>
+          )}
+
           <div className="space-y-1.5 sm:col-span-2">
             <label className={cn(MICRO, 'block text-muted-foreground')}>Amount requested</label>
             <Input
               type="number" placeholder="0.00" value={form.amount}
               onChange={(e) => set('amount', e.target.value)}
             />
-            <p className="text-xs leading-tight text-muted-foreground/70">
-              Invoice amount less WHT. What actually gets paid is recorded by the
-              Expenditure Officer at the end.
-            </p>
-          </div>
-
-          {/* Read-only: the pair belongs to the account, and typing it by hand
-              is how a schedule ends up with a code that names nothing. */}
-          <div className="space-y-1.5">
-            <label className={cn(MICRO, 'block text-muted-foreground')}>GL code</label>
-            <Input readOnly value={chosen?.gl_code || ''} placeholder="—" className="bg-muted/40" />
-          </div>
-          <div className="space-y-1.5">
-            <label className={cn(MICRO, 'block text-muted-foreground')}>GL name</label>
-            <Input readOnly value={chosen?.name || ''} placeholder="—" className="bg-muted/40" />
+            {includeTax && (
+              <p className="text-xs leading-tight text-muted-foreground/70">
+                Invoice amount less WHT. What actually gets paid is recorded by the
+                Expenditure Officer at the end.
+              </p>
+            )}
           </div>
 
           <div className="space-y-1.5 sm:col-span-2">
@@ -460,11 +392,7 @@ export function ExpenseDialog({
             <label className={cn(MICRO, 'block text-muted-foreground')}>Account number</label>
             <Input value={form.payee_account_number} onChange={(e) => set('payee_account_number', e.target.value)} />
           </div>
-          <div className="space-y-1.5">
-            <label className={cn(MICRO, 'block text-muted-foreground')}>Bank code</label>
-            <Input value={form.bank_code} onChange={(e) => set('bank_code', e.target.value)} />
-          </div>
-          <div className="space-y-1.5">
+          <div className="space-y-1.5 sm:col-span-2">
             <label className={cn(MICRO, 'block text-muted-foreground')}>Bank name</label>
             <Input value={form.payee_bank_name} onChange={(e) => set('payee_bank_name', e.target.value)} />
           </div>

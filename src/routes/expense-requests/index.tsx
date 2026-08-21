@@ -69,9 +69,9 @@ function MyRequestsPage() {
       />
 
       <StatCardGrid count={3}>
-        <StatCard icon={<Receipt />} label="Total requested" value={naira(totals?.total ?? 0, { compact: true })} />
-        <StatCard icon={<Hourglass />} label="Awaiting decision" value={naira(totals?.openTotal ?? 0, { compact: true })} />
-        <StatCard icon={<CheckCircle2 />} label="Paid" value={naira(totals?.paidTotal ?? 0, { compact: true })} />
+        <StatCard icon={<Receipt />} label="Total requested" value={naira(totals?.total ?? 0)} />
+        <StatCard icon={<Hourglass />} label="Awaiting decision" value={naira(totals?.openTotal ?? 0)} />
+        <StatCard icon={<CheckCircle2 />} label="Paid" value={naira(totals?.paidTotal ?? 0)} />
       </StatCardGrid>
 
       {/* Counts ignore the status filter, so a tab never reads zero just
@@ -171,7 +171,9 @@ function MyRequestsPage() {
                     <TableCell className="max-w-[16rem] truncate">{e.description || '—'}</TableCell>
                     <TableCell className="text-right whitespace-nowrap">{naira(Number(e.amount))}</TableCell>
                     <TableCell className="text-right whitespace-nowrap font-medium">
-                      {e.amount_paid == null ? '—' : naira(Number(e.amount_paid))}
+                      {e.amount_paid != null
+                        ? naira(Number(e.amount_paid))
+                        : (e.status === 'paid' ? naira(Number(e.amount)) : '—')}
                     </TableCell>
                     <TableCell><StepBadge expense={e} /></TableCell>
                     <TableCell className="text-right" onClick={(ev) => ev.stopPropagation()}>
