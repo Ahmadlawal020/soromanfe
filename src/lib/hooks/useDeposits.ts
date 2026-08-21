@@ -55,3 +55,51 @@ export function useCreateDeposit() {
     },
   })
 }
+
+export function useTransferBalance() {
+  const queryClient = useQueryClient()
+  const toast = useToast()
+
+  return useMutation({
+    retry: false,
+    mutationFn: async (data: {
+      fromCustomer: string | number
+      toCustomer: string | number
+      amount: number
+      description?: string
+    }) => {
+      const res = await api.post('/deposits/transfer', data)
+      return res.data
+    },
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: ['deposits'] })
+      queryClient.invalidateQueries({ queryKey: ['customers'] })
+      toast.success(res?.message || 'Balance transferred')
+    },
+    onError: (err: any) => {
+      toast.error(getErrorMessage(err))
+    },
+  })
+}
+
+/** Undoes a credit deposit — e.g. one recorded against the wrong customer. */
+export function useReverseDeposit() {
+  const queryClient = useQueryClient()
+  const toast = useToast()
+
+  return useMutation({
+    retry: false,
+    mutationFn: async ({ id, description }: { id: string | number; description?: string }) => {
+      const res = await api.post(`/deposits/${id}/reverse`, { description })
+      return res.data
+    },
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: ['deposits'] })
+      queryClient.invalidateQueries({ queryKey: ['customers'] })
+      toast.success(res?.message || 'Deposit reversed')
+    },
+    onError: (err: any) => {
+      toast.error(getErrorMessage(err))
+    },
+  })
+}

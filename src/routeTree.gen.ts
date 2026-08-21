@@ -97,6 +97,7 @@ import { Route as ProductPricingIndexRouteImport } from './routes/product-pricin
 import { Route as ProductsIndexRouteImport } from './routes/products/index'
 import { Route as ProductsDetailsRouteImport } from './routes/products/details'
 import { Route as ProductsFormRouteImport } from './routes/products/form'
+import { Route as ProfileIndexRouteImport } from './routes/profile/index'
 import { Route as SalesLedgerIndexRouteImport } from './routes/sales-ledger/index'
 import { Route as SalesLedgerAssignCustomerRouteImport } from './routes/sales-ledger/assign-customer'
 import { Route as SalesLedgerDetailsRouteImport } from './routes/sales-ledger/details'
@@ -566,6 +567,11 @@ const ProductsFormRoute = ProductsFormRouteImport.update({
   path: '/products/form',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfileIndexRoute = ProfileIndexRouteImport.update({
+  id: '/profile/',
+  path: '/profile/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SalesLedgerIndexRoute = SalesLedgerIndexRouteImport.update({
   id: '/sales-ledger/',
   path: '/sales-ledger/',
@@ -750,6 +756,7 @@ export interface FileRoutesByFullPath {
   '/product-manager-view/': typeof ProductManagerViewIndexRoute
   '/product-pricing/': typeof ProductPricingIndexRoute
   '/products/': typeof ProductsIndexRoute
+  '/profile/': typeof ProfileIndexRoute
   '/sales-ledger/': typeof SalesLedgerIndexRoute
   '/sales-manager-view/': typeof SalesManagerViewIndexRoute
   '/security-report/': typeof SecurityReportIndexRoute
@@ -857,6 +864,7 @@ export interface FileRoutesByTo {
   '/product-manager-view': typeof ProductManagerViewIndexRoute
   '/product-pricing': typeof ProductPricingIndexRoute
   '/products': typeof ProductsIndexRoute
+  '/profile': typeof ProfileIndexRoute
   '/sales-ledger': typeof SalesLedgerIndexRoute
   '/sales-manager-view': typeof SalesManagerViewIndexRoute
   '/security-report': typeof SecurityReportIndexRoute
@@ -965,6 +973,7 @@ export interface FileRoutesById {
   '/product-manager-view/': typeof ProductManagerViewIndexRoute
   '/product-pricing/': typeof ProductPricingIndexRoute
   '/products/': typeof ProductsIndexRoute
+  '/profile/': typeof ProfileIndexRoute
   '/sales-ledger/': typeof SalesLedgerIndexRoute
   '/sales-manager-view/': typeof SalesManagerViewIndexRoute
   '/security-report/': typeof SecurityReportIndexRoute
@@ -1074,6 +1083,7 @@ export interface FileRouteTypes {
     | '/product-manager-view/'
     | '/product-pricing/'
     | '/products/'
+    | '/profile/'
     | '/sales-ledger/'
     | '/sales-manager-view/'
     | '/security-report/'
@@ -1181,6 +1191,7 @@ export interface FileRouteTypes {
     | '/product-manager-view'
     | '/product-pricing'
     | '/products'
+    | '/profile'
     | '/sales-ledger'
     | '/sales-manager-view'
     | '/security-report'
@@ -1288,6 +1299,7 @@ export interface FileRouteTypes {
     | '/product-manager-view/'
     | '/product-pricing/'
     | '/products/'
+    | '/profile/'
     | '/sales-ledger/'
     | '/sales-manager-view/'
     | '/security-report/'
@@ -1396,6 +1408,7 @@ export interface RootRouteChildren {
   ProductManagerViewIndexRoute: typeof ProductManagerViewIndexRoute
   ProductPricingIndexRoute: typeof ProductPricingIndexRoute
   ProductsIndexRoute: typeof ProductsIndexRoute
+  ProfileIndexRoute: typeof ProfileIndexRoute
   SalesLedgerIndexRoute: typeof SalesLedgerIndexRoute
   SalesManagerViewIndexRoute: typeof SalesManagerViewIndexRoute
   SecurityReportIndexRoute: typeof SecurityReportIndexRoute
@@ -2025,6 +2038,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductsFormRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profile/': {
+      id: '/profile/'
+      path: '/profile'
+      fullPath: '/profile/'
+      preLoaderRoute: typeof ProfileIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sales-ledger/': {
       id: '/sales-ledger/'
       path: '/sales-ledger'
@@ -2245,6 +2265,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProductManagerViewIndexRoute: ProductManagerViewIndexRoute,
   ProductPricingIndexRoute: ProductPricingIndexRoute,
   ProductsIndexRoute: ProductsIndexRoute,
+  ProfileIndexRoute: ProfileIndexRoute,
   SalesLedgerIndexRoute: SalesLedgerIndexRoute,
   SalesManagerViewIndexRoute: SalesManagerViewIndexRoute,
   SecurityReportIndexRoute: SecurityReportIndexRoute,

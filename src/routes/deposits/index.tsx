@@ -9,7 +9,7 @@ import { Input } from '#/components/ui/input'
 import { Badge } from '#/components/ui/badge'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '#/components/ui/table'
 
-import { Search, ArrowDownLeft, Eye, X, Banknote, Plus, Landmark, ArrowRightLeft, Filter } from 'lucide-react'
+import { Search, ArrowDownLeft, Eye, X, Banknote, Plus, Landmark, ArrowRightLeft, Filter, Repeat } from 'lucide-react'
 import { PageLoader } from '#/components/PageLoader'
 import { PageError } from '#/components/PageError'
 import { PageEmpty } from '#/components/PageEmpty'
@@ -18,6 +18,7 @@ import { useDepositList } from '#/lib/hooks/useDeposits'
 import type { Deposit } from '#/lib/hooks/useDeposits'
 import { cn, toNum } from '#/lib/utils'
 import { routeGuard } from '#/lib/route-guard'
+import { TransferBalanceDialog } from './-transfer-balance-dialog'
 
 export const Route = createFileRoute('/deposits/')({
   beforeLoad: () => routeGuard('/deposits'),
@@ -45,6 +46,7 @@ function DepositsDashboard() {
   const [timeFilter, setTimeFilter] = useState<'all' | 'today' | 'week' | 'month'>('all')
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
+  const [showTransfer, setShowTransfer] = useState(false)
 
   const POLL_INTERVAL = 30_000
   const { data, isLoading, isError, error, refetch } = useDepositList({ limit: 5000, refetchInterval: POLL_INTERVAL })
@@ -137,6 +139,9 @@ function DepositsDashboard() {
       description="View and record customer deposit transactions."
       actions={
         <>
+          <Button variant="outline" className="gap-2" onClick={() => setShowTransfer(true)}>
+            <Repeat className="size-4" /> Transfer Balance
+          </Button>
           <Button
           className="gap-2"
           onClick={() => navigate({ to: '/deposits/manual-deposit' as any })}
@@ -367,6 +372,8 @@ function DepositsDashboard() {
           )}
         </CardContent>
       </Card>
+
+      <TransferBalanceDialog open={showTransfer} onOpenChange={setShowTransfer} />
     </div>
   )
 }

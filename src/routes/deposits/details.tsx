@@ -1,8 +1,11 @@
+import { useState } from 'react'
 import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
 import { PageHeader } from '#/components/PageHeader'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '#/components/ui/card'
+import { Textarea } from '#/components/ui/textarea'
+import { Label } from '#/components/ui/label'
 import {
   ArrowLeft,
   AlertCircle,
@@ -23,10 +26,13 @@ import {
   Banknote,
   ArrowRightLeft,
   Info,
+  Undo2,
 } from 'lucide-react'
 import type { Deposit } from '#/lib/hooks/useDeposits'
+import { useReverseDeposit } from '#/lib/hooks/useDeposits'
 import { toNum } from '#/lib/utils'
 import { Breadcrumbs } from '#/components/Breadcrumbs'
+import { ConfirmDialog } from '#/components/ConfirmDialog'
 import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/deposits/details')({
@@ -42,9 +48,22 @@ function DepositDetailPage() {
   const navigate = useNavigate()
   const router = useRouter()
   const deposit = (router.history.location.state as any)?.deposit as Deposit | undefined
+  const [showReverse, setShowReverse] = useState(false)
+  const [reverseReason, setReverseReason] = useState('')
+  const reverseDeposit = useReverseDeposit()
 
   const handleBack = () => {
     window.history.length > 1 ? window.history.back() : navigate({ to: '/deposits/' as any })
+  }
+
+  const isReversal = Boolean(deposit?.reference?.startsWith('REV-'))
+  const canReverse = Boolean(deposit && deposit.type === 'credit' && !isReversal)
+
+  const handleReverse = async () => {
+    if (!deposit) return
+    await reverseDeposit.mutateAsync({ id: deposit._id, description: reverseReason.trim() || undefined })
+    setShowReverse(false)
+    navigate({ to: '/deposits/' as any })
   }
 
   if (!deposit) {
@@ -82,6 +101,15 @@ function DepositDetailPage() {
       title="Deposit Details"
       description={`{isPaystack ? 'Paystack automated transaction details and customer information' : 'Manual bank deposit details and customer information'}`}
       backAction={handleBack}
+      actions={
+        canReverse ? (
+          <Button variant="outline" className="gap-2 text-destructive hover:text-destructive" onClick={() => setShowReverse(true)}>
+            <Undo2 className="size-4" /> Reverse Deposit
+          </Button>
+        ) : isReversal ? (
+          <Badge variant="outline" className="text-muted-foreground">This is a reversal</Badge>
+        ) : undefined
+      }
     />
       </header>
 
@@ -637,6 +665,28 @@ function DepositDetailPage() {
           </Card>
         )}
       </div>
+
+      <ConfirmDialog
+        open={showReverse}
+        onOpenChange={setShowReverse}
+        title="Reverse this deposit?"
+        description={`This debits ${formatCurrency(toNum(deposit.amount))} back out of ${deposit.customerName || 'this customer'}'s wallet. If some of it has already been spent on orders, it comes out of their current balance instead — this will fail if that balance can't cover it.`}
+        confirmLabel="Reverse Deposit"
+        variant="destructive"
+        loading={reverseDeposit.isPending}
+        onConfirm={handleReverse}
+      >
+        <div className="space-y-1.5">
+          <Label htmlFor="reverse-reason" className="text-xs">Reason (optional)</Label>
+          <Textarea
+            id="reverse-reason"
+            rows={2}
+            placeholder="e.g. Recorded against the wrong customer"
+            value={reverseReason}
+            onChange={(e) => setReverseReason(e.target.value)}
+          />
+        </div>
+      </ConfirmDialog>
     </div>
   )
 }

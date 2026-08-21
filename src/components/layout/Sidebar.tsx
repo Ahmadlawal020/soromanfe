@@ -193,7 +193,10 @@ export default function Sidebar() {
         {/* User / Logout Footer */}
         <div className="shrink-0 border-t border-sidebar-border p-2">
           {expanded ? (
-            <div className="mb-2 flex items-center gap-2.5 rounded-lg px-1 py-1.5">
+            <Link
+              to="/profile"
+              className="mb-2 flex items-center gap-2.5 rounded-lg px-1 py-1.5 outline-none transition-colors duration-250 ease-luxe hover:bg-sidebar-accent focus-visible:ring-3 focus-visible:ring-ring/50"
+            >
               <Avatar>
                 <AvatarFallback className="text-xs font-normal">
                   {initials}
@@ -205,15 +208,15 @@ export default function Sidebar() {
                   {user?.email || "admin"}
                 </div>
               </div>
-            </div>
+            </Link>
           ) : (
-            <div className="mb-2 flex justify-center">
+            <Link to="/profile" className="mb-2 flex justify-center" title="My profile">
               <Avatar>
                 <AvatarFallback className="text-xs font-normal">
                   {initials}
                 </AvatarFallback>
               </Avatar>
-            </div>
+            </Link>
           )}
 
           {/* Tinted, never solid red. */}
