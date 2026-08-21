@@ -101,7 +101,6 @@ export function ProductStep({ wizard }: ProductStepProps) {
     <div className="space-y-5">
       <ChoiceGrid>
         {prices.map((entry: any, idx: number) => {
-          const remaining = stockFor(entry)
           const selected = selectedProduct?.product?._id === entry.product?._id
           return (
             <ChoiceCard
@@ -121,6 +120,7 @@ export function ProductStep({ wizard }: ProductStepProps) {
               }
               meta={
                 <>
+                  {/* PFI stock — hidden on the product picker on request.
                   <ChoiceMeta
                     label="In stock"
                     value={
@@ -129,7 +129,7 @@ export function ProductStep({ wizard }: ProductStepProps) {
                         : '0 (No active PFI)'
                     }
                     tone={remaining === 0 ? 'text-destructive' : undefined}
-                  />
+                  /> */}
                   <ChoiceMeta
                     label="Unit price"
                     align="right"

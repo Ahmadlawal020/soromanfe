@@ -27,8 +27,9 @@ export function useOrderWizard() {
     address: '',
   })
 
-  // Step 2: Location & Depot (merged)
-  const [selectedState, setSelectedState] = useState('')
+  // Step 2: Depot — the state used to be picked first and depots filtered by
+  // it; now every active depot is offered directly and its own `state` rides
+  // along on the order payload, derived rather than asked for.
   const [selectedDepot, setSelectedDepot] = useState<any>(null)
 
   // Step 3: Product
@@ -63,9 +64,7 @@ export function useOrderWizard() {
   const { data: depotsList, isLoading: isLoadingDepots } = useDepots({ limit: 100 })
   const depots = depotsList || []
 
-  const stateDepots = depots.filter((d: any) =>
-    d.state?.toLowerCase().trim() === selectedState?.toLowerCase().trim()
-  )
+  const activeDepots = depots.filter((d: any) => (d.status || 'Active') === 'Active')
 
   const handleRegisterCustomer = async () => {
     setErrors([])
@@ -99,7 +98,7 @@ export function useOrderWizard() {
       const totalAmount = Number(orderQuantity) * Number(selectedProduct.currentPrice)
       const payload = {
         customer: selectedCustomer._id || selectedCustomer.id,
-        state: selectedState,
+        state: selectedDepot.state || '',
         depot: selectedDepot.id || selectedDepot._id,
         product: selectedProduct.product._id || selectedProduct.product.id,
         quantity: Number(orderQuantity),
@@ -134,7 +133,6 @@ export function useOrderWizard() {
       return errs
     }
     if (target === 2) {
-      if (!selectedState) errs.push('Please select the destination state')
       if (!selectedDepot) errs.push('Please select a depot')
       return errs
     }
@@ -187,7 +185,6 @@ export function useOrderWizard() {
     setSelectedCustomer(null)
     setIsRegisteringCustomer(false)
     setOrderCompanyName('')
-    setSelectedState('')
     setSelectedDepot(null)
     setSelectedProduct(null)
     setOrderQuantity('')
@@ -227,13 +224,11 @@ export function useOrderWizard() {
     isSearchingCustomers,
     createCustomerMutation,
 
-    // Location & Depot state
-    selectedState,
-    setSelectedState,
+    // Depot state
     selectedDepot,
     setSelectedDepot,
     setSelectedProduct,
-    stateDepots,
+    activeDepots,
     isLoadingDepots,
 
     // Product state

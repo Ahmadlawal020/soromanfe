@@ -73,6 +73,11 @@ export function TicketGenerateDialog({
   const releasable = ordered
   const partPaid = releasable < ordered
 
+  // Trucks already on this order — the backend continues truckIndex from
+  // whichever of these is highest, so the labels shown here need to match or
+  // a reopened dialog reads as though numbering restarted from Truck A/1.
+  const startIndex = loads.reduce((max, l) => Math.max(max, num(l.truckIndex)), 0)
+
   const previous = loads.reduce((s, l) => s + num(l.quantity), 0)
   const added = drafts.reduce((s, d) => s + num(d.quantity), 0)
   const remaining = releasable - previous - added
@@ -92,7 +97,7 @@ export function TicketGenerateDialog({
     if (!loadingAt) return 'Set the loading date and time'
     for (let i = 0; i < drafts.length; i++) {
       const d = drafts[i]
-      const where = `Truck ${i + 1}`
+      const where = `Truck ${startIndex + i + 1}`
       if (!d.quantity || num(d.quantity) <= 0) return `${where}: enter a quantity`
       if (inLitres && num(d.quantity) > MAX_TRUCK_LITRES) {
         return `${where}: ${fmt(num(d.quantity))} exceeds the ${fmt(MAX_TRUCK_LITRES)} litre limit`
@@ -105,7 +110,7 @@ export function TicketGenerateDialog({
       return `Allocated ${fmt(previous + added)} against ${fmt(releasable)} releasable — ${fmt(previous)} already ticketed`
     }
     return null
-  }, [drafts, loadingAt, previous, added, releasable, inLitres])
+  }, [drafts, loadingAt, previous, added, releasable, inLitres, startIndex])
 
   const submit = async () => {
     if (!order || problem) return
@@ -225,14 +230,14 @@ export function TicketGenerateDialog({
           {drafts.map((d, i) => (
             <div key={i} className="rounded-lg border border-foreground/15 p-3.5">
               <div className="mb-3 flex items-center justify-between">
-                <span className={cn(MICRO, 'text-muted-foreground')}>Truck {i + 1}</span>
+                <span className={cn(MICRO, 'text-muted-foreground')}>Truck {startIndex + i + 1}</span>
                 {drafts.length > 1 && (
                   <Button
                     variant="ghost" size="icon-sm"
                     onClick={() => setDrafts((t) => t.filter((_, j) => j !== i))}
                   >
                     <Trash2 />
-                    <span className="sr-only">Remove truck {i + 1}</span>
+                    <span className="sr-only">Remove truck {startIndex + i + 1}</span>
                   </Button>
                 )}
               </div>

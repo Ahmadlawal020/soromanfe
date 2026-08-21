@@ -86,11 +86,12 @@ function LoadingTicketsPage() {
     [datePreset, customFrom, customTo],
   )
 
-  // Only paid-or-beyond orders reach the loading desk.
+  // Only paid orders reach the loading desk — payment status, not lifecycle
+  // status, since a paid order stays paid all the way through Loading/Completed.
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
     return orders.filter((o) => {
-      if (!['Paid', 'Released', 'Loading', 'Completed'].includes(String(o.status))) return false
+      if (o.paymentStatus !== 'Paid') return false
       if (range) {
         if (!o.createdAt) return false
         if (!isWithinInterval(new Date(o.createdAt), { start: range.from, end: range.to })) return false
@@ -100,8 +101,10 @@ function LoadingTicketsPage() {
       if (statusFilter !== ALL && o.status !== statusFilter) return false
       if (pfiFilter !== ALL && o.pfiNumber !== pfiFilter) return false
       if (!q) return true
-      return [o.orderNumber, o.customerName, o.depotName, o.state, o.productName, o.pfiNumber]
-        .some((f) => String(f ?? '').toLowerCase().includes(q))
+      return [
+        o.orderNumber, o.customerName, o.companyName || o.customerCompanyName,
+        o.depotName, o.state, o.productName, o.pfiNumber,
+      ].some((f) => String(f ?? '').toLowerCase().includes(q))
     })
   }, [orders, range, productFilter, locationFilter, statusFilter, pfiFilter, search])
 
@@ -135,6 +138,7 @@ function LoadingTicketsPage() {
         { header: 'Reference', key: 'ref', width: 20 },
         { header: 'Date Loaded', key: 'date', width: 18 },
         { header: 'Customer', key: 'customer', width: 26 },
+        { header: 'Company', key: 'company', width: 24 },
         { header: 'Location', key: 'location', width: 22 },
         { header: 'Product', key: 'product', width: 22 },
         { header: 'Quantity', key: 'qty', width: 14 },
@@ -148,6 +152,7 @@ function LoadingTicketsPage() {
           ref: o.orderNumber,
           date: o.loadingStartedAt ? format(new Date(o.loadingStartedAt), 'yyyy-MM-dd HH:mm') : '',
           customer: o.customerName ?? '',
+          company: o.companyName ?? o.customerCompanyName ?? '',
           location: o.depotName ?? o.state ?? '',
           product: o.productName ?? '',
           qty: toNumber(o.quantity),
@@ -315,6 +320,7 @@ function LoadingTicketsPage() {
                       <TableHead>Reference</TableHead>
                       <TableHead>Date Loaded</TableHead>
                       <TableHead>Customer</TableHead>
+                      <TableHead>Company</TableHead>
                       <TableHead>Location</TableHead>
                       <TableHead>Product</TableHead>
                       <TableHead className="text-right">Quantity</TableHead>
@@ -401,13 +407,11 @@ function OrderRow({
   const departed = loads.length > 0 && loads.every((l) => l.status === 'gated_out')
 
   const action =
-    allocated === 0
-      ? { label: 'Generate Ticket', onClick: onGenerate, variant: 'default' as const }
-      : !fullyTicketed
-        ? { label: 'Add Ticket', onClick: onGenerate, variant: 'outline' as const }
-        : departed
-          ? { label: 'View Ticket', onClick: onView, variant: 'outline' as const }
-          : { label: 'Edit Ticket', onClick: onView, variant: 'outline' as const }
+    !fullyTicketed
+      ? { label: 'Add Ticket', onClick: onGenerate, variant: allocated === 0 ? 'default' as const : 'outline' as const }
+      : departed
+        ? { label: 'View Ticket', onClick: onView, variant: 'outline' as const }
+        : { label: 'Edit Ticket', onClick: onView, variant: 'outline' as const }
 
   return (
     <TableRow>
@@ -417,6 +421,7 @@ function OrderRow({
         {order.loadingStartedAt ? format(new Date(order.loadingStartedAt), 'd MMM yyyy') : '—'}
       </TableCell>
       <TableCell className="max-w-[14rem] truncate">{order.customerName || '—'}</TableCell>
+      <TableCell className="max-w-[12rem] truncate text-muted-foreground">{order.companyName || order.customerCompanyName || '—'}</TableCell>
       <TableCell>{order.depotName || order.state || '—'}</TableCell>
       <TableCell className="max-w-[12rem] truncate">{order.productName || '—'}</TableCell>
       <TableCell className="text-right">

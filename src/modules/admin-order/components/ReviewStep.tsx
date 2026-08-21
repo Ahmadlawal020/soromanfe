@@ -23,7 +23,6 @@ export function ReviewStep({ wizard }: ReviewStepProps) {
   const {
     selectedCustomer,
     orderCompanyName,
-    selectedState,
     selectedDepot,
     selectedProduct,
     orderQuantity,
@@ -69,16 +68,16 @@ export function ReviewStep({ wizard }: ReviewStepProps) {
         </div>
         <div className="p-4 grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
           <div>
-            <span className="text-xs text-muted-foreground block">Destination State</span>
-            <span className="font-semibold text-foreground">{selectedState}</span>
-          </div>
-          <div>
             <span className="text-xs text-muted-foreground block">Depot</span>
             <span className="font-semibold text-foreground">{selectedDepot?.name}</span>
           </div>
           <div>
             <span className="text-xs text-muted-foreground block">Depot Code</span>
             <span className="font-semibold text-foreground font-mono">{selectedDepot?.code}</span>
+          </div>
+          <div>
+            <span className="text-xs text-muted-foreground block">State</span>
+            <span className="font-semibold text-foreground">{selectedDepot?.state}</span>
           </div>
         </div>
       </div>

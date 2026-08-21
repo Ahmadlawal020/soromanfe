@@ -1,7 +1,6 @@
-import { useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
-import { Textarea } from '#/components/ui/textarea'
 import { Label } from '#/components/ui/label'
 import { useNavigate } from '@tanstack/react-router'
 import {
@@ -16,6 +15,7 @@ import {
   Banknote,
   FileCheck,
   Hourglass,
+  Trash2,
 } from 'lucide-react'
 import { formatCurrency, formatAccountName } from '../utils/formatters'
 import type { OrderWizardReturn } from '../hooks/useOrderWizard'
@@ -25,17 +25,75 @@ interface CompletionStepProps {
   wizard: OrderWizardReturn
 }
 
+/** Digits only — what gets sent as the amount. */
+const digitsOnly = (v: string) => v.replace(/\D/g, '')
+/** Display form. Empty stays empty so the placeholder still shows. */
+const formatAmount = (raw: string) => {
+  const d = digitsOnly(raw)
+  return d ? Number(d).toLocaleString('en-NG') : ''
+}
+
+type ExpectedRow = { id: number; amount: string; companyName: string }
+let rowSeq = 0
+const emptyRow = (): ExpectedRow => ({ id: rowSeq++, amount: '', companyName: '' })
+
+/** A live-formatted amount input — comma-separated as you type, caret held in place. */
+function AmountInput({ id, value, onChange }: { id: string; value: string; onChange: (raw: string) => void }) {
+  const ref = useRef<HTMLInputElement>(null)
+  const [caret, setCaret] = useState<number | null>(null)
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const el = e.target
+    const digitsBefore = digitsOnly(el.value.slice(0, el.selectionStart ?? 0)).length
+    const raw = digitsOnly(el.value)
+    onChange(raw)
+
+    const formatted = formatAmount(raw)
+    let seen = 0
+    let pos = formatted.length
+    for (let i = 0; i < formatted.length; i += 1) {
+      if (/\d/.test(formatted[i])) seen += 1
+      if (seen === digitsBefore) { pos = i + 1; break }
+    }
+    setCaret(digitsBefore === 0 ? 0 : pos)
+  }
+
+  useLayoutEffect(() => {
+    if (caret != null && ref.current) {
+      ref.current.setSelectionRange(caret, caret)
+      setCaret(null)
+    }
+  }, [caret])
+
+  return (
+    <Input
+      ref={ref}
+      id={id}
+      type="text"
+      inputMode="numeric"
+      autoComplete="off"
+      placeholder="0"
+      value={formatAmount(value)}
+      onChange={handleChange}
+      className="text-right"
+    />
+  )
+}
+
 /**
  * Optional, skippable: how the customer says they'll pay, noted while it's
  * fresh so a later anonymous bank transfer has something to be matched
  * against. Never blocks — closing this card without submitting is fine.
+ *
+ * One row per expected deposit — a customer paying in several tranches (or
+ * paying for several companies at once) gets one row each, all saved as
+ * separate expected-payment notes on submit. Company name rides in the
+ * `reference` field the API already has; there is no separate column for it.
  */
 function ExpectedPaymentNote({ customerId, orderId }: { customerId: number; orderId: number }) {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(true)
   const [saved, setSaved] = useState(false)
-  const [expectedAmount, setExpectedAmount] = useState('')
-  const [reference, setReference] = useState('')
-  const [note, setNote] = useState('')
+  const [rows, setRows] = useState<ExpectedRow[]>([emptyRow()])
   const createExpectedPayment = useCreateExpectedPayment()
 
   if (saved) {
@@ -57,47 +115,74 @@ function ExpectedPaymentNote({ customerId, orderId }: { customerId: number; orde
     )
   }
 
+  const updateRow = (id: number, patch: Partial<ExpectedRow>) =>
+    setRows((rs) => rs.map((r) => (r.id === id ? { ...r, ...patch } : r)))
+
+  const usableRows = rows.filter((r) => r.amount || r.companyName.trim())
+
   const submit = async () => {
-    await createExpectedPayment.mutateAsync({
-      customerId,
-      orderId,
-      expectedAmount: expectedAmount ? Number(expectedAmount) : undefined,
-      reference: reference.trim(),
-      note: note.trim(),
-    })
+    for (const r of usableRows) {
+      await createExpectedPayment.mutateAsync({
+        customerId,
+        orderId,
+        expectedAmount: r.amount ? Number(r.amount) : undefined,
+        reference: r.companyName.trim(),
+      })
+    }
     setSaved(true)
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-3 rounded-xl border border-border bg-card p-5">
+    <div className="max-w-2xl mx-auto space-y-3 rounded-xl border-2 border-warning/30 bg-warning/5 p-5">
       <div className="flex items-center gap-2">
-        <div className="size-8 rounded-lg bg-warning/15 flex items-center justify-center text-warning">
-          <Hourglass className="size-4" />
+        <div className="size-9 rounded-lg bg-warning/15 flex items-center justify-center text-warning">
+          <Hourglass className="size-5" />
         </div>
-        <span className="font-semibold text-sm text-foreground">Expected payment</span>
+        <span className="font-semibold text-base text-foreground">Expected payment</span>
       </div>
       <p className="text-xs text-muted-foreground">
-        Optional — a quick note on how the customer says they'll pay makes their bank
-        transfer easy to spot later. Skip if you don't know yet.
+        Optional — how the customer says they'll pay makes their bank transfer easy to
+        spot later. Add a row per deposit they've told you about; skip if you don't know yet.
       </p>
-      <div className="grid gap-3 sm:grid-cols-2">
-        <div className="space-y-1.5">
-          <Label htmlFor="ep-amount" className="text-xs">Expected amount</Label>
-          <Input id="ep-amount" type="number" step="0.01" placeholder="0.00" value={expectedAmount} onChange={(e) => setExpectedAmount(e.target.value)} />
-        </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="ep-ref" className="text-xs">Reference they'll use</Label>
-          <Input id="ep-ref" placeholder="e.g. their phone number" value={reference} onChange={(e) => setReference(e.target.value)} />
-        </div>
+
+      <div className="space-y-2">
+        {rows.map((r, i) => (
+          <div key={r.id} className="grid grid-cols-[1fr_1fr_auto] gap-2 items-end">
+            <div className="space-y-1.5">
+              {i === 0 && <Label htmlFor={`ep-amount-${r.id}`} className="text-xs">Amount</Label>}
+              <AmountInput id={`ep-amount-${r.id}`} value={r.amount} onChange={(v) => updateRow(r.id, { amount: v })} />
+            </div>
+            <div className="space-y-1.5">
+              {i === 0 && <Label htmlFor={`ep-company-${r.id}`} className="text-xs">Company name</Label>}
+              <Input
+                id={`ep-company-${r.id}`}
+                placeholder="e.g. Doe Enterprises"
+                value={r.companyName}
+                onChange={(e) => updateRow(r.id, { companyName: e.target.value })}
+              />
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              disabled={rows.length === 1}
+              onClick={() => setRows((rs) => rs.filter((x) => x.id !== r.id))}
+            >
+              <Trash2 className="size-4" />
+              <span className="sr-only">Remove row</span>
+            </Button>
+          </div>
+        ))}
       </div>
-      <div className="space-y-1.5">
-        <Label htmlFor="ep-note" className="text-xs">Note</Label>
-        <Textarea id="ep-note" rows={2} placeholder="e.g. Says she'll transfer from GTBank this afternoon" value={note} onChange={(e) => setNote(e.target.value)} />
-      </div>
-      <div className="flex items-center justify-end gap-2">
+
+      <Button type="button" variant="outline" size="sm" onClick={() => setRows((rs) => [...rs, emptyRow()])}>
+        <Plus className="size-4 mr-1" /> Add another deposit
+      </Button>
+
+      <div className="flex items-center justify-end gap-2 pt-1">
         <Button type="button" variant="ghost" size="sm" onClick={() => setOpen(false)}>Skip</Button>
-        <Button type="button" size="sm" disabled={createExpectedPayment.isPending} onClick={submit}>
-          {createExpectedPayment.isPending ? 'Saving…' : 'Save note'}
+        <Button type="button" size="sm" disabled={createExpectedPayment.isPending || usableRows.length === 0} onClick={submit}>
+          {createExpectedPayment.isPending ? 'Saving…' : `Save ${usableRows.length > 1 ? `${usableRows.length} notes` : 'note'}`}
         </Button>
       </div>
     </div>
