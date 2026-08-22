@@ -3,6 +3,7 @@ import api from '#/lib/api/http'
 import { useToast } from '#/lib/hooks/useToast'
 import { getErrorMessage } from '#/lib/utils'
 import type { StaffMember } from '#/routes/admin/-roles'
+import { useAuthStore } from '#/modules/auth'
 
 const ROLE_MAP_REVERSE: Record<string, number> = {
   super_admin: 0,
@@ -183,5 +184,69 @@ export function useDeleteAdmin() {
     onError: (err: any) => {
       toast.error(getErrorMessage(err))
     },
+  })
+}
+
+/**
+ * Your own profile — name, other names, phone, picture.
+ *
+ * Deliberately not the admin update endpoint: this one cannot touch email,
+ * roles, suspension or scope, whoever calls it. The auth store is refreshed
+ * in place so the sidebar and header show the new name without a reload.
+ */
+export function useUpdateMyProfile() {
+  const queryClient = useQueryClient()
+  const toast = useToast()
+
+  return useMutation({
+    retry: false,
+    mutationFn: async (data: {
+      first_name?: string
+      surname?: string
+      other_names?: string
+      phone_number?: string
+      profile_picture_url?: string
+      profile_picture_public_id?: string
+    }) => (await api.patch('/admin/me', data)).data,
+    onSuccess: (res) => {
+      const updated = res?.data
+      if (updated) {
+        const current = useAuthStore.getState().user
+        if (current) {
+          useAuthStore.setState({
+            user: {
+              ...current,
+              firstName: updated.firstName ?? current.firstName,
+              surname: updated.surname ?? current.surname,
+              profilePicture: updated.profilePicture ?? current.profilePicture,
+            },
+          })
+        }
+      }
+      queryClient.invalidateQueries({ queryKey: ['admins'] })
+      toast.success(res?.message || 'Profile updated')
+    },
+    onError: (err: any) => toast.error(getErrorMessage(err)),
+  })
+}
+
+/**
+ * Change your own password. The server revokes every session on success, so
+ * the caller is signed out and has to come back with the new one — hence the
+ * redirect rather than a quiet toast.
+ */
+export function useChangeMyPassword() {
+  const toast = useToast()
+
+  return useMutation({
+    retry: false,
+    mutationFn: async (data: { current_password: string; new_password: string }) =>
+      (await api.post('/admin/me/password', data)).data,
+    onSuccess: (res) => {
+      toast.success(res?.message || 'Password changed — please sign in again')
+      useAuthStore.getState().clearSession()
+      setTimeout(() => { window.location.href = '/login' }, 1200)
+    },
+    onError: (err: any) => toast.error(getErrorMessage(err)),
   })
 }

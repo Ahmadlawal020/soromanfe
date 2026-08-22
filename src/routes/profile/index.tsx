@@ -1,15 +1,21 @@
+import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import {
   Mail, Calendar, ShieldCheck, MapPin, Fuel, ChevronDown, BookOpen, Ban,
+  UserCog, Loader2,
 } from 'lucide-react'
 import { PageHeader } from '#/components/PageHeader'
 import { Badge } from '#/components/ui/badge'
+import { Button } from '#/components/ui/button'
+import { Input } from '#/components/ui/input'
+import { Label } from '#/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '#/components/ui/card'
 import { Avatar, AvatarFallback } from '#/components/ui/avatar'
 import { PageLoader } from '#/components/PageLoader'
 import { PageError } from '#/components/PageError'
+import { MICRO } from '#/lib/panel'
 import { useAuthStore } from '#/modules/auth'
-import { useAdminDetails } from '#/lib/hooks/useAdmin'
+import { useAdminDetails, useUpdateMyProfile, useChangeMyPassword } from '#/lib/hooks/useAdmin'
 import { useCurrentUserRoles } from '#/lib/hooks/useRoles'
 import { canAccessRoute, canPerformAction, isSuperAdmin } from '#/lib/rbac'
 import { ROLE_LABELS } from '#/routes/admin/-roles'
@@ -30,6 +36,145 @@ function getInitials(firstName?: string, surname?: string) {
 function formatDate(iso: string | null | undefined) {
   if (!iso) return '—'
   return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+}
+
+/**
+ * The two things a person may change about their own account.
+ *
+ * Email is shown but not editable — it is the login identity and the address
+ * a password reset goes to, so only a super admin reassigns one. The server
+ * enforces that independently; this just doesn't offer the field.
+ */
+function AccountSettings({
+  firstName, surname, phoneNumber, email,
+}: {
+  firstName: string
+  surname: string
+  phoneNumber: string
+  email: string
+}) {
+  const updateProfile = useUpdateMyProfile()
+  const changePassword = useChangeMyPassword()
+
+  const [details, setDetails] = useState({ first_name: firstName, surname, phone_number: phoneNumber })
+  const [seeded, setSeeded] = useState(`${firstName}|${surname}|${phoneNumber}`)
+  const key = `${firstName}|${surname}|${phoneNumber}`
+  if (seeded !== key) {
+    setSeeded(key)
+    setDetails({ first_name: firstName, surname, phone_number: phoneNumber })
+  }
+
+  const [pw, setPw] = useState({ current_password: '', new_password: '', confirm: '' })
+
+  const detailsChanged =
+    details.first_name !== firstName || details.surname !== surname || details.phone_number !== phoneNumber
+  const detailsValid = details.first_name.trim().length > 0 && details.surname.trim().length > 0
+
+  const pwMismatch = pw.confirm.length > 0 && pw.new_password !== pw.confirm
+  const pwValid =
+    pw.current_password.length > 0 && pw.new_password.length >= 8 && pw.new_password === pw.confirm
+
+  return (
+    <Card className="border-border/60">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <UserCog className="size-4 text-primary" /> Account settings
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="grid gap-6 lg:grid-cols-2">
+        <div className="space-y-3">
+          <p className={cn(MICRO, 'text-muted-foreground')}>Your details</p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="pf-first" className="text-xs text-muted-foreground">First name</Label>
+              <Input
+                id="pf-first" value={details.first_name}
+                onChange={(e) => setDetails((d) => ({ ...d, first_name: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="pf-surname" className="text-xs text-muted-foreground">Surname</Label>
+              <Input
+                id="pf-surname" value={details.surname}
+                onChange={(e) => setDetails((d) => ({ ...d, surname: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="pf-phone" className="text-xs text-muted-foreground">Phone number</Label>
+              <Input
+                id="pf-phone" value={details.phone_number}
+                onChange={(e) => setDetails((d) => ({ ...d, phone_number: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="pf-email" className="text-xs text-muted-foreground">Email</Label>
+              <Input id="pf-email" value={email} readOnly disabled className="bg-muted/40" />
+              <p className="text-xs leading-tight text-muted-foreground/70">
+                Only a super admin can change this.
+              </p>
+            </div>
+          </div>
+          <Button
+            size="sm"
+            disabled={!detailsChanged || !detailsValid || updateProfile.isPending}
+            onClick={() => updateProfile.mutate({
+              first_name: details.first_name.trim(),
+              surname: details.surname.trim(),
+              phone_number: details.phone_number.trim(),
+            })}
+          >
+            {updateProfile.isPending && <Loader2 className="animate-spin" />}
+            Save details
+          </Button>
+        </div>
+
+        <div className="space-y-3 lg:border-l lg:border-foreground/10 lg:pl-6">
+          <p className={cn(MICRO, 'text-muted-foreground')}>Change password</p>
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="pf-cur" className="text-xs text-muted-foreground">Current password</Label>
+              <Input
+                id="pf-cur" type="password" autoComplete="current-password" value={pw.current_password}
+                onChange={(e) => setPw((p) => ({ ...p, current_password: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="pf-new" className="text-xs text-muted-foreground">New password</Label>
+              <Input
+                id="pf-new" type="password" autoComplete="new-password" value={pw.new_password}
+                onChange={(e) => setPw((p) => ({ ...p, new_password: e.target.value }))}
+              />
+              {pw.new_password.length > 0 && pw.new_password.length < 8 && (
+                <p className="text-xs text-warning">At least 8 characters.</p>
+              )}
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="pf-confirm" className="text-xs text-muted-foreground">Confirm new password</Label>
+              <Input
+                id="pf-confirm" type="password" autoComplete="new-password" value={pw.confirm}
+                onChange={(e) => setPw((p) => ({ ...p, confirm: e.target.value }))}
+              />
+              {pwMismatch && <p className="text-xs text-destructive">The two passwords don't match.</p>}
+            </div>
+          </div>
+          <p className="text-xs leading-tight text-muted-foreground/70">
+            Changing your password signs you out everywhere, including here.
+          </p>
+          <Button
+            size="sm" variant="outline"
+            disabled={!pwValid || changePassword.isPending}
+            onClick={() => changePassword.mutate({
+              current_password: pw.current_password,
+              new_password: pw.new_password,
+            })}
+          >
+            {changePassword.isPending && <Loader2 className="animate-spin" />}
+            Change password
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  )
 }
 
 function ProfilePage() {
@@ -96,6 +241,13 @@ function ProfilePage() {
               </div>
             </CardContent>
           </Card>
+
+          <AccountSettings
+            firstName={authUser?.firstName || ''}
+            surname={authUser?.surname || ''}
+            phoneNumber={staff?.phone_number || ''}
+            email={authUser?.email || ''}
+          />
 
           {/* Where assigned */}
           <Card className="border-border/60">
