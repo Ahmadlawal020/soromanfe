@@ -27,7 +27,9 @@ export interface FinanceReportOrder {
   customerVirtualAccountNumber?: string | null
   customerVirtualAccountBank?: string | null
   depotName?: string | null
+  productId?: number | null
   productName?: string | null
+  pfiId?: number | null
   pfiNumber?: string | null
   /** The location the selected PFI operates out of. */
   pfiLocationName?: string | null
@@ -61,6 +63,7 @@ export interface FinanceReportParams {
   dateTo?: string
   depotId?: string | number
   pfiId?: string | number
+  productId?: string | number
 }
 
 export interface FinanceReportTotals {

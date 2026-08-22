@@ -4,7 +4,7 @@ import { format } from 'date-fns'
 import {
   Search, X, Loader2, Landmark, User, CreditCard,
   Hash, Clock, FileText, Info, Banknote, Droplets, TrendingUp,
-  FileSpreadsheet, ArrowRight,
+  FileSpreadsheet, ArrowRight, Trash2,
 } from 'lucide-react'
 
 import { PageHeader } from '#/components/PageHeader'
@@ -15,7 +15,7 @@ import { Input } from '#/components/ui/input'
 import { NativeSelect } from '#/components/ui/native-select'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '#/components/ui/table'
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from '#/components/ui/dialog'
 import { PageLoader } from '#/components/PageLoader'
 import { PageError } from '#/components/PageError'
@@ -31,14 +31,17 @@ import {
   type FinanceReportOrder, type OrderFunding,
 } from '#/lib/hooks/useFinanceReport'
 import { useDepotsForFilter, usePfiList, type PfiWithFinancials } from '#/lib/hooks/usePfis'
+import { useProductList } from '#/lib/hooks/useProducts'
+import { useDeleteOrder } from '#/lib/hooks/useOrders'
+import { useRoles } from '#/lib/hooks/useRoles'
 import {
   exportFinanceReportExcel, exportFinanceReportPdf,
-  FIRST_FUNDING_COLUMN_INDEX, SHARED_AMOUNT_COLUMN_INDEX, TOTAL_COLUMN_COUNT,
-  type FinanceReportFilters, type FinanceReportSummary,
+  FIRST_FUNDING_COLUMN_INDEX, SHARED_AMOUNT_COLUMN_INDEX, MIDDLE_BLANKS_AFTER_AMOUNT, TOTAL_COLUMN_COUNT,
+  type FinanceReportFilters, type FinanceReportSummary, type PfiStockRow,
 } from './-finance-report-export'
 
 // The screen table mirrors the export's column set exactly (see COLUMNS in
-// -finance-report-export.ts) — these two derived counts are what make the
+// -finance-report-export.ts) — these derived counts are what make the
 // funding sub-row's blank cells land under the right headers without a
 // magic number to keep in sync by hand.
 const LEADING_BLANKS_FOR_FUNDING_ROW = SHARED_AMOUNT_COLUMN_INDEX
@@ -241,8 +244,12 @@ function FinanceReportPage() {
   const [paymentStatus, setPaymentStatus] = useState<'Paid' | 'Unpaid' | 'all'>('Paid')
   const [locationId, setLocationId] = useState(ALL)
   const [pfiId, setPfiId] = useState(ALL)
+  const [productId, setProductId] = useState(ALL)
   const [viewing, setViewing] = useState<FinanceReportOrder | null>(null)
+  const [deleting, setDeleting] = useState<FinanceReportOrder | null>(null)
   const [exporting, setExporting] = useState<'excel' | 'pdf' | null>(null)
+  const { isSuperAdmin: canDelete } = useRoles()
+  const deleteOrderMutation = useDeleteOrder()
 
   const range = useMemo(
     () => resolveRange(datePreset, { from: customDate ? new Date(customDate) : undefined }),
@@ -261,11 +268,17 @@ function FinanceReportPage() {
     paymentStatus,
     depotId: locationId || undefined,
     pfiId: pfiId || undefined,
+    productId: productId || undefined,
   })
 
   const { data: depots = [] } = useDepotsForFilter()
   const { data: pfiData } = usePfiList({ limit: 500 })
   const pfis: PfiWithFinancials[] = useMemo(() => pfiData?.pfis || [], [pfiData])
+  const { data: productData } = useProductList()
+  const products: Array<{ id?: string | number; _id?: string; name?: string }> = useMemo(() => {
+    if (!productData) return []
+    return Array.isArray(productData) ? productData : productData.products || []
+  }, [productData])
 
   // Once a location is picked, only PFIs at that location are worth offering.
   const pfiOptions = useMemo(() => {
@@ -276,16 +289,17 @@ function FinanceReportPage() {
   const rows = useMemo(() => data?.orders || [], [data])
   const totals = data?.totals
   const hasFilters = !!(
-    search || paymentStatus !== 'Paid' || locationId || pfiId || datePreset !== 'today'
+    search || paymentStatus !== 'Paid' || locationId || pfiId || productId || datePreset !== 'today'
   )
 
   const selectedDepot = useMemo(() => depots.find((d) => idOf(d) === locationId), [depots, locationId])
   const selectedPfi = useMemo(() => pfis.find((p) => idOf(p) === pfiId), [pfis, pfiId])
+  const selectedProduct = useMemo(() => products.find((p) => idOf(p) === productId), [products, productId])
 
   // A location can be implied by the PFI alone — "location of the PFI
   // selected" should still read correctly with no location filter set.
   const locationName = selectedDepot?.name || selectedPfi?.locationName || 'All locations'
-  const productName = selectedPfi?.productName || 'All products'
+  const productName = selectedProduct?.name || selectedPfi?.productName || 'All products'
 
   // Rows are the whole filtered set (no pagination), so summing them here is
   // exactly the aggregate a backend query would produce — no separate
@@ -303,6 +317,54 @@ function FinanceReportPage() {
     initialStock: selectedPfi ? selectedPfi.startingQtyLitres ?? 0 : null,
     tankBalanceAfter: selectedPfi ? selectedPfi.financials?.remaining ?? 0 : null,
   }
+  // An order isn't marked Paid until its wallet hold covers the total in
+  // full, so this is normally 0 — nonzero only when a total was corrected
+  // by hand after the order was already paid.
+  const totalOutstanding = summary.totalSalesValue - summary.totalAmountPaid
+
+  // Every active PFI, period-sold worked out from these same filtered rows
+  // rather than a separate query — the two figures can never disagree about
+  // what counts as "sold" this way. A row whose PFI has since finished (and
+  // so isn't in the active list) still counts toward the reconciliation
+  // note below, just not as its own line in the block.
+  const pfiStock: PfiStockRow[] = useMemo(() => {
+    const soldByPfi = new Map<number, number>()
+    for (const o of rows) {
+      if (o.pfiId == null) continue
+      soldByPfi.set(o.pfiId, (soldByPfi.get(o.pfiId) || 0) + Number(o.quantity || 0))
+    }
+    return pfis
+      .filter((p) => p.status === 'active')
+      .map((p) => ({
+        pfiNumber: p.pfiNumber,
+        locationName: p.locationName || '—',
+        productName: p.productName || '—',
+        initialStock: p.startingQtyLitres ?? 0,
+        volumeSoldPeriod: soldByPfi.get(Number(p.id ?? p._id)) || 0,
+        volumeSoldAllTime: p.financials?.sold ?? 0,
+        volumeRemaining: p.financials?.remaining ?? 0,
+        revenue: p.financials?.revenue ?? 0,
+      }))
+  }, [pfis, rows])
+
+  // Reconciles the Stock Summary block against the Total Quantity card: the
+  // period-sold column only covers active PFIs, so litres sold on a PFI
+  // that has since finished (or was otherwise dropped from the active list)
+  // have to be added back separately to land on the same number.
+  const reconciliationNote = useMemo(() => {
+    const listedPfiIds = new Set(pfis.filter((p) => p.status === 'active').map((p) => Number(p.id ?? p._id)))
+    const qtyOnUnlistedPfis = rows.reduce((sum, o) => {
+      if (o.pfiId == null || listedPfiIds.has(o.pfiId)) return sum
+      return sum + Number(o.quantity || 0)
+    }, 0)
+    const periodSoldOnListed = pfiStock.reduce((sum, p) => sum + p.volumeSoldPeriod, 0)
+    if (search || productId) {
+      return 'A search or product filter is active, so the period-sold total above and the Total Quantity card are not expected to match right now.'
+    }
+    return qtyOnUnlistedPfis > 0
+      ? `Period sold on the PFIs listed (${periodSoldOnListed.toLocaleString()} L) plus ${qtyOnUnlistedPfis.toLocaleString()} L on PFIs no longer active accounts for the ${summary.totalQuantity.toLocaleString()} L on the Total Quantity card.`
+      : `Period sold across every PFI listed accounts for the full ${summary.totalQuantity.toLocaleString()} L on the Total Quantity card — every order in view this period belongs to a PFI still active.`
+  }, [pfis, rows, pfiStock, search, productId, summary.totalQuantity])
 
   const exportFilters: FinanceReportFilters = {
     periodLabel,
@@ -316,7 +378,7 @@ function FinanceReportPage() {
   }
 
   const clearFilters = () => {
-    setSearch(''); setPaymentStatus('Paid'); setLocationId(ALL); setPfiId(ALL)
+    setSearch(''); setPaymentStatus('Paid'); setLocationId(ALL); setPfiId(ALL); setProductId(ALL)
     setDatePreset('today'); setCustomDate('')
   }
 
@@ -324,8 +386,8 @@ function FinanceReportPage() {
     if (!rows.length) return
     setExporting(kind)
     try {
-      if (kind === 'excel') await exportFinanceReportExcel(rows, summary, exportFilters)
-      else await exportFinanceReportPdf(rows, summary, exportFilters)
+      if (kind === 'excel') await exportFinanceReportExcel(rows, summary, exportFilters, pfiStock)
+      else await exportFinanceReportPdf(rows, summary, exportFilters, pfiStock)
     } finally {
       setExporting(null)
     }
@@ -352,11 +414,17 @@ function FinanceReportPage() {
       />
 
       {!isLoading && !isError && totals && (
-        <StatCardGrid count={4}>
-          <StatCard icon={<Banknote />} label="Value of Confirmed Orders" value={naira(totals.totalAmount)} description={`${totals.count.toLocaleString()} orders`} />
-          <StatCard icon={<Droplets />} label="Total Litres Sold" value={totals.totalQuantity.toLocaleString()} description="litres" />
-          <StatCard icon={<Hash />} label="Confirmed Orders" value={totals.count.toLocaleString()} />
-          <StatCard icon={<TrendingUp />} label="Average Order Value" value={naira(totals.count ? totals.totalAmount / totals.count : 0)} />
+        <StatCardGrid count={3}>
+          <StatCard
+            icon={<Droplets />} label="Total Quantity" value={`${summary.totalQuantity.toLocaleString()} L`}
+            description={`${totals.count.toLocaleString()} order${totals.count === 1 ? '' : 's'} · ${periodLabel}`}
+          />
+          <StatCard icon={<Banknote />} label="Sales Value" value={naira(summary.totalSalesValue)} />
+          <StatCard
+            tone={totalOutstanding > 0 ? 'red' : 'green'}
+            icon={<TrendingUp />} label="Amount Paid" value={naira(summary.totalAmountPaid)}
+            description={totalOutstanding > 0 ? `${naira(totalOutstanding)} balance outstanding` : undefined}
+          />
         </StatCardGrid>
       )}
 
@@ -365,7 +433,7 @@ function FinanceReportPage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <Input
             className="pl-9"
-            placeholder="Search order ref, customer name or phone…"
+            placeholder="Search reference, customer, company, location, PFI or payment reference…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -402,6 +470,12 @@ function FinanceReportPage() {
           <option value={ALL}>All PFIs</option>
           {pfiOptions.map((p) => (
             <option key={idOf(p)} value={idOf(p)}>{p.pfiNumber}</option>
+          ))}
+        </NativeSelect>
+        <NativeSelect className="w-40" value={productId} onChange={(e) => setProductId(e.target.value)}>
+          <option value={ALL}>All products</option>
+          {products.map((p) => (
+            <option key={idOf(p)} value={idOf(p)}>{p.name}</option>
           ))}
         </NativeSelect>
         <div className="flex flex-wrap items-center gap-2">
@@ -450,6 +524,7 @@ function FinanceReportPage() {
           <SummaryItem label="Product" value={productName} />
           <SummaryItem label="Total sales value" value={naira(summary.totalSalesValue)} />
           <SummaryItem label="Total amount paid" value={naira(summary.totalAmountPaid)} />
+          <SummaryItem label="Balance" value={naira(totalOutstanding)} />
           {selectedPfi && (
             <>
               <SummaryItem label="Initial stock (PFI)" value={`${(summary.initialStock ?? 0).toLocaleString()} L`} />
@@ -458,6 +533,64 @@ function FinanceReportPage() {
           )}
         </div>
       </section>
+
+      {!isLoading && !isError && pfiStock.length > 0 && (
+        <section className={PANEL}>
+          <div className={PANEL_RAIL}>
+            <span className={MICRO}>PFI Stock Summary</span>
+          </div>
+          <div className={cn(PANEL_BODY, 'space-y-3')}>
+            <p className="flex items-start gap-2 text-xs leading-relaxed text-muted-foreground">
+              <Info className="mt-0.5 size-3.5 shrink-0" />
+              Sold counts confirmed customer orders only. {reconciliationNote}
+            </p>
+            <div className="overflow-x-auto rounded-lg border border-foreground/15">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>PFI</TableHead>
+                    <TableHead>Location</TableHead>
+                    <TableHead>Product</TableHead>
+                    <TableHead className="text-right">Initial Stock</TableHead>
+                    <TableHead className="text-right">Volume Sold (Period)</TableHead>
+                    <TableHead className="text-right">Total Volume Sold</TableHead>
+                    <TableHead className="text-right">Volume Remaining</TableHead>
+                    <TableHead className="text-right">Revenue</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {pfiStock.map((p) => (
+                    <TableRow key={p.pfiNumber}>
+                      <TableCell className="font-normal text-accent">{p.pfiNumber}</TableCell>
+                      <TableCell className="text-muted-foreground">{p.locationName}</TableCell>
+                      <TableCell className="text-muted-foreground">{p.productName}</TableCell>
+                      <TableCell className="text-right whitespace-nowrap">{p.initialStock.toLocaleString()} L</TableCell>
+                      <TableCell className="text-right whitespace-nowrap font-medium">{p.volumeSoldPeriod.toLocaleString()} L</TableCell>
+                      <TableCell className="text-right whitespace-nowrap">{p.volumeSoldAllTime.toLocaleString()} L</TableCell>
+                      <TableCell className={cn('text-right whitespace-nowrap', p.volumeRemaining < 0 && 'text-destructive')}>
+                        {p.volumeRemaining.toLocaleString()} L
+                      </TableCell>
+                      <TableCell className="text-right whitespace-nowrap">{naira(p.revenue)}</TableCell>
+                    </TableRow>
+                  ))}
+                  {/* Only the period-sold column is totalled — initial stock
+                      and remaining are per-PFI positions in mixed batches,
+                      summing them across PFIs would not mean anything. */}
+                  <TableRow className="bg-muted/40 hover:bg-muted/40">
+                    <TableCell colSpan={4} className="text-xs text-muted-foreground">
+                      Total ({pfiStock.length} PFI{pfiStock.length === 1 ? '' : 's'})
+                    </TableCell>
+                    <TableCell className="text-right font-semibold whitespace-nowrap">
+                      {pfiStock.reduce((s, p) => s + p.volumeSoldPeriod, 0).toLocaleString()} L
+                    </TableCell>
+                    <TableCell colSpan={3} />
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        </section>
+      )}
 
       <div className={cn(PANEL)}>
         {isLoading ? (
@@ -486,16 +619,23 @@ function FinanceReportPage() {
                   <TableHead className="text-right">Sales Value</TableHead>
                   <TableHead>Location</TableHead>
                   <TableHead>Payment Date</TableHead>
-                  <TableHead className="text-right">Amount</TableHead>
+                  <TableHead className="text-right">Amount Paid</TableHead>
+                  <TableHead className="text-right">Balance</TableHead>
                   <TableHead className="text-right">Wallet Balance After</TableHead>
                   <TableHead>Depositor / Payer</TableHead>
                   <TableHead>Paid Into</TableHead>
                   <TableHead>Deposit Reference</TableHead>
+                  <TableHead>Deposit Date</TableHead>
                   <TableHead>Recorded By</TableHead>
+                  {canDelete && <TableHead className="text-right">Delete</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {rows.map((o, i) => (
+                {rows.map((o, i) => {
+                  const salesValue = Number(o.price) * Number(o.quantity || 0)
+                  const amountPaid = Number(o.totalAmount)
+                  const balance = salesValue - amountPaid
+                  return (
                   <Fragment key={o.id}>
                     <TableRow className="cursor-pointer" onClick={() => setViewing(o)}>
                       <TableCell className="text-muted-foreground">{i + 1}</TableCell>
@@ -508,32 +648,54 @@ function FinanceReportPage() {
                       <TableCell className="text-right whitespace-nowrap">{Number(o.quantity || 0).toLocaleString()}</TableCell>
                       <TableCell className="text-muted-foreground">{o.productName || '—'}</TableCell>
                       <TableCell className="text-right whitespace-nowrap">{naira(Number(o.price))}</TableCell>
-                      <TableCell className="text-right whitespace-nowrap font-medium">{naira(Number(o.price) * Number(o.quantity || 0))}</TableCell>
+                      <TableCell className="text-right whitespace-nowrap font-medium">{naira(salesValue)}</TableCell>
                       <TableCell className="max-w-[10rem] truncate text-muted-foreground">{o.depotName || '—'}</TableCell>
                       <TableCell className="whitespace-nowrap text-muted-foreground">
                         {o.paymentConfirmedAt ? format(new Date(o.paymentConfirmedAt), 'd MMM yyyy') : '—'}
                       </TableCell>
-                      <TableCell className="text-right whitespace-nowrap font-medium">{naira(Number(o.totalAmount))}</TableCell>
+                      <TableCell className="text-right whitespace-nowrap font-medium">{naira(amountPaid)}</TableCell>
+                      <TableCell className={cn('text-right whitespace-nowrap', balance !== 0 && 'text-destructive font-medium')}>
+                        {naira(balance)}
+                      </TableCell>
                       <TableCell className="text-right whitespace-nowrap text-muted-foreground">
                         {o.walletBalanceAfter == null ? '—' : naira(o.walletBalanceAfter)}
                       </TableCell>
                       {Array.from({ length: TRAILING_BLANKS_FOR_ORDER_ROW }).map((_, blankIdx) => (
                         <TableCell key={blankIdx} />
                       ))}
+                      {canDelete && (
+                        <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                          <Button
+                            variant="ghost" size="icon-sm"
+                            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                            onClick={() => setDeleting(o)}
+                          >
+                            <Trash2 />
+                            <span className="sr-only">Delete {o.reference}</span>
+                          </Button>
+                        </TableCell>
+                      )}
                     </TableRow>
                     {o.fundingTracked && o.funding.map((f) => (
                       <TableRow key={`${o.id}-funding-${f.depositId}`} className="bg-muted/20 hover:bg-muted/30">
                         <TableCell colSpan={LEADING_BLANKS_FOR_FUNDING_ROW} />
                         <TableCell className="text-right whitespace-nowrap">{naira(Number(f.amount))}</TableCell>
-                        <TableCell />
+                        {Array.from({ length: MIDDLE_BLANKS_AFTER_AMOUNT }).map((_, blankIdx) => (
+                          <TableCell key={blankIdx} />
+                        ))}
                         <TableCell className="max-w-[10rem] truncate">{fundingDepositor(f) || '—'}</TableCell>
                         <TableCell className="max-w-[14rem] truncate">{fundingPaidInto(f) || '—'}</TableCell>
                         <TableCell className="max-w-[10rem] truncate">{f.depositReference || '—'}</TableCell>
+                        <TableCell className="whitespace-nowrap text-muted-foreground">
+                          {f.depositCreatedAt ? format(new Date(f.depositCreatedAt), 'd MMM yyyy') : '—'}
+                        </TableCell>
                         <TableCell className="max-w-[10rem] truncate">{fundingRecorder(f) || '—'}</TableCell>
+                        {canDelete && <TableCell />}
                       </TableRow>
                     ))}
                   </Fragment>
-                ))}
+                  )
+                })}
               </TableBody>
             </Table>
           </div>
@@ -541,6 +703,36 @@ function FinanceReportPage() {
       </div>
 
       <OrderDetailDialog order={viewing} open={!!viewing} onOpenChange={(o) => !o && setViewing(null)} />
+
+      {/* Names what goes with it — the same delete the Orders page offers,
+          reachable here too since this is often where a mistaken payment is
+          first noticed. */}
+      <Dialog open={deleting != null} onOpenChange={(open) => !open && setDeleting(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete {deleting?.reference}?</DialogTitle>
+            <DialogDescription>
+              This permanently removes the order and everything attached to it — its tickets,
+              allocated trucks, commissions, wallet holds and stock movements. Only the audit
+              entry survives. This cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleting(null)}>Keep it</Button>
+            <Button
+              variant="destructive"
+              disabled={deleteOrderMutation.isPending}
+              onClick={async () => {
+                if (!deleting) return
+                await deleteOrderMutation.mutateAsync(deleting.id)
+                setDeleting(null)
+              }}
+            >
+              Delete permanently
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

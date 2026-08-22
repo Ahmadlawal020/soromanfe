@@ -48,14 +48,29 @@ export interface FinanceReportSummary {
   tankBalanceAfter: number | null
 }
 
+/** One row of the PFI Stock Summary block — every active PFI, stock and revenue side by side with the period's own sales. */
+export interface PfiStockRow {
+  pfiNumber: string
+  locationName: string
+  productName: string
+  initialStock: number
+  /** Litres sold within the report's current filters — not all-time. */
+  volumeSoldPeriod: number
+  volumeSoldAllTime: number
+  volumeRemaining: number
+  revenue: number
+}
+
 // The definitive column set — the on-screen table (confirmed-payments/index.tsx)
 // mirrors this exactly, same order, same set, so what's on screen is always
-// what comes out of the export. The first COLUMNS.length - 4 columns (up to
-// and including "Wallet Balance After") only ever appear on an order's own
-// row; the last 4 (Depositor / Payer through Recorded By) only ever appear
-// on a payment-source sub-row underneath it — "Amount" is the one column
-// both row kinds fill in, since a sub-row's amount is exactly as much of an
-// "amount" as the order row's total is.
+// what comes out of the export. Everything up to and including "Amount" is
+// order-level. "Balance" and "Wallet Balance After" are also order-only —
+// they just live after Amount, since both read as "what happened to that
+// amount" rather than "what was charged". Depositor / Payer through
+// Recorded By is the payment-source group: only ever filled in on a sub-row
+// underneath the order, one per deposit that funded it. "Amount" is the one
+// column both row kinds fill in — a sub-row's amount is exactly as much of
+// an "amount" as the order row's total is.
 const COLUMNS: Array<{ header: string; key: string; width: number; fmt?: string }> = [
   { header: 'S/N', key: 'sn', width: 6 },
   { header: 'Date', key: 'date', width: 13 },
@@ -68,36 +83,50 @@ const COLUMNS: Array<{ header: string; key: string; width: number; fmt?: string 
   { header: 'Sales Value', key: 'salesValue', width: 16, fmt: NGN },
   { header: 'Location', key: 'location', width: 20 },
   { header: 'Payment Date', key: 'paymentDate', width: 13 },
-  { header: 'Amount', key: 'amount', width: 16, fmt: NGN },
-  { header: 'Wallet Balance After', key: 'balance', width: 18, fmt: NGN },
+  { header: 'Amount Paid', key: 'amount', width: 16, fmt: NGN },
+  { header: 'Balance', key: 'balance', width: 14, fmt: NGN },
+  { header: 'Wallet Balance After', key: 'walletBalanceAfter', width: 18, fmt: NGN },
   { header: 'Depositor / Payer', key: 'depositor', width: 22 },
   { header: 'Paid Into', key: 'paidInto', width: 34 },
   { header: 'Deposit Reference', key: 'depositRef', width: 20 },
+  { header: 'Deposit Date', key: 'depositDate', width: 13 },
   { header: 'Recorded By', key: 'recordedBy', width: 18 },
 ]
 /** Columns before this index (0-based) belong to the order row; this one on is payment-source only. */
 export const FIRST_FUNDING_COLUMN_INDEX = COLUMNS.findIndex((c) => c.key === 'depositor')
 /** The one column both an order row and a funding sub-row fill in. */
 export const SHARED_AMOUNT_COLUMN_INDEX = COLUMNS.findIndex((c) => c.key === 'amount')
+/** Order-only columns sitting between Amount and the payment-source group — blank on a sub-row, no colSpan needed since they're each their own cell. */
+export const MIDDLE_BLANKS_AFTER_AMOUNT = FIRST_FUNDING_COLUMN_INDEX - SHARED_AMOUNT_COLUMN_INDEX - 1
 export const TOTAL_COLUMN_COUNT = COLUMNS.length
+
+/** Exported text reads upper-cased throughout — the on-screen table doesn't. */
+const up = (v: string) => v.toUpperCase()
 
 function rowValues(o: FinanceReportOrder, i: number) {
   const qty = Number(o.quantity || 0)
   const rate = Number(o.price || 0)
+  const salesValue = rate * qty
+  const amount = Number(o.totalAmount || 0)
   return {
     sn: i + 1,
     date: o.createdAt ? new Date(o.createdAt) : null,
-    ref: o.reference,
-    customer: o.customerName || 'Unknown',
-    company: o.customerCompanyName || '—',
+    ref: up(o.reference),
+    customer: up(o.customerName || 'Unknown'),
+    company: up(o.customerCompanyName || '—'),
     qty,
-    product: o.productName || '—',
+    product: up(o.productName || '—'),
     rate,
-    salesValue: rate * qty,
-    location: o.depotName || '—',
+    salesValue,
+    location: up(o.depotName || '—'),
     paymentDate: o.paymentConfirmedAt ? new Date(o.paymentConfirmedAt) : null,
-    amount: Number(o.totalAmount || 0),
-    balance: o.walletBalanceAfter,
+    amount,
+    // What's left after this order's own sales value and what actually got
+    // paid — normally 0 (an order isn't marked Paid until its wallet hold
+    // covers the total in full), nonzero only if totalAmount was corrected
+    // by hand after the fact.
+    balance: salesValue - amount,
+    walletBalanceAfter: o.walletBalanceAfter,
   }
 }
 
@@ -105,10 +134,11 @@ function rowValues(o: FinanceReportOrder, i: number) {
 function fundingRowValues(f: OrderFunding) {
   return {
     amount: Number(f.amount || 0),
-    depositor: fundingDepositor(f) || '—',
-    paidInto: fundingPaidInto(f) || '—',
-    depositRef: f.depositReference || '—',
-    recordedBy: fundingRecorder(f) || '—',
+    depositor: up(fundingDepositor(f) || '—'),
+    paidInto: up(fundingPaidInto(f) || '—'),
+    depositRef: up(f.depositReference || '—'),
+    depositDate: f.depositCreatedAt ? new Date(f.depositCreatedAt) : null,
+    recordedBy: up(fundingRecorder(f) || '—'),
   }
 }
 
@@ -123,16 +153,18 @@ function triggerDownload(blob: Blob, filename: string) {
   URL.revokeObjectURL(url)
 }
 
+/** "ZENITH-DEPOT PAYMENTS REPORT 22-08-26" — PFI takes precedence over location, since it's the narrower filter. */
 export function buildFilename(filters: FinanceReportFilters) {
-  const parts = ['finance-report']
-  if (filters.locationName && filters.locationName !== 'All locations') parts.push(filters.locationName.replace(/\s+/g, '-'))
-  if (filters.pfiNumber && filters.pfiNumber !== 'All PFIs') parts.push(filters.pfiNumber.replace(/\s+/g, '-'))
-  parts.push(
-    filters.dateFrom === filters.dateTo
-      ? filters.dateFrom || 'all-time'
-      : `${filters.dateFrom}_to_${filters.dateTo}`,
-  )
-  return parts.join('_')
+  const scope =
+    filters.pfiNumber && filters.pfiNumber !== 'All PFIs'
+      ? filters.pfiNumber
+      : filters.locationName && filters.locationName !== 'All locations'
+        ? filters.locationName
+        : 'ALL'
+  const dateTag = filters.dateTo
+    ? format(new Date(filters.dateTo), 'dd-MM-yy')
+    : format(new Date(), 'dd-MM-yy')
+  return `${scope} PAYMENTS REPORT ${dateTag}`.toUpperCase().replace(/\s+/g, ' ')
 }
 
 /**
@@ -144,14 +176,16 @@ function summaryColumns(
   filters: FinanceReportFilters,
 ): Array<{ header: string; value: string | number; fmt?: string }> {
   const cols: Array<{ header: string; value: string | number; fmt?: string }> = [
+    { header: 'Generated At', value: up(format(new Date(), 'd MMM yyyy, HH:mm')) },
+    { header: 'Period', value: up(filters.periodLabel) },
+    { header: 'Location', value: up(filters.locationName) },
+    { header: 'PFI', value: up(filters.pfiNumber) },
+    { header: 'Product', value: up(filters.product) },
     { header: 'Number of Orders', value: summary.count },
-    { header: 'Period', value: filters.periodLabel },
     { header: 'Total Quantity', value: summary.totalQuantity, fmt: QTY },
-    { header: 'Location', value: filters.locationName },
-    { header: 'PFI', value: filters.pfiNumber },
-    { header: 'Product', value: filters.product },
     { header: 'Total Sales Value', value: summary.totalSalesValue, fmt: NGN },
     { header: 'Total Amount Paid', value: summary.totalAmountPaid, fmt: NGN },
+    { header: 'Balance', value: summary.totalSalesValue - summary.totalAmountPaid, fmt: NGN },
   ]
   if (summary.initialStock != null) cols.push({ header: 'Initial Stock (PFI)', value: summary.initialStock, fmt: QTY })
   if (summary.tankBalanceAfter != null) cols.push({ header: 'Tank Balance After (PFI)', value: summary.tankBalanceAfter, fmt: QTY })
@@ -177,6 +211,7 @@ export async function exportFinanceReportExcel(
   rows: FinanceReportOrder[],
   summary: FinanceReportSummary,
   filters: FinanceReportFilters,
+  pfiStock: PfiStockRow[] = [],
 ) {
   const ExcelJS = (await import('exceljs')).default
   const wb = new ExcelJS.Workbook()
@@ -267,6 +302,7 @@ export async function exportFinanceReportExcel(
           cell.fill = SUBROW_FILL
           if (c.key === 'amount') cell.numFmt = NGN
         }
+        if (subRow.getCell('depositDate').value) subRow.getCell('depositDate').numFmt = 'dd/mm/yyyy'
         cursor++
       }
     }
@@ -292,6 +328,58 @@ export async function exportFinanceReportExcel(
   totalRow.getCell('qty').numFmt = QTY
   totalRow.getCell('salesValue').numFmt = NGN
   totalRow.getCell('amount').numFmt = NGN
+  cursor += 3
+
+  if (pfiStock.length > 0) {
+    ws.getCell(cursor, 1).value = 'PFI STOCK SUMMARY'
+    ws.getCell(cursor, 1).font = { bold: true, size: 12, color: { argb: BRAND_GREEN } }
+    cursor += 2
+
+    const stockHeaders = ['PFI', 'Location', 'Product', 'Initial Stock', 'Volume Sold (Period)', 'Total Volume Sold', 'Volume Remaining', 'Revenue']
+    const stockHeaderRow = ws.getRow(cursor)
+    stockHeaderRow.values = stockHeaders
+    stockHeaderRow.eachCell((cell) => {
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } }
+      cell.fill = HEADER_FILL
+      cell.border = ALL_BORDERS
+      cell.alignment = { vertical: 'middle' }
+    })
+    cursor++
+
+    let periodTotal = 0
+    for (const p of pfiStock) {
+      const row = ws.getRow(cursor)
+      row.values = [
+        up(p.pfiNumber), up(p.locationName), up(p.productName),
+        p.initialStock, p.volumeSoldPeriod, p.volumeSoldAllTime, p.volumeRemaining, p.revenue,
+      ]
+      periodTotal += p.volumeSoldPeriod
+      for (let i = 1; i <= 8; i++) {
+        const cell = row.getCell(i)
+        cell.border = ALL_BORDERS
+        if (i >= 4 && i <= 7) cell.numFmt = QTY
+        if (i === 8) cell.numFmt = NGN
+        // Negative remaining stock is a real deficit — the batch was
+        // charged for more than the tank actually received.
+        if (i === 7 && p.volumeRemaining < 0) cell.font = { color: { argb: 'FFCC0000' } }
+      }
+      cursor++
+    }
+
+    // Only the period-sold column is totalled — initial stock and remaining
+    // are per-PFI positions in mixed batches, and summing them across PFIs
+    // would not mean anything.
+    const stockTotalRow = ws.getRow(cursor)
+    stockTotalRow.getCell(1).value = `Total (${pfiStock.length} PFIs)`
+    stockTotalRow.getCell(5).value = periodTotal
+    stockTotalRow.getCell(5).numFmt = QTY
+    for (let i = 1; i <= 8; i++) {
+      const cell = stockTotalRow.getCell(i)
+      cell.border = ALL_BORDERS
+      cell.fill = TOTAL_FILL
+      cell.font = { bold: true }
+    }
+  }
 
   const buf = await wb.xlsx.writeBuffer()
   triggerDownload(
@@ -304,6 +392,7 @@ export async function exportFinanceReportPdf(
   rows: FinanceReportOrder[],
   summary: FinanceReportSummary,
   filters: FinanceReportFilters,
+  pfiStock: PfiStockRow[] = [],
 ) {
   const { jsPDF } = await import('jspdf')
   const autoTable = (await import('jspdf-autotable')).default
@@ -343,9 +432,9 @@ export async function exportFinanceReportPdf(
     cursorY += 5
   }
 
-  // The number of order-only columns before the shared "Amount" column, and
-  // how many funding-only columns follow "Wallet Balance After" — computed
-  // from COLUMNS itself so this can never drift out of sync with the header.
+  // How many blank cells surround the shared "Amount" column on each row
+  // kind — all derived from COLUMNS itself so none of this drifts out of
+  // sync with the header if a column is ever added or reordered.
   const leadingBlanksForFunding = SHARED_AMOUNT_COLUMN_INDEX
   const trailingBlanksForOrder = COLUMNS.length - FIRST_FUNDING_COLUMN_INDEX
 
@@ -365,34 +454,47 @@ export async function exportFinanceReportPdf(
       v.location,
       v.paymentDate ? format(v.paymentDate, 'dd/MM/yyyy') : '—',
       naira(v.amount),
-      v.balance != null ? naira(v.balance) : '—',
+      naira(v.balance),
+      v.walletBalanceAfter != null ? naira(v.walletBalanceAfter) : '—',
       ...Array(trailingBlanksForOrder).fill(''),
     ])
 
     if (o.fundingTracked) {
       for (const f of o.funding) {
+        const fv = fundingRowValues(f)
         body.push([
           ...Array(leadingBlanksForFunding).fill(''),
-          naira(Number(f.amount)),
-          '',
-          fundingDepositor(f) || '—',
-          fundingPaidInto(f) || '—',
-          f.depositReference || '—',
-          fundingRecorder(f) || '—',
+          naira(fv.amount),
+          ...Array(MIDDLE_BLANKS_AFTER_AMOUNT).fill(''),
+          fv.depositor,
+          fv.paidInto,
+          fv.depositRef,
+          fv.depositDate ? format(fv.depositDate, 'dd/MM/yyyy') : '—',
+          fv.recordedBy,
         ])
       }
     }
   })
 
+  // Indexed by key, not position, so this can't silently point at the wrong
+  // cell if a column is ever inserted before one of these.
+  const footRow = new Array(COLUMNS.length).fill('')
+  const footAt = (key: string, value: string) => {
+    const idx = COLUMNS.findIndex((c) => c.key === key)
+    if (idx >= 0) footRow[idx] = value
+  }
+  footAt('ref', `Total (${rows.length})`)
+  footAt('qty', summary.totalQuantity.toLocaleString())
+  footAt('salesValue', naira(summary.totalSalesValue))
+  footAt('amount', naira(summary.totalAmountPaid))
+
+  const refColumnIndex = COLUMNS.findIndex((c) => c.key === 'ref')
+
   autoTable(doc, {
     startY: cursorY,
     head: [COLUMNS.map((c) => c.header)],
     body,
-    foot: [[
-      '', '', `Total (${rows.length})`, '', '',
-      summary.totalQuantity.toLocaleString(), '', '', naira(summary.totalSalesValue),
-      '', '', naira(summary.totalAmountPaid), ...Array(COLUMNS.length - 12).fill(''),
-    ]],
+    foot: [footRow],
     styles: { fontSize: 6.5, cellPadding: 1.5, lineColor: [183, 192, 204], lineWidth: 0.1 },
     headStyles: { fillColor: [31, 56, 100], textColor: 255, lineWidth: 0.1 },
     footStyles: { fillColor: [232, 238, 247], textColor: [20, 20, 20], fontStyle: 'bold', lineWidth: 0.1 },
@@ -403,11 +505,46 @@ export async function exportFinanceReportPdf(
     // order or one of its sub-rows depending on how many came before it),
     // so this replaces it rather than layering on top.
     didParseCell: (data) => {
-      if (data.section === 'body' && data.row.raw[2] === '') {
+      if (data.section === 'body' && data.row.raw[refColumnIndex] === '') {
         data.cell.styles.fillColor = [247, 249, 251]
       }
     },
   })
+
+  if (pfiStock.length > 0) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let stockY = (doc as any).lastAutoTable.finalY + 8
+    doc.setFontSize(12)
+    doc.setTextColor(0, 122, 85)
+    doc.text('PFI STOCK SUMMARY', 14, stockY)
+    doc.setTextColor(0)
+    stockY += 4
+
+    const periodTotal = pfiStock.reduce((s, p) => s + p.volumeSoldPeriod, 0)
+    autoTable(doc, {
+      startY: stockY,
+      head: [['PFI', 'Location', 'Product', 'Initial Stock', 'Volume Sold (Period)', 'Total Volume Sold', 'Volume Remaining', 'Revenue']],
+      body: pfiStock.map((p) => [
+        up(p.pfiNumber), up(p.locationName), up(p.productName),
+        p.initialStock.toLocaleString(), p.volumeSoldPeriod.toLocaleString(),
+        p.volumeSoldAllTime.toLocaleString(), p.volumeRemaining.toLocaleString(), naira(p.revenue),
+      ]),
+      // Only the period-sold column is totalled — initial stock and
+      // remaining are per-PFI positions in mixed batches, summing them
+      // across PFIs would not mean anything.
+      foot: [['', '', `Total (${pfiStock.length} PFIs)`, '', periodTotal.toLocaleString(), '', '', '']],
+      styles: { fontSize: 7, cellPadding: 1.5, lineColor: [183, 192, 204], lineWidth: 0.1 },
+      headStyles: { fillColor: [31, 56, 100], textColor: 255, lineWidth: 0.1 },
+      footStyles: { fillColor: [232, 238, 247], textColor: [20, 20, 20], fontStyle: 'bold', lineWidth: 0.1 },
+      // A batch charged for more BL than the tank received shows a negative
+      // remaining — a real deficit, worth the same red flag it gets on screen.
+      didParseCell: (data) => {
+        if (data.section === 'body' && data.column.index === 6 && String(data.cell.raw).trim().startsWith('-')) {
+          data.cell.styles.textColor = [204, 0, 0]
+        }
+      },
+    })
+  }
 
   doc.save(`${buildFilename(filters)}.pdf`)
 }
