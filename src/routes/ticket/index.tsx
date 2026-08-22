@@ -4,6 +4,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { format, isWithinInterval } from 'date-fns'
 import {
   Search, Droplets, PackageCheck, Truck, CircleDashed, FileSpreadsheet, Loader2,
+  Plus, Eye, Pencil,
 } from 'lucide-react'
 
 import { Button } from '#/components/ui/button'
@@ -396,10 +397,15 @@ function LoadingTicketsPage() {
 /**
  * One order row.
  *
- * The action keys off **ticketed quantity, never order status**. An order
- * flips to Loading the moment the first ticket exists, so status alone would
- * lock out the remaining trucks on a 90,000 L order with only 45,000 L
+ * "Fully ticketed" keys off **ticketed quantity, never order status**. An
+ * order flips to Loading the moment the first ticket exists, so status alone
+ * would lock out the remaining trucks on a 90,000 L order with only 45,000 L
  * ticketed. `allocated >= releasable` is the honest test.
+ *
+ * The three actions are independent, not a single state-driven button: a
+ * ticket someone already printed still needs reprinting after the truck has
+ * gated out, so View stays available for as long as a ticket exists at all —
+ * it does not disappear the moment Add or Edit does.
  */
 function OrderRow({
   sn, order, onGenerate, onView, onEdit,
@@ -416,14 +422,8 @@ function OrderRow({
   const releasable = toNumber(order.quantity)
 
   const fullyTicketed = releasable > 0 && allocated >= releasable
-  const departed = loads.length > 0 && loads.every((l) => l.status === 'gated_out')
-
-  const action =
-    !fullyTicketed
-      ? { label: 'Add Ticket', onClick: onGenerate, variant: allocated === 0 ? 'default' as const : 'outline' as const }
-      : departed
-        ? { label: 'View Ticket', onClick: onView, variant: 'outline' as const }
-        : { label: 'Edit Ticket', onClick: onEdit, variant: 'outline' as const }
+  const hasTickets = loads.length > 0
+  const departed = hasTickets && loads.every((l) => l.status === 'gated_out')
 
   return (
     <TableRow>
@@ -444,9 +444,29 @@ function OrderRow({
       </TableCell>
       <TableCell className="text-muted-foreground">{order.pfiNumber || '—'}</TableCell>
       <TableCell className="text-right">
-        <Button variant={action.variant} size="sm" onClick={action.onClick}>
-          {action.label}
-        </Button>
+        <div className="flex items-center justify-end gap-1.5">
+          {hasTickets && (
+            <Button variant="outline" size="icon-sm" onClick={onView} title="View / reprint ticket">
+              <Eye />
+              <span className="sr-only">View ticket</span>
+            </Button>
+          )}
+          {hasTickets && !departed && (
+            <Button variant="outline" size="icon-sm" onClick={onEdit} title="Edit truck details">
+              <Pencil />
+              <span className="sr-only">Edit ticket</span>
+            </Button>
+          )}
+          {!fullyTicketed && (
+            <Button
+              variant={allocated === 0 ? 'default' : 'outline'} size="sm"
+              onClick={onGenerate}
+            >
+              <Plus data-icon="inline-start" />
+              Add Ticket
+            </Button>
+          )}
+        </div>
       </TableCell>
     </TableRow>
   )
