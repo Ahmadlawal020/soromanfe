@@ -89,6 +89,15 @@ export function useOrderWizard() {
       }
     } catch (err: any) {
       setErrors([err?.response?.data?.message || err.message || 'Error registering customer'])
+      // The number (or email) is already on someone. The server sends back who
+      // — drop straight into the picker with them found, so the desk can use
+      // that customer instead of guessing which record already holds it.
+      const clash = err?.response?.data?.data?.existingCustomer
+      if (clash) {
+        setIsRegisteringCustomer(false)
+        setIsSearchOpen(true)
+        setCustomerSearch(clash.phone || clash.name || '')
+      }
     }
   }
 

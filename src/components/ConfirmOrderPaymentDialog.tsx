@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Loader2, CheckCircle2, AlertTriangle } from 'lucide-react'
+import { Loader2, CheckCircle2, AlertTriangle, Hourglass, Wallet } from 'lucide-react'
 
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
@@ -11,6 +11,7 @@ import { useCustomerDetails } from '#/lib/hooks/useCustomers'
 import { useBankAccounts } from '#/lib/hooks/useBankAccounts'
 import { useCreateDeposit } from '#/lib/hooks/useDeposits'
 import { usePayOrder } from '#/lib/hooks/useOrders'
+import { useExpectedPayments } from '#/lib/hooks/useExpectedPayments'
 import { StatementLinePicker } from '#/components/StatementLinePicker'
 import type { StatementLine } from '#/lib/hooks/useBankStatements'
 import { MICRO } from '#/lib/panel'
@@ -46,6 +47,11 @@ export function ConfirmOrderPaymentDialog({
   const customerId = order?.customerId ? String(order.customerId) : ''
   const { data: customer, isLoading: loadingCustomer } = useCustomerDetails(open ? customerId : '')
   const { data: bankAccounts } = useBankAccounts({ status: 'Active' })
+  // What the customer said they'd pay, captured on the order wizard — the
+  // amounts and company names to look for in the statement.
+  const { data: expected = [] } = useExpectedPayments(
+    open && order?.id ? { orderId: order.id, status: 'pending' } : undefined,
+  )
   const createDeposit = useCreateDeposit()
   const payOrder = usePayOrder()
 
@@ -134,10 +140,48 @@ export function ConfirmOrderPaymentDialog({
             </div>
           </div>
 
+          {/* What the customer told the desk they'd pay, captured when the
+              order was placed. Advisory — it's the amount and the company
+              name to go looking for in the statement below. */}
+          {expected.length > 0 && (
+            <div className="space-y-1.5 rounded-lg border border-info/25 bg-info/5 p-3">
+              <p className={cn(MICRO, 'flex items-center gap-1.5 text-info')}>
+                <Hourglass className="size-3.5" />
+                Payment expected for this order
+              </p>
+              <ul className="space-y-1">
+                {expected.map((ep) => (
+                  <li key={ep.id} className="flex items-baseline justify-between gap-3 text-sm">
+                    <span className="min-w-0 truncate text-muted-foreground">
+                      {[ep.reference, ep.note].filter(Boolean).join(' — ') || 'No further detail'}
+                    </span>
+                    <span className="shrink-0 font-semibold">
+                      {ep.expectedAmount ? formatCurrency(Number(ep.expectedAmount)) : '—'}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           {stillShort <= 0 && newDeposit === 0 ? (
-            <div className="flex items-start gap-2 rounded-lg border border-success/25 bg-success/5 p-3 text-sm text-success">
-              <CheckCircle2 className="mt-0.5 size-4 shrink-0" />
-              <p>Wallet balance already covers this order in full — nothing to match.</p>
+            <div className="space-y-2">
+              <div className="flex items-start gap-2 rounded-lg border border-success/25 bg-success/5 p-3 text-sm text-success">
+                <CheckCircle2 className="mt-0.5 size-4 shrink-0" />
+                <p>Wallet balance already covers this order in full — nothing to match.</p>
+              </div>
+              {/* Spelling out what confirming actually does to the wallet:
+                  the order's total comes off the balance and is held against
+                  this order. */}
+              <div className="flex items-center justify-between gap-3 rounded-lg border border-foreground/15 p-3 text-sm">
+                <span className="flex items-center gap-1.5 text-muted-foreground">
+                  <Wallet className="size-3.5" />
+                  Allocating from wallet
+                </span>
+                <span className="font-semibold">
+                  {formatCurrency(total)} <span className="text-muted-foreground">of {formatCurrency(liveBalance)}</span>
+                </span>
+              </div>
             </div>
           ) : (
             <>
@@ -190,6 +234,30 @@ export function ConfirmOrderPaymentDialog({
                   </p>
                 )}
               </div>
+
+              {/* How the order's total is actually being met — what comes off
+                  the balance already there versus what this match brings in. */}
+              {(newDeposit > 0 || liveBalance > 0) && (
+                <div className="space-y-1 rounded-lg border border-foreground/15 p-3 text-sm">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="flex items-center gap-1.5 text-muted-foreground">
+                      <Wallet className="size-3.5" />
+                      From existing wallet balance
+                    </span>
+                    <span className="font-semibold">{formatCurrency(Math.min(liveBalance, total))}</span>
+                  </div>
+                  {newDeposit > 0 && (
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-muted-foreground">From this statement match</span>
+                      <span className="font-semibold">{formatCurrency(Math.min(newDeposit, Math.max(0, total - liveBalance)))}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between gap-3 border-t border-foreground/10 pt-1">
+                    <span className="font-semibold">Order total</span>
+                    <span className="font-semibold">{formatCurrency(total)}</span>
+                  </div>
+                </div>
+              )}
 
               {newDeposit > 0 && (
                 <p className="text-xs leading-tight text-muted-foreground">
