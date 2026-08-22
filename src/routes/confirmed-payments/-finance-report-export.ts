@@ -494,7 +494,11 @@ export async function exportFinanceReportPdf(
     // order or one of its sub-rows depending on how many came before it),
     // so this replaces it rather than layering on top.
     didParseCell: (data) => {
-      if (data.section === 'body' && data.row.raw[refColumnIndex] === '') {
+      // `raw` is typed as the union of every row shape autoTable accepts;
+      // every row this table builds is the plain array below, so narrowing
+      // to that is safe and keeps the index lookup honest.
+      const raw = data.row.raw
+      if (data.section === 'body' && Array.isArray(raw) && raw[refColumnIndex] === '') {
         data.cell.styles.fillColor = [247, 249, 251]
       }
     },

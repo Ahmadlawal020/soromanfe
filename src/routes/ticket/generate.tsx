@@ -360,10 +360,14 @@ function GenerateTicketsPage() {
         </div>
       </div>
 
+      {/* This page prints one nominated truck, so it hands over just that
+          load — the dialog skips its picker for a single one and opens
+          straight on the waybill, which is the behaviour this page had
+          before the picker existed. */}
       <TicketPrintDialog
         orderId={orderId ?? undefined}
-        loadId={printLoadId}
-        loadIds={loads.map((l) => l.id)}
+        orderNumber={order?.orderNumber}
+        loads={loads.filter((l) => l.id === printLoadId)}
         open={printLoadId !== null}
         onOpenChange={(o) => { if (!o) setPrintLoadId(null) }}
       />
