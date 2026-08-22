@@ -468,47 +468,53 @@ export function getRoutePermissions(routePath: string): RoutePermissions | null 
 /**
  * Check if user can access a route (has view permission).
  *
+ * Role gating is OFF dashboard-wide: any signed-in staff member may open any
+ * page. This mirrors the same decision already taken on the server (see
+ * config/apiPermissions.js) — the two have to agree, or the nav hides a page
+ * whose API would have answered perfectly well, which is exactly what used to
+ * happen: someone who raised an expense or a daily report could not open the
+ * page listing it, because /expenses, /my-report and /admin-reports each named
+ * a short list of roles that did not include theirs.
+ *
+ * What still narrows what a person sees is location/PFI scope, applied
+ * server-side per row (lib/scopeFilter.js) — that is untouched by this and is
+ * the mechanism to reach for if access ever needs restricting again.
+ *
  * `overrides` (routePath -> allowed) is the per-user page-access exception
- * list from the admin form; it wins over the role default either way, but
- * never over superadmin.
+ * list from the admin form. It is still honoured, in both directions, because
+ * it is a deliberate per-person decision someone made in the UI rather than a
+ * blanket role rule — it is the supported way to close a single page to a
+ * single user.
  */
 export function canAccessRoute(userRoles: number[], routePath: string, overrides?: Record<string, boolean>): boolean {
   if (isSuperAdmin(userRoles)) return true
 
-  // TEMPORARY: the overview/home is viewable by any authenticated user. The
-  // route guards send everyone to /overview after login and on any denied
-  // route; when a non-privileged staffer could not see it, that bounced them
-  // to /login and straight back — an infinite redirect that froze the tab.
-  // Opening /overview to all logged-in users breaks that loop. Revisit if the
-  // overview should be role-restricted again (then also fix the guards to land
-  // users on a page they can actually open, not /overview).
-  if (routePath === '/overview') return true
-
   const override = resolveOverride(overrides, routePath)
   if (override !== undefined) return override
 
-  const permissions = getRoutePermissions(routePath)
-  if (!permissions) return true // No permissions defined = public to authenticated users
-  return hasAnyRole(userRoles, permissions.view)
+  return true
 }
 
 /**
- * Check if user can perform a specific action on a route
+ * Check if user can perform a specific action on a route.
+ *
+ * Open for the same reason as canAccessRoute above — and this one mattered
+ * more than it looked: most entries in ROUTE_PERMISSIONS declare
+ * `create: [], edit: [], delete: []`, and an empty list denied everyone but
+ * superadmin, so "can open the page but can do nothing on it" was the norm
+ * rather than the exception.
  */
 export function canPerformAction(
   userRoles: number[],
   routePath: string,
   action: ActionType
 ): boolean {
-  if (isSuperAdmin(userRoles)) return true
-
-  const permissions = getRoutePermissions(routePath)
-  if (!permissions) return false
-
-  const allowedRoles = permissions[action]
-  if (!allowedRoles || allowedRoles.length === 0) return false
-
-  return hasAnyRole(userRoles, allowedRoles)
+  // Signature kept so every call site stays valid and enforcement can be
+  // restored here alone.
+  void userRoles
+  void routePath
+  void action
+  return true
 }
 
 /**
