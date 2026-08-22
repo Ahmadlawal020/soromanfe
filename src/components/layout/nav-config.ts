@@ -25,6 +25,7 @@ import {
   MessageSquare,
   Store,
   Wallet,
+  UserCircle,
 } from "lucide-react";
 
 export type NavItem = {
@@ -68,6 +69,7 @@ export const navCategories: NavCategory[] = [
     items: [
       { title: "My Report", icon: FileText, path: "/my-report" },
       { title: "My Requests", icon: Receipt, path: "/expense-requests" },
+      { title: "My Profile", icon: UserCircle, path: "/profile" },
     ],
   },
   {

@@ -465,7 +465,7 @@ function OrdersDashboard() {
                                 </div>
                               </TableCell>
                               <TableCell className="text-muted-foreground">{o.pfiNumber || '—'}</TableCell>
-                              <TableCell>
+                              {/* <TableCell>
                                 <div className="flex items-center justify-end gap-1.5">
                                   <Button variant="ghost" size="icon-sm" onClick={() => setDetailsOrder(o)}>
                                     <Eye />
@@ -487,7 +487,7 @@ function OrdersDashboard() {
                                     <span className="sr-only">Edit {o.orderNumber}</span>
                                   </Button>
                                 </div>
-                              </TableCell>
+                              </TableCell> */}
                             </TableRow>
                           )
                         })}
