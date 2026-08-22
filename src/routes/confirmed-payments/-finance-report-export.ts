@@ -64,13 +64,13 @@ export interface PfiStockRow {
 // The definitive column set — the on-screen table (confirmed-payments/index.tsx)
 // mirrors this exactly, same order, same set, so what's on screen is always
 // what comes out of the export. Everything up to and including "Amount" is
-// order-level. "Balance" and "Wallet Balance After" are also order-only —
-// they just live after Amount, since both read as "what happened to that
-// amount" rather than "what was charged". Depositor / Payer through
-// Recorded By is the payment-source group: only ever filled in on a sub-row
-// underneath the order, one per deposit that funded it. "Amount" is the one
-// column both row kinds fill in — a sub-row's amount is exactly as much of
-// an "amount" as the order row's total is.
+// order-level. "Balance" is also order-only — it just lives after Amount,
+// since it reads as "what happened to that amount" rather than "what was
+// charged". Depositor / Payer through Recorded By is the payment-source
+// group: only ever filled in on a sub-row underneath the order, one per
+// deposit that funded it. "Amount" is the one column both row kinds fill
+// in — a sub-row's amount is exactly as much of an "amount" as the order
+// row's total is.
 const COLUMNS: Array<{ header: string; key: string; width: number; fmt?: string }> = [
   { header: 'S/N', key: 'sn', width: 6 },
   { header: 'Date', key: 'date', width: 13 },
@@ -85,7 +85,6 @@ const COLUMNS: Array<{ header: string; key: string; width: number; fmt?: string 
   { header: 'Payment Date', key: 'paymentDate', width: 13 },
   { header: 'Amount Paid', key: 'amount', width: 16, fmt: NGN },
   { header: 'Balance', key: 'balance', width: 14, fmt: NGN },
-  { header: 'Wallet Balance After', key: 'walletBalanceAfter', width: 18, fmt: NGN },
   { header: 'Depositor / Payer', key: 'depositor', width: 22 },
   { header: 'Paid Into', key: 'paidInto', width: 34 },
   { header: 'Deposit Reference', key: 'depositRef', width: 20 },
@@ -126,7 +125,6 @@ function rowValues(o: FinanceReportOrder, i: number) {
     // covers the total in full), nonzero only if totalAmount was corrected
     // by hand after the fact.
     balance: salesValue - amount,
-    walletBalanceAfter: o.walletBalanceAfter,
   }
 }
 
@@ -455,7 +453,6 @@ export async function exportFinanceReportPdf(
       v.paymentDate ? format(v.paymentDate, 'dd/MM/yyyy') : '—',
       naira(v.amount),
       naira(v.balance),
-      v.walletBalanceAfter != null ? naira(v.walletBalanceAfter) : '—',
       ...Array(trailingBlanksForOrder).fill(''),
     ])
 

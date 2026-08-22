@@ -621,7 +621,6 @@ function FinanceReportPage() {
                   <TableHead>Payment Date</TableHead>
                   <TableHead className="text-right">Amount Paid</TableHead>
                   <TableHead className="text-right">Balance</TableHead>
-                  <TableHead className="text-right">Wallet Balance After</TableHead>
                   <TableHead>Depositor / Payer</TableHead>
                   <TableHead>Paid Into</TableHead>
                   <TableHead>Deposit Reference</TableHead>
@@ -656,9 +655,6 @@ function FinanceReportPage() {
                       <TableCell className="text-right whitespace-nowrap font-medium">{naira(amountPaid)}</TableCell>
                       <TableCell className={cn('text-right whitespace-nowrap', balance !== 0 && 'text-destructive font-medium')}>
                         {naira(balance)}
-                      </TableCell>
-                      <TableCell className="text-right whitespace-nowrap text-muted-foreground">
-                        {o.walletBalanceAfter == null ? '—' : naira(o.walletBalanceAfter)}
                       </TableCell>
                       {Array.from({ length: TRAILING_BLANKS_FOR_ORDER_ROW }).map((_, blankIdx) => (
                         <TableCell key={blankIdx} />
