@@ -7,33 +7,37 @@ import { Button } from '#/components/ui/button'
 import { Card, CardContent } from '#/components/ui/card'
 import { Input } from '#/components/ui/input'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '#/components/ui/table'
-import { Building2, Package, DollarSign, Search, X, Wallet, Hourglass } from 'lucide-react'
-import { usePayableOrders, usePayOrder } from '#/lib/hooks/useOrders'
+import { Building2, Package, Search, X, Wallet, CheckCircle2, AlertTriangle } from 'lucide-react'
+import { useAllOrders } from '#/lib/hooks/useOrders'
+import { ConfirmOrderPaymentDialog } from '#/components/ConfirmOrderPaymentDialog'
 import { PageLoader } from '#/components/PageLoader'
 import { PageError } from '#/components/PageError'
 import { PageEmpty } from '#/components/PageEmpty'
 import { Pagination } from '#/components/Pagination'
-import { toast } from 'sonner'
+import { cn } from '#/lib/utils'
 import { routeGuard } from '#/lib/route-guard'
 
 export const Route = createFileRoute('/payable-orders/')({
   beforeLoad: () => routeGuard('/payable-orders'),
-  component: PayableOrdersPage,
+  component: PendingOrdersPage,
 })
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 0 }).format(value)
 }
 
-function PayableOrdersPage() {
+function PendingOrdersPage() {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
-  const [payingId, setPayingId] = useState<number | null>(null)
+  const [confirmingOrder, setConfirmingOrder] = useState<any | null>(null)
 
-  const { data: orders = [], isLoading, isError, error, refetch } = usePayableOrders()
-  const payOrder = usePayOrder()
+  // Every unpaid order awaiting a decision, not just the ones already fully
+  // covered by wallet balance — a shortfall is something staff act on here,
+  // not a reason to hide the order.
+  const { data, isLoading, isError, error, refetch } = useAllOrders({ status: 'Pending' })
+  const orders: any[] = (data?.orders || []).filter((o: any) => o.paymentStatus !== 'Paid')
 
   const filteredOrders = orders.filter((order: any) => {
     if (!searchTerm) return true
@@ -53,48 +57,33 @@ function PayableOrdersPage() {
     currentPage * pageSize,
   )
 
-  const totalPayableValue = filteredOrders.reduce(
-    (sum: number, o: any) => sum + (Number(o.totalAmount) || 0), 0,
-  )
+  const shortfallOf = (o: any) => Math.max(0, (Number(o.totalAmount) || 0) - (Number(o.customerBalance) || 0))
+  const fundedCount = filteredOrders.filter((o) => shortfallOf(o) <= 0).length
+  const totalShortfall = filteredOrders.reduce((sum, o) => sum + shortfallOf(o), 0)
 
-  const handlePay = async (orderId: number) => {
-    setPayingId(orderId)
-    try {
-      await payOrder.mutateAsync(orderId)
-    } catch (err: any) {
-      const status = err?.response?.status
-      const msg = String(err?.response?.data?.message || err?.message || '')
-      if (status === 409 && msg.toLowerCase().includes('expired')) {
-        toast.error('This order has expired and can no longer be paid. Please place a new order.', {
-          icon: <Hourglass className="size-4" />,
-        })
-        refetch()
-      }
-    } finally {
-      setPayingId(null)
-    }
-  }
-
-  if (isLoading) return <PageLoader message="Loading pending payments..." />
-  if (isError) return <PageError message={(error as any)?.message || 'Failed to load pending payments'} onRetry={refetch} />
+  if (isLoading) return <PageLoader message="Loading pending orders..." />
+  if (isError) return <PageError message={(error as any)?.message || 'Failed to load pending orders'} onRetry={refetch} />
 
   return (
     <div className="space-y-6 animate-fade-in">
       <PageHeader
         eyebrow="Finance"
-        title="Pending Payments"
-        description={`Orders where the customer already has enough money in their wallet to pay. Click "Pay Now" to process payment from the customer's wallet.`}
+        title="Pending Orders"
+        description="Every order awaiting payment. Confirm payment on one to match a bank statement (or record it manually) — wallet balance applies first, and anything beyond what's needed stays with the customer."
       />
 
-      <StatCardGrid count={2}>
+      <StatCardGrid count={3}>
         <StatCard
-          icon={<Package />} label="Pending payments" value={totalItems}
-          description="Wallet balance covers the full amount"
+          icon={<Package />} label="Awaiting payment" value={totalItems}
         />
         <StatCard
-          icon={<DollarSign />} label="Total pending value"
-          value={formatCurrency(totalPayableValue)}
-          description="Ready to draw from customer wallets"
+          icon={<CheckCircle2 />} label="Already covered by wallet" value={fundedCount}
+          description="Ready to confirm with no new matching"
+        />
+        <StatCard
+          tone={totalShortfall > 0 ? 'amber' : 'green'}
+          icon={<AlertTriangle />} label="Total shortfall" value={formatCurrency(totalShortfall)}
+          description="Across every order still short"
         />
       </StatCardGrid>
 
@@ -125,10 +114,8 @@ function PayableOrdersPage() {
           {filteredOrders.length === 0 ? (
             <PageEmpty
               icon={<Wallet className="size-6 text-muted-foreground" />}
-              title="No pending payments"
-              description={searchTerm
-                ? 'No orders match your search.'
-                : 'There are no unpaid orders where the customer has sufficient wallet balance.'}
+              title="No pending orders"
+              description={searchTerm ? 'No orders match your search.' : 'Every order has been paid or resolved.'}
               hasFilters={!!searchTerm}
               onClearFilters={() => setSearchTerm('')}
             />
@@ -144,6 +131,7 @@ function PayableOrdersPage() {
                       <TableHead>Quantity</TableHead>
                       <TableHead>Total Amount</TableHead>
                       <TableHead>Wallet Balance</TableHead>
+                      <TableHead>Shortfall</TableHead>
                       <TableHead className="text-center">Action</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -154,6 +142,7 @@ function PayableOrdersPage() {
                       const pName = order.productName || 'Unknown'
                       const balance = Number(order.customerBalance) || 0
                       const total = Number(order.totalAmount) || 0
+                      const shortfall = shortfallOf(order)
                       return (
                         <TableRow
                           key={order.id}
@@ -191,18 +180,25 @@ function PayableOrdersPage() {
                               {formatCurrency(balance)}
                             </span>
                           </TableCell>
+                          <TableCell>
+                            {shortfall > 0 ? (
+                              <span className="font-semibold text-warning">{formatCurrency(shortfall)}</span>
+                            ) : (
+                              <span className="text-xs text-success">Covered</span>
+                            )}
+                          </TableCell>
                           <TableCell className="text-center">
                             <Button
                               size="sm"
-                              className="bg-accent text-accent-foreground hover:bg-accent/90 cursor-pointer"
-                              disabled={payingId === order.id}
+                              className={cn(shortfall > 0 ? '' : 'bg-accent text-accent-foreground hover:bg-accent/90')}
+                              variant={shortfall > 0 ? 'outline' : 'default'}
                               onClick={(e) => {
                                 e.stopPropagation()
-                                handlePay(order.id)
+                                setConfirmingOrder(order)
                               }}
                             >
                               <Wallet className="size-4 mr-1" />
-                              {payingId === order.id ? 'Paying...' : 'Pay Now'}
+                              Confirm Payment
                             </Button>
                           </TableCell>
                         </TableRow>
@@ -223,6 +219,12 @@ function PayableOrdersPage() {
           )}
         </CardContent>
       </Card>
+
+      <ConfirmOrderPaymentDialog
+        order={confirmingOrder}
+        open={confirmingOrder !== null}
+        onOpenChange={(o) => { if (!o) setConfirmingOrder(null) }}
+      />
     </div>
   )
 }

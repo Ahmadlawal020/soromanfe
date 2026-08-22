@@ -38,6 +38,8 @@ export function useCreateDeposit() {
       paystackDetails?: Record<string, any>
       /** Claim these unmatched bank-statement lines and sum them server-side, instead of a typed amount. */
       lineIds?: number[]
+      /** Ties this deposit to a specific order — see the Pending Orders confirm-payment flow. */
+      orderId?: string | number
     }) => {
       const res = await api.post('/deposits', {
         ...data,
@@ -48,6 +50,7 @@ export function useCreateDeposit() {
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ['deposits'] })
       queryClient.invalidateQueries({ queryKey: ['customers'] })
+      queryClient.invalidateQueries({ queryKey: ['orders'] })
       toast.success(res?.message || 'Deposit recorded successfully!')
     },
     onError: (err: any) => {
