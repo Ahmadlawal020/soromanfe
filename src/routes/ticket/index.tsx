@@ -56,7 +56,7 @@ function LoadingTicketsPage() {
   const [page, setPage] = useState(1)
 
   const [ticketOrder, setTicketOrder] = useState<any | null>(null)
-  const [printOrderId, setPrintOrderId] = useState<number | null>(null)
+  const [printOrder, setPrintOrder] = useState<any | null>(null)
   const [editOrder, setEditOrder] = useState<any | null>(null)
   const [exporting, setExporting] = useState(false)
 
@@ -67,7 +67,7 @@ function LoadingTicketsPage() {
   }, [data?.orders])
 
   // Loads for whichever order currently has a dialog open.
-  const { data: openOrder } = useOrderForTicketing(ticketOrder?.id ?? printOrderId ?? editOrder?.id ?? undefined)
+  const { data: openOrder } = useOrderForTicketing(ticketOrder?.id ?? printOrder?.id ?? editOrder?.id ?? undefined)
   const openLoads: TruckLoad[] = openOrder?.trucks || []
 
   const options = useMemo(() => {
@@ -343,7 +343,7 @@ function LoadingTicketsPage() {
                           sn={sn}
                           order={o}
                           onGenerate={() => setTicketOrder(o)}
-                          onView={() => setPrintOrderId(o.id)}
+                          onView={() => setPrintOrder(o)}
                           onEdit={() => setEditOrder(o)}
                         />
                       )
@@ -372,15 +372,20 @@ function LoadingTicketsPage() {
         loads={ticketOrder ? openLoads : []}
         open={ticketOrder !== null}
         onOpenChange={(o) => { if (!o) setTicketOrder(null) }}
-        onGenerated={(id) => setPrintOrderId(id)}
+        // Closes over the same ticketOrder this dialog was opened with — the
+        // dialog calls onOpenChange(false) and onGenerated synchronously back
+        // to back, before this component re-renders, so the reference is
+        // still the right order.
+        onGenerated={() => setPrintOrder(ticketOrder)}
       />
 
       <TicketPrintDialog
-        orderId={printOrderId ?? undefined}
-        loadId={openLoads[0]?.id ?? null}
-        loadIds={openLoads.map((l) => l.id)}
-        open={printOrderId !== null}
-        onOpenChange={(o) => { if (!o) setPrintOrderId(null) }}
+        orderId={printOrder?.id ?? undefined}
+        orderNumber={printOrder?.orderNumber}
+        loads={printOrder ? openLoads : []}
+        open={printOrder !== null}
+        onOpenChange={(o) => { if (!o) setPrintOrder(null) }}
+        onEdit={() => { setEditOrder(printOrder); setPrintOrder(null) }}
       />
 
       <TruckEditDialog
