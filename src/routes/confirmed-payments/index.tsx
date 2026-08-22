@@ -27,14 +27,22 @@ import { naira } from '#/routes/pfi/-pfi-utils'
 import { DATE_PRESETS, resolveRange, type DatePreset } from '#/routes/orders/-orders-utils'
 import { routeGuard } from '#/lib/route-guard'
 import {
-  useFinanceReport, isPaystackFunding, fundingBankInfo, fundingRecorder, fundingDepositor, fundingAccountPaidTo,
+  useFinanceReport, isPaystackFunding, fundingRecorder, fundingDepositor, fundingPaidInto,
   type FinanceReportOrder, type OrderFunding,
 } from '#/lib/hooks/useFinanceReport'
 import { useDepotsForFilter, usePfiList, type PfiWithFinancials } from '#/lib/hooks/usePfis'
 import {
   exportFinanceReportExcel, exportFinanceReportPdf,
+  FIRST_FUNDING_COLUMN_INDEX, SHARED_AMOUNT_COLUMN_INDEX, TOTAL_COLUMN_COUNT,
   type FinanceReportFilters, type FinanceReportSummary,
 } from './-finance-report-export'
+
+// The screen table mirrors the export's column set exactly (see COLUMNS in
+// -finance-report-export.ts) — these two derived counts are what make the
+// funding sub-row's blank cells land under the right headers without a
+// magic number to keep in sync by hand.
+const LEADING_BLANKS_FOR_FUNDING_ROW = SHARED_AMOUNT_COLUMN_INDEX
+const TRAILING_BLANKS_FOR_ORDER_ROW = TOTAL_COLUMN_COUNT - FIRST_FUNDING_COLUMN_INDEX
 
 export const Route = createFileRoute('/confirmed-payments/')({
   beforeLoad: () => routeGuard('/confirmed-payments'),
@@ -479,10 +487,9 @@ function FinanceReportPage() {
                   <TableHead>Location</TableHead>
                   <TableHead>Payment Date</TableHead>
                   <TableHead className="text-right">Amount</TableHead>
-                  {/* <TableHead className="text-right">Balance</TableHead> */}
+                  <TableHead className="text-right">Wallet Balance After</TableHead>
                   <TableHead>Depositor / Payer</TableHead>
-                  {/* <TableHead>Account Paid To</TableHead> */}
-                  {/* <TableHead>Account Name</TableHead> */}
+                  <TableHead>Paid Into</TableHead>
                   <TableHead>Deposit Reference</TableHead>
                   <TableHead>Recorded By</TableHead>
                 </TableRow>
@@ -507,21 +514,20 @@ function FinanceReportPage() {
                         {o.paymentConfirmedAt ? format(new Date(o.paymentConfirmedAt), 'd MMM yyyy') : '—'}
                       </TableCell>
                       <TableCell className="text-right whitespace-nowrap font-medium">{naira(Number(o.totalAmount))}</TableCell>
-                      {/* <TableCell className="text-right whitespace-nowrap text-muted-foreground">{naira(o.walletBalanceAfter)}</TableCell> */}
-                      {/* <TableCell /> */}
-                      {/* <TableCell /> */}
-                      <TableCell />
-                      <TableCell />
-                      <TableCell />
+                      <TableCell className="text-right whitespace-nowrap text-muted-foreground">
+                        {o.walletBalanceAfter == null ? '—' : naira(o.walletBalanceAfter)}
+                      </TableCell>
+                      {Array.from({ length: TRAILING_BLANKS_FOR_ORDER_ROW }).map((_, blankIdx) => (
+                        <TableCell key={blankIdx} />
+                      ))}
                     </TableRow>
                     {o.fundingTracked && o.funding.map((f) => (
                       <TableRow key={`${o.id}-funding-${f.depositId}`} className="bg-muted/20 hover:bg-muted/30">
-                        <TableCell colSpan={11} />
+                        <TableCell colSpan={LEADING_BLANKS_FOR_FUNDING_ROW} />
                         <TableCell className="text-right whitespace-nowrap">{naira(Number(f.amount))}</TableCell>
                         <TableCell />
                         <TableCell className="max-w-[10rem] truncate">{fundingDepositor(f) || '—'}</TableCell>
-                        {/* <TableCell className="max-w-[10rem] truncate">{fundingAccountPaidTo(f) || '—'}</TableCell> */}
-                        {/* <TableCell className="max-w-[10rem] truncate">{fundingBankInfo(f).accountName || '—'}</TableCell> */}
+                        <TableCell className="max-w-[14rem] truncate">{fundingPaidInto(f) || '—'}</TableCell>
                         <TableCell className="max-w-[10rem] truncate">{f.depositReference || '—'}</TableCell>
                         <TableCell className="max-w-[10rem] truncate">{fundingRecorder(f) || '—'}</TableCell>
                       </TableRow>

@@ -138,3 +138,9 @@ export function fundingAccountPaidTo(f: OrderFunding): string {
   const { bankName, accountNumber } = fundingBankInfo(f)
   return [bankName, accountNumber].filter(Boolean).join(' · ')
 }
+
+/** "Zenith Bank · 1311924890 · JOHN DOE" — bank, account number and account name in one field. */
+export function fundingPaidInto(f: OrderFunding): string {
+  const { accountName } = fundingBankInfo(f)
+  return [fundingAccountPaidTo(f), accountName].filter(Boolean).join(' · ')
+}

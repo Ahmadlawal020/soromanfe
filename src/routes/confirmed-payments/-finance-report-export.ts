@@ -1,6 +1,6 @@
 import { format } from 'date-fns'
 import {
-  fundingRecorder, fundingDepositor, fundingAccountPaidTo, fundingBankInfo,
+  fundingRecorder, fundingDepositor, fundingPaidInto,
   type FinanceReportOrder, type OrderFunding,
 } from '#/lib/hooks/useFinanceReport'
 
@@ -48,6 +48,14 @@ export interface FinanceReportSummary {
   tankBalanceAfter: number | null
 }
 
+// The definitive column set — the on-screen table (confirmed-payments/index.tsx)
+// mirrors this exactly, same order, same set, so what's on screen is always
+// what comes out of the export. The first COLUMNS.length - 4 columns (up to
+// and including "Wallet Balance After") only ever appear on an order's own
+// row; the last 4 (Depositor / Payer through Recorded By) only ever appear
+// on a payment-source sub-row underneath it — "Amount" is the one column
+// both row kinds fill in, since a sub-row's amount is exactly as much of an
+// "amount" as the order row's total is.
 const COLUMNS: Array<{ header: string; key: string; width: number; fmt?: string }> = [
   { header: 'S/N', key: 'sn', width: 6 },
   { header: 'Date', key: 'date', width: 13 },
@@ -61,13 +69,17 @@ const COLUMNS: Array<{ header: string; key: string; width: number; fmt?: string 
   { header: 'Location', key: 'location', width: 20 },
   { header: 'Payment Date', key: 'paymentDate', width: 13 },
   { header: 'Amount', key: 'amount', width: 16, fmt: NGN },
-  { header: 'Balance', key: 'balance', width: 16, fmt: NGN },
+  { header: 'Wallet Balance After', key: 'balance', width: 18, fmt: NGN },
   { header: 'Depositor / Payer', key: 'depositor', width: 22 },
-  { header: 'Account Paid To', key: 'accountPaidTo', width: 26 },
-  { header: 'Account Name', key: 'accountName', width: 22 },
+  { header: 'Paid Into', key: 'paidInto', width: 34 },
   { header: 'Deposit Reference', key: 'depositRef', width: 20 },
   { header: 'Recorded By', key: 'recordedBy', width: 18 },
 ]
+/** Columns before this index (0-based) belong to the order row; this one on is payment-source only. */
+export const FIRST_FUNDING_COLUMN_INDEX = COLUMNS.findIndex((c) => c.key === 'depositor')
+/** The one column both an order row and a funding sub-row fill in. */
+export const SHARED_AMOUNT_COLUMN_INDEX = COLUMNS.findIndex((c) => c.key === 'amount')
+export const TOTAL_COLUMN_COUNT = COLUMNS.length
 
 function rowValues(o: FinanceReportOrder, i: number) {
   const qty = Number(o.quantity || 0)
@@ -94,8 +106,7 @@ function fundingRowValues(f: OrderFunding) {
   return {
     amount: Number(f.amount || 0),
     depositor: fundingDepositor(f) || '—',
-    accountPaidTo: fundingAccountPaidTo(f) || '—',
-    accountName: fundingBankInfo(f).accountName || '—',
+    paidInto: fundingPaidInto(f) || '—',
     depositRef: f.depositReference || '—',
     recordedBy: fundingRecorder(f) || '—',
   }
@@ -332,6 +343,12 @@ export async function exportFinanceReportPdf(
     cursorY += 5
   }
 
+  // The number of order-only columns before the shared "Amount" column, and
+  // how many funding-only columns follow "Wallet Balance After" — computed
+  // from COLUMNS itself so this can never drift out of sync with the header.
+  const leadingBlanksForFunding = SHARED_AMOUNT_COLUMN_INDEX
+  const trailingBlanksForOrder = COLUMNS.length - FIRST_FUNDING_COLUMN_INDEX
+
   const body: (string | number)[][] = []
   rows.forEach((o, i) => {
     const v = rowValues(o, i)
@@ -349,18 +366,17 @@ export async function exportFinanceReportPdf(
       v.paymentDate ? format(v.paymentDate, 'dd/MM/yyyy') : '—',
       naira(v.amount),
       v.balance != null ? naira(v.balance) : '—',
-      '', '', '', '', '',
+      ...Array(trailingBlanksForOrder).fill(''),
     ])
 
     if (o.fundingTracked) {
       for (const f of o.funding) {
         body.push([
-          '', '', '', '', '', '', '', '', '', '', '',
+          ...Array(leadingBlanksForFunding).fill(''),
           naira(Number(f.amount)),
           '',
           fundingDepositor(f) || '—',
-          fundingAccountPaidTo(f) || '—',
-          fundingBankInfo(f).accountName || '—',
+          fundingPaidInto(f) || '—',
           f.depositReference || '—',
           fundingRecorder(f) || '—',
         ])
@@ -375,12 +391,22 @@ export async function exportFinanceReportPdf(
     foot: [[
       '', '', `Total (${rows.length})`, '', '',
       summary.totalQuantity.toLocaleString(), '', '', naira(summary.totalSalesValue),
-      '', '', naira(summary.totalAmountPaid), '', '', '', '', '', '',
+      '', '', naira(summary.totalAmountPaid), ...Array(COLUMNS.length - 12).fill(''),
     ]],
     styles: { fontSize: 6.5, cellPadding: 1.5, lineColor: [183, 192, 204], lineWidth: 0.1 },
     headStyles: { fillColor: [31, 56, 100], textColor: 255, lineWidth: 0.1 },
     footStyles: { fillColor: [232, 238, 247], textColor: [20, 20, 20], fontStyle: 'bold', lineWidth: 0.1 },
-    alternateRowStyles: { fillColor: [247, 249, 251] },
+    // A payment-source sub-row gets the same faint tint as its Excel
+    // counterpart — never a font change, just enough to read as nested. A
+    // sub-row is the one whose Order Reference cell is blank. Plain
+    // alternating-row striping would be meaningless here (a "row" is an
+    // order or one of its sub-rows depending on how many came before it),
+    // so this replaces it rather than layering on top.
+    didParseCell: (data) => {
+      if (data.section === 'body' && data.row.raw[2] === '') {
+        data.cell.styles.fillColor = [247, 249, 251]
+      }
+    },
   })
 
   doc.save(`${buildFilename(filters)}.pdf`)
