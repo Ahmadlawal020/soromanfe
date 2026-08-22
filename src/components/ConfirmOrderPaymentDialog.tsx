@@ -5,7 +5,6 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from '#/components/ui/dialog'
 import { Button } from '#/components/ui/button'
-import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '#/components/ui/select'
 import { useCustomerDetails } from '#/lib/hooks/useCustomers'
@@ -21,17 +20,21 @@ function formatCurrency(v: number) {
   return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 2 }).format(v)
 }
 
-const digitsOnly = (v: string) => v.replace(/\D/g, '')
-const formatAmount = (raw: string) => (raw ? Number(raw).toLocaleString('en-NG') : '')
-
 /**
  * Confirm payment on one specific pending order — the point this whole flow
  * exists for. Existing wallet balance applies first; any shortfall is closed
- * by matching a bank statement line (or several) or typing a manual amount,
- * both tagged with this order's id (see createDeposit's orderId) so the
- * funding trail names this order explicitly rather than leaving a later
- * FIFO walk to land on it by coincidence. Anything matched beyond what the
- * order needs simply stays in the customer's wallet.
+ * by matching a bank statement line (or several), tagged with this order's
+ * id (see createDeposit's orderId) so the funding trail names this order
+ * explicitly rather than leaving a later FIFO walk to land on it by
+ * coincidence. Anything matched beyond what the order needs simply stays in
+ * the customer's wallet.
+ *
+ * Statement only, deliberately — no manual-amount fallback. A line's bank
+ * reference is what makes it trustworthy; typing a figure by hand has none
+ * of that, and StatementLinePicker only ever offers UNMATCHED lines, so a
+ * line already claimed by another payment can't be picked twice — claiming
+ * it flips its status server-side in the same transaction, and it drops out
+ * of the picker's search from that moment on.
  */
 export function ConfirmOrderPaymentDialog({
   order, open, onOpenChange,
@@ -46,18 +49,14 @@ export function ConfirmOrderPaymentDialog({
   const createDeposit = useCreateDeposit()
   const payOrder = usePayOrder()
 
-  const [mode, setMode] = useState<'statement' | 'manual'>('statement')
   const [bankAccountId, setBankAccountId] = useState('')
   const [statementLines, setStatementLines] = useState<StatementLine[]>([])
   const [statementQuery, setStatementQuery] = useState('')
-  const [manualAmount, setManualAmount] = useState('')
-  const [manualDepositor, setManualDepositor] = useState('')
   const [confirming, setConfirming] = useState(false)
 
   useEffect(() => {
     if (!open) {
-      setBankAccountId(''); setStatementLines([]); setStatementQuery('')
-      setManualAmount(''); setManualDepositor(''); setMode('statement'); setConfirming(false)
+      setBankAccountId(''); setStatementLines([]); setStatementQuery(''); setConfirming(false)
     }
   }, [open])
 
@@ -68,47 +67,27 @@ export function ConfirmOrderPaymentDialog({
   // orders list — that snapshot goes stale the moment another order for the
   // same customer is confirmed in this same session.
   const liveBalance = customer ? toNum(customer.balance) : toNum(order.customerBalance)
-  const newFromStatement = statementLines.reduce((s, l) => s + Number(l.amount), 0)
-  const newFromManual = mode === 'manual' ? Number(digitsOnly(manualAmount) || '0') : 0
-  const newDeposit = mode === 'statement' ? newFromStatement : newFromManual
+  const newDeposit = statementLines.reduce((s, l) => s + Number(l.amount), 0)
   const available = liveBalance + newDeposit
   const stillShort = Math.max(0, total - available)
   const excess = Math.max(0, available - total)
-  // A statement line can't be selected without a bank account already chosen
-  // (the picker itself refuses to search without one) — only the manual path
-  // needs its own explicit checks here.
-  const manualEntryValid = mode !== 'manual' || newDeposit === 0 || (manualDepositor.trim().length > 0 && !!bankAccountId)
-  const readyToConfirm = stillShort <= 0 && manualEntryValid
+  const readyToConfirm = stillShort <= 0
 
   const handleConfirm = async () => {
     if (!readyToConfirm) return
     setConfirming(true)
     try {
       if (newDeposit > 0) {
-        if (mode === 'statement') {
-          await createDeposit.mutateAsync({
-            customer: order.customerId,
-            bankAccountId,
-            lineIds: statementLines.map((l) => l.id),
-            orderId: order.id,
-          })
-        } else {
-          const bank = bankAccounts?.find((b) => String(b.id) === bankAccountId)
-          await createDeposit.mutateAsync({
-            customer: order.customerId,
-            amount: newFromManual,
-            bankAccountId: bankAccountId || undefined,
-            bankName: bank?.bankName,
-            accountName: bank?.accountName,
-            accountNumber: bank?.accountNumber,
-            depositorName: manualDepositor.trim(),
-            orderId: order.id,
-          })
-        }
+        await createDeposit.mutateAsync({
+          customer: order.customerId,
+          bankAccountId,
+          lineIds: statementLines.map((l) => l.id),
+          orderId: order.id,
+        })
         // The deposit already landed — clear the selection so a retry below
         // (if paying fails) falls back to the now-updated wallet balance
         // instead of trying to re-claim lines that are already matched.
-        setStatementLines([]); setManualAmount(''); setManualDepositor('')
+        setStatementLines([])
       }
       await payOrder.mutateAsync(order.id)
       onOpenChange(false)
@@ -167,33 +146,10 @@ export function ConfirmOrderPaymentDialog({
                   <AlertTriangle className="mt-0.5 size-4 shrink-0" />
                   <p>
                     {order.customerName || 'This customer'} needs {formatCurrency(Math.max(0, total - liveBalance))} more
-                    to complete this order — match a statement line or record the payment below.
+                    to complete this order — match a statement line below.
                   </p>
                 </div>
               )}
-
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setMode('statement')}
-                  className={cn(
-                    'flex-1 rounded-lg border px-3 py-2 text-sm transition-colors duration-250 ease-luxe',
-                    mode === 'statement' ? 'border-accent/40 bg-accent/10 text-accent' : 'border-foreground/15 text-muted-foreground hover:bg-muted/60',
-                  )}
-                >
-                  Match bank statement
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setMode('manual')}
-                  className={cn(
-                    'flex-1 rounded-lg border px-3 py-2 text-sm transition-colors duration-250 ease-luxe',
-                    mode === 'manual' ? 'border-accent/40 bg-accent/10 text-accent' : 'border-foreground/15 text-muted-foreground hover:bg-muted/60',
-                  )}
-                >
-                  Record manually
-                </button>
-              </div>
 
               <div className="space-y-1.5">
                 <Label className={cn(MICRO, 'text-muted-foreground')}>Receiving bank account</Label>
@@ -214,48 +170,26 @@ export function ConfirmOrderPaymentDialog({
                 </Select>
               </div>
 
-              {mode === 'statement' ? (
-                <div className="space-y-1.5">
-                  <Label className={cn(MICRO, 'text-muted-foreground')}>Match to bank statement</Label>
-                  <StatementLinePicker
-                    bankAccountId={bankAccountId || undefined}
-                    selected={statementLines}
-                    onToggle={(line) => {
-                      setStatementLines((prev) =>
-                        prev.some((l) => l.id === line.id) ? prev.filter((l) => l.id !== line.id) : [...prev, line],
-                      )
-                    }}
-                    onClear={() => setStatementLines([])}
-                    query={statementQuery}
-                    onQueryChange={setStatementQuery}
-                  />
-                  {statementLines.length > 0 && (
-                    <p className="text-xs text-muted-foreground">
-                      {statementLines.length} line{statementLines.length === 1 ? '' : 's'} selected · {formatCurrency(newFromStatement)}
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <Label className={cn(MICRO, 'text-muted-foreground')}>Amount</Label>
-                    <Input
-                      type="text" inputMode="numeric"
-                      value={formatAmount(digitsOnly(manualAmount))}
-                      onChange={(e) => setManualAmount(digitsOnly(e.target.value))}
-                      placeholder="0"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className={cn(MICRO, 'text-muted-foreground')}>Depositor / payer name</Label>
-                    <Input
-                      value={manualDepositor}
-                      onChange={(e) => setManualDepositor(e.target.value)}
-                      placeholder="Who paid"
-                    />
-                  </div>
-                </div>
-              )}
+              <div className="space-y-1.5">
+                <Label className={cn(MICRO, 'text-muted-foreground')}>Match to bank statement</Label>
+                <StatementLinePicker
+                  bankAccountId={bankAccountId || undefined}
+                  selected={statementLines}
+                  onToggle={(line) => {
+                    setStatementLines((prev) =>
+                      prev.some((l) => l.id === line.id) ? prev.filter((l) => l.id !== line.id) : [...prev, line],
+                    )
+                  }}
+                  onClear={() => setStatementLines([])}
+                  query={statementQuery}
+                  onQueryChange={setStatementQuery}
+                />
+                {statementLines.length > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    {statementLines.length} line{statementLines.length === 1 ? '' : 's'} selected · {formatCurrency(newDeposit)}
+                  </p>
+                )}
+              </div>
 
               {newDeposit > 0 && (
                 <p className="text-xs leading-tight text-muted-foreground">
