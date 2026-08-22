@@ -162,8 +162,8 @@ function MyRequestsPage() {
                     <TableCell className="whitespace-nowrap text-muted-foreground">
                       {format(new Date(e.expense_date), 'd MMM yyyy')}
                     </TableCell>
-                    <TableCell className="max-w-[12rem] truncate">
-                      <Badge variant={e.pfi_id ? 'default' : 'secondary'} className="max-w-[11rem] truncate">
+                    <TableCell>
+                      <Badge variant={e.pfi_id ? 'default' : 'secondary'}>
                         {e.category_name}
                       </Badge>
                     </TableCell>

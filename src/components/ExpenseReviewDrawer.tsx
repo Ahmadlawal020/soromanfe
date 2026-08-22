@@ -8,6 +8,7 @@ import {
 } from '#/components/ui/dialog'
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
+import { NumberInput } from '#/components/ui/number-input'
 import { NativeSelect } from '#/components/ui/native-select'
 import { Textarea } from '#/components/ui/textarea'
 import { Badge } from '#/components/ui/badge'
@@ -419,9 +420,9 @@ export function ExpenseReviewDrawer({
                     </div>
                     <div className="space-y-1.5">
                       <label className={cn(MICRO, 'block text-muted-foreground')}>Amount paid</label>
-                      <Input
-                        type="number" value={pay.amount_paid}
-                        onChange={(e) => setPay((p) => ({ ...p, amount_paid: e.target.value }))}
+                      <NumberInput
+                        allowDecimal value={pay.amount_paid}
+                        onValueChange={(v) => setPay((p) => ({ ...p, amount_paid: v }))}
                       />
                       <p className="text-xs leading-tight text-muted-foreground/70">
                         {naira(requested)} requested

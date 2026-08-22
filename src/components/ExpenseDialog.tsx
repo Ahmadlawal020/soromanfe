@@ -4,6 +4,7 @@ import { Loader2, Building2, Fuel } from 'lucide-react'
 
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
+import { NumberInput } from '#/components/ui/number-input'
 import { NativeSelect } from '#/components/ui/native-select'
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
@@ -315,25 +316,25 @@ export function ExpenseDialog({
             <>
               <div className="space-y-1.5">
                 <label className={cn(MICRO, 'block text-muted-foreground')}>Amount ex VAT</label>
-                <Input
-                  type="number" placeholder="0.00" value={form.amount_ex_vat}
-                  onChange={(e) => apply({ amount_ex_vat: e.target.value })}
+                <NumberInput
+                  allowDecimal placeholder="0.00" value={form.amount_ex_vat}
+                  onValueChange={(v) => apply({ amount_ex_vat: v })}
                 />
               </div>
               <div className="space-y-1.5">
                 <label className={cn(MICRO, 'block text-muted-foreground')}>
                   VAT ({(vatRate * 100).toFixed(1)}%)
                 </label>
-                <Input
-                  type="number" placeholder="0.00" value={form.vat_amount}
-                  onChange={(e) => apply({ vat_amount: e.target.value })}
+                <NumberInput
+                  allowDecimal placeholder="0.00" value={form.vat_amount}
+                  onValueChange={(v) => apply({ vat_amount: v })}
                 />
               </div>
               <div className="space-y-1.5 sm:col-span-2">
                 <label className={cn(MICRO, 'block text-muted-foreground')}>Invoice amount</label>
-                <Input
-                  type="number" placeholder="0.00" value={form.invoice_amount}
-                  onChange={(e) => apply({ invoice_amount: e.target.value })}
+                <NumberInput
+                  allowDecimal placeholder="0.00" value={form.invoice_amount}
+                  onValueChange={(v) => apply({ invoice_amount: v })}
                 />
               </div>
 
@@ -357,9 +358,9 @@ export function ExpenseDialog({
               </div>
               <div className="space-y-1.5">
                 <label className={cn(MICRO, 'block text-muted-foreground')}>WHT deduction</label>
-                <Input
-                  type="number" placeholder="0.00" value={form.wht_deduction}
-                  onChange={(e) => apply({ wht_deduction: e.target.value, wht_rate: '' })}
+                <NumberInput
+                  allowDecimal placeholder="0.00" value={form.wht_deduction}
+                  onValueChange={(v) => apply({ wht_deduction: v, wht_rate: '' })}
                 />
               </div>
             </>
@@ -367,9 +368,9 @@ export function ExpenseDialog({
 
           <div className="space-y-1.5 sm:col-span-2">
             <label className={cn(MICRO, 'block text-muted-foreground')}>Amount requested</label>
-            <Input
-              type="number" placeholder="0.00" value={form.amount}
-              onChange={(e) => set('amount', e.target.value)}
+            <NumberInput
+              allowDecimal placeholder="0.00" value={form.amount}
+              onValueChange={(v) => set('amount', v)}
             />
             {includeTax && (
               <p className="text-xs leading-tight text-muted-foreground/70">

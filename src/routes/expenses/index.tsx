@@ -142,7 +142,7 @@ function ExpensesPage() {
 
       {/* Awaiting payment stands on its own card. Folded into a total it is
           invisible, and it is the one figure whoever runs payments is after. */}
-      <StatCardGrid count={4}>
+      <StatCardGrid count={2}>
         <StatCard
           icon={<Receipt />} label="Total Expenses" value={naira(totals?.total ?? 0)}
           // description={`${totals?.count ?? 0} line${totals?.count === 1 ? '' : 's'} in view`}
@@ -267,6 +267,7 @@ function ExpensesPage() {
                   <TableHead className="w-10">S/N</TableHead>
                   <TableHead>Reference</TableHead>
                   <TableHead>Date</TableHead>
+                  <TableHead>Category</TableHead>
                   <TableHead>Vendor</TableHead>
                   {/* <TableHead>TIN number</TableHead>
                   <TableHead>Invoice no.</TableHead> */}
@@ -278,7 +279,6 @@ function ExpensesPage() {
                   <TableHead className="text-right">Requested</TableHead>
                   <TableHead className="text-right">Amount paid</TableHead>
                   {/* <TableHead>GL code</TableHead> */}
-                  <TableHead>Category</TableHead>
                   {/* <TableHead>Bank code</TableHead> */}
                   <TableHead>Bank name</TableHead>
                   <TableHead>Paid from</TableHead>
@@ -295,6 +295,11 @@ function ExpensesPage() {
                     </TableCell>
                     <TableCell className="whitespace-nowrap text-muted-foreground">
                       {format(new Date(e.expense_date), 'd MMM yyyy')}
+                    </TableCell>
+                    <TableCell className="max-w-[14rem] truncate">
+                      <Badge variant={e.pfi_id ? 'default' : 'secondary'} className="max-w-[13rem]">
+                        {e.category_name}
+                      </Badge>
                     </TableCell>
                     <TableCell className="max-w-[12rem] truncate">{e.vendor || '—'}</TableCell>
                     {/* <TableCell className="whitespace-nowrap text-muted-foreground">{e.tin_number || '—'}</TableCell>
@@ -321,11 +326,6 @@ function ExpensesPage() {
                         : (e.status === 'paid' ? naira(Number(e.amount)) : '—')}
                     </TableCell>
                     {/* <TableCell className="text-muted-foreground">{e.gl_code || '—'}</TableCell> */}
-                    <TableCell className="max-w-[14rem] truncate">
-                      <Badge variant={e.pfi_id ? 'default' : 'secondary'} className="max-w-[13rem] truncate">
-                        {e.category_name}
-                      </Badge>
-                    </TableCell>
                     {/* <TableCell className="text-muted-foreground">{e.bank_code || '—'}</TableCell> */}
                     <TableCell className="max-w-[10rem] truncate text-muted-foreground">
                       {e.payee_bank_name || '—'}

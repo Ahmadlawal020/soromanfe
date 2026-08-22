@@ -1,6 +1,7 @@
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
+import { NumberInput } from '#/components/ui/number-input'
 import { Label } from '#/components/ui/label'
 import { useNavigate } from '@tanstack/react-router'
 import {
@@ -25,60 +26,9 @@ interface CompletionStepProps {
   wizard: OrderWizardReturn
 }
 
-/** Digits only — what gets sent as the amount. */
-const digitsOnly = (v: string) => v.replace(/\D/g, '')
-/** Display form. Empty stays empty so the placeholder still shows. */
-const formatAmount = (raw: string) => {
-  const d = digitsOnly(raw)
-  return d ? Number(d).toLocaleString('en-NG') : ''
-}
-
 type ExpectedRow = { id: number; amount: string; companyName: string }
 let rowSeq = 0
 const emptyRow = (): ExpectedRow => ({ id: rowSeq++, amount: '', companyName: '' })
-
-/** A live-formatted amount input — comma-separated as you type, caret held in place. */
-function AmountInput({ id, value, onChange }: { id: string; value: string; onChange: (raw: string) => void }) {
-  const ref = useRef<HTMLInputElement>(null)
-  const [caret, setCaret] = useState<number | null>(null)
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const el = e.target
-    const digitsBefore = digitsOnly(el.value.slice(0, el.selectionStart ?? 0)).length
-    const raw = digitsOnly(el.value)
-    onChange(raw)
-
-    const formatted = formatAmount(raw)
-    let seen = 0
-    let pos = formatted.length
-    for (let i = 0; i < formatted.length; i += 1) {
-      if (/\d/.test(formatted[i])) seen += 1
-      if (seen === digitsBefore) { pos = i + 1; break }
-    }
-    setCaret(digitsBefore === 0 ? 0 : pos)
-  }
-
-  useLayoutEffect(() => {
-    if (caret != null && ref.current) {
-      ref.current.setSelectionRange(caret, caret)
-      setCaret(null)
-    }
-  }, [caret])
-
-  return (
-    <Input
-      ref={ref}
-      id={id}
-      type="text"
-      inputMode="numeric"
-      autoComplete="off"
-      placeholder="0"
-      value={formatAmount(value)}
-      onChange={handleChange}
-      className="text-right"
-    />
-  )
-}
 
 /**
  * Optional, skippable: how the customer says they'll pay, noted while it's
@@ -150,7 +100,13 @@ function ExpectedPaymentNote({ customerId, orderId }: { customerId: number; orde
           <div key={r.id} className="grid grid-cols-[1fr_1fr_auto] gap-2 items-end">
             <div className="space-y-1.5">
               {i === 0 && <Label htmlFor={`ep-amount-${r.id}`} className="text-xs">Amount</Label>}
-              <AmountInput id={`ep-amount-${r.id}`} value={r.amount} onChange={(v) => updateRow(r.id, { amount: v })} />
+              <NumberInput
+                id={`ep-amount-${r.id}`}
+                placeholder="0"
+                className="text-right"
+                value={r.amount}
+                onValueChange={(v) => updateRow(r.id, { amount: v })}
+              />
             </div>
             <div className="space-y-1.5">
               {i === 0 && <Label htmlFor={`ep-company-${r.id}`} className="text-xs">Company name</Label>}

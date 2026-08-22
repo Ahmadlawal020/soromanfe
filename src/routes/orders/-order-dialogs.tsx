@@ -7,6 +7,7 @@ import {
 } from '#/components/ui/dialog'
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
+import { NumberInput } from '#/components/ui/number-input'
 import { Label } from '#/components/ui/label'
 import { MICRO } from '#/lib/panel'
 import { cn } from '#/lib/utils'
@@ -410,17 +411,17 @@ export function OrderEditDialog({
               </div>
               <div className="space-y-2">
                 <Label htmlFor="order-qty">Quantity</Label>
-                <Input
-                  id="order-qty" type="number" inputMode="decimal" value={form.quantity}
+                <NumberInput
+                  id="order-qty" value={form.quantity}
                   disabled={!stockEditable}
-                  onChange={(e) => setForm((f) => ({ ...f, quantity: e.target.value }))}
+                  onValueChange={(v) => setForm((f) => ({ ...f, quantity: v }))}
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="order-total">Total price</Label>
-                <Input
-                  id="order-total" type="number" inputMode="decimal" value={form.totalAmount}
-                  onChange={(e) => setForm((f) => ({ ...f, totalAmount: e.target.value }))}
+                <NumberInput
+                  id="order-total" allowDecimal value={form.totalAmount}
+                  onValueChange={(v) => setForm((f) => ({ ...f, totalAmount: v }))}
                 />
               </div>
             </div>

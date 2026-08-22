@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import {
   Mail, Calendar, ShieldCheck, MapPin, Fuel, ChevronDown, BookOpen, Ban,
-  UserCog, Loader2,
+  UserCog, Loader2, Eye, EyeOff,
 } from 'lucide-react'
 import { PageHeader } from '#/components/PageHeader'
 import { Badge } from '#/components/ui/badge'
@@ -36,6 +36,56 @@ function getInitials(firstName?: string, surname?: string) {
 function formatDate(iso: string | null | undefined) {
   if (!iso) return '—'
   return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+}
+
+/**
+ * A password field with a show/hide toggle.
+ *
+ * Each field holds its own visibility rather than sharing one switch across
+ * the three: revealing your current password to check a typo shouldn't also
+ * expose the new one to whoever is stood behind you.
+ */
+function PasswordField({
+  id, label, value, onChange, autoComplete, children,
+}: {
+  id: string
+  label: string
+  value: string
+  onChange: (v: string) => void
+  autoComplete: string
+  /** Validation hint rendered under the field. */
+  children?: React.ReactNode
+}) {
+  const [visible, setVisible] = useState(false)
+
+  return (
+    <div className="space-y-1.5">
+      <Label htmlFor={id} className="text-xs text-muted-foreground">{label}</Label>
+      <div className="relative">
+        <Input
+          id={id}
+          type={visible ? 'text' : 'password'}
+          autoComplete={autoComplete}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="pr-10"
+        />
+        <button
+          type="button"
+          onClick={() => setVisible((v) => !v)}
+          // Not focusable by tab: it sits between the password fields, and
+          // catching the tab out of one on the way to the next is worse than
+          // the small loss of keyboard reach on a toggle you can still click.
+          tabIndex={-1}
+          aria-label={visible ? `Hide ${label.toLowerCase()}` : `Show ${label.toLowerCase()}`}
+          className="absolute top-1/2 right-2 flex size-7 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors duration-250 ease-luxe outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50"
+        >
+          {visible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+        </button>
+      </div>
+      {children}
+    </div>
+  )
 }
 
 /**
@@ -131,31 +181,27 @@ function AccountSettings({
         <div className="space-y-3 lg:border-l lg:border-foreground/10 lg:pl-6">
           <p className={cn(MICRO, 'text-muted-foreground')}>Change password</p>
           <div className="space-y-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="pf-cur" className="text-xs text-muted-foreground">Current password</Label>
-              <Input
-                id="pf-cur" type="password" autoComplete="current-password" value={pw.current_password}
-                onChange={(e) => setPw((p) => ({ ...p, current_password: e.target.value }))}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="pf-new" className="text-xs text-muted-foreground">New password</Label>
-              <Input
-                id="pf-new" type="password" autoComplete="new-password" value={pw.new_password}
-                onChange={(e) => setPw((p) => ({ ...p, new_password: e.target.value }))}
-              />
+            <PasswordField
+              id="pf-cur" label="Current password" autoComplete="current-password"
+              value={pw.current_password}
+              onChange={(v) => setPw((p) => ({ ...p, current_password: v }))}
+            />
+            <PasswordField
+              id="pf-new" label="New password" autoComplete="new-password"
+              value={pw.new_password}
+              onChange={(v) => setPw((p) => ({ ...p, new_password: v }))}
+            >
               {pw.new_password.length > 0 && pw.new_password.length < 8 && (
                 <p className="text-xs text-warning">At least 8 characters.</p>
               )}
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="pf-confirm" className="text-xs text-muted-foreground">Confirm new password</Label>
-              <Input
-                id="pf-confirm" type="password" autoComplete="new-password" value={pw.confirm}
-                onChange={(e) => setPw((p) => ({ ...p, confirm: e.target.value }))}
-              />
+            </PasswordField>
+            <PasswordField
+              id="pf-confirm" label="Confirm new password" autoComplete="new-password"
+              value={pw.confirm}
+              onChange={(v) => setPw((p) => ({ ...p, confirm: v }))}
+            >
               {pwMismatch && <p className="text-xs text-destructive">The two passwords don't match.</p>}
-            </div>
+            </PasswordField>
           </div>
           <p className="text-xs leading-tight text-muted-foreground/70">
             Changing your password signs you out everywhere, including here.

@@ -428,9 +428,9 @@ function OrdersDashboard() {
                       <TableHead className="text-right">Qty (L)</TableHead>
                       <TableHead className="text-right">Unit price</TableHead>
                       <TableHead className="text-right">Total</TableHead>
-                      <TableHead>Status</TableHead>
                       <TableHead>PFI</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead>Status</TableHead>
+                      {/* <TableHead className="text-right">Actions</TableHead> */}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -446,9 +446,9 @@ function OrdersDashboard() {
                                 {o.createdAt ? format(new Date(o.createdAt), 'd MMM yyyy') : '—'}
                               </TableCell>
                               <TableCell>
-                                <span className="block max-w-[14rem] truncate">{o.customerName || '—'}</span>
+                                <span className="block max-w-[14rem] uppercase truncate">{o.customerName || '—'}</span>
                                 {(o.companyName || o.customerCompanyName) && (
-                                  <span className="block max-w-[14rem] truncate text-xs text-muted-foreground">
+                                  <span className="block max-w-[14rem] truncate uppercase text-xs text-muted-foreground">
                                     {o.companyName || o.customerCompanyName}
                                   </span>
                                 )}
@@ -458,13 +458,14 @@ function OrdersDashboard() {
                               <TableCell className="text-right">{formatQty(toNumber(o.quantity))}</TableCell>
                               <TableCell className="text-right">{formatNaira(toNumber(o.price))}</TableCell>
                               <TableCell className="text-right font-semibold">{formatNaira(toNumber(o.totalAmount))}</TableCell>
+                              <TableCell className="text-muted-foreground max-w-[14rem] truncate ">{o.pfiNumber || '—'}</TableCell>
                               <TableCell>
                                 <div className="flex flex-col gap-1">
                                   <OrderStatusBadge status={o.status} />
                                   <OrderExpiryBadge status={o.status} expiresAt={o.expiresAt} expiredAt={o.expiredAt} />
                                 </div>
                               </TableCell>
-                              <TableCell className="text-muted-foreground">{o.pfiNumber || '—'}</TableCell>
+                              
                               {/* <TableCell>
                                 <div className="flex items-center justify-end gap-1.5">
                                   <Button variant="ghost" size="icon-sm" onClick={() => setDetailsOrder(o)}>

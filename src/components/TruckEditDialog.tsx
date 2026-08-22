@@ -6,6 +6,7 @@ import {
 } from '#/components/ui/dialog'
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
+import { NumberInput } from '#/components/ui/number-input'
 import { Label } from '#/components/ui/label'
 import { MICRO } from '#/lib/panel'
 import { cn } from '#/lib/utils'
@@ -59,9 +60,9 @@ function TruckRow({ orderId, load }: { orderId: number | string; load: TruckLoad
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
           <Label className={cn(MICRO, 'text-muted-foreground')}>Quantity (L)</Label>
-          <Input
-            type="number" inputMode="decimal" value={draft.quantity} disabled={locked}
-            onChange={(e) => setDraft((d) => ({ ...d, quantity: e.target.value }))}
+          <NumberInput
+            value={draft.quantity} disabled={locked}
+            onValueChange={(v) => setDraft((d) => ({ ...d, quantity: v }))}
           />
         </div>
         <div className="space-y-1">

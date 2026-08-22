@@ -1,9 +1,10 @@
-import { useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from '#/components/ui/dialog'
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
+import { NumberInput } from '#/components/ui/number-input'
 import { Label } from '#/components/ui/label'
 import { Textarea } from '#/components/ui/textarea'
 import { Check, Loader2, Search, ArrowRight } from 'lucide-react'
@@ -11,12 +12,6 @@ import { useCustomerList } from '#/lib/hooks/useCustomers'
 import { useTransferBalance } from '#/lib/hooks/useDeposits'
 import { toNum, cn } from '#/lib/utils'
 import type { Customer } from '#/lib/types'
-
-const digitsOnly = (v: string) => v.replace(/\D/g, '')
-const formatAmount = (raw: string) => {
-  const d = digitsOnly(raw)
-  return d ? Number(d).toLocaleString('en-NG') : ''
-}
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 2 }).format(value)
@@ -109,46 +104,6 @@ function CustomerPicker({
   )
 }
 
-function AmountInput({ value, onChange }: { value: string; onChange: (raw: string) => void }) {
-  const ref = useRef<HTMLInputElement>(null)
-  const [caret, setCaret] = useState<number | null>(null)
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const el = e.target
-    const digitsBefore = digitsOnly(el.value.slice(0, el.selectionStart ?? 0)).length
-    const raw = digitsOnly(el.value)
-    onChange(raw)
-    const formatted = formatAmount(raw)
-    let seen = 0
-    let pos = formatted.length
-    for (let i = 0; i < formatted.length; i += 1) {
-      if (/\d/.test(formatted[i])) seen += 1
-      if (seen === digitsBefore) { pos = i + 1; break }
-    }
-    setCaret(digitsBefore === 0 ? 0 : pos)
-  }
-
-  useLayoutEffect(() => {
-    if (caret != null && ref.current) {
-      ref.current.setSelectionRange(caret, caret)
-      setCaret(null)
-    }
-  }, [caret])
-
-  return (
-    <Input
-      ref={ref}
-      type="text"
-      inputMode="numeric"
-      autoComplete="off"
-      placeholder="0"
-      value={formatAmount(value)}
-      onChange={handleChange}
-      className="text-right text-lg font-semibold"
-    />
-  )
-}
-
 export function TransferBalanceDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
   const { data: customerData, isLoading } = useCustomerList({ limit: 5000 }, { enabled: open })
   const customers: Customer[] = useMemo(() => {
@@ -198,7 +153,12 @@ export function TransferBalanceDialog({ open, onOpenChange }: { open: boolean; o
 
           <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">Amount</Label>
-            <AmountInput value={amount} onChange={setAmount} />
+            <NumberInput
+              value={amount}
+              onValueChange={setAmount}
+              placeholder="0"
+              className="text-right text-lg font-semibold"
+            />
             {insufficientFunds && (
               <p className="text-xs text-destructive">
                 Exceeds the source customer's balance of {formatCurrency(toNum(fromCustomer?.balance))}.
