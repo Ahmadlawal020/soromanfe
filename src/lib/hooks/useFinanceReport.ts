@@ -147,3 +147,31 @@ export function fundingPaidInto(f: OrderFunding): string {
   const { accountName } = fundingBankInfo(f)
   return [fundingAccountPaidTo(f), accountName].filter(Boolean).join(' · ')
 }
+
+/**
+ * Where this order was paid into — its own dedicated virtual account, as
+ * "Zenith Bank · 1312722134 · SOROMAN CALABAR". An order-level fact, not a
+ * per-deposit one: it's the account the order itself names, which is why it
+ * reads the same in the detail dialog's Order DVA row.
+ */
+export function orderPaidInto(o: {
+  virtualAccountBank?: string | null
+  virtualAccountNumber?: string | null
+  virtualAccountName?: string | null
+}): string {
+  return [o.virtualAccountBank, o.virtualAccountNumber, o.virtualAccountName]
+    .filter(Boolean)
+    .join(' · ')
+}
+
+/**
+ * The company on the row.
+ *
+ * Deliberately the customer's own saved company, never orders.companyName —
+ * that one is typed at the point of order and drifts from the customer
+ * record ("NNPC Retail" against a saved "NNPC"). A customer with no company
+ * saved reads blank rather than borrowing whatever was typed that day.
+ */
+export function orderCompany(o: { customerCompanyName?: string | null }): string {
+  return (o.customerCompanyName || '').trim()
+}

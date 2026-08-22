@@ -27,7 +27,8 @@ import { naira } from '#/routes/pfi/-pfi-utils'
 import { DATE_PRESETS, resolveRange, type DatePreset } from '#/routes/orders/-orders-utils'
 import { routeGuard } from '#/lib/route-guard'
 import {
-  useFinanceReport, isPaystackFunding, fundingRecorder, fundingDepositor, fundingPaidInto,
+  useFinanceReport, isPaystackFunding, fundingRecorder, fundingDepositor,
+  orderPaidInto, orderCompany,
   type FinanceReportOrder, type OrderFunding,
 } from '#/lib/hooks/useFinanceReport'
 import { useDepotsForFilter, usePfiList, type PfiWithFinancials } from '#/lib/hooks/usePfis'
@@ -524,7 +525,6 @@ function FinanceReportPage() {
           <SummaryItem label="Product" value={productName} />
           <SummaryItem label="Total sales value" value={naira(summary.totalSalesValue)} />
           <SummaryItem label="Total amount paid" value={naira(summary.totalAmountPaid)} />
-          <SummaryItem label="Balance" value={naira(totalOutstanding)} />
           {selectedPfi && (
             <>
               <SummaryItem label="Initial stock (PFI)" value={`${(summary.initialStock ?? 0).toLocaleString()} L`} />
@@ -620,9 +620,8 @@ function FinanceReportPage() {
                   <TableHead>Location</TableHead>
                   <TableHead>Payment Date</TableHead>
                   <TableHead className="text-right">Amount Paid</TableHead>
-                  <TableHead className="text-right">Balance</TableHead>
-                  <TableHead>Depositor / Payer</TableHead>
                   <TableHead>Paid Into</TableHead>
+                  <TableHead>Depositor / Payer</TableHead>
                   <TableHead>Deposit Reference</TableHead>
                   <TableHead>Deposit Date</TableHead>
                   <TableHead>Recorded By</TableHead>
@@ -632,8 +631,7 @@ function FinanceReportPage() {
               <TableBody>
                 {rows.map((o, i) => {
                   const salesValue = Number(o.price) * Number(o.quantity || 0)
-                  const amountPaid = Number(o.totalAmount)
-                  const balance = salesValue - amountPaid
+                  const company = orderCompany(o)
                   return (
                   <Fragment key={o.id}>
                     <TableRow className="cursor-pointer" onClick={() => setViewing(o)}>
@@ -643,7 +641,9 @@ function FinanceReportPage() {
                       </TableCell>
                       <TableCell className="font-mono text-xs whitespace-nowrap">{o.reference}</TableCell>
                       <TableCell className="max-w-[10rem] truncate">{o.customerName || '—'}</TableCell>
-                      <TableCell className="max-w-[10rem] truncate text-muted-foreground">{o.customerCompanyName || '—'}</TableCell>
+                      {/* Blank, not a dash, when the customer has no company
+                          saved — never the order's own typed-in company. */}
+                      <TableCell className="max-w-[10rem] truncate text-muted-foreground">{company}</TableCell>
                       <TableCell className="text-right whitespace-nowrap">{Number(o.quantity || 0).toLocaleString()}</TableCell>
                       <TableCell className="text-muted-foreground">{o.productName || '—'}</TableCell>
                       <TableCell className="text-right whitespace-nowrap">{naira(Number(o.price))}</TableCell>
@@ -652,10 +652,8 @@ function FinanceReportPage() {
                       <TableCell className="whitespace-nowrap text-muted-foreground">
                         {o.paymentConfirmedAt ? format(new Date(o.paymentConfirmedAt), 'd MMM yyyy') : '—'}
                       </TableCell>
-                      <TableCell className="text-right whitespace-nowrap font-medium">{naira(amountPaid)}</TableCell>
-                      <TableCell className={cn('text-right whitespace-nowrap', balance !== 0 && 'text-destructive font-medium')}>
-                        {naira(balance)}
-                      </TableCell>
+                      <TableCell className="text-right whitespace-nowrap font-medium">{naira(Number(o.totalAmount))}</TableCell>
+                      <TableCell className="max-w-[16rem] truncate text-muted-foreground">{orderPaidInto(o) || '—'}</TableCell>
                       {Array.from({ length: TRAILING_BLANKS_FOR_ORDER_ROW }).map((_, blankIdx) => (
                         <TableCell key={blankIdx} />
                       ))}
@@ -680,7 +678,6 @@ function FinanceReportPage() {
                           <TableCell key={blankIdx} />
                         ))}
                         <TableCell className="max-w-[10rem] truncate">{fundingDepositor(f) || '—'}</TableCell>
-                        <TableCell className="max-w-[14rem] truncate">{fundingPaidInto(f) || '—'}</TableCell>
                         <TableCell className="max-w-[10rem] truncate">{f.depositReference || '—'}</TableCell>
                         <TableCell className="whitespace-nowrap text-muted-foreground">
                           {f.depositCreatedAt ? format(new Date(f.depositCreatedAt), 'd MMM yyyy') : '—'}

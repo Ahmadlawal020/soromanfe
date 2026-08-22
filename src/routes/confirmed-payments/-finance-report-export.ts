@@ -1,6 +1,6 @@
 import { format } from 'date-fns'
 import {
-  fundingRecorder, fundingDepositor, fundingPaidInto,
+  fundingRecorder, fundingDepositor, orderPaidInto, orderCompany,
   type FinanceReportOrder, type OrderFunding,
 } from '#/lib/hooks/useFinanceReport'
 
@@ -63,14 +63,13 @@ export interface PfiStockRow {
 
 // The definitive column set — the on-screen table (confirmed-payments/index.tsx)
 // mirrors this exactly, same order, same set, so what's on screen is always
-// what comes out of the export. Everything up to and including "Amount" is
-// order-level. "Balance" is also order-only — it just lives after Amount,
-// since it reads as "what happened to that amount" rather than "what was
-// charged". Depositor / Payer through Recorded By is the payment-source
-// group: only ever filled in on a sub-row underneath the order, one per
-// deposit that funded it. "Amount" is the one column both row kinds fill
-// in — a sub-row's amount is exactly as much of an "amount" as the order
-// row's total is.
+// what comes out of the export. Everything up to and including "Paid Into" is
+// order-level (Paid Into is the order's own virtual account, an order fact).
+// Depositor / Payer through Recorded By is the payment-source group: only
+// ever filled in on a sub-row underneath the order, one per deposit that
+// funded it. "Amount Paid" is the one column both row kinds fill in — a
+// sub-row's amount is exactly as much of an "amount" as the order row's
+// total is.
 const COLUMNS: Array<{ header: string; key: string; width: number; fmt?: string }> = [
   { header: 'S/N', key: 'sn', width: 6 },
   { header: 'Date', key: 'date', width: 13 },
@@ -84,9 +83,8 @@ const COLUMNS: Array<{ header: string; key: string; width: number; fmt?: string 
   { header: 'Location', key: 'location', width: 20 },
   { header: 'Payment Date', key: 'paymentDate', width: 13 },
   { header: 'Amount Paid', key: 'amount', width: 16, fmt: NGN },
-  { header: 'Balance', key: 'balance', width: 14, fmt: NGN },
+  { header: 'Paid Into', key: 'paidInto', width: 38 },
   { header: 'Depositor / Payer', key: 'depositor', width: 22 },
-  { header: 'Paid Into', key: 'paidInto', width: 34 },
   { header: 'Deposit Reference', key: 'depositRef', width: 20 },
   { header: 'Deposit Date', key: 'depositDate', width: 13 },
   { header: 'Recorded By', key: 'recordedBy', width: 18 },
@@ -105,26 +103,23 @@ const up = (v: string) => v.toUpperCase()
 function rowValues(o: FinanceReportOrder, i: number) {
   const qty = Number(o.quantity || 0)
   const rate = Number(o.price || 0)
-  const salesValue = rate * qty
-  const amount = Number(o.totalAmount || 0)
+  const company = orderCompany(o)
   return {
     sn: i + 1,
     date: o.createdAt ? new Date(o.createdAt) : null,
     ref: up(o.reference),
     customer: up(o.customerName || 'Unknown'),
-    company: up(o.customerCompanyName || '—'),
+    // Blank, not a dash, when the customer has no company saved — see
+    // orderCompany on why this never falls back to the order's own field.
+    company: company ? up(company) : '',
     qty,
     product: up(o.productName || '—'),
     rate,
-    salesValue,
+    salesValue: rate * qty,
     location: up(o.depotName || '—'),
     paymentDate: o.paymentConfirmedAt ? new Date(o.paymentConfirmedAt) : null,
-    amount,
-    // What's left after this order's own sales value and what actually got
-    // paid — normally 0 (an order isn't marked Paid until its wallet hold
-    // covers the total in full), nonzero only if totalAmount was corrected
-    // by hand after the fact.
-    balance: salesValue - amount,
+    amount: Number(o.totalAmount || 0),
+    paidInto: up(orderPaidInto(o) || '—'),
   }
 }
 
@@ -133,7 +128,6 @@ function fundingRowValues(f: OrderFunding) {
   return {
     amount: Number(f.amount || 0),
     depositor: up(fundingDepositor(f) || '—'),
-    paidInto: up(fundingPaidInto(f) || '—'),
     depositRef: up(f.depositReference || '—'),
     depositDate: f.depositCreatedAt ? new Date(f.depositCreatedAt) : null,
     recordedBy: up(fundingRecorder(f) || '—'),
@@ -183,7 +177,6 @@ function summaryColumns(
     { header: 'Total Quantity', value: summary.totalQuantity, fmt: QTY },
     { header: 'Total Sales Value', value: summary.totalSalesValue, fmt: NGN },
     { header: 'Total Amount Paid', value: summary.totalAmountPaid, fmt: NGN },
-    { header: 'Balance', value: summary.totalSalesValue - summary.totalAmountPaid, fmt: NGN },
   ]
   if (summary.initialStock != null) cols.push({ header: 'Initial Stock (PFI)', value: summary.initialStock, fmt: QTY })
   if (summary.tankBalanceAfter != null) cols.push({ header: 'Tank Balance After (PFI)', value: summary.tankBalanceAfter, fmt: QTY })
@@ -452,7 +445,7 @@ export async function exportFinanceReportPdf(
       v.location,
       v.paymentDate ? format(v.paymentDate, 'dd/MM/yyyy') : '—',
       naira(v.amount),
-      naira(v.balance),
+      v.paidInto,
       ...Array(trailingBlanksForOrder).fill(''),
     ])
 
@@ -464,7 +457,6 @@ export async function exportFinanceReportPdf(
           naira(fv.amount),
           ...Array(MIDDLE_BLANKS_AFTER_AMOUNT).fill(''),
           fv.depositor,
-          fv.paidInto,
           fv.depositRef,
           fv.depositDate ? format(fv.depositDate, 'dd/MM/yyyy') : '—',
           fv.recordedBy,
